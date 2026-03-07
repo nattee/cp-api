@@ -15,5 +15,7 @@ Rails.application.routes.draw do
 
   resources :users
 
+  get "dev/styleguide", to: "dev#styleguide" if Rails.env.development?
+
   root "users#index"
 end

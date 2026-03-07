@@ -38,12 +38,12 @@ $table-head-border-width: 2px;               // thicker than default 1px row bor
 .card .table > :not(caption) > * > * { border-color: $table-row-border-color; }
 .card .table > thead > tr > * { border-bottom-color: $table-head-border-color; border-bottom-width: $table-head-border-width; }
 
-// Outlined / frosted badges
-.badge-admin    { background-color: rgba($danger, 0.15);    color: $danger;    border: 1px solid rgba($danger, 0.3); }
-.badge-staff    { background-color: rgba($primary, 0.15);   color: $primary;   border: 1px solid rgba($primary, 0.3); }
-.badge-viewer   { background-color: rgba($secondary, 0.15); color: lighten($secondary, 30%); border: 1px solid rgba($secondary, 0.3); }
-.badge-active   { background-color: rgba($success, 0.15);   color: $success;   border: 1px solid rgba($success, 0.3); }
-.badge-inactive { background-color: rgba(150, 150, 150, 0.15); color: rgba(200, 200, 200, 0.7); border: 1px solid rgba(150, 150, 150, 0.3); }
+// Outlined / frosted badges (neon-bright text, tinted glow bg)
+.badge-admin    { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                    border: 1px solid rgba($danger, 0.4); }
+.badge-staff    { background-color: rgba($primary, 0.2);   color: lighten(saturate($primary, 30%), 10%);    border: 1px solid rgba($primary, 0.4); }
+.badge-viewer   { background-color: rgba($secondary, 0.2); color: lighten(saturate($secondary, 20%), 35%);  border: 1px solid rgba($secondary, 0.4); }
+.badge-active   { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%);    border: 1px solid rgba($success, 0.4); }
+.badge-inactive { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
 
 // Ghost icon action buttons (btn-link style, no underline, custom colors)
 .btn-ghost {
@@ -58,3 +58,7 @@ $table-head-border-width: 2px;               // thicker than default 1px row bor
 .btn-ghost-primary   { color: $primary;   &:hover { background-color: rgba($primary, 0.15);   color: $primary; } }
 .btn-ghost-secondary { color: $secondary; &:hover { background-color: rgba($secondary, 0.15); color: lighten($secondary, 20%); } }
 .btn-ghost-danger    { color: $danger;    &:hover { background-color: rgba($danger, 0.15);    color: $danger; } }
+
+// Dev style guide background swatches
+.card-bg  { background-color: $card-bg; }
+.input-bg { background-color: $input-bg; }

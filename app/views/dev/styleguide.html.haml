@@ -1,0 +1,91 @@
+- content_for(:title, "Style Guide (Dev)")
+
+%h1.mb-4 Style Guide
+
+-# --- Helper variables ---
+- badge_variants = [["badge-admin", "Admin"], ["badge-staff", "Staff"], ["badge-viewer", "Viewer"], ["badge-active", "Active"], ["badge-inactive", "Inactive"]]
+- btn_variants = %w[primary secondary success danger warning info light dark]
+- ghost_variants = [["btn-ghost-primary", "Primary"], ["btn-ghost-secondary", "Secondary"], ["btn-ghost-danger", "Danger"]]
+- backgrounds = [["Base background (body)", ""], ["Card background", "card-bg"], ["Input background", "input-bg"]]
+
+-# ============================================================
+-# Badges
+-# ============================================================
+%h2.mb-3 Badges
+
+- backgrounds.each do |label, bg_class|
+  .mb-4
+    %h5.text-muted= label
+    .p-4.rounded{class: bg_class}
+      - badge_variants.each do |cls, name|
+        %span.badge.me-2{class: cls}= name
+
+-# ============================================================
+-# Buttons (solid)
+-# ============================================================
+%h2.mb-3.mt-5 Buttons (solid)
+
+- backgrounds.each do |label, bg_class|
+  .mb-4
+    %h5.text-muted= label
+    .p-4.rounded{class: bg_class}
+      - btn_variants.each do |v|
+        %button.btn.me-2.mb-2{class: "btn-#{v}"}= v.capitalize
+
+-# ============================================================
+-# Buttons (outline)
+-# ============================================================
+%h2.mb-3.mt-5 Buttons (outline)
+
+- backgrounds.each do |label, bg_class|
+  .mb-4
+    %h5.text-muted= label
+    .p-4.rounded{class: bg_class}
+      - btn_variants.each do |v|
+        %button.btn.me-2.mb-2{class: "btn-outline-#{v}"}= v.capitalize
+
+-# ============================================================
+-# Ghost icon buttons
+-# ============================================================
+%h2.mb-3.mt-5 Ghost Icon Buttons
+
+- backgrounds.each do |label, bg_class|
+  .mb-4
+    %h5.text-muted= label
+    .p-4.rounded{class: bg_class}
+      - ghost_variants.each do |cls, name|
+        %span.me-3
+          %a.btn-ghost{class: cls, href: "#", title: name}
+            %span.material-symbols{style: "font-size: 18px"} visibility
+          %small.text-muted.ms-1= name
+
+-# ============================================================
+-# Badges in a table (inside card)
+-# ============================================================
+%h2.mb-3.mt-5 Table with Badges and Actions (in card)
+
+.card
+  .card-body
+    .table-responsive
+      %table.table.table-hover.mb-0
+        %thead
+          %tr
+            %th Item
+            %th Role Badge
+            %th Status Badge
+            %th Actions
+        %tbody
+          - [["Alice", "badge-admin", "Admin", "badge-active", "Active"], ["Bob", "badge-staff", "Staff", "badge-inactive", "Inactive"], ["Carol", "badge-viewer", "Viewer", "badge-active", "Active"]].each do |name, role_cls, role, status_cls, status|
+            %tr
+              %td= name
+              %td
+                %span.badge{class: role_cls}= role
+              %td
+                %span.badge{class: status_cls}= status
+              %td
+                %a.btn-ghost.btn-ghost-primary.me-1{href: "#", title: "Show"}
+                  %span.material-symbols{style: "font-size: 18px"} visibility
+                %a.btn-ghost.btn-ghost-secondary.me-1{href: "#", title: "Edit"}
+                  %span.material-symbols{style: "font-size: 18px"} edit
+                %a.btn-ghost.btn-ghost-danger{href: "#", title: "Delete"}
+                  %span.material-symbols{style: "font-size: 18px"} delete
