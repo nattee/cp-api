@@ -21,17 +21,20 @@
               %td= user.email
               %td= user.name
               %td
-                %span.badge{class: user.admin? ? "bg-danger" : user.staff? ? "bg-primary" : "bg-secondary"}
+                %span.badge{class: user.admin? ? "badge-admin" : user.staff? ? "badge-staff" : "badge-viewer"}
                   = user.role
               %td
                 - if user.active?
-                  %span.badge.bg-success Active
+                  %span.badge.badge-active Active
                 - else
-                  %span.badge.bg-secondary Inactive
+                  %span.badge.badge-inactive Inactive
               %td
-                = link_to "Show", user, class: "btn btn-sm btn-outline-primary me-1"
-                = link_to "Edit", edit_user_path(user), class: "btn btn-sm btn-outline-secondary me-1"
-                = link_to "Delete", user, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-sm btn-outline-danger"
+                = link_to user, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
+                  %span.material-symbols{style: "font-size: 18px"} visibility
+                = link_to edit_user_path(user), class: "btn-ghost btn-ghost-secondary me-1", title: "Edit" do
+                  %span.material-symbols{style: "font-size: 18px"} edit
+                = link_to user, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn-ghost btn-ghost-danger", title: "Delete" do
+                  %span.material-symbols{style: "font-size: 18px"} delete
           - if @users.empty?
             %tr
               %td.text-muted.text-center{colspan: 6} No users found.

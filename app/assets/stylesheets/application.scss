@@ -8,8 +8,53 @@ $success:   #3faa65;
 $warning:   #e9cb3d;
 $danger:    #f22330;
 
+// Surface colors derived from $dark (elevation = lightness)
+$body-bg:   $dark;                          // page canvas (lowest)
+$card-bg:   lighten($dark, 7%);             // cards & sidebar (elevated)
+$input-bg:  lighten($dark, 2%);             // form controls (recessed into card)
+$input-group-addon-bg: lighten($dark, 1%);  // input group text (deeper recess)
+$table-bg:  transparent;                    // inherit card background, no extra layer
+
+// Table border customization
+// DO NOT use Bootstrap's $table-border-color — it compiles into --bs-table-border-color
+// on .table, but cells never read that variable (border-color is not a CSS inherited
+// property). Cells default to currentColor (text color), ignoring the table's variable.
+// This is a Bootstrap bug (see memory/bootstrap-table-border-bug.md).
+// Instead, we define our own variables and apply them directly to cells in post-import
+// CSS rules. We also need distinct header vs row borders, which Bootstrap doesn't support.
+$table-row-border-color:  rgba(white, 0.08); // subtle separator between body rows
+$table-head-border-color: rgba(white, 0.2);  // more prominent border under thead
+$table-head-border-width: 2px;               // thicker than default 1px row borders
+
 // Import Bootstrap
 @import "scss/bootstrap";
 
-// Material Symbols icons
-@import "material-symbols";
+// Material Symbols icons loaded as standalone CSS (material-symbols.css)
+// so Propshaft can rewrite the font url() to a fingerprinted path.
+
+// Tables inside cards: subtle row separators, no outer border (card provides rounding)
+.card .table { border: 0; }
+.card .table tr:last-child td { border-bottom: 0; }
+.card .table > :not(caption) > * > * { border-color: $table-row-border-color; }
+.card .table > thead > tr > * { border-bottom-color: $table-head-border-color; border-bottom-width: $table-head-border-width; }
+
+// Outlined / frosted badges
+.badge-admin    { background-color: rgba($danger, 0.15);    color: $danger;    border: 1px solid rgba($danger, 0.3); }
+.badge-staff    { background-color: rgba($primary, 0.15);   color: $primary;   border: 1px solid rgba($primary, 0.3); }
+.badge-viewer   { background-color: rgba($secondary, 0.15); color: lighten($secondary, 30%); border: 1px solid rgba($secondary, 0.3); }
+.badge-active   { background-color: rgba($success, 0.15);   color: $success;   border: 1px solid rgba($success, 0.3); }
+.badge-inactive { background-color: rgba(150, 150, 150, 0.15); color: rgba(200, 200, 200, 0.7); border: 1px solid rgba(150, 150, 150, 0.3); }
+
+// Ghost icon action buttons (btn-link style, no underline, custom colors)
+.btn-ghost {
+  @extend .btn;
+  @extend .btn-link;
+  text-decoration: none;
+  padding: 0.25rem 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-ghost-primary   { color: $primary;   &:hover { background-color: rgba($primary, 0.15);   color: $primary; } }
+.btn-ghost-secondary { color: $secondary; &:hover { background-color: rgba($secondary, 0.15); color: lighten($secondary, 20%); } }
+.btn-ghost-danger    { color: $danger;    &:hover { background-color: rgba($danger, 0.15);    color: $danger; } }

@@ -6,6 +6,7 @@ node_modules/**
 .bundle/**
 vendor/bundle/**
 public/assets/**
+app/assets/builds/**
 *.lock
 config/master.key
 .claude/
