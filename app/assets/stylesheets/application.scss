@@ -1,6 +1,15 @@
-// Custom Bootstrap variable overrides
-// @use "bootstrap/scss/functions";
-// @use "bootstrap/scss/variables" with ($primary: #e84393);
+// Bootstrap variable overrides (must come before Bootstrap import)
+$light:     #6fcfff;
+$dark:      #0c0e13;
+$primary:   #a4c6d4;
+$secondary: #62336b;
+$info:      #b15b95;
+$success:   #3faa65;
+$warning:   #e9cb3d;
+$danger:    #f22330;
 
 // Import Bootstrap
-@use "scss/bootstrap";
+@import "scss/bootstrap";
+
+// Material Symbols icons
+@import "material-symbols";

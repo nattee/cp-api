@@ -1,5 +1,5 @@
 !!!
-%html
+%html{"data-bs-theme" => "dark"}
   %head
     %title= content_for(:title) || "CP API"
     %meta{name: "viewport", content: "width=device-width,initial-scale=1"}
@@ -19,4 +19,47 @@
     = javascript_importmap_tags
 
   %body
-    = yield
+    .d-flex
+      -# Sidebar - offcanvas on small screens, fixed on large
+      %nav#sidebar.offcanvas-lg.offcanvas-start.d-flex.flex-column.flex-shrink-0.p-3.bg-body-tertiary{style: "width: 250px; min-height: 100vh;"}
+        .offcanvas-header.d-lg-none
+          %h5.offcanvas-title CP API
+          %button.btn-close{"data-bs-dismiss" => "offcanvas", "data-bs-target" => "#sidebar", "aria-label" => "Close"}
+        %a.d-flex.align-items-center.mb-3.mb-md-0.me-md-auto.text-decoration-none.d-none.d-lg-flex{href: root_path}
+          %span.fs-4.fw-semibold CP API
+        %hr.d-none.d-lg-block
+        %ul.nav.nav-pills.flex-column.mb-auto
+          %li.nav-item
+            = link_to users_path, class: "nav-link #{'active' if controller_name == 'users'}" do
+              Users
+
+        %hr
+        .dropdown
+          %a.d-flex.align-items-center.text-decoration-none.dropdown-toggle{"data-bs-toggle" => "dropdown", href: "#"}
+            %span= current_user.name
+          %ul.dropdown-menu.dropdown-menu-dark.shadow
+            %li= link_to "Profile", user_path(current_user), class: "dropdown-item"
+            %li
+              %hr.dropdown-divider
+            %li= button_to "Sign Out", logout_path, method: :delete, class: "dropdown-item"
+
+      -# Main content
+      .flex-grow-1.d-flex.flex-column{style: "min-height: 100vh;"}
+        %header.navbar.bg-body-tertiary.d-lg-none.border-bottom
+          .container-fluid
+            %button.navbar-toggler{"data-bs-toggle" => "offcanvas", "data-bs-target" => "#sidebar", "aria-controls" => "sidebar"}
+              %span.navbar-toggler-icon
+            %span.navbar-brand.mb-0 CP API
+
+        %main.flex-grow-1.p-4
+          .container-fluid
+            - if flash[:notice]
+              .alert.alert-success.alert-dismissible.fade.show{role: "alert"}
+                = flash[:notice]
+                %button.btn-close{"data-bs-dismiss" => "alert", "aria-label" => "Close"}
+            - if flash[:alert]
+              .alert.alert-danger.alert-dismissible.fade.show{role: "alert"}
+                = flash[:alert]
+                %button.btn-close{"data-bs-dismiss" => "alert", "aria-label" => "Close"}
+
+            = yield

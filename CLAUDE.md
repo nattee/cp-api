@@ -26,9 +26,20 @@ Data is imported via CSV/Excel and fetched from external data providers.
 
 - Uses **Mercurial (hg)**, not Git. The `.git` directory does not exist.
 
+## Authentication
+
+- Session-based login with `has_secure_password` (bcrypt)
+- `ApplicationController` provides `current_user`, `logged_in?`, and `require_login` (applied to all controllers by default)
+- Controllers that allow unauthenticated access must `skip_before_action :require_login`
+- Login page uses a separate `auth` layout (no sidebar)
+
 ## Development
 
 ```
-bin/dev          # starts Rails server + dartsass:watch via foreman
-bin/rails server # starts Rails server only (no SCSS recompilation)
+bin/dev                  # starts Rails server + dartsass:watch via foreman
+bin/rails server         # starts Rails server only (no SCSS recompilation)
+AUTO_LOGIN=1 bin/dev     # bypass login, auto-authenticate as user ID 1
 ```
+
+- `AUTO_LOGIN` env var: set to a user ID to skip authentication. Only use in development.
+- Seed data: `bin/rails db:seed` creates a super admin at ID 1 (`superadmin` / `password123`).

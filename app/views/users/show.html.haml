@@ -1,0 +1,46 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1= @user.name
+  .d-flex.gap-2
+    = link_to "Edit", edit_user_path(@user), class: "btn btn-outline-secondary"
+    = link_to "Back", users_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    %dl.row.mb-0
+      %dt.col-sm-3 Username
+      %dd.col-sm-9= @user.username
+
+      %dt.col-sm-3 Email
+      %dd.col-sm-9= @user.email
+
+      %dt.col-sm-3 Name
+      %dd.col-sm-9= @user.name
+
+      %dt.col-sm-3 Role
+      %dd.col-sm-9
+        %span.badge{class: @user.admin? ? "bg-danger" : @user.staff? ? "bg-primary" : "bg-secondary"}
+          = @user.role
+
+      %dt.col-sm-3 Active
+      %dd.col-sm-9
+        - if @user.active?
+          %span.badge.bg-success Active
+        - else
+          %span.badge.bg-secondary Inactive
+
+      - if @user.provider.present?
+        %dt.col-sm-3 SSO Provider
+        %dd.col-sm-9= @user.provider
+
+        %dt.col-sm-3 SSO UID
+        %dd.col-sm-9= @user.uid
+
+      %dt.col-sm-3 Last sign in
+      %dd.col-sm-9
+        = @user.last_sign_in_at&.strftime("%B %d, %Y %H:%M") || "Never"
+
+      %dt.col-sm-3 Created at
+      %dd.col-sm-9= @user.created_at.strftime("%B %d, %Y %H:%M")
+
+      %dt.col-sm-3 Updated at
+      %dd.col-sm-9= @user.updated_at.strftime("%B %d, %Y %H:%M")
