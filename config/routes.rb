@@ -13,6 +13,12 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
+  namespace :line do
+    post "webhook", to: "webhook#callback"
+  end
+
+  resource :line_account, only: [:show, :create, :destroy], controller: "line_accounts"
+
   resources :users
 
   get "dev/styleguide", to: "dev#styleguide" if Rails.env.development?

@@ -1,0 +1,32 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 LINE Account
+  = link_to "Back", user_path(current_user), class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    - if @linked
+      .d-flex.align-items-center.mb-3
+        %span.badge.badge-active.me-2 Linked
+        %span Connected as LINE user
+
+      = button_to "Unlink LINE Account", line_account_path, method: :delete, class: "btn btn-outline-danger",
+        data: { turbo_confirm: "Are you sure you want to unlink your LINE account?" }
+
+    - else
+      .d-flex.align-items-center.mb-3
+        %span.badge.badge-inactive.me-2 Not linked
+        %span No LINE account linked
+
+      - if @token
+        .alert.alert-info.mt-3
+          %p.mb-1
+            %strong Linking code:
+          %p.mb-1
+            %code= @token
+          %p.mb-0.text-body-secondary
+            Send
+            %code= "link #{@token}"
+            to the LINE bot within 30 minutes.
+
+      .mt-3
+        = button_to "Generate Linking Code", line_account_path, method: :post, class: "btn btn-outline-primary"

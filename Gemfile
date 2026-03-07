@@ -46,6 +46,9 @@ gem "haml-rails"
 # Excel/CSV import
 gem "roo"
 
+# LINE Messaging API
+gem "line-bot-api", "~> 2.0"
+
 # SCSS compilation (works with Propshaft)
 gem "dartsass-rails"
 

@@ -34,6 +34,10 @@
             = link_to users_path, class: "nav-link #{'active' if controller_name == 'users'}" do
               Users
 
+          %li.nav-item
+            = link_to line_account_path, class: "nav-link #{'active' if controller_name == 'line_accounts'}" do
+              LINE Account
+
         %hr
         .dropdown
           %a.d-flex.align-items-center.text-decoration-none.dropdown-toggle{"data-bs-toggle" => "dropdown", href: "#"}

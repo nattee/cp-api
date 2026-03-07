@@ -50,6 +50,15 @@ AUTO_LOGIN=1 bin/dev     # bypass login, auto-authenticate as user ID 1
 - **Derive surface colors from `$dark`**: Use Sass functions (`lighten`, `darken`) on `$dark` for all surface colors so they stay in sync when the base changes.
 - **Table borders**: Do not use Bootstrap's `$table-border-color` — it has no effect on cell borders due to a Bootstrap bug (see `memory/bootstrap-table-border-bug.md`). Use our custom Sass variables (`$table-row-border-color`, `$table-head-border-color`, `$table-head-border-width`) defined in `application.scss`, applied via post-import CSS rules.
 
+## LINE Integration
+
+Bot integration for LINE Messaging API. See `docs/line-integration.md` for architecture and dev setup.
+
+- Webhook: `POST /line/webhook` (exposed via reverse proxy, rest stays intranet)
+- Account linking: web UI at `/line_account` generates a token, user sends `link <token>` in LINE chat
+- Adding commands: one file in `app/services/line/commands/` + one entry in `MessageRouter::COMMAND_MAP`
+- Webhook controller inherits `ActionController::API` (not `ApplicationController`) to skip CSRF, auth, and browser checks
+
 ## UI Component Conventions
 
 - **Badges**: Use frosted badge classes (`.badge-admin`, `.badge-staff`, `.badge-viewer`, `.badge-active`, `.badge-inactive`) with semi-transparent tinted backgrounds and subtle borders. Do not use Bootstrap's solid `bg-*` badges.
