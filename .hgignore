@@ -1,0 +1,11 @@
+syntax: glob
+log/*.log
+tmp/**
+storage/**
+node_modules/**
+.bundle/**
+vendor/bundle/**
+public/assets/**
+*.lock
+config/master.key
+.claude/
