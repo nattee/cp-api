@@ -50,8 +50,26 @@ $input-icon-color: darken($light, 5%);
 .badge-admin    { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                    border: 1px solid rgba($danger, 0.4); }
 .badge-staff    { background-color: rgba($primary, 0.2);   color: lighten(saturate($primary, 30%), 10%);    border: 1px solid rgba($primary, 0.4); }
 .badge-viewer   { background-color: rgba($secondary, 0.2); color: lighten(saturate($secondary, 20%), 35%);  border: 1px solid rgba($secondary, 0.4); }
-.badge-active   { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%);    border: 1px solid rgba($success, 0.4); }
-.badge-inactive { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
+.badge-active    { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%);    border: 1px solid rgba($success, 0.4); }
+.badge-inactive  { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
+.badge-graduated { background-color: rgba($info, 0.2);    color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
+.badge-on-leave  { background-color: rgba($warning, 0.2); color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
+
+// Section dividers for forms and detail pages
+.form-section, .detail-section {
+  &:not(:first-of-type) {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+  }
+
+  > legend, > .section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bs-secondary-color);
+    margin-bottom: 0.75rem;
+  }
+}
 
 // Ghost icon action buttons (btn-link style, no underline, custom colors)
 .btn-ghost {

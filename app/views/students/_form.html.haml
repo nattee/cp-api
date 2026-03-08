@@ -1,0 +1,141 @@
+= form_with(model: student, class: "needs-validation") do |f|
+  - if student.errors.any?
+    .alert.alert-danger
+      %h5.alert-heading
+        = pluralize(student.errors.count, "error")
+        prohibited this student from being saved:
+      %ul.mb-0
+        - student.errors.full_messages.each do |message|
+          %li= message
+
+  %fieldset.form-section
+    %legend Identity
+    .row
+      .col-md-6.mb-3
+        = f.label :student_id, "Student ID", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols badge
+          = f.text_field :student_id, class: "form-control #{'is-invalid' if student.errors[:student_id].any?}"
+          - if student.errors[:student_id].any?
+            .invalid-feedback= student.errors[:student_id].first
+
+    .row
+      .col-md-6.mb-3
+        = f.label :first_name, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols person
+          = f.text_field :first_name, class: "form-control #{'is-invalid' if student.errors[:first_name].any?}"
+          - if student.errors[:first_name].any?
+            .invalid-feedback= student.errors[:first_name].first
+      .col-md-6.mb-3
+        = f.label :last_name, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols person
+          = f.text_field :last_name, class: "form-control #{'is-invalid' if student.errors[:last_name].any?}"
+          - if student.errors[:last_name].any?
+            .invalid-feedback= student.errors[:last_name].first
+
+    .row
+      .col-md-6.mb-3
+        = f.label :first_name_th, "First Name (TH)", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols translate
+          = f.text_field :first_name_th, class: "form-control"
+      .col-md-6.mb-3
+        = f.label :last_name_th, "Last Name (TH)", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols translate
+          = f.text_field :last_name_th, class: "form-control"
+
+  %fieldset.form-section
+    %legend Academic
+    .row
+      .col-md-6.mb-3
+        = f.label :admission_year, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols calendar_month
+          = f.number_field :admission_year, class: "form-control #{'is-invalid' if student.errors[:admission_year].any?}"
+          - if student.errors[:admission_year].any?
+            .invalid-feedback= student.errors[:admission_year].first
+      .col-md-6.mb-3
+        = f.label :status, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols info
+          = f.select :status, Student::STATUSES.map { |s| [s.titleize, s] }, {}, class: "form-select #{'is-invalid' if student.errors[:status].any?}"
+          - if student.errors[:status].any?
+            .invalid-feedback= student.errors[:status].first
+
+  %fieldset.form-section
+    %legend Contact
+    .row
+      .col-md-6.mb-3
+        = f.label :email, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols mail
+          = f.email_field :email, class: "form-control"
+      .col-md-6.mb-3
+        = f.label :phone, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols phone
+          = f.text_field :phone, class: "form-control"
+
+    .row
+      .col-md-6.mb-3
+        = f.label :discord, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols forum
+          = f.text_field :discord, class: "form-control"
+      .col-md-6.mb-3
+        = f.label :line_id, "LINE ID", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols chat
+          = f.text_field :line_id, class: "form-control"
+
+    .mb-3
+      = f.label :address, class: "form-label"
+      = f.text_area :address, class: "form-control", rows: 3
+
+  %fieldset.form-section
+    %legend Guardian
+    .row
+      .col-md-6.mb-3
+        = f.label :guardian_name, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols family_restroom
+          = f.text_field :guardian_name, class: "form-control"
+      .col-md-6.mb-3
+        = f.label :guardian_phone, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols phone
+          = f.text_field :guardian_phone, class: "form-control"
+
+  %fieldset.form-section
+    %legend Background
+    .row
+      .col-md-6.mb-3
+        = f.label :previous_school, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols school
+          = f.text_field :previous_school, class: "form-control"
+      .col-md-6.mb-3
+        = f.label :enrollment_method, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols how_to_reg
+          = f.text_field :enrollment_method, class: "form-control"
+
+  = f.submit class: "btn btn-primary"

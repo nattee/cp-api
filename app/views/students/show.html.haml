@@ -1,0 +1,91 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1= @student.full_name
+  .d-flex.gap-2
+    - if current_user.admin?
+      = link_to "Edit", edit_student_path(@student), class: "btn btn-outline-secondary"
+    = link_to "Back", students_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    .detail-section
+      %dl.row.mb-0
+        %dt.col-sm-3 Student ID
+        %dd.col-sm-9= @student.student_id
+
+        %dt.col-sm-3 Name (EN)
+        %dd.col-sm-9= @student.full_name
+
+        - if @student.full_name_th.present?
+          %dt.col-sm-3 Name (TH)
+          %dd.col-sm-9= @student.full_name_th
+
+    .detail-section
+      %h6.section-title Academic
+      %dl.row.mb-0
+        %dt.col-sm-3 Admission Year
+        %dd.col-sm-9= @student.admission_year
+
+        %dt.col-sm-3 Status
+        %dd.col-sm-9
+          - if @student.active?
+            %span.badge.badge-active Active
+          - elsif @student.graduated?
+            %span.badge.badge-graduated Graduated
+          - elsif @student.on_leave?
+            %span.badge.badge-on-leave On Leave
+
+    - if [@student.email, @student.phone, @student.discord, @student.line_id, @student.address].any?(&:present?)
+      .detail-section
+        %h6.section-title Contact
+        %dl.row.mb-0
+          - if @student.email.present?
+            %dt.col-sm-3 Email
+            %dd.col-sm-9= @student.email
+
+          - if @student.phone.present?
+            %dt.col-sm-3 Phone
+            %dd.col-sm-9= @student.phone
+
+          - if @student.discord.present?
+            %dt.col-sm-3 Discord
+            %dd.col-sm-9= @student.discord
+
+          - if @student.line_id.present?
+            %dt.col-sm-3 LINE ID
+            %dd.col-sm-9= @student.line_id
+
+          - if @student.address.present?
+            %dt.col-sm-3 Address
+            %dd.col-sm-9= @student.address
+
+    - if [@student.guardian_name, @student.guardian_phone].any?(&:present?)
+      .detail-section
+        %h6.section-title Guardian
+        %dl.row.mb-0
+          - if @student.guardian_name.present?
+            %dt.col-sm-3 Guardian Name
+            %dd.col-sm-9= @student.guardian_name
+
+          - if @student.guardian_phone.present?
+            %dt.col-sm-3 Guardian Phone
+            %dd.col-sm-9= @student.guardian_phone
+
+    - if [@student.previous_school, @student.enrollment_method].any?(&:present?)
+      .detail-section
+        %h6.section-title Background
+        %dl.row.mb-0
+          - if @student.previous_school.present?
+            %dt.col-sm-3 Previous School
+            %dd.col-sm-9= @student.previous_school
+
+          - if @student.enrollment_method.present?
+            %dt.col-sm-3 Enrollment Method
+            %dd.col-sm-9= @student.enrollment_method
+
+    .detail-section
+      %dl.row.mb-0
+        %dt.col-sm-3 Created at
+        %dd.col-sm-9= @student.created_at.strftime("%B %d, %Y %H:%M")
+
+        %dt.col-sm-3 Updated at
+        %dd.col-sm-9= @student.updated_at.strftime("%B %d, %Y %H:%M")

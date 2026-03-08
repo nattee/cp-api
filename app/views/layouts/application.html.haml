@@ -31,6 +31,9 @@
         %hr.d-none.d-lg-block
         %ul.nav.nav-pills.flex-column.mb-auto
           %li.nav-item
+            = link_to students_path, class: "nav-link #{'active' if controller_name == 'students'}" do
+              Students
+          %li.nav-item
             = link_to users_path, class: "nav-link #{'active' if controller_name == 'users'}" do
               Users
 

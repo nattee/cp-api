@@ -10,7 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_07_143537) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_08_071512) do
+  create_table "students", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.text "address"
+    t.integer "admission_year", null: false
+    t.datetime "created_at", null: false
+    t.string "discord"
+    t.string "email"
+    t.string "enrollment_method"
+    t.string "first_name", null: false
+    t.string "first_name_th"
+    t.string "guardian_name"
+    t.string "guardian_phone"
+    t.string "last_name", null: false
+    t.string "last_name_th"
+    t.string "line_id"
+    t.string "phone"
+    t.string "previous_school"
+    t.string "status", default: "active", null: false
+    t.string "student_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admission_year"], name: "index_students_on_admission_year"
+    t.index ["student_id"], name: "index_students_on_student_id", unique: true
+  end
+
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false

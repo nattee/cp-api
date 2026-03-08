@@ -1,0 +1,40 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 Students
+  - if current_user.admin?
+    = link_to "New Student", new_student_path, class: "btn btn-primary"
+
+.card
+  .card-body
+    .table-responsive
+      %table.table.table-hover.mb-0
+        %thead
+          %tr
+            %th Student ID
+            %th Name
+            %th Admission Year
+            %th Status
+            %th Actions
+        %tbody
+          - @students.each do |student|
+            %tr
+              %td= student.student_id
+              %td= student.full_name
+              %td= student.admission_year
+              %td
+                - if student.active?
+                  %span.badge.badge-active Active
+                - elsif student.graduated?
+                  %span.badge.badge-graduated Graduated
+                - elsif student.on_leave?
+                  %span.badge.badge-on-leave On Leave
+              %td
+                = link_to student, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
+                  %span.material-symbols{style: "font-size: 18px"} visibility
+                - if current_user.admin?
+                  = link_to edit_student_path(student), class: "btn-ghost btn-ghost-secondary me-1", title: "Edit" do
+                    %span.material-symbols{style: "font-size: 18px"} edit
+                  = link_to student, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn-ghost btn-ghost-danger", title: "Delete" do
+                    %span.material-symbols{style: "font-size: 18px"} delete
+          - if @students.empty?
+            %tr
+              %td.text-muted.text-center{colspan: 5} No students found.

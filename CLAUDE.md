@@ -72,7 +72,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 
 ## UI Component Conventions
 
-- **Badges**: Use frosted badge classes (`.badge-admin`, `.badge-staff`, `.badge-viewer`, `.badge-active`, `.badge-inactive`) with semi-transparent tinted backgrounds and subtle borders. Do not use Bootstrap's solid `bg-*` badges.
+- **Badges**: Every badge must use a named semantic `.badge-*` class — never raw Bootstrap `bg-*` classes. When introducing a new badge, add a new `.badge-<concept>` class in `application.scss` following the frosted style (semi-transparent tinted background, subtle border) rather than reusing an existing class with a different meaning. Existing classes: `.badge-admin`, `.badge-staff`, `.badge-viewer`, `.badge-active`, `.badge-inactive`, `.badge-graduated`, `.badge-on-leave`. Two classes may share similar colors if they represent different domain concepts.
 - **Icon action buttons**: Use ghost button classes (`.btn-ghost .btn-ghost-*`) for icon-only action links in tables. These extend Bootstrap's `btn-link` with no underline, custom color per variant, and a subtle tinted background on hover. Variants: `-primary` (view/show), `-secondary` (edit), `-danger` (delete). Do not use `btn-outline-*` for icon-only actions.
 - **Icons**: Use Material Symbols (`%span.material-symbols`) for action icons, typically at `font-size: 18px` in tables.
 - **Input group icons**: Styled with `$input-icon-color` (defined post-import in `application.scss`). Currently `darken($light, 5%)` — a dimmed version of the `$light` theme color.
