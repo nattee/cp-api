@@ -10,7 +10,7 @@ Data is imported via CSV/Excel and fetched from external data providers.
 - MySQL 8.0 (user: `cp_api`, databases: `cp_api_development`, `cp_api_test`, `cp_api_production`)
 - Propshaft (asset pipeline), Importmap (JS modules), Dart Sass (SCSS compilation)
 - HAML templates, Turbo, Stimulus
-- Bootstrap 5.3 (vendored SCSS + JS), DataTables, Chart.js
+- Bootstrap 5.3 (vendored SCSS + JS), DataTables, Chart.js, Tom Select, Flatpickr
 
 ## Requirements
 
@@ -19,8 +19,9 @@ Data is imported via CSV/Excel and fetched from external data providers.
 ## Asset Pipeline
 
 - **CSS**: Dart Sass compiles `app/assets/stylesheets/application.scss` → `app/assets/builds/application.css`. Run `bin/rails dartsass:build` to compile, or use `bin/dev` for watch mode.
-- **JS**: Importmap pins in `config/importmap.rb` point to vendored files in `vendor/javascript/`. No build step — browser resolves imports via the importmap.
+- **JS**: Importmap pins in `config/importmap.rb` point to vendored files in `vendor/javascript/`. No build step — browser resolves imports via the importmap. When vendoring new JS libraries, use **self-contained ESM bundles** (e.g. from `esm.sh/<pkg>/es2022/<pkg>.bundle.mjs`). UMD modules lack `export default` and won't work with importmap. Modular ESM (with sub-module imports) won't resolve either — must be a single file.
 - **Propshaft** serves all assets (from app, vendor, and gem directories) with fingerprinted URLs. It does no compilation.
+- **Stylesheet load order** (in `application.html.haml`): Vendor CSS (Tom Select, Flatpickr) loads **before** `application.css` so that our SCSS overrides win the cascade at equal specificity.
 
 ## Version Control
 
@@ -80,3 +81,4 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - **Tables in cards**: Tables inside `.card` use transparent background (inherits card bg), no outer border (card provides rounding). Row separators are subtle, header border is more prominent. Styled globally in `application.scss` — no extra classes needed on individual tables.
 - **Dev style guide**: `/dev/styleguide` (development only) has an interactive Color Playground with live-preview color pickers for all base and derived variables, a sample form, badges, buttons, and tables. Use "Copy SCSS" to export changes.
 - **Code patterns**: See `docs/code-patterns.md` for canonical controller, view, fixture, and test templates. Reference these when creating new resources instead of re-reading existing files.
+- **Icon mappings**: Codify icon associations as frozen hash constants on the model (e.g. `Student::STATUS_ICONS`). In forms, pass icons as `data-icon` attributes on `<option>` elements via `options_for_select`. The `tomselect_controller.js` is generic — it detects `data-icon` automatically and renders Material Symbols icons.
