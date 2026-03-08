@@ -1,6 +1,14 @@
 class Student < ApplicationRecord
   STATUSES = %w[active graduated on_leave].freeze
 
+  # Material Symbols icon for each status — used by Tom Select dropdowns
+  # and anywhere else that needs a visual indicator for status.
+  STATUS_ICONS = {
+    "active"    => "check_circle",
+    "graduated" => "school",
+    "on_leave"  => "pause_circle"
+  }.freeze
+
   validates :student_id, presence: true, uniqueness: true
   validates :first_name, presence: true
   validates :last_name, presence: true

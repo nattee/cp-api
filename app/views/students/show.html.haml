@@ -34,6 +34,10 @@
           - elsif @student.on_leave?
             %span.badge.badge-on-leave On Leave
 
+        - if @student.graduation_date.present?
+          %dt.col-sm-3 Graduation Date
+          %dd.col-sm-9= @student.graduation_date.strftime("%B %-d, %Y")
+
     - if [@student.email, @student.phone, @student.discord, @student.line_id, @student.address].any?(&:present?)
       .detail-section
         %h6.section-title Contact

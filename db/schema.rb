@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_08_071512) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_08_080946) do
   create_table "students", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.text "address"
     t.integer "admission_year", null: false
@@ -20,6 +20,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_071512) do
     t.string "enrollment_method"
     t.string "first_name", null: false
     t.string "first_name_th"
+    t.date "graduation_date"
     t.string "guardian_name"
     t.string "guardian_phone"
     t.string "last_name", null: false

@@ -57,12 +57,9 @@
 
   .mb-3
     = f.label :role, class: "form-label"
-    .input-group
-      %span.input-group-text
-        %span.material-symbols shield_person
-      = f.select :role, %w[admin staff viewer], {}, class: "form-select #{'is-invalid' if user.errors[:role].any?}"
-      - if user.errors[:role].any?
-        .invalid-feedback= user.errors[:role].first
+    = f.select :role, %w[admin staff viewer], {}, class: "form-select #{'is-invalid' if user.errors[:role].any?}", data: { controller: "tomselect" }
+    - if user.errors[:role].any?
+      .invalid-feedback= user.errors[:role].first
 
   .mb-3.form-check
     = f.check_box :active, class: "form-check-input"

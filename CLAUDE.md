@@ -51,6 +51,7 @@ AUTO_LOGIN=1 bin/dev     # bypass login, auto-authenticate as user ID 1
 - **Derive surface colors from `$dark`**: Use Sass functions (`lighten`, `darken`) on `$dark` for all surface colors so they stay in sync when the base changes.
 - **Post-import variables**: Variables that depend on Bootstrap internals (e.g. `$input-icon-color` uses `$light`) must be defined **after** `@import "scss/bootstrap"`, not before.
 - **Table borders**: Do not use Bootstrap's `$table-border-color` — it has no effect on cell borders due to a Bootstrap bug (see `memory/bootstrap-table-border-bug.md`). Use our custom Sass variables (`$table-row-border-color`, `$table-head-border-color`, `$table-head-border-width`) defined in `application.scss`, applied via post-import CSS rules.
+- **IMPORTANT — 3rd-party CSS overrides in `application.scss`**: Vendored libraries (Flatpickr, Tom Select, etc.) hardcode their own colors, font sizes, and SVG fills that do NOT read Bootstrap CSS variables or respect `[data-bs-theme="dark"]`. We override these in `application.scss`, which loads AFTER the vendor stylesheets so same-specificity rules win the cascade. **Every override block MUST be extensively commented**: start with a header explaining WHY the overrides exist (the library hardcodes X instead of using Bootstrap vars), then annotate each rule with what the original hardcoded value was (e.g. `// was #343a40`). This is critical because without comments, future readers cannot tell whether a rule is a cosmetic tweak or a required fix for a broken 3rd-party default.
 
 ## Testing
 
@@ -78,3 +79,4 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - **Input group icons**: Styled with `$input-icon-color` (defined post-import in `application.scss`). Currently `darken($light, 5%)` — a dimmed version of the `$light` theme color.
 - **Tables in cards**: Tables inside `.card` use transparent background (inherits card bg), no outer border (card provides rounding). Row separators are subtle, header border is more prominent. Styled globally in `application.scss` — no extra classes needed on individual tables.
 - **Dev style guide**: `/dev/styleguide` (development only) has an interactive Color Playground with live-preview color pickers for all base and derived variables, a sample form, badges, buttons, and tables. Use "Copy SCSS" to export changes.
+- **Code patterns**: See `docs/code-patterns.md` for canonical controller, view, fixture, and test templates. Reference these when creating new resources instead of re-reading existing files.

@@ -8,6 +8,15 @@ $success:   #3faa65;
 $warning:   #e9cb3d;
 $danger:    #f22330;
 
+// Font
+// Bootstrap resolves fonts via $font-family-sans-serif → $font-family-base →
+// --bs-body-font-family (CSS var on <body>). The default value is a system
+// font stack: system-ui → Segoe UI (Windows), SF Pro (macOS), Roboto (Android).
+// All elements inherit from <body> unless a 3rd-party library hardcodes its own.
+// To switch to a Thai-supporting font later, change this single variable and
+// vendor the .woff2 files in vendor/fonts/.
+$font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
 // Font color (Bootstrap dark mode text)
 $body-color-dark: #dee2e6;               // Bootstrap default — override to customize
 
@@ -88,6 +97,128 @@ $input-icon-color: darken($light, 5%);
 // Dev style guide background swatches
 .card-bg  { background-color: $card-bg; }
 .input-bg { background-color: $input-bg; }
+
+// ---------------------------------------------------------------------------
+// Flatpickr dark mode overrides
+// ---------------------------------------------------------------------------
+// Flatpickr (flatpickr.css) is a standalone date picker with NO Bootstrap
+// integration. Its CSS hardcodes light-mode colors everywhere — white
+// backgrounds (#fff), dark text (#393939), light borders (#e6e6e6), and
+// even a red SVG fill (#f64747) on the month-nav arrow hover.
+//
+// None of these respond to Bootstrap's dark mode ([data-bs-theme="dark"]) or
+// read any Bootstrap CSS variables. Since we can't change the vendored CSS
+// (it would be overwritten on upgrade), we override every visible color here
+// using our Sass variables so the calendar matches the rest of the app.
+//
+// The vendored flatpickr.css is loaded BEFORE this stylesheet (see
+// application.html.haml), so same-specificity rules here win the cascade.
+// ---------------------------------------------------------------------------
+.flatpickr-calendar {
+  background: $card-bg;                       // was #fff
+  border: 1px solid rgba(white, 0.25);        // was #e6e6e6 — brighter than the default
+                                              // 0.15 so it doesn't blend into the form bg
+  box-shadow: none;                           // was a light drop shadow
+  // Flatpickr hardcodes font-size: 14px rather than inheriting from Bootstrap.
+  // Use inherit so calendar text matches the rest of the app (Bootstrap's
+  // system font stack at 1rem). The font-family IS the same (system-ui /
+  // Segoe UI on Windows) but the smaller size makes it look off.
+  font-size: inherit;
+
+  .flatpickr-months {
+    .flatpickr-month { color: $body-color-dark; background: transparent; } // was rgba(0,0,0,0.9)
+
+    // Month nav arrows: flatpickr's default arrows are thin filled-path SVGs
+    // with fill color set via CSS (dark gray default, red #f64747 on hover).
+    // We replace them with stroke-based chevrons (via the Stimulus controller)
+    // that use `stroke: currentColor`, so we control color via the element's
+    // `color` property. We also override the SVG `fill` for the original
+    // arrows' hover state (flatpickr targets it separately with `fill: #f64747`).
+    .flatpickr-prev-month, .flatpickr-next-month {
+      color: $body-color-dark;
+      fill: $body-color-dark;                 // was rgba(0,0,0,0.9)
+      &:hover { color: $primary; }
+      &:hover svg { fill: $primary; }         // was fill: #f64747 (red)
+    }
+  }
+
+  .flatpickr-current-month {
+    color: $body-color-dark;
+    // Flatpickr sets font-weight: 300 (thin) on the month/year header,
+    // making it look wispy compared to Bootstrap's normal weight (400).
+    font-weight: 400;                         // was 300
+    .flatpickr-monthDropdown-months {
+      background: $card-bg;                   // was transparent (shows white underneath)
+      color: $body-color-dark;
+      font-weight: 400;                       // was 300
+    }
+    input.cur-year { color: $body-color-dark; font-weight: 400; } // was rgba(0,0,0,0.9), weight 300
+  }
+
+  .flatpickr-weekdays { background: transparent; }
+  span.flatpickr-weekday { color: rgba($body-color-dark, 0.5); } // was rgba(0,0,0,0.54)
+
+  .flatpickr-day {
+    color: $body-color-dark;                                       // was #393939
+    &:hover { background: lighten($dark, 14%); border-color: lighten($dark, 14%); } // was #e6e6e6
+    &.selected { background: $primary; border-color: $primary; color: $dark; }       // was #569ff7
+    &.today { border-color: $primary; }                                              // was #959ea9
+    &.prevMonthDay, &.nextMonthDay { color: rgba($body-color-dark, 0.3); }           // was rgba(57,57,57,0.3)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tom Select dark mode overrides
+// ---------------------------------------------------------------------------
+// Tom Select's Bootstrap 5 theme (tom-select.bootstrap5.css) is a PARTIAL
+// integration. It reads some Bootstrap CSS variables for backgrounds:
+//   - var(--bs-body-bg) for control & dropdown background
+//   - var(--bs-tertiary-bg) for the active/hover option
+//   - var(--bs-border-color) for the control border
+//
+// However, it HARDCODES several light-mode values that don't adapt to
+// dark mode:
+//   - Text color: #343a40 (dark gray — invisible on dark backgrounds)
+//   - Dropdown border: #d0d0d0 (light gray)
+//   - Dropdown shadow: rgba(0,0,0,.175)
+//   - Focus ring: #86b7fe border + rgba(13,110,253,.25) shadow (Bootstrap's
+//     default blue, not our $primary)
+//   - Caret arrow: an inline SVG with stroke='#343a40' (invisible on dark)
+//
+// These seem to be values that Bootstrap itself generates at compile time
+// from Sass, but Tom Select's pre-built CSS baked in the defaults rather
+// than using CSS variables. We override them here with our Sass variables.
+//
+// The vendored tom-select.bootstrap5.css is loaded BEFORE this stylesheet
+// (see application.html.haml), so same-specificity rules here win.
+// ---------------------------------------------------------------------------
+
+// Text color — the most critical fix. Without this, all text is invisible.
+.ts-control,
+.ts-control input,
+.ts-dropdown {
+  color: $body-color-dark;                    // was #343a40
+}
+
+// Caret (dropdown arrow) — an inline SVG with a hardcoded dark stroke.
+// We re-encode the same SVG with our $body-color-dark as the stroke color.
+.ts-wrapper:not(.form-control, .form-select).single .ts-control {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23#{str-slice(inspect($body-color-dark), 2)}' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+// Dropdown panel border and shadow
+.ts-dropdown,
+.ts-dropdown.form-control,
+.ts-dropdown.form-select {
+  border-color: rgba(white, 0.15);            // was #d0d0d0
+  box-shadow: none;                           // was rgba(0,0,0,.175) shadow
+}
+
+// Focus ring — use our $primary instead of Bootstrap's default blue
+.focus .ts-control {
+  border-color: $primary;                     // was #86b7fe
+  box-shadow: 0 0 0 0.25rem rgba($primary, 0.25); // was rgba(13,110,253,.25)
+}
 
 // Expose Sass variables as CSS custom properties (used by dev/styleguide)
 :root {

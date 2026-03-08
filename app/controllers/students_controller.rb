@@ -56,7 +56,7 @@ class StudentsController < ApplicationController
       :student_id, :first_name, :last_name, :first_name_th, :last_name_th,
       :email, :phone, :address, :discord, :line_id,
       :guardian_name, :guardian_phone, :previous_school, :enrollment_method,
-      :admission_year, :status
+      :admission_year, :status, :graduation_date
     )
   end
 end
