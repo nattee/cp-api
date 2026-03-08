@@ -47,7 +47,9 @@ AUTO_LOGIN=1 bin/dev     # bypass login, auto-authenticate as user ID 1
 ## Styling Guidelines
 
 - **Sass variable overrides first**: To customize Bootstrap, override Sass variables (e.g. `$card-bg`, `$body-bg`) **before** the `@import "scss/bootstrap"` line in `application.scss`. Bootstrap uses `!default`, so pre-defined variables take precedence. Avoid overriding Bootstrap's CSS variables (e.g. `--bs-card-bg`) in theme selectors — Bootstrap components often re-declare them on the element itself, which wins over ancestor overrides.
+- **Dark mode uses `$body-color-dark`**, not `$body-color`. The app runs with `[data-bs-theme="dark"]`, so Bootstrap applies dark-mode Sass variables (e.g. `$body-color-dark`, `$body-bg-dark`) via CSS variables at runtime. Override `$body-color-dark` before the import to change the font color; `$body-color` only affects light mode.
 - **Derive surface colors from `$dark`**: Use Sass functions (`lighten`, `darken`) on `$dark` for all surface colors so they stay in sync when the base changes.
+- **Post-import variables**: Variables that depend on Bootstrap internals (e.g. `$input-icon-color` uses `$light`) must be defined **after** `@import "scss/bootstrap"`, not before.
 - **Table borders**: Do not use Bootstrap's `$table-border-color` — it has no effect on cell borders due to a Bootstrap bug (see `memory/bootstrap-table-border-bug.md`). Use our custom Sass variables (`$table-row-border-color`, `$table-head-border-color`, `$table-head-border-width`) defined in `application.scss`, applied via post-import CSS rules.
 
 ## LINE Integration
@@ -64,4 +66,6 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - **Badges**: Use frosted badge classes (`.badge-admin`, `.badge-staff`, `.badge-viewer`, `.badge-active`, `.badge-inactive`) with semi-transparent tinted backgrounds and subtle borders. Do not use Bootstrap's solid `bg-*` badges.
 - **Icon action buttons**: Use ghost button classes (`.btn-ghost .btn-ghost-*`) for icon-only action links in tables. These extend Bootstrap's `btn-link` with no underline, custom color per variant, and a subtle tinted background on hover. Variants: `-primary` (view/show), `-secondary` (edit), `-danger` (delete). Do not use `btn-outline-*` for icon-only actions.
 - **Icons**: Use Material Symbols (`%span.material-symbols`) for action icons, typically at `font-size: 18px` in tables.
+- **Input group icons**: Styled with `$input-icon-color` (defined post-import in `application.scss`). Currently `darken($light, 5%)` — a dimmed version of the `$light` theme color.
 - **Tables in cards**: Tables inside `.card` use transparent background (inherits card bg), no outer border (card provides rounding). Row separators are subtle, header border is more prominent. Styled globally in `application.scss` — no extra classes needed on individual tables.
+- **Dev style guide**: `/dev/styleguide` (development only) has an interactive Color Playground with live-preview color pickers for all base and derived variables, a sample form, badges, buttons, and tables. Use "Copy SCSS" to export changes.

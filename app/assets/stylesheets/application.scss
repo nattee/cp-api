@@ -8,12 +8,16 @@ $success:   #3faa65;
 $warning:   #e9cb3d;
 $danger:    #f22330;
 
+// Font color (Bootstrap dark mode text)
+$body-color-dark: #dee2e6;               // Bootstrap default — override to customize
+
 // Surface colors derived from $dark (elevation = lightness)
 $body-bg:   $dark;                          // page canvas (lowest)
 $card-bg:   lighten($dark, 7%);             // cards & sidebar (elevated)
 $input-bg:  lighten($dark, 2%);             // form controls (recessed into card)
 $input-group-addon-bg: lighten($dark, 1%);  // input group text (deeper recess)
 $table-bg:  transparent;                    // inherit card background, no extra layer
+
 
 // Table border customization
 // DO NOT use Bootstrap's $table-border-color — it compiles into --bs-table-border-color
@@ -31,6 +35,10 @@ $table-head-border-width: 2px;               // thicker than default 1px row bor
 
 // Material Symbols icons loaded as standalone CSS (material-symbols.css)
 // so Propshaft can rewrite the font url() to a fingerprinted path.
+
+// Input group icon color (dimmed body text)
+$input-icon-color: darken($light, 5%);
+.input-group-text { color: $input-icon-color; }
 
 // Tables inside cards: subtle row separators, no outer border (card provides rounding)
 .card .table { border: 0; }
@@ -62,3 +70,23 @@ $table-head-border-width: 2px;               // thicker than default 1px row bor
 // Dev style guide background swatches
 .card-bg  { background-color: $card-bg; }
 .input-bg { background-color: $input-bg; }
+
+// Expose Sass variables as CSS custom properties (used by dev/styleguide)
+:root {
+  --sass-light: #{$light};
+  --sass-dark: #{$dark};
+  --sass-primary: #{$primary};
+  --sass-secondary: #{$secondary};
+  --sass-info: #{$info};
+  --sass-success: #{$success};
+  --sass-warning: #{$warning};
+  --sass-danger: #{$danger};
+  --sass-body-bg: #{$body-bg};
+  --sass-card-bg: #{$card-bg};
+  --sass-input-bg: #{$input-bg};
+  --sass-input-group-addon-bg: #{$input-group-addon-bg};
+  --sass-body-color: #{$body-color-dark};
+  --sass-input-icon-color: #{$input-icon-color};
+  --sass-table-row-border-color: #{$table-row-border-color};
+  --sass-table-head-border-color: #{$table-head-border-color};
+}
