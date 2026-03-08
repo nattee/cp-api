@@ -47,6 +47,45 @@
 
     %hr
 
+    %h5.card-title.mb-3 3rd-Party Library Colors
+    %p.text-muted.small Always derived from base colors. These override hardcoded values in Flatpickr and Tom Select.
+    .row.g-3#library-colors
+      %h6.col-12.mb-0
+        %span.text-muted Flatpickr
+      - [["flatpickr-header-color", "Header", "= $light"], ["flatpickr-day-color", "Day text", "= $body-color"], ["flatpickr-day-hover-bg", "Day hover bg", "lighten($dark, 14%)"], ["flatpickr-selected-bg", "Selected bg", "= $primary"], ["flatpickr-selected-color", "Selected text", "= $dark"], ["flatpickr-spinner-color", "Spinner", "= $light"]].each do |key, label, formula|
+        .col-auto{style: "min-width: 105px"}
+          %label.form-label.small.mb-1
+            %span= label
+            %br
+            %span.text-muted{style: "font-size: 0.7rem"}= formula
+          .d-flex.align-items-center.gap-2
+            .library-swatch{data: {lib_key: key}, style: "width: 34px; height: 34px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15);"}
+            %code.small.lib-hex{data: {lib_key: key}}
+      -# Flatpickr colors with alpha — show on dark background to visualize transparency
+      - [["flatpickr-weekday-color", "Weekday", "rgba($light, 0.5)"], ["flatpickr-muted-color", "Muted day", "rgba($body-color, 0.3)"], ["flatpickr-border-color", "Border", "rgba(white, 0.25)"]].each do |key, label, formula|
+        .col-auto{style: "min-width: 105px"}
+          %label.form-label.small.mb-1
+            %span= label
+            %br
+            %span.text-muted{style: "font-size: 0.7rem"}= formula
+          .d-flex.align-items-center.gap-2
+            .library-swatch{data: {lib_key: key}, style: "width: 34px; height: 34px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15);"}
+            %code.small.lib-hex{data: {lib_key: key}}
+
+      %h6.col-12.mb-0.mt-2
+        %span.text-muted Tom Select
+      - [["ts-text-color", "Text", "= $body-color"], ["ts-focus-border", "Focus border", "= $primary"]].each do |key, label, formula|
+        .col-auto{style: "min-width: 105px"}
+          %label.form-label.small.mb-1
+            %span= label
+            %br
+            %span.text-muted{style: "font-size: 0.7rem"}= formula
+          .d-flex.align-items-center.gap-2
+            .library-swatch{data: {lib_key: key}, style: "width: 34px; height: 34px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15);"}
+            %code.small.lib-hex{data: {lib_key: key}}
+
+    %hr
+
     .d-flex.gap-2
       %button.btn.btn-outline-primary.btn-sm#copy-scss
         %span.material-symbols{style: "font-size: 16px; vertical-align: -3px"} content_copy
@@ -125,6 +164,45 @@
       .d-flex.gap-2
         %button.btn.btn-primary{type: "button"} Save
         %button.btn.btn-outline-secondary{type: "button"} Cancel
+
+-# ============================================================
+-# Tom Select
+-# ============================================================
+%h2.mb-3.mt-5 Tom Select
+%p.text-muted.small Enhanced select fields. Wraps native &lt;select&gt; with searchable dropdown via Stimulus controller.
+
+.card{style: "max-width: 640px"}
+  .card-body
+    .mb-3
+      %label.form-label Status (with Material Symbols icons)
+      %select.form-select{data: {controller: "tomselect"}}
+        %option{value: "active", data: {icon: "check_circle"}} Active
+        %option{value: "graduated", data: {icon: "school"}} Graduated
+        %option{value: "on_leave", data: {icon: "pause_circle"}} On Leave
+    .mb-3
+      %label.form-label Role (plain, no icons)
+      %select.form-select{data: {controller: "tomselect"}}
+        %option admin
+        %option staff
+        %option viewer
+
+-# ============================================================
+-# Flatpickr Date Picker
+-# ============================================================
+%h2.mb-3.mt-5 Flatpickr Date Picker
+%p.text-muted.small Date input with calendar popup. Uses altInput for human-friendly display, stores ISO date.
+
+.card{style: "max-width: 640px"}
+  .card-body
+    .mb-3
+      %label.form-label Date (with input group icon)
+      .input-group
+        %span.input-group-text
+          %span.material-symbols school
+        %input.form-control{type: "text", data: {controller: "datepicker"}, placeholder: "Pick a date…"}
+    .mb-3
+      %label.form-label Date (standalone)
+      %input.form-control{type: "text", data: {controller: "datepicker"}, placeholder: "Pick a date…"}
 
 -# ============================================================
 -# Badges
@@ -299,14 +377,15 @@
     var originalSurfaces = Object.assign({}, surfaces);
 
     // --- Derive dependent colors from base colors ---
+    // Formulas here MUST match the Sass variables in application.scss.
     function deriveSurfaces() {
       var dark = colors.dark;
       var derived = {
-        "body-bg": dark,
-        "card-bg": lighten(dark, 7),
-        "input-bg": lighten(dark, 2),
-        "input-group-addon-bg": lighten(dark, 1),
-        "input-icon-color": darken(colors.light, 5)
+        "body-bg": dark,                            // $body-bg: $dark
+        "card-bg": lighten(dark, 7),                // $card-bg: lighten($dark, 7%)
+        "input-bg": lighten(dark, 2),               // $input-bg: lighten($dark, 2%)
+        "input-group-addon-bg": lighten(dark, 1),   // $input-group-addon-bg: lighten($dark, 1%)
+        "input-icon-color": darken(colors.light, 5) // $input-icon-color: darken($light, 5%)
       };
       Object.keys(derived).forEach(function(key) {
         var lock = document.querySelector('.surface-lock[data-surface-key="' + key + '"]');
@@ -314,6 +393,30 @@
           surfaces[key] = derived[key];
         }
       });
+    }
+
+    // --- Compute 3rd-party library derived colors ---
+    // These mirror the $flatpickr-* and Tom Select variables in application.scss.
+    // Returns an object mapping swatch keys to {hex, css} where css is the
+    // actual CSS value (may be rgba) and hex is for swatch display.
+    function computeLibraryColors() {
+      var c = colors;
+      var s = surfaces;
+      return {
+        // Flatpickr (application.scss lines 101-109)
+        "flatpickr-header-color":   { hex: c.light,                css: c.light },                  // $flatpickr-header-color: $light
+        "flatpickr-weekday-color":  { hex: c.light,                css: rgba(c.light, 0.5) },       // $flatpickr-weekday-color: rgba($light, 0.5)
+        "flatpickr-day-color":      { hex: c["body-color"],        css: c["body-color"] },          // $flatpickr-day-color: $body-color-dark
+        "flatpickr-day-hover-bg":   { hex: lighten(c.dark, 14),    css: lighten(c.dark, 14) },      // $flatpickr-day-hover-bg: lighten($dark, 14%)
+        "flatpickr-selected-bg":    { hex: c.primary,              css: c.primary },                // $flatpickr-selected-bg: $primary
+        "flatpickr-selected-color": { hex: c.dark,                 css: c.dark },                   // $flatpickr-selected-color: $dark
+        "flatpickr-muted-color":    { hex: c["body-color"],        css: rgba(c["body-color"], 0.3) }, // $flatpickr-muted-color: rgba($body-color-dark, 0.3)
+        "flatpickr-border-color":   { hex: "#ffffff",              css: "rgba(255, 255, 255, 0.25)" }, // $flatpickr-border-color: rgba(white, 0.25)
+        "flatpickr-spinner-color":  { hex: c.light,                css: c.light },                  // $flatpickr-spinner-color: $light
+        // Tom Select (application.scss Tom Select override section)
+        "ts-text-color":            { hex: c["body-color"],        css: c["body-color"] },          // .ts-control color: $body-color-dark
+        "ts-focus-border":          { hex: c.primary,              css: c.primary }                  // .focus .ts-control border: $primary
+      };
     }
 
     function darken(hex, amount) {
@@ -421,7 +524,47 @@
       // Table
       css += ".table { color: " + font + " !important; }\n";
 
+      // --- Flatpickr overrides (mirrors application.scss .flatpickr-calendar block) ---
+      var lib = computeLibraryColors();
+      var fpCal = ".flatpickr-calendar";
+      css += fpCal + " { background: " + s["card-bg"] + " !important; border-color: " + lib["flatpickr-border-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-months .flatpickr-month { color: " + lib["flatpickr-header-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-months .flatpickr-prev-month, " + fpCal + " .flatpickr-months .flatpickr-next-month { color: " + lib["flatpickr-header-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-months .flatpickr-prev-month:hover, " + fpCal + " .flatpickr-months .flatpickr-next-month:hover { color: " + c.primary + " !important; }\n";
+      css += fpCal + " .flatpickr-current-month { color: " + lib["flatpickr-header-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-current-month .flatpickr-monthDropdown-months { background: " + s["card-bg"] + " !important; color: " + lib["flatpickr-header-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-current-month input.cur-year { color: " + lib["flatpickr-header-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-current-month .numInputWrapper span.arrowUp:after { border-bottom-color: " + lib["flatpickr-spinner-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-current-month .numInputWrapper span.arrowDown:after { border-top-color: " + lib["flatpickr-spinner-color"].css + " !important; }\n";
+      css += fpCal + " span.flatpickr-weekday { color: " + lib["flatpickr-weekday-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-day { color: " + lib["flatpickr-day-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-day:hover { background: " + lib["flatpickr-day-hover-bg"].css + " !important; border-color: " + lib["flatpickr-day-hover-bg"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-day.selected { background: " + lib["flatpickr-selected-bg"].css + " !important; border-color: " + lib["flatpickr-selected-bg"].css + " !important; color: " + lib["flatpickr-selected-color"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-day.today { border-color: " + lib["flatpickr-selected-bg"].css + " !important; }\n";
+      css += fpCal + " .flatpickr-day.prevMonthDay, " + fpCal + " .flatpickr-day.nextMonthDay { color: " + lib["flatpickr-muted-color"].css + " !important; }\n";
+
+      // --- Tom Select overrides (mirrors application.scss Tom Select section) ---
+      css += ".ts-control, .ts-control input, .ts-dropdown { color: " + lib["ts-text-color"].css + " !important; }\n";
+      css += ".ts-dropdown, .ts-dropdown.form-control, .ts-dropdown.form-select { border-color: rgba(255, 255, 255, 0.15) !important; }\n";
+      css += ".focus .ts-control { border-color: " + lib["ts-focus-border"].css + " !important; box-shadow: 0 0 0 0.25rem " + rgba(c.primary, 0.25) + " !important; }\n";
+      // Tom Select caret SVG — re-encode with current body-color
+      var caretHex = "%23" + font.slice(1);
+      css += ".ts-wrapper:not(.form-control, .form-select).single .ts-control { background-image: url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='" + caretHex + "' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E\") !important; }\n";
+
+      // --- DataTables overrides ---
+      css += ":root { --dt-row-selected: " + hexToRgbStr(c.primary) + "; }\n";
+
       styleEl.textContent = css;
+
+      // --- Update 3rd-party library color swatches ---
+      document.querySelectorAll(".library-swatch").forEach(function(el) {
+        var entry = lib[el.dataset.libKey];
+        if (entry) el.style.backgroundColor = entry.css;
+      });
+      document.querySelectorAll(".lib-hex").forEach(function(el) {
+        var entry = lib[el.dataset.libKey];
+        if (entry) el.textContent = entry.hex;
+      });
 
       // Update CSS custom properties
       Object.keys(colors).forEach(function(key) {
@@ -450,7 +593,8 @@
     applyColors();
 
     // Keys that trigger re-derivation of dependent colors
-    var deriveTriggers = ["dark", "light", "body-color"];
+    // primary is included because flatpickr-selected-bg and ts-focus-border depend on it
+    var deriveTriggers = ["dark", "light", "body-color", "primary"];
 
     // Base color pickers
     document.querySelectorAll(".color-picker").forEach(function(el) {
