@@ -94,6 +94,20 @@ $input-icon-color: darken($light, 5%);
 .btn-ghost-secondary { color: $secondary; &:hover { background-color: rgba($secondary, 0.15); color: lighten($secondary, 20%); } }
 .btn-ghost-danger    { color: $danger;    &:hover { background-color: rgba($danger, 0.15);    color: $danger; } }
 
+// Flatpickr calendar colors (post-import — uses $light)
+// These are project variables, not flatpickr's. Flatpickr hardcodes its own
+// colors; we override them in the rules below using these variables so that
+// changing a single variable here updates the entire calendar appearance.
+$flatpickr-header-color:    $light;                     // month name, year, nav arrows
+$flatpickr-weekday-color:   rgba($light, 0.5);          // day-of-week labels (Mon, Tue…)
+$flatpickr-day-color:       $body-color-dark;            // day numbers in the grid
+$flatpickr-day-hover-bg:    lighten($dark, 14%);         // day hover background
+$flatpickr-selected-bg:     $primary;                    // selected day background
+$flatpickr-selected-color:  $dark;                       // selected day text
+$flatpickr-muted-color:     rgba($body-color-dark, 0.3); // prev/next month days
+$flatpickr-border-color:    rgba(white, 0.25);           // calendar popup border
+$flatpickr-spinner-color:   $light;                      // year increment arrows
+
 // Dev style guide background swatches
 .card-bg  { background-color: $card-bg; }
 .input-bg { background-color: $input-bg; }
@@ -116,8 +130,7 @@ $input-icon-color: darken($light, 5%);
 // ---------------------------------------------------------------------------
 .flatpickr-calendar {
   background: $card-bg;                       // was #fff
-  border: 1px solid rgba(white, 0.25);        // was #e6e6e6 — brighter than the default
-                                              // 0.15 so it doesn't blend into the form bg
+  border: 1px solid $flatpickr-border-color;  // was #e6e6e6
   box-shadow: none;                           // was a light drop shadow
   // Flatpickr hardcodes font-size: 14px rather than inheriting from Bootstrap.
   // Use inherit so calendar text matches the rest of the app (Bootstrap's
@@ -126,44 +139,50 @@ $input-icon-color: darken($light, 5%);
   font-size: inherit;
 
   .flatpickr-months {
-    .flatpickr-month { color: $body-color-dark; background: transparent; } // was rgba(0,0,0,0.9)
+    .flatpickr-month { color: $flatpickr-header-color; background: transparent; } // was rgba(0,0,0,0.9)
 
-    // Month nav arrows: flatpickr's default arrows are thin filled-path SVGs
-    // with fill color set via CSS (dark gray default, red #f64747 on hover).
-    // We replace them with stroke-based chevrons (via the Stimulus controller)
-    // that use `stroke: currentColor`, so we control color via the element's
-    // `color` property. We also override the SVG `fill` for the original
-    // arrows' hover state (flatpickr targets it separately with `fill: #f64747`).
+    // Month nav arrows: flatpickr's defaults are thin filled-path SVGs with
+    // hardcoded dark fill + red hover (#f64747). We replace the SVGs with
+    // plain text chevrons (‹ ›) via the Stimulus controller, so color is
+    // controlled entirely by CSS `color` — no SVG fill overrides needed.
     .flatpickr-prev-month, .flatpickr-next-month {
-      color: $body-color-dark;
-      fill: $body-color-dark;                 // was rgba(0,0,0,0.9)
-      &:hover { color: $primary; }
-      &:hover svg { fill: $primary; }         // was fill: #f64747 (red)
+      color: $flatpickr-header-color;         // was rgba(0,0,0,0.9)
+      &:hover { color: $primary; }            // was #f64747 (red)
     }
   }
 
   .flatpickr-current-month {
-    color: $body-color-dark;
+    color: $flatpickr-header-color;
     // Flatpickr sets font-weight: 300 (thin) on the month/year header,
     // making it look wispy compared to Bootstrap's normal weight (400).
     font-weight: 400;                         // was 300
     .flatpickr-monthDropdown-months {
       background: $card-bg;                   // was transparent (shows white underneath)
-      color: $body-color-dark;
+      color: $flatpickr-header-color;
       font-weight: 400;                       // was 300
     }
-    input.cur-year { color: $body-color-dark; font-weight: 400; } // was rgba(0,0,0,0.9), weight 300
+    input.cur-year { color: $flatpickr-header-color; font-weight: 400; } // was rgba(0,0,0,0.9), weight 300
+
+    // Year increment spinner arrows — flatpickr uses CSS border-triangles
+    // (border-bottom-color for up, border-top-color for down) hardcoded to
+    // rgba(0,0,0,0.9). These are invisible on a dark background.
+    .numInputWrapper span.arrowUp:after {
+      border-bottom-color: $flatpickr-spinner-color; // was rgba(0,0,0,0.9)
+    }
+    .numInputWrapper span.arrowDown:after {
+      border-top-color: $flatpickr-spinner-color;    // was rgba(0,0,0,0.9)
+    }
   }
 
   .flatpickr-weekdays { background: transparent; }
-  span.flatpickr-weekday { color: rgba($body-color-dark, 0.5); } // was rgba(0,0,0,0.54)
+  span.flatpickr-weekday { color: $flatpickr-weekday-color; } // was rgba(0,0,0,0.54)
 
   .flatpickr-day {
-    color: $body-color-dark;                                       // was #393939
-    &:hover { background: lighten($dark, 14%); border-color: lighten($dark, 14%); } // was #e6e6e6
-    &.selected { background: $primary; border-color: $primary; color: $dark; }       // was #569ff7
-    &.today { border-color: $primary; }                                              // was #959ea9
-    &.prevMonthDay, &.nextMonthDay { color: rgba($body-color-dark, 0.3); }           // was rgba(57,57,57,0.3)
+    color: $flatpickr-day-color;                                                           // was #393939
+    &:hover { background: $flatpickr-day-hover-bg; border-color: $flatpickr-day-hover-bg; } // was #e6e6e6
+    &.selected { background: $flatpickr-selected-bg; border-color: $flatpickr-selected-bg; color: $flatpickr-selected-color; } // was #569ff7
+    &.today { border-color: $flatpickr-selected-bg; }                                      // was #959ea9
+    &.prevMonthDay, &.nextMonthDay { color: $flatpickr-muted-color; }                      // was rgba(57,57,57,0.3)
   }
 }
 

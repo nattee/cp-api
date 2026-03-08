@@ -3,18 +3,17 @@ import flatpickr from "flatpickr"
 
 export default class extends Controller {
   connect() {
-    // Thicker stroke-based chevrons to replace flatpickr's thin filled-path arrows
-    const prevArrow = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m10 2-6 6 6 6'/></svg>"
-    const nextArrow = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m6 2 6 6-6 6'/></svg>"
-
     this.picker = flatpickr(this.element, {
       dateFormat: "Y-m-d",
       altInput: true,
       altFormat: "F j, Y",
       allowInput: true,
       disableMobile: true,
-      prevArrow,
-      nextArrow
+      // Replace flatpickr's default filled-path SVG arrows with Material
+      // Symbols icons, matching the icon language used across the app.
+      // Color is controlled by CSS ($flatpickr-header-color).
+      prevArrow: "<span class='material-symbols'>chevron_left</span>",
+      nextArrow: "<span class='material-symbols'>chevron_right</span>"
     })
 
     // Ensure alt input works inside Bootstrap input-groups
