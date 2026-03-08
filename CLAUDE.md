@@ -52,6 +52,15 @@ AUTO_LOGIN=1 bin/dev     # bypass login, auto-authenticate as user ID 1
 - **Post-import variables**: Variables that depend on Bootstrap internals (e.g. `$input-icon-color` uses `$light`) must be defined **after** `@import "scss/bootstrap"`, not before.
 - **Table borders**: Do not use Bootstrap's `$table-border-color` — it has no effect on cell borders due to a Bootstrap bug (see `memory/bootstrap-table-border-bug.md`). Use our custom Sass variables (`$table-row-border-color`, `$table-head-border-color`, `$table-head-border-width`) defined in `application.scss`, applied via post-import CSS rules.
 
+## Testing
+
+- **Framework**: Minitest + fixtures. System tests use Capybara + Selenium + headless Firefox (ESR).
+- **After implementing a feature**: ask whether to write tests before proceeding.
+- **Before writing tests**: briefly discuss what will be tested and get user input.
+- **Model tests**: cover validations, associations, scopes, and custom methods.
+- **System tests**: for any work involving UI — cover the happy path and key error states.
+- **Run tests**: `bin/rails test` (unit/model), `bin/rails test:system` (system).
+
 ## LINE Integration
 
 Bot integration for LINE Messaging API. See `docs/line-integration.md` for architecture and dev setup.
