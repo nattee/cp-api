@@ -25,7 +25,7 @@ export default class extends Controller {
   iconRenderConfig() {
     const iconHtml = (data, escape) => {
       const icon = data.icon
-        ? `<span class="material-symbols" style="font-size: 18px;">${escape(data.icon)}</span>`
+        ? `<span class="material-symbols" style="font-size: 16px; opacity: 0.5;">${escape(data.icon)}</span>`
         : ""
       return `<div style="display: flex; align-items: center; gap: 6px;">${icon}${escape(data.text)}</div>`
     }

@@ -28,6 +28,8 @@
                   %span.badge.badge-graduated Graduated
                 - elsif student.on_leave?
                   %span.badge.badge-on-leave On Leave
+                - elsif student.retired?
+                  %span.badge.badge-retired Retired
               %td
                 = link_to student, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
                   %span.material-symbols{style: "font-size: 18px"} visibility

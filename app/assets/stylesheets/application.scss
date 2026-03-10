@@ -49,6 +49,14 @@ $table-head-border-width: 2px;               // thicker than default 1px row bor
 $input-icon-color: darken($light, 5%);
 .input-group-text { color: $input-icon-color; }
 
+// Form labels — quiet contextual markers, not the focus. The input value is
+// what matters; the label just tells you what the field is. Muted color +
+// slightly smaller size mirrors our thead th treatment (quiet labels, loud data).
+.form-label {
+  color: var(--bs-secondary-color);
+  font-size: 0.85rem;
+}
+
 // Resource icon — plain icon next to card/page titles.
 .resource-icon { font-size: 20px; }
 
@@ -79,6 +87,7 @@ $input-icon-color: darken($light, 5%);
 .badge-inactive  { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
 .badge-graduated { background-color: rgba($info, 0.2);    color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
 .badge-on-leave  { background-color: rgba($warning, 0.2); color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
+.badge-retired   { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
 
 // Section dividers for forms and detail pages
 .form-section, .detail-section {

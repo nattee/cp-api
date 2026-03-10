@@ -33,6 +33,8 @@
             %span.badge.badge-graduated Graduated
           - elsif @student.on_leave?
             %span.badge.badge-on-leave On Leave
+          - elsif @student.retired?
+            %span.badge.badge-retired Retired
 
         - if @student.graduation_date.present?
           %dt.col-sm-3 Graduation Date
