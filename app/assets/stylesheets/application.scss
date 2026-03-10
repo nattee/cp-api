@@ -239,6 +239,53 @@ $flatpickr-spinner-color:   $light;                      // year increment arrow
   box-shadow: 0 0 0 0.25rem rgba($primary, 0.25); // was rgba(13,110,253,.25)
 }
 
+// ---------------------------------------------------------------------------
+// DataTables Bootstrap 5 dark mode overrides
+// ---------------------------------------------------------------------------
+// DataTables' Bootstrap 5 theme (datatables.bootstrap5.min.css) has PARTIAL
+// dark mode support. It adjusts row hover/stripe/ordering colors via
+// [data-bs-theme=dark] and uses Bootstrap's form-control / pagination
+// components (which already adapt to dark mode).
+//
+// However, several things need fixing for our theme:
+//   - Sort indicator arrows (▲▼) have very low opacity (0.125 inactive,
+//     0.6 active) — nearly invisible on dark backgrounds
+//   - The --dt-row-selected CSS variable uses Bootstrap's default blue
+//     (13, 110, 253) instead of our $primary
+//   - "No matching records" empty message inherits no special styling
+//   - The wrapper adds margin that conflicts with our card layout
+//
+// The vendored datatables.bootstrap5.min.css is loaded BEFORE this stylesheet
+// (see application.html.haml), so same-specificity rules here win.
+// ---------------------------------------------------------------------------
+
+// Use our $primary for row selection instead of Bootstrap's default blue
+:root {
+  --dt-row-selected: #{red($primary)}, #{green($primary)}, #{blue($primary)};
+}
+
+// Sort indicator arrows — boost opacity so they're visible on dark backgrounds
+table.dataTable thead > tr > th.dt-orderable-asc span.dt-column-order:before,
+table.dataTable thead > tr > th.dt-orderable-asc span.dt-column-order:after,
+table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:before,
+table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
+  opacity: 0.3;    // was 0.125 — nearly invisible on dark bg
+}
+table.dataTable thead > tr > th.dt-ordering-asc span.dt-column-order:before,
+table.dataTable thead > tr > th.dt-ordering-desc span.dt-column-order:after {
+  opacity: 0.85;   // was 0.6 — active sort direction, should be clearly visible
+}
+
+// Remove top margin on the wrapper row so it sits flush inside cards
+div.dt-container .row.mt-2 {
+  margin-top: 0.5rem !important;  // was mt-2 (0.5rem via Bootstrap, but
+}                                 // the first/last rows get extra spacing)
+
+// Empty table message — muted color to match "No students found" style
+table.dataTable tbody td.dt-empty {
+  color: var(--bs-secondary-color);  // muted text, consistent with .text-muted
+}
+
 // Expose Sass variables as CSS custom properties (used by dev/styleguide)
 :root {
   --sass-light: #{$light};
@@ -257,4 +304,15 @@ $flatpickr-spinner-color:   $light;                      // year increment arrow
   --sass-input-icon-color: #{$input-icon-color};
   --sass-table-row-border-color: #{$table-row-border-color};
   --sass-table-head-border-color: #{$table-head-border-color};
+
+  // Flatpickr derived colors (used by dev/styleguide Color Playground)
+  --sass-flatpickr-header-color: #{$flatpickr-header-color};
+  --sass-flatpickr-weekday-color: #{$flatpickr-weekday-color};
+  --sass-flatpickr-day-color: #{$flatpickr-day-color};
+  --sass-flatpickr-day-hover-bg: #{$flatpickr-day-hover-bg};
+  --sass-flatpickr-selected-bg: #{$flatpickr-selected-bg};
+  --sass-flatpickr-selected-color: #{$flatpickr-selected-color};
+  --sass-flatpickr-muted-color: #{$flatpickr-muted-color};
+  --sass-flatpickr-border-color: #{$flatpickr-border-color};
+  --sass-flatpickr-spinner-color: #{$flatpickr-spinner-color};
 }

@@ -3,10 +3,10 @@
   - if current_user.admin?
     = link_to "New Student", new_student_path, class: "btn btn-primary"
 
-.card
+.card{"data-controller" => "datatable"}
   .card-body
     .table-responsive
-      %table.table.table-hover.mb-0
+      %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
         %thead
           %tr
             %th Student ID
@@ -35,6 +35,3 @@
                     %span.material-symbols{style: "font-size: 18px"} edit
                   = link_to student, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn-ghost btn-ghost-danger", title: "Delete" do
                     %span.material-symbols{style: "font-size: 18px"} delete
-          - if @students.empty?
-            %tr
-              %td.text-muted.text-center{colspan: 5} No students found.
