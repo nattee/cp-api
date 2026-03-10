@@ -65,7 +65,7 @@ end
 
 ### index.html.haml
 ```haml
-.card
+.card{"data-controller" => "datatable"}
   .card-body.p-3
     .d-flex.justify-content-between.align-items-center.mb-3
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
@@ -74,7 +74,7 @@ end
       - if current_user.admin?
         = link_to "New Thing", new_thing_path, class: "btn btn-primary btn-sm"
     .table-responsive
-      %table.table.table-hover.mb-0
+      %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
         %thead
           %tr
             %th Column
@@ -146,11 +146,22 @@ end
   = f.submit class: "btn btn-primary"
 ```
 
-### new.html.haml / edit.html.haml
+### new.html.haml
 ```haml
 .d-flex.justify-content-between.align-items-center.mb-3
-  %h1 New Thing  /  Edit Thing
-  = link_to "Back", things_path, class: "btn btn-outline-primary"  # or thing_path(@thing) for edit
+  %h1 New Thing
+  = link_to "Back", things_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    = render "form", thing: @thing
+```
+
+### edit.html.haml
+```haml
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 Edit Thing
+  = link_to "Back", thing_path(@thing), class: "btn btn-outline-primary"
 
 .card
   .card-body
