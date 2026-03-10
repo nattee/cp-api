@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
   before_action :set_user, only: %i[show edit update destroy]
+  before_action :require_admin, only: %i[new create edit update destroy]
 
   def index
     @users = User.all
@@ -42,6 +43,12 @@ class UsersController < ApplicationController
 
   def set_user
     @user = User.find(params[:id])
+  end
+
+  def require_admin
+    unless current_user.admin?
+      redirect_to users_path, alert: "Only admins can perform this action."
+    end
   end
 
   def user_params

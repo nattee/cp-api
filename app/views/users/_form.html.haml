@@ -57,7 +57,7 @@
 
   .mb-3
     = f.label :role, class: "form-label"
-    = f.select :role, %w[admin staff viewer], {}, class: "form-select #{'is-invalid' if user.errors[:role].any?}", data: { controller: "tomselect" }
+    = f.select :role, options_for_select(User::ROLES.map { |r| [r.titleize, r, { data: { icon: User::ROLE_ICONS[r] } }] }, user.role), {}, class: "form-select #{'is-invalid' if user.errors[:role].any?}", data: { controller: "tomselect" }
     - if user.errors[:role].any?
       .invalid-feedback= user.errors[:role].first
 
