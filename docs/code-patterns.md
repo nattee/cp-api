@@ -78,11 +78,14 @@ end
         %thead
           %tr
             %th Column
+            %th Status
             %th Actions
         %tbody
           - @things.each do |thing|
             %tr
               %td= thing.name
+              %td
+                %span.badge{class: "badge-#{thing.status.dasherize}"}= thing.status.titleize
               %td
                 = link_to thing, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
                   %span.material-symbols{style: "font-size: 18px"} visibility

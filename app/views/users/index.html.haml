@@ -23,13 +23,10 @@
               %td= user.email
               %td= user.name
               %td
-                %span.badge{class: user.admin? ? "badge-admin" : user.staff? ? "badge-staff" : "badge-viewer"}
-                  = user.role
+                %span.badge{class: "badge-#{user.role}"}= user.role.titleize
               %td
-                - if user.active?
-                  %span.badge.badge-active Active
-                - else
-                  %span.badge.badge-inactive Inactive
+                %span.badge{class: user.active? ? "badge-active" : "badge-inactive"}
+                  = user.active? ? "Active" : "Inactive"
               %td
                 = link_to user, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
                   %span.material-symbols{style: "font-size: 18px"} visibility

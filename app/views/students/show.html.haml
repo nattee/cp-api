@@ -27,14 +27,7 @@
 
         %dt.col-sm-3 Status
         %dd.col-sm-9
-          - if @student.active?
-            %span.badge.badge-active Active
-          - elsif @student.graduated?
-            %span.badge.badge-graduated Graduated
-          - elsif @student.on_leave?
-            %span.badge.badge-on-leave On Leave
-          - elsif @student.retired?
-            %span.badge.badge-retired Retired
+          %span.badge{class: "badge-#{@student.status.dasherize}"}= @student.status.titleize
 
         - if @student.graduation_date.present?
           %dt.col-sm-3 Graduation Date

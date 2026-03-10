@@ -18,15 +18,12 @@
 
       %dt.col-sm-3 Role
       %dd.col-sm-9
-        %span.badge{class: @user.admin? ? "badge-admin" : @user.staff? ? "badge-staff" : "badge-viewer"}
-          = @user.role
+        %span.badge{class: "badge-#{@user.role}"}= @user.role.titleize
 
       %dt.col-sm-3 Active
       %dd.col-sm-9
-        - if @user.active?
-          %span.badge.badge-active Active
-        - else
-          %span.badge.badge-inactive Inactive
+        %span.badge{class: @user.active? ? "badge-active" : "badge-inactive"}
+          = @user.active? ? "Active" : "Inactive"
 
       - if @user.provider.present?
         %dt.col-sm-3 SSO Provider
