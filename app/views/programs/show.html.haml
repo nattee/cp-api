@@ -1,0 +1,41 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1= @program.name_en
+  .d-flex.gap-2
+    - if current_user.admin?
+      = link_to "Edit", edit_program_path(@program), class: "btn btn-outline-secondary"
+    = link_to "Back", programs_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    .detail-section
+      %dl.row.mb-0
+        %dt.col-sm-3 Name (EN)
+        %dd.col-sm-9= @program.name_en
+
+        - if @program.name_th.present?
+          %dt.col-sm-3 Name (TH)
+          %dd.col-sm-9= @program.name_th
+
+    .detail-section
+      %h6.section-title Degree
+      %dl.row.mb-0
+        %dt.col-sm-3 Degree Level
+        %dd.col-sm-9
+          %span.badge{class: "badge-#{@program.degree_level}"}= @program.degree_level.titleize
+
+        %dt.col-sm-3 Degree Name
+        %dd.col-sm-9= @program.degree_name
+
+        %dt.col-sm-3 Field of Study
+        %dd.col-sm-9= @program.field_of_study
+
+        %dt.col-sm-3 Year Started
+        %dd.col-sm-9= @program.year_started
+
+    .detail-section
+      %dl.row.mb-0
+        %dt.col-sm-3 Created at
+        %dd.col-sm-9= @program.created_at.strftime("%B %d, %Y %H:%M")
+
+        %dt.col-sm-3 Updated at
+        %dd.col-sm-9= @program.updated_at.strftime("%B %d, %Y %H:%M")

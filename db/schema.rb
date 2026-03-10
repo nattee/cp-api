@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_08_080946) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_10_032219) do
+  create_table "programs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "degree_level", null: false
+    t.string "degree_name", null: false
+    t.string "field_of_study", null: false
+    t.string "name_en", null: false
+    t.string "name_th"
+    t.datetime "updated_at", null: false
+    t.integer "year_started", null: false
+  end
+
   create_table "students", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.text "address"
     t.integer "admission_year", null: false
@@ -28,10 +39,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_080946) do
     t.string "line_id"
     t.string "phone"
     t.string "previous_school"
+    t.bigint "program_id"
     t.string "status", default: "active", null: false
     t.string "student_id", null: false
     t.datetime "updated_at", null: false
     t.index ["admission_year"], name: "index_students_on_admission_year"
+    t.index ["program_id"], name: "index_students_on_program_id"
     t.index ["student_id"], name: "index_students_on_student_id", unique: true
   end
 
@@ -54,4 +67,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_080946) do
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
+
+  add_foreign_key "students", "programs"
 end

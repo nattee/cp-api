@@ -1,0 +1,7 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 Edit Program
+  = link_to "Back", program_path(@program), class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    = render "form", program: @program

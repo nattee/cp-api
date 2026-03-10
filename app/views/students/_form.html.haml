@@ -56,6 +56,11 @@
     %legend Academic
     .row
       .col-md-6.mb-3
+        = f.label :program_id, "Program", class: "form-label"
+        = f.select :program_id, options_for_select(Program.all.map { |p| [p.name_en, p.id] }, student.program_id), { include_blank: "Select a program" }, class: "form-select #{'is-invalid' if student.errors[:program].any?}", data: { controller: "tomselect" }
+        - if student.errors[:program].any?
+          .invalid-feedback= student.errors[:program].first
+      .col-md-6.mb-3
         = f.label :admission_year, class: "form-label"
         .input-group
           %span.input-group-text
@@ -63,6 +68,8 @@
           = f.number_field :admission_year, class: "form-control #{'is-invalid' if student.errors[:admission_year].any?}"
           - if student.errors[:admission_year].any?
             .invalid-feedback= student.errors[:admission_year].first
+
+    .row
       .col-md-6.mb-3
         = f.label :status, class: "form-label"
         = f.select :status, options_for_select(Student::STATUSES.map { |s| [s.titleize, s, { data: { icon: Student::STATUS_ICONS[s] } }] }, student.status), {}, class: "form-select #{'is-invalid' if student.errors[:status].any?}", data: { controller: "tomselect" }

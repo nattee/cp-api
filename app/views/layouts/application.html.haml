@@ -35,6 +35,10 @@
         %hr.d-none.d-lg-block
         %ul.nav.nav-pills.flex-column.mb-auto
           %li.nav-item
+            = link_to programs_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'programs'}" do
+              = resource_icon("programs")
+              Programs
+          %li.nav-item
             = link_to students_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'students'}" do
               = resource_icon("students")
               Students

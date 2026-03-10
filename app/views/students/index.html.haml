@@ -12,6 +12,7 @@
           %tr
             %th Student ID
             %th Name
+            %th Program
             %th Admission Year
             %th Status
             %th Actions
@@ -20,6 +21,7 @@
             %tr
               %td= student.student_id
               %td= student.full_name
+              %td= student.program&.name_en
               %td= student.admission_year
               %td
                 %span.badge{class: "badge-#{student.status.dasherize}"}= student.status.titleize

@@ -19,6 +19,7 @@ Rails.application.routes.draw do
 
   resource :line_account, only: [:show, :create, :destroy], controller: "line_accounts"
 
+  resources :programs
   resources :students
   resources :users
 

@@ -8,6 +8,7 @@ active_student:
   admission_year: 2567
   status: active
   discord: "thanawat#1234"
+  program: cp_bachelor
 
 graduated_student:
   student_id: "6532100071"
@@ -18,6 +19,7 @@ graduated_student:
   email: arunee.p@student.chula.ac.th
   admission_year: 2565
   status: graduated
+  program: cp_bachelor
 
 on_leave_student:
   student_id: "6632100063"
@@ -25,3 +27,4 @@ on_leave_student:
   last_name: Thongkham
   admission_year: 2566
   status: on_leave
+  program: cp_bachelor

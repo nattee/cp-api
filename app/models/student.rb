@@ -10,6 +10,8 @@ class Student < ApplicationRecord
     "retired"   => "exit_to_app"
   }.freeze
 
+  belongs_to :program
+
   validates :student_id, presence: true, uniqueness: true
   validates :first_name, presence: true
   validates :last_name, presence: true

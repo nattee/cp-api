@@ -1,0 +1,15 @@
+cp_bachelor:
+  name_en: Computer Engineering (Bachelor)
+  name_th: วิศวกรรมคอมพิวเตอร์ (ปริญญาตรี)
+  degree_level: bachelor
+  degree_name: Bachelor of Engineering
+  field_of_study: Computer Engineering
+  year_started: 2540
+
+cp_master:
+  name_en: Computer Engineering (Master)
+  name_th: วิศวกรรมคอมพิวเตอร์ (ปริญญาโท)
+  degree_level: master
+  degree_name: Master of Engineering
+  field_of_study: Computer Engineering
+  year_started: 2545
