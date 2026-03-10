@@ -49,11 +49,27 @@ $table-head-border-width: 2px;               // thicker than default 1px row bor
 $input-icon-color: darken($light, 5%);
 .input-group-text { color: $input-icon-color; }
 
+// Resource icon — plain icon next to card/page titles.
+.resource-icon { font-size: 20px; }
+
+// Card title — use $light for visual hierarchy against muted body text.
+.card .card-title { color: $light; }
+
 // Tables inside cards: subtle row separators, no outer border (card provides rounding)
 .card .table { border: 0; }
 .card .table tr:last-child td { border-bottom: 0; }
 .card .table > :not(caption) > * > * { border-color: $table-row-border-color; }
 .card .table > thead > tr > * { border-bottom-color: $table-head-border-color; border-bottom-width: $table-head-border-width; }
+
+// Column headers as muted labels — recede visually so data rows are the focus.
+// Uppercase + small size + letter-spacing = quiet "label" feel (Linear/Stripe pattern).
+.card .table > thead > tr > th {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--bs-secondary-color);
+  font-weight: 600;
+}
 
 // Outlined / frosted badges (neon-bright text, tinted glow bg)
 .badge-admin    { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                    border: 1px solid rgba($danger, 0.4); }
@@ -276,10 +292,13 @@ table.dataTable thead > tr > th.dt-ordering-desc span.dt-column-order:after {
   opacity: 0.85;   // was 0.6 — active sort direction, should be clearly visible
 }
 
-// Remove top margin on the wrapper row so it sits flush inside cards
-div.dt-container .row.mt-2 {
-  margin-top: 0.5rem !important;  // was mt-2 (0.5rem via Bootstrap, but
-}                                 // the first/last rows get extra spacing)
+// DataTables control rows (search, pagination) use Bootstrap .row with gutters
+// that create different effective padding than the card-body's p-3. Zero out the
+// gutter so the card-body padding controls all horizontal spacing.
+.card-body div.dt-container > .row {
+  --bs-gutter-x: 0;
+  margin: 0;
+}
 
 // Empty table message — muted color to match "No students found" style
 table.dataTable tbody td.dt-empty {

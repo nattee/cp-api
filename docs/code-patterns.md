@@ -65,13 +65,14 @@ end
 
 ### index.html.haml
 ```haml
-.d-flex.justify-content-between.align-items-center.mb-3
-  %h1 Things
-  - if current_user.admin?
-    = link_to "New Thing", new_thing_path, class: "btn btn-primary"
-
 .card
-  .card-body
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        = resource_icon
+        Things
+      - if current_user.admin?
+        = link_to "New Thing", new_thing_path, class: "btn btn-primary btn-sm"
     .table-responsive
       %table.table.table-hover.mb-0
         %thead
