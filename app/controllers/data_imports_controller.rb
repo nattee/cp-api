@@ -39,8 +39,9 @@ class DataImportsController < ApplicationController
       @show_sheet_selector = @sheets.size > 1
       spreadsheet.default_sheet = @selected_sheet if @selected_sheet
 
-      @file_headers = spreadsheet.row(1).map { |h| h.to_s.strip }
+      raw_headers = spreadsheet.row(1).map { |h| h.to_s.strip }
       @preview_row = spreadsheet.last_row >= 2 ? spreadsheet.row(2) : []
+      @file_headers = importer_class.label_headers(raw_headers)
     end
 
     if @file_headers.blank?
@@ -49,7 +50,7 @@ class DataImportsController < ApplicationController
     end
 
     @attribute_definitions = importer_class.attribute_definitions
-    @auto_mapping = importer_class.auto_map(@file_headers)
+    @auto_mapping = importer_class.auto_map(@file_headers.map { |h| h.sub(/\A[A-Z]+: /, "") })
   end
 
   CONSTANT_MARKER = "__constant__"

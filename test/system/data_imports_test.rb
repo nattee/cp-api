@@ -78,21 +78,21 @@ class DataImportsTest < ApplicationSystemTestCase
     di = create_pending_import("students_import.csv")
     visit mapping_data_import_path(di)
 
-    # Auto-mapped selects should have file headers selected
-    assert_select_value "mapping[student_id]", "student_id"
-    assert_select_value "mapping[first_name]", "first_name"
-    assert_select_value "mapping[last_name]", "last_name"
-    assert_select_value "mapping[admission_year]", "admission_year"
+    # Auto-mapped selects should have labeled file headers selected (column letter prefix)
+    assert_select_value "mapping[student_id]", "A: student_id"
+    assert_select_value "mapping[first_name]", "B: first_name"
+    assert_select_value "mapping[last_name]", "C: last_name"
+    assert_select_value "mapping[admission_year]", "D: admission_year"
   end
 
   test "mapping page auto-maps Thai headers" do
     di = create_pending_import("students_thai_headers.csv")
     visit mapping_data_import_path(di)
 
-    assert_select_value "mapping[student_id]", "รหัสนิสิต"
-    assert_select_value "mapping[first_name]", "ชื่อ"
-    assert_select_value "mapping[last_name]", "นามสกุล"
-    assert_select_value "mapping[admission_year]", "ปีที่รับเข้า"
+    assert_select_value "mapping[student_id]", "A: รหัสนิสิต"
+    assert_select_value "mapping[first_name]", "B: ชื่อ"
+    assert_select_value "mapping[last_name]", "C: นามสกุล"
+    assert_select_value "mapping[admission_year]", "D: ปีที่รับเข้า"
   end
 
   test "execute import from mapping page" do

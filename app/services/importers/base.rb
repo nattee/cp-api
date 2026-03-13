@@ -21,9 +21,31 @@ module Importers
       attribute_definitions.each_with_object({}) { |d, h| h[d[:attribute]] = d[:label] }
     end
 
-    def self.auto_map(file_headers)
-      normalized = file_headers.map { |h| h.to_s.strip }
-      downcased = normalized.map(&:downcase)
+    # Convert 0-based column index to Excel-style letter (0 → A, 25 → Z, 26 → AA)
+    def self.column_letter(index)
+      letter = ""
+      i = index
+      loop do
+        letter = (65 + i % 26).chr + letter
+        i = i / 26 - 1
+        break if i < 0
+      end
+      letter
+    end
+
+    # Prefix each header with its Excel column letter: ["name", "name"] → ["A: name", "B: name"]
+    def self.label_headers(raw_headers)
+      raw_headers.each_with_index.map { |h, i| "#{column_letter(i)}: #{h}" }
+    end
+
+    # Parse column letter prefix back to 0-based index: "AA" → 26
+    def self.column_index_from_letter(letter)
+      letter.chars.reduce(0) { |acc, c| acc * 26 + (c.ord - 64) } - 1
+    end
+
+    def self.auto_map(raw_headers)
+      labeled = label_headers(raw_headers)
+      downcased = raw_headers.map { |h| h.to_s.strip.downcase }
       claimed = Set.new
 
       attribute_definitions.each_with_object({}) do |defn, mapping|
@@ -42,7 +64,7 @@ module Importers
 
         if match
           claimed.add(match)
-          mapping[defn[:attribute]] = normalized[match]
+          mapping[defn[:attribute]] = labeled[match]
         end
       end
     end
@@ -51,12 +73,15 @@ module Importers
       data_import.update!(state: "processing")
 
       with_spreadsheet do |spreadsheet|
-        # Build col_indices from stored column_mapping
-        headers = spreadsheet.row(1).map { |h| h.to_s.strip }
+        # Build col_indices from stored column_mapping.
+        # Mapping values are labeled headers like "A: name" — parse the column
+        # letter to get a 0-based index directly (handles duplicate header names).
         col_indices = {}
-        data_import.column_mapping.each do |attr_str, header_str|
-          idx = headers.index { |h| h == header_str }
-          col_indices[idx] = attr_str.to_sym if idx
+        data_import.column_mapping.each do |attr_str, labeled_header|
+          if labeled_header =~ /\A([A-Z]+): /
+            idx = self.class.column_index_from_letter($1)
+            col_indices[idx] = attr_str.to_sym
+          end
         end
 
         # Build constant values hash (symbol keys)

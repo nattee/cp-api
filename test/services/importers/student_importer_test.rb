@@ -21,33 +21,33 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
 
   # --- auto_map ---
 
-  test "auto_map matches English headers" do
+  test "auto_map matches English headers with column letter prefix" do
     headers = ["student_id", "first_name", "last_name", "admission_year", "email"]
     mapping = Importers::StudentImporter.auto_map(headers)
 
-    assert_equal "student_id", mapping[:student_id]
-    assert_equal "first_name", mapping[:first_name]
-    assert_equal "last_name", mapping[:last_name]
-    assert_equal "admission_year", mapping[:admission_year]
-    assert_equal "email", mapping[:email]
+    assert_equal "A: student_id", mapping[:student_id]
+    assert_equal "B: first_name", mapping[:first_name]
+    assert_equal "C: last_name", mapping[:last_name]
+    assert_equal "D: admission_year", mapping[:admission_year]
+    assert_equal "E: email", mapping[:email]
   end
 
-  test "auto_map matches Thai headers" do
+  test "auto_map matches Thai headers with column letter prefix" do
     headers = ["รหัสนิสิต", "ชื่อ", "นามสกุล", "ปีที่รับเข้า"]
     mapping = Importers::StudentImporter.auto_map(headers)
 
-    assert_equal "รหัสนิสิต", mapping[:student_id]
-    assert_equal "ชื่อ", mapping[:first_name]
-    assert_equal "นามสกุล", mapping[:last_name]
-    assert_equal "ปีที่รับเข้า", mapping[:admission_year]
+    assert_equal "A: รหัสนิสิต", mapping[:student_id]
+    assert_equal "B: ชื่อ", mapping[:first_name]
+    assert_equal "C: นามสกุล", mapping[:last_name]
+    assert_equal "D: ปีที่รับเข้า", mapping[:admission_year]
   end
 
   test "auto_map is case-insensitive" do
     headers = ["Student_ID", "First_Name", "Last_Name", "Admission_Year"]
     mapping = Importers::StudentImporter.auto_map(headers)
 
-    assert_equal "Student_ID", mapping[:student_id]
-    assert_equal "First_Name", mapping[:first_name]
+    assert_equal "A: Student_ID", mapping[:student_id]
+    assert_equal "B: First_Name", mapping[:first_name]
   end
 
   test "auto_map skips unrecognized headers" do
@@ -63,7 +63,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     headers = ["รหัสนิสิต", "ชื่อ", "นามสกุล", "ปีที่รับเข้า"]
     mapping = Importers::StudentImporter.auto_map(headers)
 
-    assert_equal "ชื่อ", mapping[:first_name]
+    assert_equal "B: ชื่อ", mapping[:first_name]
     assert_nil mapping[:first_name_th]
   end
 
@@ -130,14 +130,15 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   # --- full import via call ---
 
   test "call imports CSV with column_mapping" do
+    # CSV headers: student_id,first_name,last_name,admission_year,status,program
     data_import = create_data_import("students_import.csv",
       column_mapping: {
-        "student_id" => "student_id",
-        "first_name" => "first_name",
-        "last_name" => "last_name",
-        "admission_year" => "admission_year",
-        "status" => "status",
-        "program_name" => "program"
+        "student_id" => "A: student_id",
+        "first_name" => "B: first_name",
+        "last_name" => "C: last_name",
+        "admission_year" => "D: admission_year",
+        "status" => "E: status",
+        "program_name" => "F: program"
       }
     )
 
@@ -152,12 +153,13 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   end
 
   test "call applies default_values as constants" do
+    # CSV headers: student_id,first_name,last_name,admission_year
     data_import = create_data_import("students_minimal.csv",
       column_mapping: {
-        "student_id" => "student_id",
-        "first_name" => "first_name",
-        "last_name" => "last_name",
-        "admission_year" => "admission_year"
+        "student_id" => "A: student_id",
+        "first_name" => "B: first_name",
+        "last_name" => "C: last_name",
+        "admission_year" => "D: admission_year"
       },
       default_values: {
         "status" => "on_leave",
@@ -175,13 +177,14 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   end
 
   test "call with Thai headers via column_mapping" do
+    # CSV headers: รหัสนิสิต,ชื่อ,นามสกุล,ปีที่รับเข้า,สถานะ
     data_import = create_data_import("students_thai_headers.csv",
       column_mapping: {
-        "student_id" => "รหัสนิสิต",
-        "first_name" => "ชื่อ",
-        "last_name" => "นามสกุล",
-        "admission_year" => "ปีที่รับเข้า",
-        "status" => "สถานะ"
+        "student_id" => "A: รหัสนิสิต",
+        "first_name" => "B: ชื่อ",
+        "last_name" => "C: นามสกุล",
+        "admission_year" => "D: ปีที่รับเข้า",
+        "status" => "E: สถานะ"
       },
       default_values: { "program_name" => programs(:cp_bachelor).id.to_s }
     )
@@ -197,8 +200,8 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   test "call fails when required column missing from mapping" do
     data_import = create_data_import("students_import.csv",
       column_mapping: {
-        "student_id" => "student_id",
-        "first_name" => "first_name"
+        "student_id" => "A: student_id",
+        "first_name" => "B: first_name"
         # missing last_name and admission_year
       }
     )
