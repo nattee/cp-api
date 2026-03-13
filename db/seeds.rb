@@ -51,7 +51,28 @@ if Rails.env.development?
     end
   end
 
-  puts "Seed complete. Super admin + 5 dev users + 4 programs + 6 students ready."
+  [
+    { course_no: "2110101", revision_year: 2565, name: "Computer Programming",                    name_th: "การเขียนโปรแกรมคอมพิวเตอร์",          name_abbr: "COMP PROG",    course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 2, nl_hours: 2, s_hours: 5, program: cp_bachelor },
+    { course_no: "2110201", revision_year: 2565, name: "Computer Engineering Essentials",          name_th: "สาระสำคัญของวิศวกรรมคอมพิวเตอร์",     name_abbr: "CE ESSEN",     course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 3, nl_hours: 0, s_hours: 6, program: cp_bachelor },
+    { course_no: "2110211", revision_year: 2565, name: "Data Structures",                         name_th: "โครงสร้างข้อมูล",                     name_abbr: "DATA STRUCT",  course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 2, nl_hours: 2, s_hours: 5, program: cp_bachelor },
+    { course_no: "2110215", revision_year: 2565, name: "Programming Methodology",                 name_th: "ระเบียบวิธีการเขียนโปรแกรม",           name_abbr: "PROG METHOD",  course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 2, nl_hours: 2, s_hours: 5, program: cp_bachelor },
+    { course_no: "2110263", revision_year: 2565, name: "Digital Logic Lab",                        name_th: "ปฏิบัติการตรรกะดิจิทัล",                name_abbr: "DIGI LAB",     course_group: "Core",    department_code: "21", credits: 1, l_credits: 0, nl_credits: 1, l_hours: 0, nl_hours: 3, s_hours: 0, program: cp_bachelor },
+    { course_no: "2110313", revision_year: 2565, name: "Operating Systems",                       name_th: "ระบบปฏิบัติการ",                       name_abbr: "OS",           course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 3, nl_hours: 0, s_hours: 6, program: cp_bachelor },
+    { course_no: "2110327", revision_year: 2565, name: "Algorithm Design",                        name_th: "การออกแบบขั้นตอนวิธี",                 name_abbr: "ALGO",         course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 3, nl_hours: 0, s_hours: 6, program: cp_bachelor },
+    { course_no: "2110332", revision_year: 2565, name: "Systems Programming",                     name_th: "การเขียนโปรแกรมระบบ",                  name_abbr: "SYS PROG",     course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 2, nl_hours: 2, s_hours: 5, program: cp_bachelor },
+    { course_no: "2110363", revision_year: 2565, name: "Computer Architecture",                   name_th: "สถาปัตยกรรมคอมพิวเตอร์",               name_abbr: "COMP ARCH",    course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 3, nl_hours: 0, s_hours: 6, program: cp_bachelor },
+    { course_no: "2110422", revision_year: 2565, name: "Database Systems",                        name_th: "ระบบฐานข้อมูล",                        name_abbr: "DB SYS",       course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 3, nl_hours: 0, s_hours: 6, program: cp_bachelor },
+    { course_no: "2110443", revision_year: 2565, name: "Software Engineering",                    name_th: "วิศวกรรมซอฟต์แวร์",                    name_abbr: "SW ENG",       course_group: "Core",    department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 3, nl_hours: 0, s_hours: 6, program: cp_bachelor },
+    { course_no: "2110499", revision_year: 2565, name: "Senior Project",                          name_th: "โครงงานวิศวกรรมคอมพิวเตอร์",           name_abbr: "SR PROJ",      course_group: "Project", department_code: "21", credits: 3, l_credits: 0, nl_credits: 3, l_hours: 0, nl_hours: 9, s_hours: 0, program: cp_bachelor },
+    { course_no: "2103106", revision_year: 2560, name: "General Physics",                         name_th: "ฟิสิกส์ทั่วไป",                        name_abbr: "GEN PHYS",     course_group: "GenEd",   department_code: "21", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 3, nl_hours: 0, s_hours: 6, is_gened: true, program: cp_bachelor },
+    { course_no: "2301108", revision_year: 2560, name: "Calculus I",                              name_th: "แคลคูลัส 1",                           name_abbr: "CALC I",       course_group: "GenEd",   department_code: "23", credits: 3, l_credits: 3, nl_credits: 0, l_hours: 3, nl_hours: 0, s_hours: 6, is_gened: true, program: cp_bachelor },
+  ].each do |attrs|
+    Course.find_or_create_by!(course_no: attrs[:course_no], revision_year: attrs[:revision_year]) do |c|
+      c.assign_attributes(attrs.except(:course_no, :revision_year))
+    end
+  end
+
+  puts "Seed complete. Super admin + 5 dev users + 4 programs + 6 students + 14 courses ready."
 else
   puts "Seed complete. Super admin user (ID 1) ready."
 end

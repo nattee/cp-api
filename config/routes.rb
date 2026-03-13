@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   resource :line_account, only: [:show, :create, :destroy], controller: "line_accounts"
 
   resources :programs
+  resources :courses
   resources :students
   resources :users
   resources :data_imports, only: [:index, :new, :create, :show] do

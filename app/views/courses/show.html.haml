@@ -1,0 +1,88 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1= @course.name
+  .d-flex.gap-2
+    - if current_user.admin?
+      = link_to "Edit", edit_course_path(@course), class: "btn btn-outline-secondary"
+    = link_to "Back", courses_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    .detail-section
+      %dl.row.mb-0
+        %dt.col-sm-3 Course No
+        %dd.col-sm-9= @course.course_no
+
+        %dt.col-sm-3 Name (EN)
+        %dd.col-sm-9= @course.name
+
+        - if @course.name_th.present?
+          %dt.col-sm-3 Name (TH)
+          %dd.col-sm-9= @course.name_th
+
+        - if @course.name_abbr.present?
+          %dt.col-sm-3 Abbreviation
+          %dd.col-sm-9= @course.name_abbr
+
+        %dt.col-sm-3 Revision Year
+        %dd.col-sm-9= @course.revision_year
+
+    .detail-section
+      %h6.section-title Academic
+      %dl.row.mb-0
+        %dt.col-sm-3 Program
+        %dd.col-sm-9
+          - if @course.program
+            = link_to @course.program.name_en, @course.program
+          - else
+            .text-muted Not assigned
+
+        - if @course.course_group.present?
+          %dt.col-sm-3 Course Group
+          %dd.col-sm-9= @course.course_group
+
+        - if @course.department_code.present?
+          %dt.col-sm-3 Department Code
+          %dd.col-sm-9= @course.department_code
+
+        %dt.col-sm-3 GenEd
+        %dd.col-sm-9
+          - if @course.is_gened?
+            %span.badge.badge-active Yes
+          - else
+            %span.text-muted No
+
+        %dt.col-sm-3 Thesis
+        %dd.col-sm-9
+          - if @course.is_thesis?
+            %span.badge.badge-active Yes
+          - else
+            %span.text-muted No
+
+    .detail-section
+      %h6.section-title Credits & Hours
+      %dl.row.mb-0
+        %dt.col-sm-3 Credits
+        %dd.col-sm-9= @course.credits
+
+        %dt.col-sm-3 Lecture Credits
+        %dd.col-sm-9= @course.l_credits
+
+        %dt.col-sm-3 Non-Lecture Credits
+        %dd.col-sm-9= @course.nl_credits
+
+        %dt.col-sm-3 Lecture Hours
+        %dd.col-sm-9= @course.l_hours
+
+        %dt.col-sm-3 Non-Lecture Hours
+        %dd.col-sm-9= @course.nl_hours
+
+        %dt.col-sm-3 Self-Study Hours
+        %dd.col-sm-9= @course.s_hours
+
+    .detail-section
+      %dl.row.mb-0
+        %dt.col-sm-3 Created at
+        %dd.col-sm-9= @course.created_at.strftime("%B %d, %Y %H:%M")
+
+        %dt.col-sm-3 Updated at
+        %dd.col-sm-9= @course.updated_at.strftime("%B %d, %Y %H:%M")

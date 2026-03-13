@@ -1,0 +1,117 @@
+= form_with(model: course, class: "needs-validation") do |f|
+  - if course.errors.any?
+    .alert.alert-danger
+      %h5.alert-heading
+        = pluralize(course.errors.count, "error")
+        prohibited this course from being saved:
+      %ul.mb-0
+        - course.errors.full_messages.each do |message|
+          %li= message
+
+  %fieldset.form-section
+    %legend Identity
+    .row
+      .col-md-6.mb-3
+        = f.label :course_no, "Course No", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols tag
+          = f.text_field :course_no, class: "form-control #{'is-invalid' if course.errors[:course_no].any?}"
+          - if course.errors[:course_no].any?
+            .invalid-feedback= course.errors[:course_no].first
+      .col-md-6.mb-3
+        = f.label :revision_year, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols calendar_month
+          = f.number_field :revision_year, class: "form-control #{'is-invalid' if course.errors[:revision_year].any?}"
+          - if course.errors[:revision_year].any?
+            .invalid-feedback= course.errors[:revision_year].first
+
+    .row
+      .col-md-6.mb-3
+        = f.label :name, "Name (EN)", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols menu_book
+          = f.text_field :name, class: "form-control #{'is-invalid' if course.errors[:name].any?}"
+          - if course.errors[:name].any?
+            .invalid-feedback= course.errors[:name].first
+      .col-md-6.mb-3
+        = f.label :name_th, "Name (TH)", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols translate
+          = f.text_field :name_th, class: "form-control"
+
+    .row
+      .col-md-6.mb-3
+        = f.label :name_abbr, "Abbreviation", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols short_text
+          = f.text_field :name_abbr, class: "form-control"
+
+  %fieldset.form-section
+    %legend Academic
+    .row
+      .col-md-6.mb-3
+        = f.label :program_id, "Program", class: "form-label"
+        = f.select :program_id, options_for_select(Program.all.map { |p| [p.name_en, p.id] }, course.program_id), { include_blank: "Select a program" }, class: "form-select #{'is-invalid' if course.errors[:program].any?}", data: { controller: "tomselect" }
+        - if course.errors[:program].any?
+          .invalid-feedback= course.errors[:program].first
+      .col-md-6.mb-3
+        = f.label :course_group, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols folder
+          = f.text_field :course_group, class: "form-control"
+
+    .row
+      .col-md-6.mb-3
+        = f.label :department_code, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols domain
+          = f.text_field :department_code, class: "form-control"
+
+    .row
+      .col-md-6.mb-3
+        .form-check
+          = f.check_box :is_gened, class: "form-check-input"
+          = f.label :is_gened, "General Education (GenEd)", class: "form-check-label"
+      .col-md-6.mb-3
+        .form-check
+          = f.check_box :is_thesis, class: "form-check-input"
+          = f.label :is_thesis, "Thesis", class: "form-check-label"
+
+  %fieldset.form-section
+    %legend Credits & Hours
+    .row
+      .col-md-4.mb-3
+        = f.label :credits, "Total Credits", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols star
+          = f.number_field :credits, class: "form-control #{'is-invalid' if course.errors[:credits].any?}"
+          - if course.errors[:credits].any?
+            .invalid-feedback= course.errors[:credits].first
+      .col-md-4.mb-3
+        = f.label :l_credits, "Lecture Credits", class: "form-label"
+        = f.number_field :l_credits, class: "form-control"
+      .col-md-4.mb-3
+        = f.label :nl_credits, "Non-Lecture Credits", class: "form-label"
+        = f.number_field :nl_credits, class: "form-control"
+
+    .row
+      .col-md-4.mb-3
+        = f.label :l_hours, "Lecture Hours", class: "form-label"
+        = f.number_field :l_hours, class: "form-control"
+      .col-md-4.mb-3
+        = f.label :nl_hours, "Non-Lecture Hours", class: "form-label"
+        = f.number_field :nl_hours, class: "form-control"
+      .col-md-4.mb-3
+        = f.label :s_hours, "Self-Study Hours", class: "form-label"
+        = f.number_field :s_hours, class: "form-control"
+
+  = f.submit class: "btn btn-primary"

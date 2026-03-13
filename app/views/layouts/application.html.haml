@@ -39,6 +39,10 @@
               = resource_icon("programs")
               Programs
           %li.nav-item
+            = link_to courses_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'courses'}" do
+              = resource_icon("courses")
+              Courses
+          %li.nav-item
             = link_to students_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'students'}" do
               = resource_icon("students")
               Students
@@ -79,12 +83,12 @@
         %main.flex-grow-1.p-4
           .container-fluid
             - if flash[:notice]
-              .alert.alert-success.alert-dismissible.fade.show{role: "alert"}
+              .alert.alert-success.alert-dismissible.fade.show{"data-controller" => "alert", role: "alert"}
                 = flash[:notice]
-                %button.btn-close{"data-bs-dismiss" => "alert", "aria-label" => "Close"}
+                %button.btn-close{"data-action" => "alert#dismiss", "aria-label" => "Close"}
             - if flash[:alert]
-              .alert.alert-danger.alert-dismissible.fade.show{role: "alert"}
+              .alert.alert-danger.alert-dismissible.fade.show{"data-controller" => "alert", role: "alert"}
                 = flash[:alert]
-                %button.btn-close{"data-bs-dismiss" => "alert", "aria-label" => "Close"}
+                %button.btn-close{"data-action" => "alert#dismiss", "aria-label" => "Close"}
 
             = yield

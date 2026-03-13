@@ -7,6 +7,7 @@ class Program < ApplicationRecord
     "doctoral" => "science"
   }.freeze
 
+  has_many :courses, dependent: :restrict_with_error
   has_many :students, dependent: :restrict_with_error
 
   validates :name_en, presence: true
