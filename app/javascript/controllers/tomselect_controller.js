@@ -6,6 +6,8 @@ import TomSelect from "tom-select"
 // renders plain text. No icon-specific logic is hardcoded here — the
 // icon mapping lives in the model (e.g. Student::STATUS_ICONS).
 export default class extends Controller {
+  static [Symbol.for("stimulusMorphMode")] = "reconnect"
+
   connect() {
     const hasIcons = this.element.querySelector("option[data-icon]") !== null
 

@@ -1,0 +1,101 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1
+    = resource_icon("data_imports")
+    Import ##{@data_import.id}
+  .d-flex.gap-2
+    - if @data_import.state == "pending"
+      = link_to "Continue", mapping_data_import_path(@data_import), class: "btn btn-primary"
+    - if @data_import.state == "failed"
+      = button_to "Retry", retry_import_data_import_path(@data_import), method: :patch, class: "btn btn-primary"
+    = link_to "Back", data_imports_path, class: "btn btn-outline-primary"
+
+.card.mb-3
+  .card-body
+    .detail-section
+      %dl.row.mb-0
+        %dt.col-sm-3 Target
+        %dd.col-sm-9= @data_import.target_type
+
+        %dt.col-sm-3 Mode
+        %dd.col-sm-9
+          %span.badge{class: "badge-#{@data_import.mode.dasherize}"}= DataImport::MODE_LABELS[@data_import.mode]
+
+        %dt.col-sm-3 State
+        %dd.col-sm-9
+          %span.badge{class: "badge-#{@data_import.state.dasherize}"}= @data_import.state.titleize
+
+        %dt.col-sm-3 Imported By
+        %dd.col-sm-9= @data_import.user.name
+
+        %dt.col-sm-3 Date
+        %dd.col-sm-9= @data_import.created_at.strftime("%B %-d, %Y %H:%M")
+
+    .detail-section
+      %h6.section-title Results
+      %dl.row.mb-0
+        %dt.col-sm-3 Total Rows
+        %dd.col-sm-9= @data_import.total_rows
+
+        %dt.col-sm-3 Created
+        %dd.col-sm-9= @data_import.created_count
+
+        %dt.col-sm-3 Updated
+        %dd.col-sm-9= @data_import.updated_count
+
+        %dt.col-sm-3 Errors
+        %dd.col-sm-9= @data_import.error_count
+
+    - if @data_import.file.attached?
+      .detail-section
+        %h6.section-title File
+        %dl.row.mb-0
+          %dt.col-sm-3 Filename
+          %dd.col-sm-9= @data_import.file.filename
+
+          - if @data_import.sheet_name.present?
+            %dt.col-sm-3 Sheet
+            %dd.col-sm-9= @data_import.sheet_name
+
+    - if @data_import.column_mapping.present? || @data_import.default_values.present?
+      .detail-section
+        %h6.section-title Column Mapping
+        - labels = @data_import.importer_class.attribute_labels
+        %table.table.table-sm.mb-0
+          %thead
+            %tr
+              %th Field
+              %th Source
+          %tbody
+            - (@data_import.column_mapping || {}).each do |attr, header|
+              %tr
+                %td= labels[attr.to_sym] || attr
+                %td= header
+            - (@data_import.default_values || {}).each do |attr, value|
+              %tr
+                %td= labels[attr.to_sym] || attr
+                %td
+                  %span.badge.badge-pending constant
+                  = value
+
+- if @data_import.error_message.present?
+  .alert.alert-danger
+    %h5.alert-heading Import Error
+    %p.mb-0= @data_import.error_message
+
+- if @data_import.row_errors.present?
+  .card{"data-controller" => "datatable"}
+    .card-body.p-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center.mb-3
+        %span.material-symbols.resource-icon.me-2 error
+        Row Errors
+      .table-responsive
+        %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
+          %thead
+            %tr
+              %th Row
+              %th Errors
+          %tbody
+            - @data_import.row_errors.each do |row_error|
+              %tr
+                %td= row_error["row"]
+                %td= row_error["errors"].join(", ")

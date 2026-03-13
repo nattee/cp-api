@@ -22,6 +22,13 @@ Rails.application.routes.draw do
   resources :programs
   resources :students
   resources :users
+  resources :data_imports, only: [:index, :new, :create, :show] do
+    member do
+      get :mapping
+      patch :execute
+      patch :retry_import
+    end
+  end
 
   get "dev/styleguide", to: "dev#styleguide" if Rails.env.development?
 

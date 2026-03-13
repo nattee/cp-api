@@ -4,6 +4,7 @@ module ApplicationHelper
     "students"      => "school",
     "users"         => "group",
     "line_accounts" => "chat",
+    "data_imports"  => "upload_file",
   }.freeze
 
   def resource_icon(resource = controller_name)

@@ -52,6 +52,12 @@
               = resource_icon("line_accounts")
               LINE Account
 
+          - if current_user.admin?
+            %li.nav-item
+              = link_to data_imports_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'data_imports'}" do
+                = resource_icon("data_imports")
+                Imports
+
         %hr
         .dropdown
           %a.d-flex.align-items-center.text-decoration-none.dropdown-toggle{"data-bs-toggle" => "dropdown", href: "#"}

@@ -22,6 +22,7 @@ Data is imported via CSV/Excel and fetched from external data providers.
 - **JS**: Importmap pins in `config/importmap.rb` point to vendored files in `vendor/javascript/`. No build step — browser resolves imports via the importmap. When vendoring new JS libraries, use **self-contained ESM bundles** (e.g. from `esm.sh/<pkg>/es2022/<pkg>.bundle.mjs`). UMD modules lack `export default` and won't work with importmap. Modular ESM (with sub-module imports) won't resolve either — must be a single file.
 - **Propshaft** serves all assets (from app, vendor, and gem directories) with fingerprinted URLs. It does no compilation.
 - **Stylesheet load order** (in `application.html.haml`): Vendor CSS (Tom Select, Flatpickr) loads **before** `application.css` so that our SCSS overrides win the cascade at equal specificity.
+- **Bootstrap JS is UMD** (not ESM). It's pinned in importmap but has no named or default exports — `import { Popover } from "bootstrap"` and `import Bootstrap from "bootstrap"` both fail at runtime. For interactive components that would normally need Bootstrap JS (popovers, tooltips, collapses), use **CSS-only implementations** (`:focus`/`:focus-within` patterns) instead. See `.help-popover-trigger` in `application.scss` for the pattern.
 
 ## Version Control
 
@@ -62,6 +63,7 @@ AUTO_LOGIN=1 bin/dev     # bypass login, auto-authenticate as user ID 1
 - **Model tests**: cover validations, associations, scopes, and custom methods.
 - **System tests**: for any work involving UI — cover the happy path and key error states.
 - **Run tests**: `bin/rails test` (unit/model), `bin/rails test:system` (system).
+- **ActiveStorage `file.open` tempfile lifetime**: The tempfile created by `file.open` is deleted when the block exits. Do NOT `return` a Roo spreadsheet object from inside `file.open` — the underlying file will be gone when you try to read rows. Use a block pattern (e.g. `with_spreadsheet { |ss| ... }`) that keeps all processing inside the block.
 
 ## LINE Integration
 
@@ -91,3 +93,15 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - **Resource icons**: Centralized in `ApplicationHelper::RESOURCE_ICONS` — maps controller names to Material Symbols icon names. The `resource_icon` helper renders the icon span. Used in the sidebar nav and card titles. To add a new resource icon, add one entry to the hash.
 - **Domain icon mappings**: Codify icon associations as frozen hash constants on the model (e.g. `Student::STATUS_ICONS`). These map domain values (not pages) to icons. In forms, pass icons as `data-icon` attributes on `<option>` elements via `options_for_select`. The `tomselect_controller.js` is generic — it detects `data-icon` automatically and renders Material Symbols icons at reduced size and opacity so the text label remains primary.
 - **Visual hierarchy in forms**: Supporting elements (labels, icons) recede so input values stand out. Form labels use muted color + smaller font (like `thead th`). Tom Select dropdown icons render at `16px` / `opacity: 0.5`. Input group icons use `$input-icon-color`. Do not give labels and values equal visual weight.
+- **CSS-only popovers**: Use `.help-popover-trigger` with a child `.help-popover-content` span. Shows on `:focus`, no JS needed. Used for field help text in import mapping. Prefer this over Bootstrap JS popovers (see Asset Pipeline note about Bootstrap JS being UMD).
+
+## Import System
+
+Multi-step flow: upload (`create`) → column mapping (`mapping`) → execute (`execute`). `DataImport` stays in `pending` state until the user confirms mapping. Failed imports can be retried (reset to `pending`).
+
+- **Importer interface**: Subclasses of `Importers::Base` implement `self.attribute_definitions` returning an array of hashes: `{ attribute:, label:, required:, aliases:, help:, fixed_options: }`. Base provides derived class methods: `required_attributes`, `attribute_labels`, `auto_map(headers)`.
+  - `aliases`: list of column name variants (English + Thai) for auto-mapping
+  - `help`: optional string, renders a CSS-only popover icon next to the field label
+  - `fixed_options`: optional lambda returning `[[label, value], ...]` for relational fields — renders a `<select>` instead of text input when user picks "fixed value" mode
+- **Adding a new importer**: Create `app/services/importers/foo_importer.rb` extending `Base`, implement `self.attribute_definitions` + private methods (`find_existing_record`, `build_new_record`, `transform_attributes`, `unique_key_fields`), add an entry to `DataImport::IMPORTERS`.
+- **Column mapping storage**: `column_mapping` JSON maps attribute names to file column headers. `default_values` JSON maps attribute names to constant values. An attribute is in one or the other, never both.

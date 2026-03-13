@@ -1,0 +1,73 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 Configure Import
+  = link_to "Cancel", data_imports_path, class: "btn btn-outline-primary"
+
+-# Summary card
+.card.mb-3
+  .card-body
+    %dl.row.mb-0
+      %dt.col-sm-3 Target
+      %dd.col-sm-9= @data_import.target_type
+
+      %dt.col-sm-3 Mode
+      %dd.col-sm-9
+        %span.badge{class: "badge-#{@data_import.mode.dasherize}"}= DataImport::MODE_LABELS[@data_import.mode]
+
+      %dt.col-sm-3 File
+      %dd.col-sm-9= @data_import.file.filename
+
+-# Sheet selector (only for multi-sheet files)
+- if @show_sheet_selector
+  .card.mb-3
+    .card-body
+      %h6.section-title Sheet
+      = form_tag mapping_data_import_path(@data_import), method: :get, class: "row align-items-end" do
+        .col-md-6
+          = label_tag :sheet, "Select sheet", class: "form-label"
+          = select_tag :sheet, options_for_select(@sheets, @selected_sheet), class: "form-select", onchange: "this.form.requestSubmit()"
+
+-# Column mapping
+= form_tag execute_data_import_path(@data_import), method: :patch do
+  = hidden_field_tag :sheet_name, @selected_sheet
+  .card.mb-3{"data-controller" => "mapping-preview", "data-mapping-preview-headers-value" => @file_headers.to_json, "data-mapping-preview-row-value" => @preview_row.map { |v| v&.to_s }.to_json}
+    .card-body.p-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center.mb-3
+        %span.material-symbols.resource-icon.me-2 table_chart
+        Column Mapping
+      .table-responsive
+        %table.table.table-hover.mb-0
+          %thead
+            %tr
+              %th Field
+              %th Source
+              %th Preview
+          %tbody
+            - @attribute_definitions.each do |defn|
+              - attr = defn[:attribute]
+              - auto_mapped_header = @auto_mapping[attr]
+              - preview_idx = auto_mapped_header ? @file_headers.index(auto_mapped_header) : nil
+              - source_options = [["-- skip --", ""], ["-- fixed value --", "__constant__"]] + @file_headers.map { |h| [h, h] }
+              %tr
+                %td
+                  = defn[:label]
+                  - if defn[:required]
+                    %span.text-danger *
+                  - if defn[:help].present?
+                    %button.help-popover-trigger{type: "button", tabindex: "0"}
+                      %span.material-symbols{style: "font-size: 16px"} help
+                      %span.help-popover-content= defn[:help]
+                %td
+                  = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm", "data-mapping-attr" => attr
+                %td.preview-cell{"data-mapping-preview" => attr}
+                  %span.text-muted{"data-mapping-preview-text" => attr}
+                    - if preview_idx
+                      = @preview_row[preview_idx]
+                    - else
+                      \--
+                  - if defn[:fixed_options]
+                    = select_tag "defaults[#{attr}]", options_for_select([["Select...", ""]] + defn[:fixed_options].call), class: "form-select form-select-sm", hidden: true, "data-mapping-constant" => attr
+                  - else
+                    = text_field_tag "defaults[#{attr}]", nil, class: "form-control form-control-sm", placeholder: "Enter value...", hidden: true, "data-mapping-constant" => attr
+
+  .d-flex.justify-content-end
+    = submit_tag "Run Import", class: "btn btn-primary"

@@ -1,0 +1,37 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 New Import
+  = link_to "Back", data_imports_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    = form_with(model: @data_import, class: "needs-validation") do |f|
+      - if @data_import.errors.any?
+        .alert.alert-danger
+          %h5.alert-heading
+            = pluralize(@data_import.errors.count, "error")
+            prohibited this import from being saved:
+          %ul.mb-0
+            - @data_import.errors.full_messages.each do |message|
+              %li= message
+
+      %fieldset.form-section
+        %legend Import Settings
+        .row
+          .col-md-6.mb-3
+            = f.label :target_type, "Target", class: "form-label"
+            = f.select :target_type, options_for_select(DataImport::TARGETS.map { |t| [t, t] }, @data_import.target_type), { include_blank: "Select target..." }, { class: "form-select", "data-controller" => "tomselect" }
+          .col-md-6.mb-3
+            = f.label :mode, class: "form-label"
+            = f.select :mode, options_for_select(DataImport::MODES.map { |m| [DataImport::MODE_LABELS[m], m, { "data-icon" => DataImport::MODE_ICONS[m] }] }, @data_import.mode), { include_blank: "Select mode..." }, { class: "form-select", "data-controller" => "tomselect" }
+
+      %fieldset.form-section
+        %legend File
+        .row
+          .col-md-12.mb-3
+            = f.label :file, class: "form-label"
+            = f.file_field :file, accept: ".xlsx,.xls,.csv", class: "form-control #{'is-invalid' if @data_import.errors[:file].any?}"
+            - if @data_import.errors[:file].any?
+              .invalid-feedback= @data_import.errors[:file].first
+            .form-text Accepts .xlsx, .xls, or .csv files
+
+      = f.submit "Upload & Configure", class: "btn btn-primary"

@@ -92,6 +92,16 @@ $input-icon-color: darken($light, 5%);
 .badge-master    { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
 .badge-doctoral  { background-color: rgba($warning, 0.2);   color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
 
+// Import state badges
+.badge-pending    { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
+.badge-processing { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);    border: 1px solid rgba($info, 0.4); }
+.badge-completed  { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%); border: 1px solid rgba($success, 0.4); }
+.badge-failed     { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                 border: 1px solid rgba($danger, 0.4); }
+
+// Import mode badges
+.badge-create-only { background-color: rgba($primary, 0.2);  color: lighten(saturate($primary, 30%), 10%); border: 1px solid rgba($primary, 0.4); }
+.badge-upsert      { background-color: rgba($warning, 0.2);  color: lighten($warning, 8%);                 border: 1px solid rgba($warning, 0.4); }
+
 // Section dividers for forms and detail pages
 .form-section, .detail-section {
   &:not(:first-of-type) {
@@ -315,6 +325,61 @@ table.dataTable thead > tr > th.dt-ordering-desc span.dt-column-order:after {
 // Empty table message — muted color to match "No students found" style
 table.dataTable tbody td.dt-empty {
   color: var(--bs-secondary-color);  // muted text, consistent with .text-muted
+}
+
+// CSS-only help popover — triggered by :focus on a button. No Bootstrap JS
+// needed (the vendored bootstrap.js is UMD, which has no ES module exports
+// and cannot be imported from Stimulus controllers).
+.help-popover-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 0.25rem;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+  vertical-align: baseline;
+  line-height: 1;
+
+  .help-popover-content {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 280px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 400;
+    line-height: 1.4;
+    text-transform: none;      // reset thead th uppercase
+    letter-spacing: normal;    // reset thead th letter-spacing
+    color: $body-color-dark;
+    background: lighten($dark, 14%);
+    border: 1px solid rgba(white, 0.15);
+    border-radius: 0.375rem;
+    z-index: 1050;
+    white-space: normal;
+
+    // Arrow
+    &::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: lighten($dark, 14%);
+    }
+  }
+
+  &:focus .help-popover-content,
+  &:focus-within .help-popover-content {
+    display: block;
+  }
 }
 
 // Expose Sass variables as CSS custom properties (used by dev/styleguide)
