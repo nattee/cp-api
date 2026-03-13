@@ -54,6 +54,7 @@ class StudentsTest < ApplicationSystemTestCase
     fill_in "Student ID", with: "9999900099"
     fill_in "First name", with: "New"
     fill_in "Last name", with: "Student"
+    tomselect_pick "Computer Engineering (Bachelor)", from: "Program"
     fill_in "Admission year", with: 2567
     click_on "Create Student"
 
@@ -149,6 +150,7 @@ class StudentsTest < ApplicationSystemTestCase
     fill_in "Student ID", with: "9999900100"
     fill_in "First name", with: "Test"
     fill_in "Last name", with: "Integration"
+    tomselect_pick "Computer Engineering (Bachelor)", from: "Program"
     fill_in "Admission year", with: 2565
 
     # Select "Graduated" via Tom Select
