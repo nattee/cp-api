@@ -1,9 +1,17 @@
 // Bootstrap variable overrides (must come before Bootstrap import)
-$light:     #6fcfff;
-$dark:      #0c0e13;
-$primary:   #a4c6d4;
-$secondary: #62336b;
-$info:      #b15b95;
+
+//$light:     #6fcfff;
+//$dark:      #0c0e13;
+//$primary:   #a4c6d4;
+//$secondary: #62336b;
+//$info:      #b15b95;
+
+$light: #f3f5e3;
+$dark: #161708;
+$primary: #dadb9a;
+$secondary: #2d3b7c;
+$info: #a54bbe;
+
 $success:   #3faa65;
 $warning:   #e9cb3d;
 $danger:    #f22330;
@@ -362,12 +370,21 @@ table.dataTable tbody td.dt-empty {
 }
 
 // Import mapping source selects — monospace font so column letter prefixes
-// (A:, B:, AA:) align consistently across rows. The option element needs
-// explicit font-family because most browsers don't inherit it from select.
-.mapping-source-select,
-.mapping-source-select option {
+// (A:, B:, AA:) align consistently across rows. Tom Select renders custom
+// HTML elements (not native <option>), so we style the wrapper's control
+// and dropdown instead of the original select.
+.mapping-source-select {
+  // Hidden by Tom Select, but keeps monospace if TS fails to initialize
   font-family: var(--bs-font-monospace);
   font-size: 0.8rem;
+
+  // Tom Select wraps itself as a sibling — target via adjacent combinator
+  + .ts-wrapper {
+    .ts-control, .ts-dropdown {
+      font-family: var(--bs-font-monospace);
+      font-size: 0.8rem;
+    }
+  }
 }
 
 // CSS-only help popover — triggered by :focus on a button. No Bootstrap JS

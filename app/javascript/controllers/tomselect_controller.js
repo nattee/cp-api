@@ -10,9 +10,10 @@ export default class extends Controller {
 
   connect() {
     const hasIcons = this.element.querySelector("option[data-icon]") !== null
+    const allowEmpty = this.element.dataset.tomselectAllowEmpty !== undefined
 
     this.select = new TomSelect(this.element, {
-      allowEmptyOption: false,
+      allowEmptyOption: allowEmpty,
       controlInput: null,
       ...(hasIcons ? this.iconRenderConfig() : {})
     })

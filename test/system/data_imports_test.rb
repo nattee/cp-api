@@ -110,7 +110,7 @@ class DataImportsTest < ApplicationSystemTestCase
     visit mapping_data_import_path(di)
 
     # Unmap a required field
-    select "-- skip --", from: "mapping[admission_year]"
+    tomselect_pick_by_name "-- skip --", name: "mapping[admission_year]"
     click_on "Run Import"
 
     # Should redirect back to mapping with error
@@ -122,7 +122,7 @@ class DataImportsTest < ApplicationSystemTestCase
     di = create_pending_import("students_minimal.csv")
     visit mapping_data_import_path(di)
 
-    select "-- fixed value --", from: "mapping[status]"
+    tomselect_pick_by_name "-- fixed value --", name: "mapping[status]"
 
     # The constant input should be visible
     assert_selector "[data-mapping-constant='status']", visible: true
@@ -132,11 +132,11 @@ class DataImportsTest < ApplicationSystemTestCase
     di = create_pending_import("students_minimal.csv")
     visit mapping_data_import_path(di)
 
-    select "-- fixed value --", from: "mapping[status]"
+    tomselect_pick_by_name "-- fixed value --", name: "mapping[status]"
     find("[data-mapping-constant='status']").fill_in with: "on_leave"
 
     # Program is required — set as fixed value via dropdown
-    select "-- fixed value --", from: "mapping[program_name]"
+    tomselect_pick_by_name "-- fixed value --", name: "mapping[program_name]"
     find("[data-mapping-constant='program_name']").select programs(:cp_bachelor).name_en + " (#{programs(:cp_bachelor).year_started})"
 
     click_on "Run Import"
@@ -160,11 +160,11 @@ class DataImportsTest < ApplicationSystemTestCase
     di = create_pending_import("students_minimal.csv")
     visit mapping_data_import_path(di)
 
-    select "-- fixed value --", from: "mapping[status]"
+    tomselect_pick_by_name "-- fixed value --", name: "mapping[status]"
     find("[data-mapping-constant='status']").fill_in with: "active"
 
     # Program is required — set as fixed value via dropdown
-    select "-- fixed value --", from: "mapping[program_name]"
+    tomselect_pick_by_name "-- fixed value --", name: "mapping[program_name]"
     find("[data-mapping-constant='program_name']").select programs(:cp_bachelor).name_en + " (#{programs(:cp_bachelor).year_started})"
 
     click_on "Run Import"
@@ -225,7 +225,7 @@ class DataImportsTest < ApplicationSystemTestCase
     di = create_pending_import("students_minimal.csv")
     visit mapping_data_import_path(di)
 
-    select "-- fixed value --", from: "mapping[program_name]"
+    tomselect_pick_by_name "-- fixed value --", name: "mapping[program_name]"
 
     # Should show a select element (dropdown), not a text input
     constant_el = find("[data-mapping-constant='program_name']", visible: true)
@@ -246,12 +246,21 @@ class DataImportsTest < ApplicationSystemTestCase
     wrapper.find(".ts-dropdown .option", text: value).click
   end
 
+  # Pick a Tom Select option by the underlying select's name attribute.
+  # Used for mapping selects which don't have labels.
+  def tomselect_pick_by_name(value, name:)
+    select_el = find("select[name='#{name}']", visible: false)
+    wrapper = select_el.sibling(".ts-wrapper")
+    wrapper.find(".ts-control").click
+    wrapper.find(".ts-dropdown .option", text: value).click
+  end
+
   def csv_fixture_path(filename)
     Rails.root.join("test/fixtures/files", filename).to_s
   end
 
   def assert_select_value(name, expected)
-    select_el = find("select[name='#{name}']")
+    select_el = find("select[name='#{name}']", visible: false)
     assert_equal expected, select_el.value, "Expected #{name} to be '#{expected}' but was '#{select_el.value}'"
   end
 

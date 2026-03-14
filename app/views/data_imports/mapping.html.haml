@@ -54,40 +54,39 @@
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center.mb-3
         %span.material-symbols.resource-icon.me-2 table_chart
         Column Mapping
-      .table-responsive
-        %table.table.table-hover.mb-0
-          %thead
+      %table.table.table-hover.mb-0
+        %thead
+          %tr
+            %th Field
+            %th Source
+            %th Preview
+        %tbody
+          - @attribute_definitions.each do |defn|
+            - attr = defn[:attribute]
+            - auto_mapped_header = @auto_mapping[attr]
+            - preview_idx = auto_mapped_header ? @file_headers.index(auto_mapped_header) : nil
+            - source_options = [["-- skip --", ""], ["-- fixed value --", "__constant__"]] + @file_headers.map { |h| [h, h] }
             %tr
-              %th Field
-              %th Source
-              %th Preview
-          %tbody
-            - @attribute_definitions.each do |defn|
-              - attr = defn[:attribute]
-              - auto_mapped_header = @auto_mapping[attr]
-              - preview_idx = auto_mapped_header ? @file_headers.index(auto_mapped_header) : nil
-              - source_options = [["-- skip --", ""], ["-- fixed value --", "__constant__"]] + @file_headers.map { |h| [h, h] }
-              %tr
-                %td
-                  = defn[:label]
-                  - if defn[:required]
-                    %span.text-danger *
-                  - if defn[:help].present?
-                    %button.help-popover-trigger{type: "button", tabindex: "0"}
-                      %span.material-symbols{style: "font-size: 16px"} help
-                      %span.help-popover-content= defn[:help]
-                %td
-                  = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm mapping-source-select", "data-mapping-attr" => attr
-                %td.preview-cell{"data-mapping-preview" => attr}
-                  %span.text-muted{"data-mapping-preview-text" => attr}
-                    - if preview_idx
-                      = @preview_row[preview_idx]
-                    - else
-                      \--
-                  - if defn[:fixed_options]
-                    = select_tag "defaults[#{attr}]", options_for_select([["Select...", ""]] + defn[:fixed_options].call), class: "form-select form-select-sm", hidden: true, "data-mapping-constant" => attr
+              %td
+                = defn[:label]
+                - if defn[:required]
+                  %span.text-danger *
+                - if defn[:help].present?
+                  %button.help-popover-trigger{type: "button", tabindex: "0"}
+                    %span.material-symbols{style: "font-size: 16px"} help
+                    %span.help-popover-content= defn[:help]
+              %td
+                = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm mapping-source-select", "data-controller" => "tomselect", "data-tomselect-allow-empty" => "", "data-mapping-attr" => attr
+              %td.preview-cell{"data-mapping-preview" => attr}
+                %span.text-muted{"data-mapping-preview-text" => attr}
+                  - if preview_idx
+                    = @preview_row[preview_idx]
                   - else
-                    = text_field_tag "defaults[#{attr}]", nil, class: "form-control form-control-sm", placeholder: "Enter value...", hidden: true, "data-mapping-constant" => attr
+                    \--
+                - if defn[:fixed_options]
+                  = select_tag "defaults[#{attr}]", options_for_select([["Select...", ""]] + defn[:fixed_options].call), class: "form-select form-select-sm", hidden: true, "data-mapping-constant" => attr
+                - else
+                  = text_field_tag "defaults[#{attr}]", nil, class: "form-control form-control-sm", placeholder: "Enter value...", hidden: true, "data-mapping-constant" => attr
 
   .d-flex.justify-content-end
     = submit_tag "Run Import", class: "btn btn-primary"
