@@ -8,7 +8,7 @@
 .card
   .card-body
     .detail-section
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Name (EN)
         %dd.col-sm-9= @program.name_en
 
@@ -18,7 +18,7 @@
 
     .detail-section
       %h6.section-title Degree
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Degree Level
         %dd.col-sm-9
           %span.badge{class: "badge-#{@program.degree_level}"}= @program.degree_level.titleize
@@ -33,7 +33,7 @@
         %dd.col-sm-9= @program.year_started
 
     .detail-section
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Created at
         %dd.col-sm-9= @program.created_at.strftime("%B %d, %Y %H:%M")
 

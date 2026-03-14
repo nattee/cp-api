@@ -94,6 +94,7 @@ $input-icon-color: darken($light, 5%);
 
 // Import state badges
 .badge-pending    { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
+.badge-retrying   { background-color: rgba($warning, 0.2);   color: lighten(saturate($warning, 20%), 12%); border: 1px solid rgba($warning, 0.4); }
 .badge-processing { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);    border: 1px solid rgba($info, 0.4); }
 .badge-completed  { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%); border: 1px solid rgba($success, 0.4); }
 .badge-failed     { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                 border: 1px solid rgba($danger, 0.4); }
@@ -103,6 +104,15 @@ $input-icon-color: darken($light, 5%);
 .badge-upsert      { background-color: rgba($warning, 0.2);  color: lighten($warning, 8%);                 border: 1px solid rgba($warning, 0.4); }
 
 // Section dividers for forms and detail pages
+// Section title — quiet label style used in detail pages, forms, and cards.
+// Standalone class so it works outside .form-section/.detail-section too.
+.section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  margin-bottom: 0.75rem;
+}
+
 .form-section, .detail-section {
   &:not(:first-of-type) {
     border-top: 1px solid rgba(255, 255, 255, 0.15);
@@ -110,12 +120,36 @@ $input-icon-color: darken($light, 5%);
     padding-top: 1rem;
   }
 
-  > legend, > .section-title {
+  > legend {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--bs-secondary-color);
     margin-bottom: 0.75rem;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Definition list (dl) label–value modes
+// ---------------------------------------------------------------------------
+// Two explicit modes for dt/dd pairs in detail and summary views:
+//
+//   .dl-fields              — Mode 1: bold label, normal value.
+//                             Used on show/detail pages where field names
+//                             are the primary navigation aid.
+//
+//   .dl-fields.dl-value-emphasis — Mode 2: muted label, bold value.
+//                             Used on summary cards (e.g. import config)
+//                             where the values matter more than the labels.
+//
+// Apply on the %dl element; child dt/dd are styled automatically.
+// ---------------------------------------------------------------------------
+.dl-fields {
+  > dt { @extend .fw-bold; }
+}
+
+.dl-value-emphasis {
+  > dt { @extend .fw-normal; @extend .text-muted; }
+  > dd { @extend .fw-semibold; }
 }
 
 // Ghost icon action buttons (btn-link style, no underline, custom colors)
@@ -325,6 +359,15 @@ table.dataTable thead > tr > th.dt-ordering-desc span.dt-column-order:after {
 // Empty table message — muted color to match "No students found" style
 table.dataTable tbody td.dt-empty {
   color: var(--bs-secondary-color);  // muted text, consistent with .text-muted
+}
+
+// Import mapping source selects — monospace font so column letter prefixes
+// (A:, B:, AA:) align consistently across rows. The option element needs
+// explicit font-family because most browsers don't inherit it from select.
+.mapping-source-select,
+.mapping-source-select option {
+  font-family: var(--bs-font-monospace);
+  font-size: 0.8rem;
 }
 
 // CSS-only help popover — triggered by :focus on a button. No Bootstrap JS

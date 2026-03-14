@@ -36,12 +36,12 @@
                   = di.total_rows
               %td= di.user.name
               %td
-                - if di.state == "pending"
+                - if di.state.in?(%w[pending retrying])
                   = link_to mapping_data_import_path(di), class: "btn-ghost btn-ghost-primary", title: "Configure" do
                     %span.material-symbols{style: "font-size: 18px"} tune
                 - else
                   = link_to data_import_path(di), class: "btn-ghost btn-ghost-primary", title: "Show" do
                     %span.material-symbols{style: "font-size: 18px"} visibility
-                  - if di.state == "failed"
-                    = button_to retry_import_data_import_path(di), method: :patch, class: "btn-ghost btn-ghost-secondary", title: "Retry" do
+                  - if di.state.in?(%w[failed completed])
+                    = button_to retry_import_data_import_path(di), method: :patch, class: "btn-ghost btn-ghost-secondary", title: "Retry", form: { class: "d-inline" } do
                       %span.material-symbols{style: "font-size: 18px"} refresh

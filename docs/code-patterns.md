@@ -111,13 +111,13 @@ end
 .card
   .card-body
     .detail-section
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Field
         %dd.col-sm-9= @thing.field
 
     .detail-section
       %h6.section-title Section Name
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Field
         %dd.col-sm-9= @thing.field
 ```

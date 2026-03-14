@@ -123,12 +123,14 @@ module Importers
             end
           end
 
-          if row_errors.any?
+          # Transactional mode: roll back all changes if any row failed
+          if row_errors.any? && !data_import.skip_failures
             raise ActiveRecord::Rollback
           end
         end
 
-        if row_errors.any?
+        if row_errors.any? && !data_import.skip_failures
+          # Transactional: all rolled back
           data_import.update!(
             state: "failed",
             total_rows: total,
@@ -138,12 +140,14 @@ module Importers
             row_errors: row_errors
           )
         else
+          # Success (or partial success with skip_failures)
           data_import.update!(
             state: "completed",
             total_rows: total,
             created_count: created,
             updated_count: updated,
-            error_count: 0
+            error_count: row_errors.size,
+            row_errors: row_errors.presence
           )
         end
       end

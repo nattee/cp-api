@@ -8,7 +8,7 @@
 .card
   .card-body
     .detail-section
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Course No
         %dd.col-sm-9= @course.course_no
 
@@ -28,7 +28,7 @@
 
     .detail-section
       %h6.section-title Academic
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Program
         %dd.col-sm-9
           - if @course.program
@@ -60,7 +60,7 @@
 
     .detail-section
       %h6.section-title Credits & Hours
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Credits
         %dd.col-sm-9= @course.credits
 
@@ -80,7 +80,7 @@
         %dd.col-sm-9= @course.s_hours
 
     .detail-section
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Created at
         %dd.col-sm-9= @course.created_at.strftime("%B %d, %Y %H:%M")
 

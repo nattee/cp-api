@@ -1,9 +1,10 @@
 class DataImport < ApplicationRecord
-  STATES = %w[pending processing completed failed].freeze
+  STATES = %w[pending retrying processing completed failed].freeze
   MODES = %w[create_only upsert].freeze
 
   STATE_ICONS = {
     "pending"    => "schedule",
+    "retrying"   => "replay",
     "processing" => "sync",
     "completed"  => "check_circle",
     "failed"     => "error"
@@ -39,6 +40,6 @@ class DataImport < ApplicationRecord
   end
 
   def ready_for_mapping?
-    state == "pending" && file.attached?
+    state.in?(%w[pending retrying]) && file.attached?
   end
 end

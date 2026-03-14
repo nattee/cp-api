@@ -183,7 +183,7 @@ class DataImportsTest < ApplicationSystemTestCase
     assert_button "Retry"
   end
 
-  test "retry resets failed import to pending and redirects to mapping" do
+  test "retry sets failed import to retrying and redirects to mapping" do
     di = create_failed_import
     visit data_import_path(di)
 
@@ -191,7 +191,7 @@ class DataImportsTest < ApplicationSystemTestCase
 
     assert_text "Configure Import"
     di.reload
-    assert_equal "pending", di.state
+    assert_equal "retrying", di.state
   end
 
   # --- Pending import navigation ---

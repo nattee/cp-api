@@ -3,16 +3,16 @@
     = resource_icon("data_imports")
     Import ##{@data_import.id}
   .d-flex.gap-2
-    - if @data_import.state == "pending"
+    - if @data_import.state.in?(%w[pending retrying])
       = link_to "Continue", mapping_data_import_path(@data_import), class: "btn btn-primary"
-    - if @data_import.state == "failed"
-      = button_to "Retry", retry_import_data_import_path(@data_import), method: :patch, class: "btn btn-primary"
+    - if @data_import.state.in?(%w[failed completed])
+      = button_to "Retry", retry_import_data_import_path(@data_import), method: :patch, class: "btn btn-primary", form: { class: "d-inline" }
     = link_to "Back", data_imports_path, class: "btn btn-outline-primary"
 
 .card.mb-3
   .card-body
     .detail-section
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Target
         %dd.col-sm-9= @data_import.target_type
 
@@ -32,7 +32,7 @@
 
     .detail-section
       %h6.section-title Results
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Total Rows
         %dd.col-sm-9= @data_import.total_rows
 
@@ -48,7 +48,7 @@
     - if @data_import.file.attached?
       .detail-section
         %h6.section-title File
-        %dl.row.mb-0
+        %dl.dl-fields.row.mb-0
           %dt.col-sm-3 Filename
           %dd.col-sm-9= @data_import.file.filename
 

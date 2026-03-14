@@ -27,7 +27,7 @@ class DataImportsController < ApplicationController
 
   def mapping
     @data_import = DataImport.find(params[:id])
-    redirect_to(@data_import) and return unless @data_import.state == "pending"
+    redirect_to(@data_import) and return unless @data_import.state.in?(%w[pending retrying])
 
     importer_class = @data_import.importer_class
 
@@ -57,7 +57,7 @@ class DataImportsController < ApplicationController
 
   def execute
     @data_import = DataImport.find(params[:id])
-    redirect_to(@data_import) and return unless @data_import.state == "pending"
+    redirect_to(@data_import) and return unless @data_import.state.in?(%w[pending retrying])
 
     importer_class = @data_import.importer_class
     permitted_attrs = importer_class.attribute_definitions.map { |d| d[:attribute].to_s }
@@ -90,7 +90,8 @@ class DataImportsController < ApplicationController
     @data_import.update!(
       sheet_name: params[:sheet_name].presence,
       column_mapping: column_mapping,
-      default_values: default_values.presence
+      default_values: default_values.presence,
+      skip_failures: params[:skip_failures] == "1"
     )
     importer = importer_class.new(@data_import)
     importer.call
@@ -99,16 +100,13 @@ class DataImportsController < ApplicationController
 
   def retry_import
     @data_import = DataImport.find(params[:id])
-    redirect_to(@data_import) and return unless @data_import.state == "failed"
+    redirect_to(@data_import) and return unless @data_import.state.in?(%w[failed completed])
 
     @data_import.update!(
-      state: "pending",
-      total_rows: 0,
-      created_count: 0,
-      updated_count: 0,
-      error_count: 0,
+      state: "retrying",
       row_errors: nil,
-      error_message: nil
+      error_message: nil,
+      skip_failures: false
     )
     redirect_to mapping_data_import_path(@data_import)
   end

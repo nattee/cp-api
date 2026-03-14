@@ -8,7 +8,7 @@
 .card
   .card-body
     .detail-section
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Student ID
         %dd.col-sm-9= @student.student_id
 
@@ -21,7 +21,7 @@
 
     .detail-section
       %h6.section-title Academic
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Program
         %dd.col-sm-9
           - if @student.program
@@ -43,7 +43,7 @@
     - if [@student.email, @student.phone, @student.discord, @student.line_id, @student.address].any?(&:present?)
       .detail-section
         %h6.section-title Contact
-        %dl.row.mb-0
+        %dl.dl-fields.row.mb-0
           - if @student.email.present?
             %dt.col-sm-3 Email
             %dd.col-sm-9= @student.email
@@ -67,7 +67,7 @@
     - if [@student.guardian_name, @student.guardian_phone].any?(&:present?)
       .detail-section
         %h6.section-title Guardian
-        %dl.row.mb-0
+        %dl.dl-fields.row.mb-0
           - if @student.guardian_name.present?
             %dt.col-sm-3 Guardian Name
             %dd.col-sm-9= @student.guardian_name
@@ -79,7 +79,7 @@
     - if [@student.previous_school, @student.enrollment_method].any?(&:present?)
       .detail-section
         %h6.section-title Background
-        %dl.row.mb-0
+        %dl.dl-fields.row.mb-0
           - if @student.previous_school.present?
             %dt.col-sm-3 Previous School
             %dd.col-sm-9= @student.previous_school
@@ -89,7 +89,7 @@
             %dd.col-sm-9= @student.enrollment_method
 
     .detail-section
-      %dl.row.mb-0
+      %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Created at
         %dd.col-sm-9= @student.created_at.strftime("%B %d, %Y %H:%M")
 

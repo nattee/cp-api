@@ -5,9 +5,11 @@
 -# Summary card
 .card.mb-3
   .card-body
-    %dl.row.mb-0
+    %dl.dl-fields.dl-value-emphasis.row.mb-0
       %dt.col-sm-3 Target
-      %dd.col-sm-9= @data_import.target_type
+      %dd.col-sm-9
+        = resource_icon(@data_import.target_type.tableize)
+        = @data_import.target_type
 
       %dt.col-sm-3 Mode
       %dd.col-sm-9
@@ -16,19 +18,37 @@
       %dt.col-sm-3 File
       %dd.col-sm-9= @data_import.file.filename
 
--# Sheet selector (only for multi-sheet files)
-- if @show_sheet_selector
-  .card.mb-3
-    .card-body
-      %h6.section-title Sheet
-      = form_tag mapping_data_import_path(@data_import), method: :get, class: "row align-items-end" do
-        .col-md-6
-          = label_tag :sheet, "Select sheet", class: "form-label"
-          = select_tag :sheet, options_for_select(@sheets, @selected_sheet), class: "form-select", onchange: "this.form.requestSubmit()"
+-# Sheet selector and skip_failures side by side
+- show_sheet = @show_sheet_selector
+- show_skip = @data_import.state == "retrying"
+- if show_sheet || show_skip
+  .row.mb-3
+    - if show_sheet
+      .col-md-6.mb-3.mb-md-0
+        .card.h-100
+          .card-body
+            %h6.section-title Sheet
+            = form_tag mapping_data_import_path(@data_import), method: :get do
+              = select_tag :sheet, options_for_select(@sheets, @selected_sheet), class: "form-select", onchange: "this.form.requestSubmit()"
+    - if show_skip
+      .col-md-6.mb-3.mb-md-0
+        .card.h-100
+          .card-body
+            %h6.section-title Error Handling
+            .form-text.text-muted.mb-2
+              By default, the import is
+              %strong all-or-nothing:
+              if any row fails, the entire import is rolled back and no records are saved.
+            .form-check.form-switch
+              = check_box_tag :skip_failures, "1", false, class: "form-check-input", id: "skip_failures", form: "import-form"
+              = label_tag :skip_failures, "Skip failed rows", class: "form-check-label"
+              .form-text.text-muted
+                Save successful records and skip rows with errors.
 
 -# Column mapping
-= form_tag execute_data_import_path(@data_import), method: :patch do
+= form_tag execute_data_import_path(@data_import), method: :patch, id: "import-form" do
   = hidden_field_tag :sheet_name, @selected_sheet
+
   .card.mb-3{"data-controller" => "mapping-preview", "data-mapping-preview-headers-value" => @file_headers.to_json, "data-mapping-preview-row-value" => @preview_row.map { |v| v&.to_s }.to_json}
     .card-body.p-3
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center.mb-3
@@ -57,7 +77,7 @@
                       %span.material-symbols{style: "font-size: 16px"} help
                       %span.help-popover-content= defn[:help]
                 %td
-                  = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm", "data-mapping-attr" => attr
+                  = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm mapping-source-select", "data-mapping-attr" => attr
                 %td.preview-cell{"data-mapping-preview" => attr}
                   %span.text-muted{"data-mapping-preview-text" => attr}
                     - if preview_idx
