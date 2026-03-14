@@ -34,7 +34,7 @@ $table-bg:  transparent;                    // inherit card background, no extra
 // DO NOT use Bootstrap's $table-border-color — it compiles into --bs-table-border-color
 // on .table, but cells never read that variable (border-color is not a CSS inherited
 // property). Cells default to currentColor (text color), ignoring the table's variable.
-// This is a Bootstrap bug (see memory/bootstrap-table-border-bug.md).
+// This is a Bootstrap bug (see docs/bootstrap-table-border-bug.md).
 // Instead, we define our own variables and apply them directly to cells in post-import
 // CSS rules. We also need distinct header vs row borders, which Bootstrap doesn't support.
 $table-row-border-color:  rgba(white, 0.08); // subtle separator between body rows
@@ -60,7 +60,7 @@ $input-icon-color: darken($light, 5%);
 }
 
 // Resource icon — plain icon next to card/page titles.
-.resource-icon { font-size: 20px; }
+.resource-icon { font-size: 20px; vertical-align: middle; }
 
 // Card title — use $light for visual hierarchy against muted body text.
 .card .card-title { color: $light; }
