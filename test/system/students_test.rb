@@ -54,7 +54,7 @@ class StudentsTest < ApplicationSystemTestCase
     fill_in "Student ID", with: "9999900099"
     fill_in "First name", with: "New"
     fill_in "Last name", with: "Student"
-    tomselect_pick "Computer Engineering (Bachelor)", from: "Program"
+    select2_pick "Computer Engineering (Bachelor)", from: "Program"
     fill_in "Admission year", with: 2567
     click_on "Create Student"
 
@@ -84,36 +84,36 @@ class StudentsTest < ApplicationSystemTestCase
 
   # ---------------------------------------------------------------------------
   # JS control interaction tests
-  # These test that Tom Select and Flatpickr actually work when clicked.
+  # These test that Select2 and Flatpickr actually work when clicked.
   # If a vendored JS library upgrade breaks these controls, these tests fail.
   # ---------------------------------------------------------------------------
 
-  test "Tom Select renders and allows selecting a status" do
+  test "Select2 renders and allows selecting a status" do
     visit edit_student_path(students(:active_student))
 
-    # Tom Select replaces <select> with a .ts-wrapper div.
-    # Verify it initialized (the wrapper exists and shows current value).
-    within find_tomselect_wrapper("Status") do
+    # Select2 replaces <select> with a .select2-container span.
+    # Verify it initialized (the container exists and shows current value).
+    within find_select2_container("Status") do
       assert_text "Active"
     end
 
     # Open the dropdown and pick a different status
-    tomselect_pick "Graduated", from: "Status"
+    select2_pick "Graduated", from: "Status"
 
     click_on "Update Student"
     assert_text "Student was successfully updated"
     assert_selector ".badge-graduated", text: "Graduated"
   end
 
-  test "Tom Select shows Material Symbols icons in status options" do
+  test "Select2 shows Material Symbols icons in status options" do
     visit edit_student_path(students(:active_student))
 
     # Open the status dropdown
-    find_tomselect_wrapper("Status").find(".ts-control").click
+    find_select2_container("Status").find(".select2-selection").click
 
     # Each option should contain a Material Symbols icon span
-    within ".ts-dropdown" do
-      assert_selector ".option .material-symbols", minimum: 3
+    within ".select2-dropdown" do
+      assert_selector ".select2-results__option .material-symbols", minimum: 3
     end
   end
 
@@ -144,17 +144,17 @@ class StudentsTest < ApplicationSystemTestCase
     assert_text "Graduation Date"
   end
 
-  test "creating a student with Tom Select status and Flatpickr date" do
+  test "creating a student with Select2 status and Flatpickr date" do
     visit new_student_path
 
     fill_in "Student ID", with: "9999900100"
     fill_in "First name", with: "Test"
     fill_in "Last name", with: "Integration"
-    tomselect_pick "Computer Engineering (Bachelor)", from: "Program"
+    select2_pick "Computer Engineering (Bachelor)", from: "Program"
     fill_in "Admission year", with: 2565
 
-    # Select "Graduated" via Tom Select
-    tomselect_pick "Graduated", from: "Status"
+    # Select "Graduated" via Select2
+    select2_pick "Graduated", from: "Status"
 
     # Pick a graduation date via Flatpickr
     find_flatpickr_input("Graduation Date").click
@@ -172,19 +172,19 @@ class StudentsTest < ApplicationSystemTestCase
 
   private
 
-  # Find the Tom Select wrapper (.ts-wrapper) associated with a labeled field.
-  # Tom Select inserts the wrapper as a sibling of the original <select>.
-  def find_tomselect_wrapper(label_text)
+  # Find the Select2 container associated with a labeled field.
+  # Select2 inserts the container as a sibling of the original <select>.
+  def find_select2_container(label_text)
     label = find("label", text: label_text)
     container = label.ancestor(".mb-3", match: :first)
-    container.find(".ts-wrapper")
+    container.find(".select2-container")
   end
 
-  # Open a Tom Select dropdown and pick an option by visible text.
-  def tomselect_pick(value, from:)
-    wrapper = find_tomselect_wrapper(from)
-    wrapper.find(".ts-control").click
-    wrapper.find(".ts-dropdown .option", text: value).click
+  # Open a Select2 dropdown and pick an option by visible text.
+  def select2_pick(value, from:)
+    container = find_select2_container(from)
+    container.find(".select2-selection").click
+    find(".select2-dropdown .select2-results__option", text: value).click
   end
 
   # Find the visible Flatpickr input (the alt input) associated with a label.

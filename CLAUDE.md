@@ -10,7 +10,7 @@ Data is imported via CSV/Excel and fetched from external data providers.
 - MySQL 8.0 (user: `cp_api`, databases: `cp_api_development`, `cp_api_test`, `cp_api_production`)
 - Propshaft (asset pipeline), Importmap (JS modules), Dart Sass (SCSS compilation)
 - HAML templates, Turbo, Stimulus
-- Bootstrap 5.3 (vendored SCSS + JS), DataTables, Chart.js, Tom Select, Flatpickr
+- Bootstrap 5.3 (vendored SCSS + JS), DataTables, Chart.js, Select2, Flatpickr
 
 ## Requirements
 
@@ -21,7 +21,7 @@ Data is imported via CSV/Excel and fetched from external data providers.
 - **CSS**: Dart Sass compiles `app/assets/stylesheets/application.scss` → `app/assets/builds/application.css`. Run `bin/rails dartsass:build` to compile, or use `bin/dev` for watch mode.
 - **JS**: Importmap pins in `config/importmap.rb` point to vendored files in `vendor/javascript/`. No build step — browser resolves imports via the importmap. When vendoring new JS libraries, use **self-contained ESM bundles** (e.g. from `esm.sh/<pkg>/es2022/<pkg>.bundle.mjs`). UMD modules lack `export default` and won't work with importmap. Modular ESM (with sub-module imports) won't resolve either — must be a single file.
 - **Propshaft** serves all assets (from app, vendor, and gem directories) with fingerprinted URLs. It does no compilation.
-- **Stylesheet load order** (in `application.html.haml`): Vendor CSS (Tom Select, Flatpickr) loads **before** `application.css` so that our SCSS overrides win the cascade at equal specificity.
+- **Stylesheet load order** (in `application.html.haml`): Vendor CSS (Select2, Flatpickr) loads **before** `application.css` so that our SCSS overrides win the cascade at equal specificity.
 - **Bootstrap JS is UMD** (not ESM). It's pinned in importmap but has no named or default exports — `import { Popover } from "bootstrap"` and `import Bootstrap from "bootstrap"` both fail at runtime. For interactive components that would normally need Bootstrap JS (popovers, tooltips, collapses), use **CSS-only implementations** (`:focus`/`:focus-within` patterns) instead. See `.help-popover-trigger` in `application.scss` for the pattern.
 
 ## Version Control
@@ -53,7 +53,7 @@ AUTO_LOGIN=1 bin/dev     # bypass login, auto-authenticate as user ID 1
 - **Derive surface colors from `$dark`**: Use Sass functions (`lighten`, `darken`) on `$dark` for all surface colors so they stay in sync when the base changes.
 - **Post-import variables**: Variables that depend on Bootstrap internals (e.g. `$input-icon-color` uses `$light`) must be defined **after** `@import "scss/bootstrap"`, not before.
 - **Table borders**: Do not use Bootstrap's `$table-border-color` — it has no effect on cell borders due to a Bootstrap bug (see `memory/bootstrap-table-border-bug.md`). Use our custom Sass variables (`$table-row-border-color`, `$table-head-border-color`, `$table-head-border-width`) defined in `application.scss`, applied via post-import CSS rules.
-- **IMPORTANT — 3rd-party CSS overrides in `application.scss`**: Vendored libraries (Flatpickr, Tom Select, etc.) hardcode their own colors, font sizes, and SVG fills that do NOT read Bootstrap CSS variables or respect `[data-bs-theme="dark"]`. We override these in `application.scss`, which loads AFTER the vendor stylesheets so same-specificity rules win the cascade. **Every override block MUST be extensively commented**: start with a header explaining WHY the overrides exist (the library hardcodes X instead of using Bootstrap vars), then annotate each rule with what the original hardcoded value was (e.g. `// was #343a40`). This is critical because without comments, future readers cannot tell whether a rule is a cosmetic tweak or a required fix for a broken 3rd-party default.
+- **IMPORTANT — 3rd-party CSS overrides in `application.scss`**: Vendored libraries (Flatpickr, Select2, etc.) hardcode their own colors, font sizes, and SVG fills that do NOT read Bootstrap CSS variables or respect `[data-bs-theme="dark"]`. We override these in `application.scss`, which loads AFTER the vendor stylesheets so same-specificity rules win the cascade. **Every override block MUST be extensively commented**: start with a header explaining WHY the overrides exist (the library hardcodes X instead of using Bootstrap vars), then annotate each rule with what the original hardcoded value was (e.g. `// was #343a40`). This is critical because without comments, future readers cannot tell whether a rule is a cosmetic tweak or a required fix for a broken 3rd-party default.
 
 ## Testing
 
@@ -91,8 +91,8 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
   - **Model**: Enum-like fields get a frozen `FOOS` array constant + `FOO_ICONS` hash constant; validations reference the constant
   - **Form dropdowns**: Use `options_for_select` with `data-icon` attributes from the model's icon constant, not a plain array
 - **Resource icons**: Centralized in `ApplicationHelper::RESOURCE_ICONS` — maps controller names to Material Symbols icon names. The `resource_icon` helper renders the icon span. Used in the sidebar nav and card titles. To add a new resource icon, add one entry to the hash.
-- **Domain icon mappings**: Codify icon associations as frozen hash constants on the model (e.g. `Student::STATUS_ICONS`). These map domain values (not pages) to icons. In forms, pass icons as `data-icon` attributes on `<option>` elements via `options_for_select`. The `tomselect_controller.js` is generic — it detects `data-icon` automatically and renders Material Symbols icons at reduced size and opacity so the text label remains primary.
-- **Visual hierarchy in forms**: Supporting elements (labels, icons) recede so input values stand out. Form labels use muted color + smaller font (like `thead th`). Tom Select dropdown icons render at `16px` / `opacity: 0.5`. Input group icons use `$input-icon-color`. Do not give labels and values equal visual weight.
+- **Domain icon mappings**: Codify icon associations as frozen hash constants on the model (e.g. `Student::STATUS_ICONS`). These map domain values (not pages) to icons. In forms, pass icons as `data-icon` attributes on `<option>` elements via `options_for_select`. The `select2_controller.js` is generic — it detects `data-icon` automatically and renders Material Symbols icons at reduced size and opacity so the text label remains primary.
+- **Visual hierarchy in forms**: Supporting elements (labels, icons) recede so input values stand out. Form labels use muted color + smaller font (like `thead th`). Select2 dropdown icons render at `16px` / `opacity: 0.5`. Input group icons use `$input-icon-color`. Do not give labels and values equal visual weight.
 - **CSS-only popovers**: Use `.help-popover-trigger` with a child `.help-popover-content` span. Shows on `:focus`, no JS needed. Used for field help text in import mapping. Prefer this over Bootstrap JS popovers (see Asset Pipeline note about Bootstrap JS being UMD).
 
 ## Import System

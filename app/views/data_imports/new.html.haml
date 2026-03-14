@@ -19,10 +19,10 @@
         .row
           .col-md-6.mb-3
             = f.label :target_type, "Target", class: "form-label"
-            = f.select :target_type, options_for_select(DataImport::TARGETS.map { |t| [t, t] }, @data_import.target_type), { include_blank: "Select target..." }, { class: "form-select", "data-controller" => "tomselect" }
+            = f.select :target_type, options_for_select(DataImport::TARGETS.map { |t| [t, t] }, @data_import.target_type), { include_blank: "Select target..." }, { class: "form-select", "data-controller" => "select2" }
           .col-md-6.mb-3
             = f.label :mode, class: "form-label"
-            = f.select :mode, options_for_select(DataImport::MODES.map { |m| [DataImport::MODE_LABELS[m], m, { "data-icon" => DataImport::MODE_ICONS[m] }] }, @data_import.mode), { include_blank: "Select mode..." }, { class: "form-select", "data-controller" => "tomselect" }
+            = f.select :mode, options_for_select(DataImport::MODES.map { |m| [DataImport::MODE_LABELS[m], m, { "data-icon" => DataImport::MODE_ICONS[m] }] }, @data_import.mode), { include_blank: "Select mode..." }, { class: "form-select", "data-controller" => "select2" }
 
       %fieldset.form-section
         %legend File

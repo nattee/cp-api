@@ -44,7 +44,7 @@ class CoursesTest < ApplicationSystemTestCase
     fill_in "Course No", with: "2110999"
     fill_in "Revision year", with: 2565
     fill_in "Name (EN)", with: "New Course"
-    tomselect_pick "Computer Engineering (Bachelor)", from: "Program"
+    select2_pick "Computer Engineering (Bachelor)", from: "Program"
     fill_in "Total Credits", with: 3
     click_on "Create Course"
 
@@ -84,25 +84,25 @@ class CoursesTest < ApplicationSystemTestCase
     assert_no_text course.course_no
   end
 
-  test "Tom Select renders for program field on new course" do
+  test "Select2 renders for program field on new course" do
     visit new_course_path
 
-    within find_tomselect_wrapper("Program") do
-      assert_selector ".ts-control"
+    within find_select2_container("Program") do
+      assert_selector ".select2-selection"
     end
   end
 
   private
 
-  def find_tomselect_wrapper(label_text)
+  def find_select2_container(label_text)
     label = find("label", text: label_text)
     container = label.ancestor(".mb-3", match: :first)
-    container.find(".ts-wrapper")
+    container.find(".select2-container")
   end
 
-  def tomselect_pick(value, from:)
-    wrapper = find_tomselect_wrapper(from)
-    wrapper.find(".ts-control").click
-    wrapper.find(".ts-dropdown .option", text: value).click
+  def select2_pick(value, from:)
+    container = find_select2_container(from)
+    container.find(".select2-selection").click
+    find(".select2-dropdown .select2-results__option", text: value).click
   end
 end

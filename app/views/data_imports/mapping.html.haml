@@ -76,7 +76,7 @@
                     %span.material-symbols{style: "font-size: 16px"} help
                     %span.help-popover-content= defn[:help]
               %td
-                = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm mapping-source-select", "data-controller" => "tomselect", "data-tomselect-allow-empty" => "", "data-mapping-attr" => attr
+                = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm mapping-source-select", "data-controller" => "select2", "data-select2-allow-clear" => "", "data-mapping-attr" => attr
               %td.preview-cell{"data-mapping-preview" => attr}
                 %span.text-muted{"data-mapping-preview-text" => attr}
                   - if preview_idx

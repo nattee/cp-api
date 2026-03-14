@@ -48,7 +48,7 @@
     %hr
 
     %h5.card-title.mb-3 3rd-Party Library Colors
-    %p.text-muted.small Always derived from base colors. These override hardcoded values in Flatpickr and Tom Select.
+    %p.text-muted.small Always derived from base colors. These override hardcoded values in Flatpickr and Select2.
     .row.g-3#library-colors
       %h6.col-12.mb-0
         %span.text-muted Flatpickr
@@ -73,8 +73,8 @@
             %code.small.lib-hex{data: {lib_key: key}}
 
       %h6.col-12.mb-0.mt-2
-        %span.text-muted Tom Select
-      - [["ts-text-color", "Text", "= $body-color"], ["ts-focus-border", "Focus border", "= $primary"]].each do |key, label, formula|
+        %span.text-muted Select2
+      - [["s2-text-color", "Text", "= $body-color"], ["s2-focus-border", "Focus border", "= $primary"]].each do |key, label, formula|
         .col-auto{style: "min-width: 105px"}
           %label.form-label.small.mb-1
             %span= label
@@ -166,22 +166,22 @@
         %button.btn.btn-outline-secondary{type: "button"} Cancel
 
 -# ============================================================
--# Tom Select
+-# Select2
 -# ============================================================
-%h2.mb-3.mt-5 Tom Select
+%h2.mb-3.mt-5 Select2
 %p.text-muted.small Enhanced select fields. Wraps native &lt;select&gt; with searchable dropdown via Stimulus controller.
 
 .card{style: "max-width: 640px"}
   .card-body
     .mb-3
       %label.form-label Status (with Material Symbols icons)
-      %select.form-select{data: {controller: "tomselect"}}
+      %select.form-select{data: {controller: "select2"}}
         %option{value: "active", data: {icon: "check_circle"}} Active
         %option{value: "graduated", data: {icon: "school"}} Graduated
         %option{value: "on_leave", data: {icon: "pause_circle"}} On Leave
     .mb-3
       %label.form-label Role (plain, no icons)
-      %select.form-select{data: {controller: "tomselect"}}
+      %select.form-select{data: {controller: "select2"}}
         %option admin
         %option staff
         %option viewer
@@ -396,7 +396,7 @@
     }
 
     // --- Compute 3rd-party library derived colors ---
-    // These mirror the $flatpickr-* and Tom Select variables in application.scss.
+    // These mirror the $flatpickr-* and Select2 variables in application.scss.
     // Returns an object mapping swatch keys to {hex, css} where css is the
     // actual CSS value (may be rgba) and hex is for swatch display.
     function computeLibraryColors() {
@@ -413,9 +413,9 @@
         "flatpickr-muted-color":    { hex: c["body-color"],        css: rgba(c["body-color"], 0.3) }, // $flatpickr-muted-color: rgba($body-color-dark, 0.3)
         "flatpickr-border-color":   { hex: "#ffffff",              css: "rgba(255, 255, 255, 0.25)" }, // $flatpickr-border-color: rgba(white, 0.25)
         "flatpickr-spinner-color":  { hex: c.light,                css: c.light },                  // $flatpickr-spinner-color: $light
-        // Tom Select (application.scss Tom Select override section)
-        "ts-text-color":            { hex: c["body-color"],        css: c["body-color"] },          // .ts-control color: $body-color-dark
-        "ts-focus-border":          { hex: c.primary,              css: c.primary }                  // .focus .ts-control border: $primary
+        // Select2 (application.scss Select2 override section)
+        "s2-text-color":            { hex: c["body-color"],        css: c["body-color"] },          // .select2-selection color: $body-color-dark
+        "s2-focus-border":          { hex: c.primary,              css: c.primary }                  // .select2-container--focus border: $primary
       };
     }
 
@@ -543,13 +543,16 @@
       css += fpCal + " .flatpickr-day.today { border-color: " + lib["flatpickr-selected-bg"].css + " !important; }\n";
       css += fpCal + " .flatpickr-day.prevMonthDay, " + fpCal + " .flatpickr-day.nextMonthDay { color: " + lib["flatpickr-muted-color"].css + " !important; }\n";
 
-      // --- Tom Select overrides (mirrors application.scss Tom Select section) ---
-      css += ".ts-control, .ts-control input, .ts-dropdown { color: " + lib["ts-text-color"].css + " !important; }\n";
-      css += ".ts-dropdown, .ts-dropdown.form-control, .ts-dropdown.form-select { border-color: rgba(255, 255, 255, 0.15) !important; }\n";
-      css += ".focus .ts-control { border-color: " + lib["ts-focus-border"].css + " !important; box-shadow: 0 0 0 0.25rem " + rgba(c.primary, 0.25) + " !important; }\n";
-      // Tom Select caret SVG — re-encode with current body-color
-      var caretHex = "%23" + font.slice(1);
-      css += ".ts-wrapper:not(.form-control, .form-select).single .ts-control { background-image: url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='" + caretHex + "' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E\") !important; }\n";
+      // --- Select2 overrides (mirrors application.scss Select2 section) ---
+      css += ".select2-container--bootstrap-5 .select2-dropdown { background-color: " + lighten(c.dark, 10) + " !important; border-color: rgba(255, 255, 255, 0.15) !important; color: " + lib["s2-text-color"].css + " !important; }\n";
+      css += ".select2-container--bootstrap-5 .select2-selection { background-color: " + s["input-bg"] + " !important; color: " + lib["s2-text-color"].css + " !important; border-color: rgba(255, 255, 255, 0.15) !important; }\n";
+      css += ".select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered { color: " + lib["s2-text-color"].css + " !important; }\n";
+      css += ".select2-container--bootstrap-5.select2-container--focus .select2-selection, .select2-container--bootstrap-5.select2-container--open .select2-selection { border-color: " + lib["s2-focus-border"].css + " !important; box-shadow: 0 0 0 0.25rem " + rgba(c.primary, 0.25) + " !important; }\n";
+      css += ".select2-container--bootstrap-5 .select2-results__option { color: " + lib["s2-text-color"].css + " !important; }\n";
+      css += ".select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted { background-color: " + rgba(c.primary, 0.25) + " !important; color: " + lib["s2-text-color"].css + " !important; }\n";
+      css += ".select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--selected, .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-selected=true]:not(.select2-results__option--highlighted) { background-color: " + c.primary + " !important; color: " + c.dark + " !important; }\n";
+      css += ".select2-container--bootstrap-5 .select2-dropdown .select2-search .select2-search__field { background-color: " + s["input-bg"] + " !important; color: " + lib["s2-text-color"].css + " !important; }\n";
+      css += ".select2-container--bootstrap-5 .select2-dropdown .select2-search .select2-search__field:focus { border-color: " + lib["s2-focus-border"].css + " !important; box-shadow: 0 0 0 0.25rem " + rgba(c.primary, 0.25) + " !important; }\n";
 
       // --- DataTables overrides ---
       css += ":root { --dt-row-selected: " + hexToRgbStr(c.primary) + "; }\n";

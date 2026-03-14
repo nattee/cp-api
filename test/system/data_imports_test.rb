@@ -43,18 +43,18 @@ class DataImportsTest < ApplicationSystemTestCase
     assert_selector "a", text: "New Import"
   end
 
-  test "Tom Select works after validation error" do
+  test "Select2 works after validation error" do
     visit new_data_import_path
 
     # Submit without selecting anything — triggers validation errors
     click_on "Upload & Configure"
     assert_text "prohibited this import from being saved"
 
-    # After validation error, Tom Select on mode dropdown must still work
-    tomselect_pick "Create or Update", from: "Mode"
+    # After validation error, Select2 on mode dropdown must still work
+    select2_pick "Create or Update", from: "Mode"
 
     # Verify the selection stuck
-    within find_tomselect_wrapper("Mode") do
+    within find_select2_container("Mode") do
       assert_text "Create or Update"
     end
   end
@@ -64,8 +64,8 @@ class DataImportsTest < ApplicationSystemTestCase
   test "upload redirects to mapping page" do
     visit new_data_import_path
 
-    tomselect_pick "Student", from: "Target"
-    tomselect_pick "Create only", from: "Mode"
+    select2_pick "Student", from: "Target"
+    select2_pick "Create only", from: "Mode"
     attach_file "File", csv_fixture_path("students_import.csv")
 
     click_on "Upload & Configure"
@@ -110,7 +110,7 @@ class DataImportsTest < ApplicationSystemTestCase
     visit mapping_data_import_path(di)
 
     # Unmap a required field
-    tomselect_pick_by_name "-- skip --", name: "mapping[admission_year]"
+    select2_pick_by_name "-- skip --", name: "mapping[admission_year]"
     click_on "Run Import"
 
     # Should redirect back to mapping with error
@@ -122,7 +122,7 @@ class DataImportsTest < ApplicationSystemTestCase
     di = create_pending_import("students_minimal.csv")
     visit mapping_data_import_path(di)
 
-    tomselect_pick_by_name "-- fixed value --", name: "mapping[status]"
+    select2_pick_by_name "-- fixed value --", name: "mapping[status]"
 
     # The constant input should be visible
     assert_selector "[data-mapping-constant='status']", visible: true
@@ -132,11 +132,11 @@ class DataImportsTest < ApplicationSystemTestCase
     di = create_pending_import("students_minimal.csv")
     visit mapping_data_import_path(di)
 
-    tomselect_pick_by_name "-- fixed value --", name: "mapping[status]"
+    select2_pick_by_name "-- fixed value --", name: "mapping[status]"
     find("[data-mapping-constant='status']").fill_in with: "on_leave"
 
     # Program is required — set as fixed value via dropdown
-    tomselect_pick_by_name "-- fixed value --", name: "mapping[program_name]"
+    select2_pick_by_name "-- fixed value --", name: "mapping[program_name]"
     find("[data-mapping-constant='program_name']").select programs(:cp_bachelor).name_en + " (#{programs(:cp_bachelor).year_started})"
 
     click_on "Run Import"
@@ -160,11 +160,11 @@ class DataImportsTest < ApplicationSystemTestCase
     di = create_pending_import("students_minimal.csv")
     visit mapping_data_import_path(di)
 
-    tomselect_pick_by_name "-- fixed value --", name: "mapping[status]"
+    select2_pick_by_name "-- fixed value --", name: "mapping[status]"
     find("[data-mapping-constant='status']").fill_in with: "active"
 
     # Program is required — set as fixed value via dropdown
-    tomselect_pick_by_name "-- fixed value --", name: "mapping[program_name]"
+    select2_pick_by_name "-- fixed value --", name: "mapping[program_name]"
     find("[data-mapping-constant='program_name']").select programs(:cp_bachelor).name_en + " (#{programs(:cp_bachelor).year_started})"
 
     click_on "Run Import"
@@ -225,7 +225,7 @@ class DataImportsTest < ApplicationSystemTestCase
     di = create_pending_import("students_minimal.csv")
     visit mapping_data_import_path(di)
 
-    tomselect_pick_by_name "-- fixed value --", name: "mapping[program_name]"
+    select2_pick_by_name "-- fixed value --", name: "mapping[program_name]"
 
     # Should show a select element (dropdown), not a text input
     constant_el = find("[data-mapping-constant='program_name']", visible: true)
@@ -234,25 +234,25 @@ class DataImportsTest < ApplicationSystemTestCase
 
   private
 
-  def find_tomselect_wrapper(label_text)
+  def find_select2_container(label_text)
     label = find("label", text: label_text)
     container = label.ancestor(".mb-3", match: :first)
-    container.find(".ts-wrapper")
+    container.find(".select2-container")
   end
 
-  def tomselect_pick(value, from:)
-    wrapper = find_tomselect_wrapper(from)
-    wrapper.find(".ts-control").click
-    wrapper.find(".ts-dropdown .option", text: value).click
+  def select2_pick(value, from:)
+    container = find_select2_container(from)
+    container.find(".select2-selection").click
+    find(".select2-dropdown .select2-results__option", text: value).click
   end
 
-  # Pick a Tom Select option by the underlying select's name attribute.
+  # Pick a Select2 option by the underlying select's name attribute.
   # Used for mapping selects which don't have labels.
-  def tomselect_pick_by_name(value, name:)
+  def select2_pick_by_name(value, name:)
     select_el = find("select[name='#{name}']", visible: false)
-    wrapper = select_el.sibling(".ts-wrapper")
-    wrapper.find(".ts-control").click
-    wrapper.find(".ts-dropdown .option", text: value).click
+    container = select_el.sibling(".select2-container")
+    container.find(".select2-selection").click
+    find(".select2-dropdown .select2-results__option", text: value).click
   end
 
   def csv_fixture_path(filename)

@@ -57,7 +57,7 @@
     .row
       .col-md-6.mb-3
         = f.label :program_id, "Program", class: "form-label"
-        = f.select :program_id, options_for_select(Program.all.map { |p| [p.name_en, p.id] }, course.program_id), { include_blank: "Select a program" }, class: "form-select #{'is-invalid' if course.errors[:program].any?}", data: { controller: "tomselect" }
+        = f.select :program_id, options_for_select(Program.all.map { |p| [p.name_en, p.id] }, course.program_id), { include_blank: "Select a program" }, class: "form-select #{'is-invalid' if course.errors[:program].any?}", data: { controller: "select2" }
         - if course.errors[:program].any?
           .invalid-feedback= course.errors[:program].first
       .col-md-6.mb-3

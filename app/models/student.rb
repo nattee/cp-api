@@ -1,7 +1,7 @@
 class Student < ApplicationRecord
   STATUSES = %w[active graduated on_leave retired].freeze
 
-  # Material Symbols icon for each status — used by Tom Select dropdowns
+  # Material Symbols icon for each status — used by Select2 dropdowns
   # and anywhere else that needs a visual indicator for status.
   STATUS_ICONS = {
     "active"    => "check_circle",

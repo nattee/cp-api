@@ -31,7 +31,7 @@
     .row
       .col-md-6.mb-3
         = f.label :degree_level, class: "form-label"
-        = f.select :degree_level, options_for_select(Program::DEGREE_LEVELS.map { |l| [l.titleize, l, { data: { icon: Program::DEGREE_LEVEL_ICONS[l] } }] }, program.degree_level), {}, class: "form-select #{'is-invalid' if program.errors[:degree_level].any?}", data: { controller: "tomselect" }
+        = f.select :degree_level, options_for_select(Program::DEGREE_LEVELS.map { |l| [l.titleize, l, { data: { icon: Program::DEGREE_LEVEL_ICONS[l] } }] }, program.degree_level), {}, class: "form-select #{'is-invalid' if program.errors[:degree_level].any?}", data: { controller: "select2" }
         - if program.errors[:degree_level].any?
           .invalid-feedback= program.errors[:degree_level].first
       .col-md-6.mb-3

@@ -3,7 +3,7 @@ class User < ApplicationRecord
 
   ROLES = %w[admin staff viewer].freeze
 
-  # Material Symbols icon for each role — used by Tom Select dropdowns
+  # Material Symbols icon for each role — used by Select2 dropdowns
   # and anywhere else that needs a visual indicator for role.
   ROLE_ICONS = {
     "admin"  => "shield_person",

@@ -1,16 +1,10 @@
 // Bootstrap variable overrides (must come before Bootstrap import)
 
-//$light:     #6fcfff;
-//$dark:      #0c0e13;
-//$primary:   #a4c6d4;
-//$secondary: #62336b;
-//$info:      #b15b95;
-
-$light: #f3f5e3;
-$dark: #161708;
-$primary: #dadb9a;
-$secondary: #2d3b7c;
-$info: #a54bbe;
+$light:     #6fcfff;
+$dark:      #0c0e13;
+$primary:   #a4c6d4;
+$secondary: #62336b;
+$info:      #b15b95;
 
 $success:   #3faa65;
 $warning:   #e9cb3d;
@@ -267,56 +261,82 @@ $flatpickr-spinner-color:   $light;                      // year increment arrow
 }
 
 // ---------------------------------------------------------------------------
-// Tom Select dark mode overrides
+// Select2 dark mode overrides
 // ---------------------------------------------------------------------------
-// Tom Select's Bootstrap 5 theme (tom-select.bootstrap5.css) is a PARTIAL
-// integration. It reads some Bootstrap CSS variables for backgrounds:
-//   - var(--bs-body-bg) for control & dropdown background
-//   - var(--bs-tertiary-bg) for the active/hover option
-//   - var(--bs-border-color) for the control border
-//
-// However, it HARDCODES several light-mode values that don't adapt to
-// dark mode:
-//   - Text color: #343a40 (dark gray — invisible on dark backgrounds)
-//   - Dropdown border: #d0d0d0 (light gray)
-//   - Dropdown shadow: rgba(0,0,0,.175)
-//   - Focus ring: #86b7fe border + rgba(13,110,253,.25) shadow (Bootstrap's
+// Select2's Bootstrap 5 theme (select2-bootstrap-5-theme.min.css) adapts
+// some aspects to Bootstrap form-control styling, but HARDCODES light-mode
+// colors that don't work with [data-bs-theme="dark"]:
+//   - Selection text color: inherits from body (OK) but dropdown text is #000
+//   - Dropdown background: #fff
+//   - Dropdown border: uses Bootstrap border color (mostly OK)
+//   - Focus ring: #86b7fe border + rgba(13,110,253,.25) shadow (Bootstrap
 //     default blue, not our $primary)
-//   - Caret arrow: an inline SVG with stroke='#343a40' (invisible on dark)
+//   - Search input inside dropdown: white background
+//   - Highlighted option: #0d6efd (Bootstrap primary blue)
 //
-// These seem to be values that Bootstrap itself generates at compile time
-// from Sass, but Tom Select's pre-built CSS baked in the defaults rather
-// than using CSS variables. We override them here with our Sass variables.
-//
-// The vendored tom-select.bootstrap5.css is loaded BEFORE this stylesheet
+// The vendored select2 CSS files are loaded BEFORE this stylesheet
 // (see application.html.haml), so same-specificity rules here win.
 // ---------------------------------------------------------------------------
 
-// Text color — the most critical fix. Without this, all text is invisible.
-.ts-control,
-.ts-control input,
-.ts-dropdown {
-  color: $body-color-dark;                    // was #343a40
+// Dropdown panel — slightly elevated above card-bg so it visually floats
+.select2-container--bootstrap-5 .select2-dropdown {
+  background-color: lighten($dark, 10%);      // was #fff — one step above card-bg for separation
+  border-color: rgba(white, 0.15);            // was Bootstrap border color
+  color: $body-color-dark;                    // was #000
 }
 
-// Caret (dropdown arrow) — an inline SVG with a hardcoded dark stroke.
-// We re-encode the same SVG with our $body-color-dark as the stroke color.
-.ts-wrapper:not(.form-control, .form-select).single .ts-control {
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23#{str-slice(inspect($body-color-dark), 2)}' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+// Search input inside dropdown — must match theme's nesting:
+// .select2-container--bootstrap-5 .select2-dropdown .select2-search .select2-search__field
+.select2-container--bootstrap-5 .select2-dropdown .select2-search .select2-search__field {
+  background-color: $input-bg;                // was #fff
+  color: $body-color-dark;                    // was #212529
+  border-color: rgba(white, 0.15);            // was #ced4da
+
+  &:focus {
+    border-color: $primary;                   // was #86b7fe
+    box-shadow: 0 0 0 0.25rem rgba($primary, 0.25); // was rgba(13,110,253,.25)
+  }
 }
 
-// Dropdown panel border and shadow
-.ts-dropdown,
-.ts-dropdown.form-control,
-.ts-dropdown.form-select {
-  border-color: rgba(white, 0.15);            // was #d0d0d0
-  box-shadow: none;                           // was rgba(0,0,0,.175) shadow
+// Selection control (the visible "input" area)
+.select2-container--bootstrap-5 .select2-selection {
+  background-color: $input-bg;                // was #fff
+  color: $body-color-dark;                    // was inherited
+  border-color: rgba(white, 0.15);            // was Bootstrap border color
+}
+
+// Rendered text inside the selection
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+  color: $body-color-dark;                    // was #000
 }
 
 // Focus ring — use our $primary instead of Bootstrap's default blue
-.focus .ts-control {
+.select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.select2-container--bootstrap-5.select2-container--open .select2-selection {
   border-color: $primary;                     // was #86b7fe
   box-shadow: 0 0 0 0.25rem rgba($primary, 0.25); // was rgba(13,110,253,.25)
+}
+
+// Dropdown option items
+.select2-container--bootstrap-5 .select2-results__option {
+  color: $body-color-dark;                    // was #000
+}
+
+// Highlighted (hovered/focused) option — must match theme's nesting:
+// .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted {
+  background-color: rgba($primary, 0.25);     // was #e9ecef
+  color: $body-color-dark;                    // was #000
+}
+
+// Selected option (already chosen) — theme uses two selectors for this:
+// 1. .select2-results__option.select2-results__option--selected
+// 2. .select2-results__option[aria-selected=true]:not(.select2-results__option--highlighted)
+// Both must be overridden with matching nesting depth.
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--selected,
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-selected=true]:not(.select2-results__option--highlighted) {
+  background-color: $primary;                 // was #0d6efd
+  color: $dark;                               // was #fff — dark text on our light primary
 }
 
 // ---------------------------------------------------------------------------
@@ -370,17 +390,17 @@ table.dataTable tbody td.dt-empty {
 }
 
 // Import mapping source selects — monospace font so column letter prefixes
-// (A:, B:, AA:) align consistently across rows. Tom Select renders custom
-// HTML elements (not native <option>), so we style the wrapper's control
-// and dropdown instead of the original select.
+// (A:, B:, AA:) align consistently across rows. Select2 renders custom
+// HTML elements (not native <option>), so we style the container's
+// selection and dropdown instead of the original select.
 .mapping-source-select {
-  // Hidden by Tom Select, but keeps monospace if TS fails to initialize
+  // Hidden by Select2, but keeps monospace if S2 fails to initialize
   font-family: var(--bs-font-monospace);
   font-size: 0.8rem;
 
-  // Tom Select wraps itself as a sibling — target via adjacent combinator
-  + .ts-wrapper {
-    .ts-control, .ts-dropdown {
+  // Select2 inserts its container as a sibling — target via adjacent combinator
+  + .select2-container {
+    .select2-selection, .select2-dropdown {
       font-family: var(--bs-font-monospace);
       font-size: 0.8rem;
     }
