@@ -2,7 +2,7 @@ class Grade < ApplicationRecord
   belongs_to :student
   belongs_to :course
 
-  GRADES = %w[A B+ B C+ C D+ D F S U I W Au].freeze
+  GRADES = %w[A B+ B C+ C D+ D F S U I W V M P R X].freeze
 
   GRADE_WEIGHTS = {
     "A" => 4.0, "B+" => 3.5, "B" => 3.0, "C+" => 2.5,
