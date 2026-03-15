@@ -1,0 +1,7 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 New Grade
+  = link_to "Back", grades_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    = render "form", grade: @grade

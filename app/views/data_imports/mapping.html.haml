@@ -76,7 +76,7 @@
                     %span.material-symbols{style: "font-size: 16px"} help
                     %span.help-popover-content= defn[:help]
               %td
-                = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm mapping-source-select", "data-controller" => "select2", "data-select2-allow-clear" => "", "data-mapping-attr" => attr
+                = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm mapping-source-select", "data-controller" => "select2", "data-select2-allow-clear" => "", "data-select2-dropdown-class" => "select2-dropdown--monospace", "data-mapping-attr" => attr
               %td.preview-cell{"data-mapping-preview" => attr}
                 %span.text-muted{"data-mapping-preview-text" => attr}
                   - if preview_idx
@@ -87,6 +87,19 @@
                   = select_tag "defaults[#{attr}]", options_for_select([["Select...", ""]] + defn[:fixed_options].call), class: "form-select form-select-sm", hidden: true, "data-mapping-constant" => attr
                 - else
                   = text_field_tag "defaults[#{attr}]", nil, class: "form-control form-control-sm", placeholder: "Enter value...", hidden: true, "data-mapping-constant" => attr
+
+  - if @data_import.target_type == "Grade"
+    .card.mb-3
+      .card-body.p-3
+        %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center.mb-3
+          %span.material-symbols.resource-icon.me-2 tune
+          Import Options
+        .row
+          .col-md-6
+            %label.form-label When grade is blank
+            = select_tag "defaults[_blank_grade]", options_for_select([["Skip row — do not import", "skip"], ["Import without grade", "import"]], "skip"), class: "form-select form-select-sm"
+            .form-text.text-muted
+              Rows where the grade column is empty or missing.
 
   .d-flex.justify-content-end
     = submit_tag "Run Import", class: "btn btn-primary"

@@ -1,0 +1,77 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1
+    = @grade.course.course_no
+    \—
+    = @grade.student.full_name
+  .d-flex.gap-2
+    - if current_user.admin? && @grade.manual?
+      = link_to "Edit", edit_grade_path(@grade), class: "btn btn-outline-secondary"
+    = link_to "Back", grades_path(year: @grade.year, semester: @grade.semester), class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    .detail-section
+      %h6.section-title Student
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Student ID
+        %dd.col-sm-9= link_to @grade.student.student_id, @grade.student
+
+        %dt.col-sm-3 Name
+        %dd.col-sm-9= link_to @grade.student.full_name, @grade.student
+
+    .detail-section
+      %h6.section-title Course
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Course No
+        %dd.col-sm-9= link_to @grade.course.course_no, @grade.course
+
+        %dt.col-sm-3 Course Name
+        %dd.col-sm-9= link_to @grade.course.name, @grade.course
+
+        %dt.col-sm-3 Credits
+        %dd.col-sm-9= @grade.course.credits
+
+    .detail-section
+      %h6.section-title Term
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Year
+        %dd.col-sm-9= @grade.year
+
+        %dt.col-sm-3 Semester
+        %dd.col-sm-9= @grade.semester
+
+    .detail-section
+      %h6.section-title Grade
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Grade
+        %dd.col-sm-9
+          - if @grade.grade.present?
+            %span.badge{class: @grade.grade_badge_class}= @grade.grade
+          - else
+            .text-muted Not graded
+
+        %dt.col-sm-3 Grade Weight
+        %dd.col-sm-9
+          - if @grade.grade_weight.present?
+            = @grade.grade_weight
+          - else
+            .text-muted —
+
+        %dt.col-sm-3 Credits Granted
+        %dd.col-sm-9
+          - if @grade.credits_grant.present?
+            = @grade.credits_grant
+          - else
+            .text-muted —
+
+        %dt.col-sm-3 Source
+        %dd.col-sm-9
+          %span.badge{class: "badge-#{@grade.source}"}= @grade.source.titleize
+
+    .detail-section
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Created at
+        %dd.col-sm-9= @grade.created_at.strftime("%B %d, %Y %H:%M")
+
+        %dt.col-sm-3 Updated at
+        %dd.col-sm-9= @grade.updated_at.strftime("%B %d, %Y %H:%M")

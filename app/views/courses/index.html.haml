@@ -20,7 +20,12 @@
         %tbody
           - @courses.each do |course|
             %tr
-              %td= course.course_no
+              %td
+                = course.course_no
+                - if course.auto_generated == "copied"
+                  %span.badge.badge-auto-copied.ms-1 Copied
+                - elsif course.auto_generated == "placeholder"
+                  %span.badge.badge-auto-placeholder.ms-1 Placeholder
               %td= course.name
               %td= course.revision_year
               %td= course.program&.name_en

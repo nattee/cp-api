@@ -43,6 +43,7 @@ class StudentsController < ApplicationController
 
   def set_student
     @student = Student.find(params[:id])
+    @grades = @student.grades.includes(course: :program) if action_name == "show"
   end
 
   def require_admin

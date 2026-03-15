@@ -6,7 +6,16 @@ class CoursesController < ApplicationController
     @courses = Course.all
   end
 
-  def show; end
+  def show
+    @available_years = @course.grades.distinct.pluck(:year).sort.reverse
+    if params[:year].present?
+      @selected_year = params[:year].to_i
+      @selected_semester = params[:semester].present? ? params[:semester].to_i : nil
+      scope = @course.grades.includes(:student).where(year: @selected_year)
+      scope = scope.where(semester: @selected_semester) if @selected_semester
+      @course_grades = scope.order("students.student_id")
+    end
+  end
 
   def new
     @course = Course.new

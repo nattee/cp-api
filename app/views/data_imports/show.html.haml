@@ -42,6 +42,10 @@
         %dt.col-sm-3 Updated
         %dd.col-sm-9= @data_import.updated_count
 
+        - if @data_import.skipped_count.to_i > 0
+          %dt.col-sm-3 Skipped
+          %dd.col-sm-9= @data_import.skipped_count
+
         %dt.col-sm-3 Errors
         %dd.col-sm-9= @data_import.error_count
 
@@ -70,7 +74,7 @@
               %tr
                 %td= labels[attr.to_sym] || attr
                 %td= header
-            - (@data_import.default_values || {}).each do |attr, value|
+            - (@data_import.default_values || {}).reject { |k, _| k.start_with?("_") }.each do |attr, value|
               %tr
                 %td= labels[attr.to_sym] || attr
                 %td

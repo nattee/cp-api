@@ -1,0 +1,80 @@
+= form_with(model: grade, class: "needs-validation", data: { controller: "grade-weight" }) do |f|
+  - if grade.errors.any?
+    .alert.alert-danger
+      %h5.alert-heading
+        = pluralize(grade.errors.count, "error")
+        prohibited this grade from being saved:
+      %ul.mb-0
+        - grade.errors.full_messages.each do |message|
+          %li= message
+
+  %fieldset.form-section
+    %legend Student & Course
+    .row
+      .col-md-6.mb-3
+        = f.label :student_id, "Student", class: "form-label"
+        = f.select :student_id, options_for_select(Student.order(:student_id).map { |s| ["#{s.student_id} — #{s.full_name}", s.id] }, grade.student_id), { include_blank: "Select a student" }, class: "form-select #{'is-invalid' if grade.errors[:student_id].any? || grade.errors[:student].any?}", data: { controller: "select2" }
+        - if grade.errors[:student_id].any?
+          .invalid-feedback= grade.errors[:student_id].first
+        - if grade.errors[:student].any?
+          .invalid-feedback= grade.errors[:student].first
+
+      .col-md-6.mb-3
+        = f.label :course_id, "Course", class: "form-label"
+        = f.select :course_id, options_for_select(Course.order(:course_no).map { |c| ["#{c.course_no} — #{c.name} (#{c.revision_year})", c.id] }, grade.course_id), { include_blank: "Select a course" }, class: "form-select #{'is-invalid' if grade.errors[:course_id].any? || grade.errors[:course].any?}", data: { controller: "select2" }
+        - if grade.errors[:course_id].any?
+          .invalid-feedback= grade.errors[:course_id].first
+        - if grade.errors[:course].any?
+          .invalid-feedback= grade.errors[:course].first
+
+  %fieldset.form-section
+    %legend Term
+    .row
+      .col-md-6.mb-3
+        = f.label :year, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols calendar_month
+          = f.number_field :year, class: "form-control #{'is-invalid' if grade.errors[:year].any?}"
+          - if grade.errors[:year].any?
+            .invalid-feedback= grade.errors[:year].first
+      .col-md-6.mb-3
+        = f.label :semester, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols event
+          = f.select :semester, options_for_select(Grade::SEMESTERS.map { |s| [s == 3 ? "3 (Summer)" : s.to_s, s] }, grade.semester), { include_blank: "Select semester" }, class: "form-select #{'is-invalid' if grade.errors[:semester].any?}"
+          - if grade.errors[:semester].any?
+            .invalid-feedback= grade.errors[:semester].first
+
+  %fieldset.form-section
+    %legend Grade
+    .row
+      .col-md-6.mb-3
+        = f.label :grade, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols grading
+          = f.select :grade, options_for_select(Grade::GRADES, grade.grade), { include_blank: "Select grade" }, class: "form-select #{'is-invalid' if grade.errors[:grade].any?}", data: { action: "grade-weight#update", grade_weight_target: "gradeSelect" }
+          - if grade.errors[:grade].any?
+            .invalid-feedback= grade.errors[:grade].first
+      .col-md-6.mb-3
+        = f.label :grade_weight, "Grade Weight", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols balance
+          = f.number_field :grade_weight, step: 0.1, min: 0, max: 4, class: "form-control #{'is-invalid' if grade.errors[:grade_weight].any?}", data: { grade_weight_target: "weightInput" }
+          - if grade.errors[:grade_weight].any?
+            .invalid-feedback= grade.errors[:grade_weight].first
+
+    .row
+      .col-md-6.mb-3
+        = f.label :credits_grant, "Credits Granted", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols school
+          = f.number_field :credits_grant, min: 0, class: "form-control #{'is-invalid' if grade.errors[:credits_grant].any?}"
+          - if grade.errors[:credits_grant].any?
+            .invalid-feedback= grade.errors[:credits_grant].first
+
+  = f.submit class: "btn btn-primary"

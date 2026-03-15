@@ -3,6 +3,7 @@ module ApplicationHelper
     "programs"      => "account_tree",
     "courses"       => "menu_book",
     "students"      => "school",
+    "grades"        => "grading",
     "users"         => "group",
     "line_accounts" => "chat",
     "data_imports"  => "upload_file",

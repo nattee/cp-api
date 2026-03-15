@@ -109,4 +109,22 @@ class StudentTest < ActiveSupport::TestCase
     assert students(:on_leave_student).on_leave?
     assert_not students(:active_student).on_leave?
   end
+
+  # --- GPA ---
+
+  test "gpa calculates weighted average" do
+    student = students(:active_student)
+    # Fixtures: A(4.0)*3cr + B+(3.5)*3cr + B(3.0)*3cr = 31.5 / 9 = 3.5
+    assert_equal 3.5, student.gpa
+  end
+
+  test "gpa returns nil when no grades" do
+    student = students(:on_leave_student)
+    assert_nil student.gpa
+  end
+
+  test "total_credits sums credits of graded records" do
+    student = students(:active_student)
+    assert_equal 9, student.total_credits
+  end
 end

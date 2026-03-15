@@ -1,0 +1,40 @@
+- if @course_grades
+  .table-responsive
+    %table.table.table-hover.mb-0
+      %thead
+        %tr
+          %th Student ID
+          %th Student Name
+          %th.text-center Grade
+          %th.text-center Weight
+      %tbody
+        - @course_grades.each do |g|
+          %tr
+            %td= link_to g.student.student_id, g.student
+            %td= link_to g.student.full_name, g.student
+            %td.text-center
+              - if g.grade.present?
+                %span.badge{class: g.grade_badge_class}= g.grade
+            %td.text-center= g.grade_weight
+        - if @course_grades.empty?
+          %tr
+            %td.text-muted.text-center{colspan: 4} No grades found for this term.
+
+  - if @course_grades.any?
+    - graded = @course_grades.select { |g| g.grade_weight }
+    - total_weighted = graded.sum { |g| g.grade_weight.to_f * @course.credits.to_i }
+    - total_credits = graded.sum { |g| @course.credits.to_i }
+    - avg_gpa = total_credits.zero? ? nil : (total_weighted / total_credits).round(2)
+    - distribution = @course_grades.select { |g| g.grade.present? }.group_by(&:grade).transform_values(&:count).sort_by { |gr, _| Grade::GRADES.index(gr) || 99 }
+    .mt-2.text-muted.small
+      %strong Enrolled:
+      = @course_grades.size
+      - if avg_gpa
+        &bull;
+        %strong Average:
+        = avg_gpa
+      - if distribution.any?
+        .mt-1
+          - distribution.each do |grade_letter, count|
+            %span.badge.me-1{class: "badge-grade-#{grade_letter.downcase.gsub('+', '-plus')}"}
+              = "#{grade_letter}: #{count}"

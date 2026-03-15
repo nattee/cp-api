@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_14_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_15_040638) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -40,6 +40,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_160000) do
   end
 
   create_table "courses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "auto_generated", default: "none", null: false
     t.string "course_group"
     t.string "course_no", null: false
     t.datetime "created_at", null: false
@@ -73,6 +74,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_160000) do
     t.json "row_errors"
     t.string "sheet_name"
     t.boolean "skip_failures", default: false, null: false
+    t.integer "skipped_count", default: 0
     t.string "state", null: false
     t.string "target_type", null: false
     t.integer "total_rows", default: 0
@@ -82,6 +84,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_160000) do
     t.index ["state"], name: "index_data_imports_on_state"
     t.index ["target_type"], name: "index_data_imports_on_target_type"
     t.index ["user_id"], name: "index_data_imports_on_user_id"
+  end
+
+  create_table "grades", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "course_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "credits_grant"
+    t.string "grade"
+    t.decimal "grade_weight", precision: 3, scale: 1
+    t.integer "semester", null: false
+    t.string "source", default: "manual", null: false
+    t.bigint "student_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "year", null: false
+    t.index ["course_id"], name: "index_grades_on_course_id"
+    t.index ["student_id", "course_id", "year", "semester"], name: "idx_enrollments_unique_student_course_term", unique: true
+    t.index ["student_id"], name: "index_grades_on_student_id"
   end
 
   create_table "programs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -145,5 +163,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_160000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "courses", "programs"
   add_foreign_key "data_imports", "users"
+  add_foreign_key "grades", "courses"
+  add_foreign_key "grades", "students"
   add_foreign_key "students", "programs"
 end

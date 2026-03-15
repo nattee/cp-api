@@ -17,15 +17,28 @@ export default class extends Controller {
     const hasIcons = this.element.querySelector("option[data-icon]") !== null
     const allowClear = this.element.dataset.select2AllowClear !== undefined
 
+    // data-select2-dropdown-class passes a CSS class to Select2's dropdown,
+    // which is appended to <body> (not a sibling of the original <select>).
+    // Without this, parent/sibling CSS selectors cannot style the dropdown.
+    const dropdownClass = this.element.dataset.select2DropdownClass
+
     const opts = {
       theme: "bootstrap-5",
       width: "100%",
       minimumResultsForSearch: 6,
       ...(allowClear ? { allowClear: true, placeholder: "" } : {}),
-      ...(hasIcons ? this.iconTemplateConfig() : {})
+      ...(hasIcons ? this.iconTemplateConfig() : {}),
+      ...(dropdownClass ? { dropdownCssClass: dropdownClass } : {})
     }
 
     $el.select2(opts)
+
+    // Select2 fires change via jQuery, which does NOT bubble through native
+    // addEventListener. Dispatch a real DOM event so Stimulus controllers and
+    // other native listeners that use event delegation can react.
+    $el.on("select2:select select2:unselect select2:clear", () => {
+      this.element.dispatchEvent(new Event("change", { bubbles: true }))
+    })
   }
 
   disconnect() {

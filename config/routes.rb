@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   resources :programs
   resources :courses
   resources :students
+  resources :grades
   resources :users
   resources :data_imports, only: [:index, :new, :create, :show] do
     member do

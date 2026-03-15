@@ -11,6 +11,7 @@ class Student < ApplicationRecord
   }.freeze
 
   belongs_to :program
+  has_many :grades, dependent: :destroy
 
   validates :student_id, presence: true, uniqueness: true
   validates :first_name, presence: true
@@ -43,5 +44,16 @@ class Student < ApplicationRecord
 
   def retired?
     status == "retired"
+  end
+
+  def gpa
+    graded = grades.joins(:course).where.not(grade_weight: nil)
+    total_weighted = graded.sum("grades.grade_weight * courses.credits")
+    total_credits = graded.sum("courses.credits")
+    total_credits.zero? ? nil : (total_weighted / total_credits).round(2)
+  end
+
+  def total_credits
+    grades.joins(:course).where.not(grade_weight: nil).sum("courses.credits")
   end
 end

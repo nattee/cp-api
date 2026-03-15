@@ -49,6 +49,10 @@
               = resource_icon("students")
               Students
           %li.nav-item
+            = link_to grades_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'grades'}" do
+              = resource_icon("grades")
+              Grades
+          %li.nav-item
             = link_to users_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'users'}" do
               = resource_icon("users")
               Users

@@ -95,6 +95,7 @@ module Importers
         row_errors = []
         created = 0
         updated = 0
+        skipped = 0
         total = spreadsheet.last_row - 1 # exclude header
 
         ActiveRecord::Base.transaction do
@@ -103,6 +104,12 @@ module Importers
             attrs = extract_attributes(row, col_indices)
             constants.each { |attr, value| attrs[attr] = value }
             attrs = transform_attributes(attrs)
+
+            # Subclass returned nil to signal "skip this row"
+            if attrs.nil?
+              skipped += 1
+              next
+            end
 
             if data_import.mode == "upsert" && (existing = find_existing_record(attrs))
               existing.assign_attributes(attrs.except(*unique_key_fields))
@@ -136,6 +143,7 @@ module Importers
             total_rows: total,
             created_count: 0,
             updated_count: 0,
+            skipped_count: skipped,
             error_count: row_errors.size,
             row_errors: row_errors
           )
@@ -146,6 +154,7 @@ module Importers
             total_rows: total,
             created_count: created,
             updated_count: updated,
+            skipped_count: skipped,
             error_count: row_errors.size,
             row_errors: row_errors.presence
           )

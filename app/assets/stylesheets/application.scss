@@ -105,6 +105,38 @@ $input-icon-color: darken($light, 5%);
 .badge-create-only { background-color: rgba($primary, 0.2);  color: lighten(saturate($primary, 30%), 10%); border: 1px solid rgba($primary, 0.4); }
 .badge-upsert      { background-color: rgba($warning, 0.2);  color: lighten($warning, 8%);                 border: 1px solid rgba($warning, 0.4); }
 
+// Grade badges — color-coded by grade tier to give instant visual feedback on performance.
+// Uses frosted style consistent with other badges. Derived via grade_badge_class helper method.
+$grade-green:  #3faa65;   // A, S — top marks
+$grade-teal:   #3fa5aa;   // B+, B — good
+$grade-yellow: #bfaa30;   // C+, C — average
+$grade-orange: #d48a2e;   // D+, D — below average
+$grade-red:    #e04040;   // F, U — fail
+$grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
+.badge-grade-a       { background-color: rgba($grade-green, 0.2);  color: lighten($grade-green, 12%);  border: 1px solid rgba($grade-green, 0.4); }
+.badge-grade-b-plus  { background-color: rgba($grade-teal, 0.2);   color: lighten($grade-teal, 12%);   border: 1px solid rgba($grade-teal, 0.4); }
+.badge-grade-b       { background-color: rgba($grade-teal, 0.2);   color: lighten($grade-teal, 12%);   border: 1px solid rgba($grade-teal, 0.4); }
+.badge-grade-c-plus  { background-color: rgba($grade-yellow, 0.2); color: lighten($grade-yellow, 12%); border: 1px solid rgba($grade-yellow, 0.4); }
+.badge-grade-c       { background-color: rgba($grade-yellow, 0.2); color: lighten($grade-yellow, 12%); border: 1px solid rgba($grade-yellow, 0.4); }
+.badge-grade-d-plus  { background-color: rgba($grade-orange, 0.2); color: lighten($grade-orange, 12%); border: 1px solid rgba($grade-orange, 0.4); }
+.badge-grade-d       { background-color: rgba($grade-orange, 0.2); color: lighten($grade-orange, 12%); border: 1px solid rgba($grade-orange, 0.4); }
+.badge-grade-f       { background-color: rgba($grade-red, 0.2);    color: lighten($grade-red, 12%);    border: 1px solid rgba($grade-red, 0.4); }
+.badge-grade-s       { background-color: rgba($grade-green, 0.2);  color: lighten($grade-green, 12%);  border: 1px solid rgba($grade-green, 0.4); }
+.badge-grade-u       { background-color: rgba($grade-red, 0.2);    color: lighten($grade-red, 12%);    border: 1px solid rgba($grade-red, 0.4); }
+.badge-grade-i       { background-color: rgba($grade-muted, 0.18); color: rgba(210, 210, 210, 0.8);    border: 1px solid rgba($grade-muted, 0.35); }
+.badge-grade-w       { background-color: rgba($grade-muted, 0.18); color: rgba(210, 210, 210, 0.8);    border: 1px solid rgba($grade-muted, 0.35); }
+.badge-grade-au      { background-color: rgba($grade-muted, 0.18); color: rgba(210, 210, 210, 0.8);    border: 1px solid rgba($grade-muted, 0.35); }
+
+// Enrollment source badges
+.badge-imported { background-color: rgba($primary, 0.2);              color: lighten(saturate($primary, 30%), 10%); border: 1px solid rgba($primary, 0.4); }
+.badge-manual   { background-color: rgba($grade-muted, 0.18);         color: rgba(210, 210, 210, 0.8);              border: 1px solid rgba($grade-muted, 0.35); }
+
+// Auto-generated course badges — courses created automatically during grade import.
+// "Copied" = another revision year existed and was duplicated (mild warning).
+// "Placeholder" = no matching course_no at all, minimal stub created (stronger warning).
+.badge-auto-copied      { background-color: rgba($warning, 0.2);  color: lighten($warning, 8%);  border: 1px solid rgba($warning, 0.4); }
+.badge-auto-placeholder { background-color: rgba($danger, 0.2);   color: lighten($danger, 12%);  border: 1px solid rgba($danger, 0.4); }
+
 // Section dividers for forms and detail pages
 // Section title — quiet label style used in detail pages, forms, and cards.
 // Standalone class so it works outside .form-section/.detail-section too.
@@ -400,11 +432,20 @@ table.dataTable tbody td.dt-empty {
 
   // Select2 inserts its container as a sibling — target via adjacent combinator
   + .select2-container {
-    .select2-selection, .select2-dropdown {
+    .select2-selection {
       font-family: var(--bs-font-monospace);
       font-size: 0.8rem;
     }
   }
+}
+
+// Select2 appends the dropdown to <body>, so sibling/parent selectors can't
+// reach it. The select2_controller passes data-select2-dropdown-class through
+// as Select2's dropdownCssClass option, which adds this class to the detached
+// dropdown element.
+.select2-dropdown--monospace {
+  font-family: var(--bs-font-monospace);
+  font-size: 0.8rem;
 }
 
 // CSS-only help popover — triggered by :focus on a button. No Bootstrap JS

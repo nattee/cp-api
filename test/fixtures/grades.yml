@@ -1,0 +1,35 @@
+active_intro_computing:
+  student: active_student
+  course: intro_computing
+  year: 2024
+  semester: 1
+  grade: A
+  grade_weight: 4.0
+  source: imported
+
+active_senior_project:
+  student: active_student
+  course: senior_project
+  year: 2024
+  semester: 2
+  grade: "B+"
+  grade_weight: 3.5
+  source: imported
+
+active_gened:
+  student: active_student
+  course: gened_course
+  year: 2024
+  semester: 1
+  grade: B
+  grade_weight: 3.0
+  source: manual
+
+graduated_intro_computing:
+  student: graduated_student
+  course: intro_computing
+  year: 2022
+  semester: 1
+  grade: "A"
+  grade_weight: 4.0
+  source: imported
