@@ -114,8 +114,7 @@ module Importers
     def parse_semester(value)
       str = value.to_s.strip.upcase
       str = str.delete_prefix("X") if str.match?(/\AX\d\z/)
-      str = "3" if str == "S2"
-      str = "1" if str == "S1"
+      str = str.delete_prefix("S") if str.match?(/\AS\d\z/)
       str.to_i
     end
 
