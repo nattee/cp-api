@@ -2,6 +2,7 @@ module ApplicationHelper
   RESOURCE_ICONS = {
     "programs"      => "account_tree",
     "courses"       => "menu_book",
+    "staffs"        => "groups",
     "students"      => "school",
     "grades"        => "grading",
     "users"         => "group",

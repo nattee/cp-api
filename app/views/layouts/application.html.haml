@@ -45,6 +45,10 @@
               = resource_icon("courses")
               Courses
           %li.nav-item
+            = link_to staffs_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'staffs'}" do
+              = resource_icon("staffs")
+              Staff
+          %li.nav-item
             = link_to students_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'students'}" do
               = resource_icon("students")
               Students

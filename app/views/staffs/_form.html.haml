@@ -1,0 +1,111 @@
+= form_with(model: staff, class: "needs-validation") do |f|
+  - if staff.errors.any?
+    .alert.alert-danger
+      %h5.alert-heading
+        = pluralize(staff.errors.count, "error")
+        prohibited this staff from being saved:
+      %ul.mb-0
+        - staff.errors.full_messages.each do |message|
+          %li= message
+
+  %fieldset.form-section
+    %legend Identity
+    .row
+      .col-md-4.mb-3
+        = f.label :title, class: "form-label"
+        = f.select :title, options_for_select(Staff::TITLES, staff.title), { include_blank: "Select title" }, class: "form-select #{'is-invalid' if staff.errors[:title].any?}", data: { controller: "select2" }
+        - if staff.errors[:title].any?
+          .invalid-feedback= staff.errors[:title].first
+      .col-md-4.mb-3
+        = f.label :academic_title, class: "form-label"
+        = f.select :academic_title, options_for_select(Staff::ACADEMIC_TITLES, staff.academic_title), { include_blank: "None" }, class: "form-select", data: { controller: "select2" }
+
+    .row
+      .col-md-6.mb-3
+        = f.label :first_name, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols person
+          = f.text_field :first_name, class: "form-control #{'is-invalid' if staff.errors[:first_name].any?}"
+          - if staff.errors[:first_name].any?
+            .invalid-feedback= staff.errors[:first_name].first
+      .col-md-6.mb-3
+        = f.label :last_name, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols person
+          = f.text_field :last_name, class: "form-control #{'is-invalid' if staff.errors[:last_name].any?}"
+          - if staff.errors[:last_name].any?
+            .invalid-feedback= staff.errors[:last_name].first
+
+    .row
+      .col-md-6.mb-3
+        = f.label :first_name_th, "First Name (TH)", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols translate
+          = f.text_field :first_name_th, class: "form-control"
+      .col-md-6.mb-3
+        = f.label :last_name_th, "Last Name (TH)", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols translate
+          = f.text_field :last_name_th, class: "form-control"
+
+  %fieldset.form-section
+    %legend Position
+    .row
+      .col-md-6.mb-3
+        = f.label :staff_type, "Type", class: "form-label"
+        = f.select :staff_type, options_for_select(Staff::STAFF_TYPES.map { |t| [t.titleize, t, { data: { icon: Staff::STAFF_TYPE_ICONS[t] } }] }, staff.staff_type), {}, class: "form-select #{'is-invalid' if staff.errors[:staff_type].any?}", data: { controller: "select2" }
+        - if staff.errors[:staff_type].any?
+          .invalid-feedback= staff.errors[:staff_type].first
+      .col-md-6.mb-3
+        = f.label :status, class: "form-label"
+        = f.select :status, options_for_select(Staff::STATUSES.map { |s| [s.titleize, s, { data: { icon: Staff::STATUS_ICONS[s] } }] }, staff.status), {}, class: "form-select #{'is-invalid' if staff.errors[:status].any?}", data: { controller: "select2" }
+        - if staff.errors[:status].any?
+          .invalid-feedback= staff.errors[:status].first
+
+    .row
+      .col-md-6.mb-3
+        = f.label :employment_date, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols event
+          = f.text_field :employment_date, value: staff.employment_date&.iso8601, class: "form-control", data: { controller: "datepicker" }
+
+  %fieldset.form-section
+    %legend Contact
+    .row
+      .col-md-6.mb-3
+        = f.label :email, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols mail
+          = f.email_field :email, class: "form-control"
+      .col-md-6.mb-3
+        = f.label :phone, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols phone
+          = f.text_field :phone, class: "form-control"
+
+    .row
+      .col-md-6.mb-3
+        = f.label :room, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols meeting_room
+          = f.text_field :room, class: "form-control"
+
+  %fieldset.form-section
+    %legend Personal
+    .row
+      .col-md-6.mb-3
+        = f.label :birthdate, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols cake
+          = f.text_field :birthdate, value: staff.birthdate&.iso8601, class: "form-control", data: { controller: "datepicker" }
+
+  = f.submit class: "btn btn-primary"

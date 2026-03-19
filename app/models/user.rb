@@ -1,13 +1,13 @@
 class User < ApplicationRecord
   has_secure_password
 
-  ROLES = %w[admin staff viewer].freeze
+  ROLES = %w[admin editor viewer].freeze
 
   # Material Symbols icon for each role — used by Select2 dropdowns
   # and anywhere else that needs a visual indicator for role.
   ROLE_ICONS = {
     "admin"  => "shield_person",
-    "staff"  => "work",
+    "editor" => "edit",
     "viewer" => "visibility"
   }.freeze
 
@@ -23,8 +23,8 @@ class User < ApplicationRecord
     role == "admin"
   end
 
-  def staff?
-    role == "staff"
+  def editor?
+    role == "editor"
   end
 
   def viewer?

@@ -21,6 +21,7 @@ Rails.application.routes.draw do
 
   resources :programs
   resources :courses
+  resources :staffs
   resources :students
   resources :grades
   resources :users

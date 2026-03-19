@@ -83,7 +83,7 @@ $input-icon-color: darken($light, 5%);
 
 // Outlined / frosted badges (neon-bright text, tinted glow bg)
 .badge-admin    { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                    border: 1px solid rgba($danger, 0.4); }
-.badge-staff    { background-color: rgba($primary, 0.2);   color: lighten(saturate($primary, 30%), 10%);    border: 1px solid rgba($primary, 0.4); }
+.badge-editor   { background-color: rgba($primary, 0.2);   color: lighten(saturate($primary, 30%), 10%);    border: 1px solid rgba($primary, 0.4); }
 .badge-viewer   { background-color: rgba($secondary, 0.2); color: lighten(saturate($secondary, 20%), 35%);  border: 1px solid rgba($secondary, 0.4); }
 .badge-active    { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%);    border: 1px solid rgba($success, 0.4); }
 .badge-inactive  { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
@@ -93,6 +93,19 @@ $input-icon-color: darken($light, 5%);
 .badge-bachelor  { background-color: rgba($primary, 0.2);   color: lighten(saturate($primary, 30%), 10%);    border: 1px solid rgba($primary, 0.4); }
 .badge-master    { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
 .badge-doctoral  { background-color: rgba($warning, 0.2);   color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
+
+// Staff type badges
+.badge-lecturer         { background-color: rgba($primary, 0.2);   color: lighten(saturate($primary, 30%), 10%);    border: 1px solid rgba($primary, 0.4); }
+.badge-adjunct          { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
+.badge-lab              { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%);    border: 1px solid rgba($success, 0.4); }
+.badge-admin-permanent  { background-color: rgba($secondary, 0.2); color: lighten(saturate($secondary, 20%), 35%);  border: 1px solid rgba($secondary, 0.4); }
+.badge-admin-annual     { background-color: rgba($warning, 0.2);   color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
+.badge-admin-short-term { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                    border: 1px solid rgba($danger, 0.4); }
+
+// Staff program role badges
+.badge-head      { background-color: rgba($warning, 0.2);   color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
+.badge-secretary { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
+.badge-member    { background-color: rgba($secondary, 0.2); color: lighten(saturate($secondary, 20%), 35%);  border: 1px solid rgba($secondary, 0.4); }
 
 // Import state badges
 .badge-pending    { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }

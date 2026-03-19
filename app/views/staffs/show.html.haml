@@ -1,0 +1,91 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1= @staff.display_name
+  .d-flex.gap-2
+    - if current_user.admin?
+      = link_to "Edit", edit_staff_path(@staff), class: "btn btn-outline-secondary"
+    = link_to "Back", staffs_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    .detail-section
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Title
+        %dd.col-sm-9= @staff.title
+
+        - if @staff.academic_title.present?
+          %dt.col-sm-3 Academic Title
+          %dd.col-sm-9= @staff.academic_title
+
+        %dt.col-sm-3 Name (EN)
+        %dd.col-sm-9= @staff.full_name
+
+        - if @staff.full_name_th.present?
+          %dt.col-sm-3 Name (TH)
+          %dd.col-sm-9= @staff.full_name_th
+
+    .detail-section
+      %h6.section-title Position
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Type
+        %dd.col-sm-9
+          %span.badge{class: "badge-#{@staff.staff_type.dasherize}"}= @staff.staff_type.titleize
+
+        %dt.col-sm-3 Status
+        %dd.col-sm-9
+          %span.badge{class: "badge-#{@staff.status.dasherize}"}= @staff.status.titleize
+
+        - if @staff.employment_date.present?
+          %dt.col-sm-3 Employment Date
+          %dd.col-sm-9= @staff.employment_date.strftime("%B %-d, %Y")
+
+    - if [@staff.email, @staff.phone, @staff.room].any?(&:present?)
+      .detail-section
+        %h6.section-title Contact
+        %dl.dl-fields.row.mb-0
+          - if @staff.email.present?
+            %dt.col-sm-3 Email
+            %dd.col-sm-9= @staff.email
+
+          - if @staff.phone.present?
+            %dt.col-sm-3 Phone
+            %dd.col-sm-9= @staff.phone
+
+          - if @staff.room.present?
+            %dt.col-sm-3 Room
+            %dd.col-sm-9= @staff.room
+
+    - if @staff.birthdate.present?
+      .detail-section
+        %h6.section-title Personal
+        %dl.dl-fields.row.mb-0
+          %dt.col-sm-3 Birthdate
+          %dd.col-sm-9= @staff.birthdate.strftime("%B %-d, %Y")
+
+    - if @staff.staff_programs.any?
+      .detail-section
+        %h6.section-title Programs
+        .table-responsive
+          %table.table.table-hover.mb-0
+            %thead
+              %tr
+                %th Program
+                %th Role
+                %th Start Date
+                %th End Date
+            %tbody
+              - @staff.staff_programs.includes(:program).each do |sp|
+                %tr
+                  %td= link_to sp.program.name_en, sp.program
+                  %td
+                    - if sp.role.present?
+                      %span.badge{class: "badge-#{sp.role.dasherize}"}= sp.role.titleize
+                  %td= sp.start_date&.strftime("%B %-d, %Y")
+                  %td= sp.end_date&.strftime("%B %-d, %Y")
+
+    .detail-section
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Created at
+        %dd.col-sm-9= @staff.created_at.strftime("%B %d, %Y %H:%M")
+
+        %dt.col-sm-3 Updated at
+        %dd.col-sm-9= @staff.updated_at.strftime("%B %d, %Y %H:%M")

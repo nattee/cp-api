@@ -77,7 +77,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "accepts valid roles" do
-    %w[admin staff viewer].each do |role|
+    %w[admin editor viewer].each do |role|
       user = User.new(valid_attributes.merge(role: role))
       assert user.valid?, "#{role} should be a valid role"
     end
@@ -122,20 +122,20 @@ class UserTest < ActiveSupport::TestCase
 
   test "admin? returns true for admin role" do
     assert users(:admin).admin?
-    assert_not users(:admin).staff?
+    assert_not users(:admin).editor?
     assert_not users(:admin).viewer?
   end
 
-  test "staff? returns true for staff role" do
-    assert users(:staff).staff?
-    assert_not users(:staff).admin?
-    assert_not users(:staff).viewer?
+  test "editor? returns true for editor role" do
+    assert users(:editor).editor?
+    assert_not users(:editor).admin?
+    assert_not users(:editor).viewer?
   end
 
   test "viewer? returns true for viewer role" do
     assert users(:viewer).viewer?
     assert_not users(:viewer).admin?
-    assert_not users(:viewer).staff?
+    assert_not users(:viewer).editor?
   end
 
   # --- Scopes ---
@@ -143,7 +143,7 @@ class UserTest < ActiveSupport::TestCase
   test "active scope excludes inactive users" do
     active_users = User.active
     assert_includes active_users, users(:admin)
-    assert_includes active_users, users(:staff)
+    assert_includes active_users, users(:editor)
     assert_includes active_users, users(:viewer)
     assert_not_includes active_users, users(:inactive)
   end

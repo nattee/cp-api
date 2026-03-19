@@ -3,7 +3,7 @@
 %h1.mb-4 Style Guide
 
 -# --- Helper variables ---
-- badge_variants = [["badge-admin", "Admin"], ["badge-staff", "Staff"], ["badge-viewer", "Viewer"], ["badge-active", "Active"], ["badge-inactive", "Inactive"], ["badge-graduated", "Graduated"], ["badge-on-leave", "On Leave"]]
+- badge_variants = [["badge-admin", "Admin"], ["badge-editor", "Editor"], ["badge-viewer", "Viewer"], ["badge-active", "Active"], ["badge-inactive", "Inactive"], ["badge-graduated", "Graduated"], ["badge-on-leave", "On Leave"]]
 - btn_variants = %w[primary secondary success danger warning info light dark]
 - ghost_variants = [["btn-ghost-primary", "Primary"], ["btn-ghost-secondary", "Secondary"], ["btn-ghost-danger", "Danger"]]
 - backgrounds = [["Base background (body)", ""], ["Card background", "card-bg"], ["Input background", "input-bg"]]
@@ -138,7 +138,7 @@
             %span.material-symbols shield_person
           %select.form-select
             %option{selected: true} admin
-            %option staff
+            %option editor
             %option viewer
 
       .mb-3.form-check
@@ -183,7 +183,7 @@
       %label.form-label Role (plain, no icons)
       %select.form-select{data: {controller: "select2"}}
         %option admin
-        %option staff
+        %option editor
         %option viewer
 
 -# ============================================================
@@ -271,7 +271,7 @@
             %th Status Badge
             %th Actions
         %tbody
-          - [["Alice", "badge-admin", "Admin", "badge-active", "Active"], ["Bob", "badge-staff", "Staff", "badge-inactive", "Inactive"], ["Carol", "badge-viewer", "Viewer", "badge-graduated", "Graduated"], ["Dave", "badge-staff", "Staff", "badge-on-leave", "On Leave"]].each do |name, role_cls, role, status_cls, status|
+          - [["Alice", "badge-admin", "Admin", "badge-active", "Active"], ["Bob", "badge-editor", "Editor", "badge-inactive", "Inactive"], ["Carol", "badge-viewer", "Viewer", "badge-graduated", "Graduated"], ["Dave", "badge-editor", "Editor", "badge-on-leave", "On Leave"]].each do |name, role_cls, role, status_cls, status|
             %tr
               %td= name
               %td
@@ -507,7 +507,7 @@
 
       // Custom badges
       css += ".badge-admin { background-color: " + rgba(c.danger, 0.2) + " !important; color: " + lighten(c.danger, 12) + " !important; border-color: " + rgba(c.danger, 0.4) + " !important; }\n";
-      css += ".badge-staff { background-color: " + rgba(c.primary, 0.2) + " !important; color: " + lighten(saturate(c.primary, 30), 10) + " !important; border-color: " + rgba(c.primary, 0.4) + " !important; }\n";
+      css += ".badge-editor { background-color: " + rgba(c.primary, 0.2) + " !important; color: " + lighten(saturate(c.primary, 30), 10) + " !important; border-color: " + rgba(c.primary, 0.4) + " !important; }\n";
       css += ".badge-viewer { background-color: " + rgba(c.secondary, 0.2) + " !important; color: " + lighten(saturate(c.secondary, 20), 35) + " !important; border-color: " + rgba(c.secondary, 0.4) + " !important; }\n";
       css += ".badge-active { background-color: " + rgba(c.success, 0.2) + " !important; color: " + lighten(saturate(c.success, 20), 12) + " !important; border-color: " + rgba(c.success, 0.4) + " !important; }\n";
       css += ".badge-graduated { background-color: " + rgba(c.info, 0.2) + " !important; color: " + lighten(saturate(c.info, 20), 12) + " !important; border-color: " + rgba(c.info, 0.4) + " !important; }\n";

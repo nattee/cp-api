@@ -8,12 +8,12 @@ admin:
   role: admin
   active: true
 
-staff:
-  username: staff_user
-  email: staff@example.com
-  name: Staff User
+editor:
+  username: editor_user
+  email: editor@example.com
+  name: Editor User
   password_digest: "<%= password_digest %>"
-  role: staff
+  role: editor
   active: true
 
 viewer:

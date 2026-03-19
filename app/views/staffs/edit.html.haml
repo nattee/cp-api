@@ -1,0 +1,7 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 Edit Staff
+  = link_to "Back", staff_path(@staff), class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    = render "form", staff: @staff

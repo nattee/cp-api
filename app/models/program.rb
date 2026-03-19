@@ -11,6 +11,8 @@ class Program < ApplicationRecord
 
   has_many :courses, dependent: :restrict_with_error
   has_many :students, dependent: :restrict_with_error
+  has_many :staff_programs, dependent: :destroy
+  has_many :staffs, through: :staff_programs
 
   validates :name_en, presence: true
   validates :degree_level, presence: true, inclusion: { in: DEGREE_LEVELS }

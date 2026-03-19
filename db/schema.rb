@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_15_040638) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_19_030302) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -113,6 +113,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_15_040638) do
     t.integer "year_started", null: false
   end
 
+  create_table "staff_programs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "end_date"
+    t.bigint "program_id", null: false
+    t.string "role"
+    t.bigint "staff_id", null: false
+    t.date "start_date"
+    t.datetime "updated_at", null: false
+    t.index ["program_id"], name: "index_staff_programs_on_program_id"
+    t.index ["staff_id"], name: "index_staff_programs_on_staff_id"
+  end
+
+  create_table "staffs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "academic_title"
+    t.date "birthdate"
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.date "employment_date"
+    t.string "first_name", null: false
+    t.string "first_name_th"
+    t.string "last_name", null: false
+    t.string "last_name_th"
+    t.string "phone"
+    t.string "room"
+    t.string "staff_type", null: false
+    t.string "status", default: "active", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "students", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.text "address"
     t.integer "admission_year", null: false
@@ -165,5 +195,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_15_040638) do
   add_foreign_key "data_imports", "users"
   add_foreign_key "grades", "courses"
   add_foreign_key "grades", "students"
+  add_foreign_key "staff_programs", "programs"
+  add_foreign_key "staff_programs", "staffs"
   add_foreign_key "students", "programs"
 end

@@ -14,9 +14,9 @@ end
 
 if Rails.env.development?
   [
-    { username: "somchai.w",  email: "somchai.w@cp.eng.chula.ac.th",  name: "Somchai Wongsakul",  role: "staff" },
+    { username: "somchai.w",  email: "somchai.w@cp.eng.chula.ac.th",  name: "Somchai Wongsakul",  role: "editor" },
     { username: "naree.k",    email: "naree.k@cp.eng.chula.ac.th",    name: "Naree Kittisak",     role: "viewer" },
-    { username: "pichit.s",   email: "pichit.s@cp.eng.chula.ac.th",   name: "Pichit Srisombat",   role: "staff" },
+    { username: "pichit.s",   email: "pichit.s@cp.eng.chula.ac.th",   name: "Pichit Srisombat",   role: "editor" },
     { username: "anucha.p",   email: "anucha.p@cp.eng.chula.ac.th",   name: "Anucha Prasert",     role: "admin" },
     { username: "kannika.t",  email: "kannika.t@cp.eng.chula.ac.th",  name: "Kannika Thongchai",  role: "viewer", active: false },
   ].each do |attrs|
@@ -80,3 +80,6 @@ if Rails.env.development?
 else
   puts "Seed complete. Super admin user (ID 1) ready."
 end
+
+# Load additional seed files
+Dir[Rails.root.join("db/seeds/*.rb")].sort.each { |f| load f }
