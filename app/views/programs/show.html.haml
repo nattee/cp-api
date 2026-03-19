@@ -9,6 +9,9 @@
   .card-body
     .detail-section
       %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Program Code
+        %dd.col-sm-9= @program.program_code
+
         %dt.col-sm-3 Name (EN)
         %dd.col-sm-9= @program.name_en
 
@@ -23,14 +26,29 @@
         %dd.col-sm-9
           %span.badge{class: "badge-#{@program.degree_level}"}= @program.degree_level.titleize
 
-        %dt.col-sm-3 Degree Name
+        %dt.col-sm-3 Degree Name (EN)
         %dd.col-sm-9= @program.degree_name
+
+        - if @program.degree_name_th.present?
+          %dt.col-sm-3 Degree Name (TH)
+          %dd.col-sm-9= @program.degree_name_th
 
         %dt.col-sm-3 Field of Study
         %dd.col-sm-9= @program.field_of_study
 
-        %dt.col-sm-3 Year Started
+        %dt.col-sm-3 Total Credits
+        %dd.col-sm-9= @program.total_credit || "—"
+
+        %dt.col-sm-3
+          Year Started
+          %button.help-popover-trigger{type: "button", tabindex: "0"}
+            %span.material-symbols{style: "font-size: 16px"} help
+            %span.help-popover-content Buddhist Era year (B.E.). To convert to CE, subtract 543.
         %dd.col-sm-9= @program.year_started
+
+        %dt.col-sm-3 Status
+        %dd.col-sm-9
+          %span.badge{class: @program.active? ? "badge-active" : "badge-inactive"}= @program.active? ? "Active" : "Inactive"
 
     .detail-section
       %dl.dl-fields.row.mb-0

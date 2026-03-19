@@ -12,6 +12,9 @@ User.find_or_create_by!(id: 1) do |u|
   u.role = "admin"
 end
 
+# Load additional seed files
+Dir[Rails.root.join("db/seeds/*.rb")].sort.each { |f| load f }
+
 if Rails.env.development?
   [
     { username: "somchai.w",  email: "somchai.w@cp.eng.chula.ac.th",  name: "Somchai Wongsakul",  role: "editor" },
@@ -29,18 +32,8 @@ if Rails.env.development?
       u.active = attrs.fetch(:active, true)
     end
   end
-  programs = [
-    { name_en: "Computer Engineering",                    name_th: "วิศวกรรมคอมพิวเตอร์",                        degree_level: "bachelor", degree_name: "Bachelor of Engineering",       field_of_study: "Computer Engineering", year_started: 2540 },
-    { name_en: "Computer Engineering",                    name_th: "วิศวกรรมคอมพิวเตอร์",                        degree_level: "master",   degree_name: "Master of Engineering",        field_of_study: "Computer Engineering", year_started: 2545 },
-    { name_en: "Computer Engineering",                    name_th: "วิศวกรรมคอมพิวเตอร์",                        degree_level: "doctoral", degree_name: "Doctor of Philosophy",         field_of_study: "Computer Engineering", year_started: 2550 },
-    { name_en: "Computer Science and Information Science", name_th: "วิทยาศาสตร์คอมพิวเตอร์และเทคโนโลยีสารสนเทศ", degree_level: "bachelor", degree_name: "Bachelor of Science",          field_of_study: "Computer Science",     year_started: 2560 },
-  ].map do |attrs|
-    Program.find_or_create_by!(name_en: attrs[:name_en], degree_level: attrs[:degree_level]) do |p|
-      p.assign_attributes(attrs)
-    end
-  end
 
-  cp_bachelor = programs[0]
+  cp_bachelor =  Program.last
 
   [
     { student_id: "6732100021", first_name: "Thanawat",  last_name: "Sricharoen",   first_name_th: "ธนวัฒน์",  last_name_th: "ศรีเจริญ",   admission_year_be: 2567, email: "thanawat.s@student.chula.ac.th",  discord: "thanawat#1234", previous_school: "Triam Udom Suksa", enrollment_method: "Direct Admission", program: cp_bachelor },
@@ -81,5 +74,3 @@ else
   puts "Seed complete. Super admin user (ID 1) ready."
 end
 
-# Load additional seed files
-Dir[Rails.root.join("db/seeds/*.rb")].sort.each { |f| load f }

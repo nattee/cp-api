@@ -14,14 +14,17 @@ class Program < ApplicationRecord
   has_many :staff_programs, dependent: :destroy
   has_many :staffs, through: :staff_programs
 
+  validates :program_code, presence: true, uniqueness: true
   validates :name_en, presence: true
   validates :degree_level, presence: true, inclusion: { in: DEGREE_LEVELS }
   validates :degree_name, presence: true
   validates :field_of_study, presence: true
   validates :year_started, presence: true, numericality: { only_integer: true }
+  validates :total_credit, numericality: { only_integer: true }, allow_nil: true
 
   def self.placeholder
     find_or_create_by!(name_en: PLACEHOLDER_NAME) do |p|
+      p.program_code = "0000"
       p.degree_level = "bachelor"
       p.degree_name = "Unknown"
       p.field_of_study = "Unknown"

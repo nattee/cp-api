@@ -38,10 +38,10 @@ module Importers
         { attribute: :graduation_date,   label: "Graduation Date",   required: false,
           aliases: %w[graduation_date วันจบ วันสำเร็จการศึกษา] },
         { attribute: :program_name,      label: "Program",           required: false,
-          aliases: %w[program program_name program_id หลักสูตร],
-          help: "From file: looks up by ID first, then English name, then Thai name. " \
+          aliases: %w[program program_name program_id program_code หลักสูตร],
+          help: "From file: looks up by program code (4-digit) first, then English name, then Thai name. " \
                 "If multiple programs share the same name, the latest one (by year started) is used.",
-          fixed_options: -> { Program.order(year_started: :desc).map { |p| ["#{p.name_en} (#{p.year_started})", p.id] } } }
+          fixed_options: -> { Program.order(year_started: :desc).map { |p| ["#{p.program_code} — #{p.name_en} (#{p.year_started})", p.id] } } }
       ]
     end
 
@@ -60,11 +60,9 @@ module Importers
     end
 
     def resolve_program(value)
-      # 1. Try by ID if numeric
-      if value.match?(/\A\d+\z/)
-        found = Program.find_by(id: value.to_i)
-        return found if found
-      end
+      # 1. Try by program_code (4-digit code)
+      found = Program.find_by(program_code: value)
+      return found if found
 
       # 2. Try by English name (latest by year_started)
       found = Program.where(name_en: value).order(year_started: :desc).first

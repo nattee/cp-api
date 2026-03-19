@@ -1,4 +1,5 @@
 cp_bachelor:
+  program_code: "2101"
   name_en: Computer Engineering (Bachelor)
   name_th: วิศวกรรมคอมพิวเตอร์ (ปริญญาตรี)
   degree_level: bachelor
@@ -7,6 +8,7 @@ cp_bachelor:
   year_started: 2540
 
 cp_master:
+  program_code: "2102"
   name_en: Computer Engineering (Master)
   name_th: วิศวกรรมคอมพิวเตอร์ (ปริญญาโท)
   degree_level: master

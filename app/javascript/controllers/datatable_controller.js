@@ -22,7 +22,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["table", "filter"]
-  static values = { serverSideUrl: String, pageLength: { type: Number, default: 25 } }
+  static values = { serverSideUrl: String, pageLength: { type: Number, default: 25 }, order: String }
 
   connect() {
     if (!window.DataTable) return
@@ -31,9 +31,17 @@ export default class extends Controller {
     const headerCells = this.tableTarget.querySelectorAll("thead th")
     const lastColIndex = headerCells.length - 1
 
+    // Parse order value: "colIndex:dir" e.g. "4:desc". Default: first column asc.
+    let order = [[0, "asc"]]
+    if (this.hasOrderValue && this.orderValue) {
+      const [col, dir] = this.orderValue.split(":")
+      order = [[parseInt(col, 10), dir || "asc"]]
+    }
+
     const opts = {
       pageLength: this.pageLengthValue,
       lengthMenu: [10, 25, 50, 100],
+      order,
       columnDefs: [
         { orderable: false, searchable: false, targets: lastColIndex }
       ]

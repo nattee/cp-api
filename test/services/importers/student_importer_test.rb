@@ -69,11 +69,11 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
 
   # --- resolve_program (via transform_attributes) ---
 
-  test "resolve_program finds by ID" do
+  test "resolve_program finds by program_code" do
     program = programs(:cp_bachelor)
     importer = build_importer
 
-    attrs = { program_name: program.id.to_s, student_id: "1", admission_year_be: 2567, status: "active" }
+    attrs = { program_name: program.program_code, student_id: "1", admission_year_be: 2567, status: "active" }
     result = importer.send(:transform_attributes, attrs)
 
     assert_equal program.id, result[:program_id]
@@ -112,6 +112,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     # Create a newer program with the same English name
     older = programs(:cp_bachelor) # year_started: 2540
     newer = Program.create!(
+      program_code: "9999",
       name_en: older.name_en,
       name_th: "วิศวกรรมคอมพิวเตอร์ (ปริญญาตรี) ฉบับใหม่",
       degree_level: "bachelor",
@@ -163,7 +164,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
       },
       default_values: {
         "status" => "on_leave",
-        "program_name" => programs(:cp_bachelor).id.to_s
+        "program_name" => programs(:cp_bachelor).program_code
       }
     )
 
@@ -186,7 +187,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
         "admission_year_be" => "D: ปีที่รับเข้า",
         "status" => "E: สถานะ"
       },
-      default_values: { "program_name" => programs(:cp_bachelor).id.to_s }
+      default_values: { "program_name" => programs(:cp_bachelor).program_code }
     )
 
     Importers::StudentImporter.new(data_import).call

@@ -9,8 +9,19 @@
           %li= message
 
   %fieldset.form-section
-    %legend Program Name
+    %legend Program Info
     .row
+      .col-md-6.mb-3
+        = f.label :program_code, "Program Code", class: "form-label"
+        %button.help-popover-trigger{type: "button", tabindex: "0"}
+          %span.material-symbols{style: "font-size: 16px"} help
+          %span.help-popover-content 4-digit code identifying this program. Used for student imports.
+        .input-group
+          %span.input-group-text
+            %span.material-symbols pin
+          = f.text_field :program_code, class: "form-control #{'is-invalid' if program.errors[:program_code].any?}", maxlength: 4
+          - if program.errors[:program_code].any?
+            .invalid-feedback= program.errors[:program_code].first
       .col-md-6.mb-3
         = f.label :name_en, "Name (English)", class: "form-label"
         .input-group
@@ -35,13 +46,20 @@
         - if program.errors[:degree_level].any?
           .invalid-feedback= program.errors[:degree_level].first
       .col-md-6.mb-3
-        = f.label :degree_name, class: "form-label"
+        = f.label :degree_name, "Degree Name (English)", class: "form-label"
         .input-group
           %span.input-group-text
             %span.material-symbols workspace_premium
           = f.text_field :degree_name, class: "form-control #{'is-invalid' if program.errors[:degree_name].any?}"
           - if program.errors[:degree_name].any?
             .invalid-feedback= program.errors[:degree_name].first
+    .row
+      .col-md-6.mb-3
+        = f.label :degree_name_th, "Degree Name (Thai)", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols translate
+          = f.text_field :degree_name_th, class: "form-control"
 
     .row
       .col-md-6.mb-3
@@ -53,12 +71,29 @@
           - if program.errors[:field_of_study].any?
             .invalid-feedback= program.errors[:field_of_study].first
       .col-md-6.mb-3
-        = f.label :year_started, class: "form-label"
+        = f.label :total_credit, "Total Credits", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols school
+          = f.number_field :total_credit, class: "form-control #{'is-invalid' if program.errors[:total_credit].any?}"
+          - if program.errors[:total_credit].any?
+            .invalid-feedback= program.errors[:total_credit].first
+    .row
+      .col-md-6.mb-3
+        = f.label :year_started, "Year Started", class: "form-label"
+        %button.help-popover-trigger{type: "button", tabindex: "0"}
+          %span.material-symbols{style: "font-size: 16px"} help
+          %span.help-popover-content Buddhist Era year (e.g. 2540). To convert from CE, add 543.
         .input-group
           %span.input-group-text
             %span.material-symbols calendar_month
           = f.number_field :year_started, class: "form-control #{'is-invalid' if program.errors[:year_started].any?}"
           - if program.errors[:year_started].any?
             .invalid-feedback= program.errors[:year_started].first
+      .col-md-6.mb-3
+        = f.label :active, class: "form-label d-block"
+        .form-check.form-switch
+          = f.check_box :active, class: "form-check-input", role: "switch"
+          = f.label :active, "Active program", class: "form-check-label"
 
   = f.submit class: "btn btn-primary"

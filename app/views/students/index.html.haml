@@ -9,8 +9,11 @@
           %span.form-label.mb-0.small.text-muted Program
           = select_tag "filter-program", options_for_select([["All", ""]] + @programs.map { |p| [p, p] }), data: { controller: "select2", datatable_target: "filter", action: "change->datatable#filter", datatable_column_index: "2" }
         .d-flex.align-items-center.gap-2{style: "min-width: 160px"}
+          %span.form-label.mb-0.small.text-muted Degree
+          = select_tag "filter-degree", options_for_select([["All", ""]] + Program::DEGREE_LEVELS.map { |d| [d.titleize, d] }), data: { controller: "select2", datatable_target: "filter", action: "change->datatable#filter", datatable_column_index: "3" }
+        .d-flex.align-items-center.gap-2{style: "min-width: 160px"}
           %span.form-label.mb-0.small.text-muted Year
-          = select_tag "filter-year", options_for_select([["All", ""]] + @admission_years.map { |y| [y, y] }), data: { controller: "select2", datatable_target: "filter", action: "change->datatable#filter", datatable_column_index: "3" }
+          = select_tag "filter-year", options_for_select([["All", ""]] + @admission_years.map { |y| [y, y] }), data: { controller: "select2", datatable_target: "filter", action: "change->datatable#filter", datatable_column_index: "4" }
       - if current_user.admin?
         = link_to "New Student", new_student_path, class: "btn btn-primary btn-sm"
     .table-responsive
@@ -20,6 +23,7 @@
             %th Student ID
             %th Name
             %th Program
+            %th Degree
             %th Admission Year
             %th Status
             %th Actions

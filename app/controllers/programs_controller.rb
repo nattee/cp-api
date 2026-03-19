@@ -52,6 +52,6 @@ class ProgramsController < ApplicationController
   end
 
   def program_params
-    params.require(:program).permit(:name_en, :name_th, :degree_level, :degree_name, :field_of_study, :year_started)
+    params.require(:program).permit(:program_code, :name_en, :name_th, :degree_level, :degree_name, :degree_name_th, :field_of_study, :year_started, :active, :total_credit)
   end
 end

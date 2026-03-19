@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_19_070358) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_19_091205) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -103,14 +103,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_070358) do
   end
 
   create_table "programs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.string "degree_level", null: false
     t.string "degree_name", null: false
+    t.string "degree_name_th"
     t.string "field_of_study", null: false
     t.string "name_en", null: false
     t.string "name_th"
+    t.string "program_code", null: false
+    t.integer "total_credit"
     t.datetime "updated_at", null: false
     t.integer "year_started", null: false
+    t.index ["program_code"], name: "index_programs_on_program_code", unique: true
   end
 
   create_table "staff_programs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
