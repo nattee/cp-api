@@ -6,6 +6,9 @@ class CoursesController < ApplicationController
     @courses = Course.all
   end
 
+  # Grade stack order: bottom (worst) to top (best)
+  GRADE_STACK_ORDER = %w[M F U W P V S D D+ C C+ B B+ A].freeze
+
   def show
     @grades_count = @course.grades.count
     @available_years = @course.grades.distinct.pluck(:year).sort.reverse
@@ -16,6 +19,7 @@ class CoursesController < ApplicationController
       scope = scope.where(semester: @selected_semester) if @selected_semester
       @course_grades = scope.order("students.student_id")
     end
+    prepare_grade_distribution_chart
   end
 
   def new
@@ -56,6 +60,28 @@ class CoursesController < ApplicationController
     unless current_user.admin?
       redirect_to courses_path, alert: "Only admins can perform this action."
     end
+  end
+
+  def prepare_grade_distribution_chart
+    counts = @course.grades
+                    .where.not(grade: [ nil, "" ])
+                    .group(:year, :semester, :grade)
+                    .count
+
+    # Build sorted term labels (year/semester)
+    terms = counts.keys.map { |y, s, _| [ y, s ] }.uniq.sort
+    labels = terms.map { |y, s| "#{y}/#{s}" }
+
+    # Only include grades that appear in the data
+    present_grades = counts.values.any? { |c| c > 0 } ? counts.keys.map { |_, _, g| g }.uniq : []
+    grades = GRADE_STACK_ORDER.select { |g| present_grades.include?(g) }
+
+    datasets = grades.map do |grade|
+      data = terms.map { |y, s| counts[[y, s, grade]] || 0 }
+      { grade: grade, data: data }
+    end
+
+    @grade_dist_chart_data = { labels: labels, datasets: datasets }
   end
 
   def course_params
