@@ -7,6 +7,7 @@ class CoursesController < ApplicationController
   end
 
   def show
+    @grades_count = @course.grades.count
     @available_years = @course.grades.distinct.pluck(:year).sort.reverse
     if params[:year].present?
       @selected_year = params[:year].to_i

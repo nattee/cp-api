@@ -7,94 +7,84 @@
 
 .card
   .card-body
-    .detail-section
-      %dl.dl-fields.row.mb-0
-        %dt.col-sm-3 Course No
-        %dd.col-sm-9= @course.course_no
+    .row
+      .col-lg-6
+        .detail-section
+          %dl.dl-fields.row.mb-0
+            %dt.col-sm-4 Course No
+            %dd.col-sm-8= @course.course_no
 
-        %dt.col-sm-3 Name (EN)
-        %dd.col-sm-9= @course.name
+            %dt.col-sm-4 Name (EN)
+            %dd.col-sm-8= @course.name
 
-        - if @course.name_th.present?
-          %dt.col-sm-3 Name (TH)
-          %dd.col-sm-9= @course.name_th
+            - if @course.name_th.present?
+              %dt.col-sm-4 Name (TH)
+              %dd.col-sm-8= @course.name_th
 
-        - if @course.name_abbr.present?
-          %dt.col-sm-3 Abbreviation
-          %dd.col-sm-9= @course.name_abbr
+            - if @course.name_abbr.present?
+              %dt.col-sm-4 Abbreviation
+              %dd.col-sm-8= @course.name_abbr
 
-        %dt.col-sm-3 Revision Year
-        %dd.col-sm-9= @course.revision_year
+            %dt.col-sm-4 Revision Year
+            %dd.col-sm-8= @course.revision_year
 
-    .detail-section
-      %h6.section-title Academic
-      %dl.dl-fields.row.mb-0
-        %dt.col-sm-3 Program
-        %dd.col-sm-9
-          - if @course.program
-            = link_to @course.program.name_en, @course.program
-          - else
-            .text-muted Not assigned
+            %dt.col-sm-4 Program
+            %dd.col-sm-8
+              - if @course.program
+                = link_to @course.program.name_en, @course.program
+              - else
+                .text-muted Not assigned
 
-        - if @course.course_group.present?
-          %dt.col-sm-3 Course Group
-          %dd.col-sm-9= @course.course_group
+      .col-lg-6
+        .detail-section
+          %dl.dl-fields.row.mb-0
+            - if @course.course_group.present?
+              %dt.col-sm-4 Course Group
+              %dd.col-sm-8= @course.course_group
 
-        - if @course.department_code.present?
-          %dt.col-sm-3 Department Code
-          %dd.col-sm-9= @course.department_code
+            - if @course.department_code.present?
+              %dt.col-sm-4 Dept. Code
+              %dd.col-sm-8= @course.department_code
 
-        %dt.col-sm-3 GenEd
-        %dd.col-sm-9
-          - if @course.is_gened?
-            %span.badge.badge-active Yes
-          - else
-            %span.text-muted No
+            %dt.col-sm-4 Credits
+            %dd.col-sm-8
+              = @course.credits
+              %span.text-muted.small.ms-1
+                (#{[@course.l_credits, @course.nl_credits, @course.l_hours, @course.nl_hours, @course.s_hours].map(&:to_i).join("-")})
+              %button.help-popover-trigger{type: "button", tabindex: "0"}
+                %span.material-symbols{style: "font-size: 16px"} help
+                %span.help-popover-content Lecture credits - Non-lecture credits - Lecture hours - Non-lecture hours - Self-study hours
 
-        %dt.col-sm-3 Thesis
-        %dd.col-sm-9
-          - if @course.is_thesis?
-            %span.badge.badge-active Yes
-          - else
-            %span.text-muted No
+            %dt.col-sm-4 GenEd
+            %dd.col-sm-8
+              - if @course.is_gened?
+                %span.badge.badge-active Yes
+              - else
+                %span.text-muted No
 
-    .detail-section
-      %h6.section-title Credits & Hours
-      %dl.dl-fields.row.mb-0
-        %dt.col-sm-3 Credits
-        %dd.col-sm-9= @course.credits
+            %dt.col-sm-4 Thesis
+            %dd.col-sm-8
+              - if @course.is_thesis?
+                %span.badge.badge-active Yes
+              - else
+                %span.text-muted No
 
-        %dt.col-sm-3 Lecture Credits
-        %dd.col-sm-9= @course.l_credits
+            %dt.col-sm-4 Created
+            %dd.col-sm-8= @course.created_at.strftime("%B %d, %Y")
 
-        %dt.col-sm-3 Non-Lecture Credits
-        %dd.col-sm-9= @course.nl_credits
+            %dt.col-sm-4 Updated
+            %dd.col-sm-8= @course.updated_at.strftime("%B %d, %Y")
 
-        %dt.col-sm-3 Lecture Hours
-        %dd.col-sm-9= @course.l_hours
+.card.mt-3
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        %span.material-symbols.resource-icon.me-2 groups
+        Grades
+        %span.text-muted.ms-2.fw-normal
+          (#{@grades_count})
 
-        %dt.col-sm-3 Non-Lecture Hours
-        %dd.col-sm-9= @course.nl_hours
-
-        %dt.col-sm-3 Self-Study Hours
-        %dd.col-sm-9= @course.s_hours
-
-    .detail-section
-      %dl.dl-fields.row.mb-0
-        %dt.col-sm-3 Created at
-        %dd.col-sm-9= @course.created_at.strftime("%B %d, %Y %H:%M")
-
-        %dt.col-sm-3 Updated at
-        %dd.col-sm-9= @course.updated_at.strftime("%B %d, %Y %H:%M")
-
-- if @available_years.any?
-  .card.mt-3
-    .card-body.p-3
-      .d-flex.justify-content-between.align-items-center.mb-3
-        %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
-          %span.material-symbols.resource-icon.me-2 groups
-          Grades
-
+    - if @available_years.any?
       = form_with(url: course_path(@course), method: :get, class: "row g-2 align-items-end mb-3") do |f|
         .col-auto
           %label.form-label.mb-0{for: "year"} Year
@@ -108,3 +98,5 @@
             Filter
 
       = render "grades_table"
+    - else
+      %p.text-muted.mb-0 No grade information available.
