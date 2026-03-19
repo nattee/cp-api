@@ -23,6 +23,7 @@ Data is imported via CSV/Excel and fetched from external data providers.
 - **Propshaft** serves all assets (from app, vendor, and gem directories) with fingerprinted URLs. It does no compilation.
 - **Stylesheet load order** (in `application.html.haml`): Vendor CSS (Select2, Flatpickr) loads **before** `application.css` so that our SCSS overrides win the cascade at equal specificity.
 - **Bootstrap JS is UMD** (not ESM). It's pinned in importmap but has no named or default exports — `import { Popover } from "bootstrap"` and `import Bootstrap from "bootstrap"` both fail at runtime. For interactive components that would normally need Bootstrap JS (popovers, tooltips, collapses), use **CSS-only implementations** (`:focus`/`:focus-within` patterns) instead. See `.help-popover-trigger` in `application.scss` for the pattern.
+- **Chart.js is UMD** (same situation as Bootstrap). Pinned in importmap as `chart.js`. Use a side-effect import (`import "chart.js"`) to load the UMD bundle, then access `window.Chart`. Do NOT use `import Chart from "chart.js"` — it returns `undefined`. The `chart_controller.js` Stimulus controller handles rendering; it supports chart types `stacked-bar`, `histogram`, and `grade-distribution`. Pass data as JSON via `data-chart-data-value` attributes.
 
 ## Version Control
 
@@ -84,6 +85,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - **Index page layout**: Title + action button live inside `.card-body.p-3` (no `.card-header`). The title row uses `.d-flex.justify-content-between.align-items-center.mb-3` with an `%h5.card-title`. See `docs/code-patterns.md` for the canonical template.
 - **Card titles**: Use `.card-title` class on headings inside cards. Styled with `$light` color in `application.scss` to create visual hierarchy against muted body text.
 - **Tables in cards**: Tables inside `.card` use transparent background (inherits card bg), no outer border (card provides rounding). Row separators are subtle, header border is more prominent. Column headers (`thead th`) are styled as quiet labels: uppercase, `0.7rem`, letter-spaced, muted color. Styled globally in `application.scss` — no extra classes needed on individual tables.
+- **Table group headers**: Use `.table-group-header` on `%tr` rows with a `%td{colspan: N}` to visually separate groups (e.g. course groups, semesters) within a **single** table. This keeps columns aligned across groups — do NOT use separate tables per group. Styled with subtle background and stronger top border.
 - **Dev style guide**: `/dev/styleguide` (development only) has an interactive Color Playground with live-preview color pickers for all base and derived variables, a sample form, badges, buttons, and tables. Use "Copy SCSS" to export changes.
 - **Code patterns**: See `docs/code-patterns.md` for canonical controller, view, fixture, and test templates. Reference these when creating new resources instead of re-reading existing files. When creating or updating any resource, verify alignment against this checklist:
   - **Controller**: `before_action :require_admin, only: %i[new create edit update destroy]` + private `require_admin` method
@@ -100,6 +102,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 
 - **Program `program_code`**: A unique 4-digit string (e.g. `"0018"`, `"4784"`) from the university's official system. This is the **business key** — use it for all external lookups (imports, seeds, APIs). Rails auto-increment `id` is only for internal associations/foreign keys. Seeds use `find_or_create_by!(program_code:)`.
 - **Year fields are Buddhist Era (B.E.)**: `admission_year_be` (Student), `year_started` (Program), `revision_year` (Course) all store B.E. years (e.g. 2567 = 2024 CE). Importers auto-convert CE→BE by adding 543 when the value is < 2400.
+- **Student name display**: Use `Student#display_name` (prefers `full_name_th`, falls back to `full_name`) in all index pages, tables, and list contexts. Reserve `full_name` / `full_name_th` for show-page detail fields where both languages are displayed explicitly.
 
 ## Import System
 
