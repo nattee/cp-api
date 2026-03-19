@@ -7,6 +7,7 @@ class ProgramsController < ApplicationController
   end
 
   def show
+    @students = @program.students.order(admission_year_be: :desc, student_id: :asc)
   end
 
   def new
