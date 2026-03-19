@@ -129,23 +129,24 @@
       -# Tab 1: By Course Group
       .tab-panel{"data-tabs-target" => "panel"}
         - grouped = @grades.sort_by { |g| [g.course.course_group.to_s, g.year, g.semester] }.group_by { |g| g.course.course_group.presence || "Uncategorized" }
-        - grouped.each do |group_name, group_grades|
-          - group_credits = group_grades.select { |g| g.grade_weight }.sum { |g| g.course.credits.to_i }
-          %h6.section-title
-            = group_name
-            %span.text-muted.ms-2.fw-normal
-              (#{group_credits} credits)
-          .table-responsive.mb-3
-            %table.table.table-hover.mb-0
-              %thead
-                %tr
-                  %th Course No
-                  %th Course Name
-                  %th Year/Sem
-                  %th.text-center Credits
-                  %th.text-center Grade
-                  %th.text-center Weight
-              %tbody
+        .table-responsive
+          %table.table.table-hover.mb-0
+            %thead
+              %tr
+                %th Course No
+                %th Course Name
+                %th Year/Sem
+                %th.text-center Credits
+                %th.text-center Grade
+                %th.text-center Weight
+            %tbody
+              - grouped.each do |group_name, group_grades|
+                - group_credits = group_grades.select { |g| g.grade_weight }.sum { |g| g.course.credits.to_i }
+                %tr.table-group-header
+                  %td{colspan: 6}
+                    %strong= group_name
+                    %span.text-muted.ms-2.fw-normal
+                      (#{group_credits} credits)
                 - group_grades.each do |g|
                   %tr
                     %td= link_to g.course.course_no, g.course
@@ -160,29 +161,30 @@
       -# Tab 2: By Semester
       .tab-panel.d-none{"data-tabs-target" => "panel"}
         - by_term = @grades.sort_by { |g| [-g.year, -g.semester] }.group_by { |g| "#{g.year}/#{g.semester}" }
-        - by_term.each do |term_label, term_grades|
-          - term_graded = term_grades.select { |g| g.grade_weight }
-          - term_weighted = term_graded.sum { |g| g.grade_weight.to_f * g.course.credits.to_i }
-          - term_credits = term_graded.sum { |g| g.course.credits.to_i }
-          - term_gpa = term_credits.zero? ? nil : (term_weighted / term_credits).round(2)
-          %h6.section-title
-            = term_label
-            - if term_gpa
-              %span.text-muted.ms-2.fw-normal
-                GPA: #{term_gpa}
-                &bull;
-                #{term_credits} credits
-          .table-responsive.mb-3
-            %table.table.table-hover.mb-0
-              %thead
-                %tr
-                  %th Course No
-                  %th Course Name
-                  %th Course Group
-                  %th.text-center Credits
-                  %th.text-center Grade
-                  %th.text-center Weight
-              %tbody
+        .table-responsive
+          %table.table.table-hover.mb-0
+            %thead
+              %tr
+                %th Course No
+                %th Course Name
+                %th Course Group
+                %th.text-center Credits
+                %th.text-center Grade
+                %th.text-center Weight
+            %tbody
+              - by_term.each do |term_label, term_grades|
+                - term_graded = term_grades.select { |g| g.grade_weight }
+                - term_weighted = term_graded.sum { |g| g.grade_weight.to_f * g.course.credits.to_i }
+                - term_credits = term_graded.sum { |g| g.course.credits.to_i }
+                - term_gpa = term_credits.zero? ? nil : (term_weighted / term_credits).round(2)
+                %tr.table-group-header
+                  %td{colspan: 6}
+                    %strong= term_label
+                    - if term_gpa
+                      %span.text-muted.ms-2.fw-normal
+                        GPA: #{term_gpa}
+                        &bull;
+                        #{term_credits} credits
                 - term_grades.each do |g|
                   %tr
                     %td= link_to g.course.course_no, g.course

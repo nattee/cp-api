@@ -71,6 +71,21 @@ $input-icon-color: darken($light, 5%);
 .card .table > :not(caption) > * > * { border-color: $table-row-border-color; }
 .card .table > thead > tr > * { border-bottom-color: $table-head-border-color; border-bottom-width: $table-head-border-width; }
 
+// Group header rows within a single table — used to separate sections (e.g. course
+// groups, semesters) while keeping all columns aligned. Styled as a subtle label row
+// with a stronger top border to visually separate groups.
+.table-group-header td {
+  background-color: rgba(white, 0.03);
+  border-top: 1px solid $table-head-border-color;
+  padding-top: 0.6rem;
+  padding-bottom: 0.4rem;
+  font-size: 0.85rem;
+}
+// First group header should not have a top border (thead border is enough)
+.card .table > tbody > tr.table-group-header:first-child td {
+  border-top: 0;
+}
+
 // Column headers as muted labels — recede visually so data rows are the focus.
 // Uppercase + small size + letter-spacing = quiet "label" feel (Linear/Stripe pattern).
 .card .table > thead > tr > th {
