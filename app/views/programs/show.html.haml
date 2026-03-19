@@ -12,6 +12,9 @@
         %dt.col-sm-3 Program Code
         %dd.col-sm-9= @program.program_code
 
+        %dt.col-sm-3 Short Name
+        %dd.col-sm-9= @program.short_name.presence || "—"
+
         %dt.col-sm-3 Name (EN)
         %dd.col-sm-9= @program.name_en
 

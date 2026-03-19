@@ -81,6 +81,7 @@ module Importers
       return nil if code_str.length <= 4
 
       revision_year = code_str[0, 4].to_i
+      revision_year += 543 if revision_year < 2400
       course_no = code_str[4..]
 
       # 1. Exact match

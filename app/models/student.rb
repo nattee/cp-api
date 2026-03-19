@@ -14,8 +14,8 @@ class Student < ApplicationRecord
   has_many :grades, dependent: :destroy
 
   validates :student_id, presence: true, uniqueness: true
-  validates :first_name, presence: true
-  validates :last_name, presence: true
+  validates :first_name_th, presence: true
+  validates :last_name_th, presence: true
   validates :admission_year_be, presence: true, numericality: { only_integer: true }
   validates :status, presence: true, inclusion: { in: STATUSES }
 

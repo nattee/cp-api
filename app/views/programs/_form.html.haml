@@ -23,6 +23,13 @@
           - if program.errors[:program_code].any?
             .invalid-feedback= program.errors[:program_code].first
       .col-md-6.mb-3
+        = f.label :short_name, "Short Name", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols label
+          = f.text_field :short_name, class: "form-control"
+    .row
+      .col-md-6.mb-3
         = f.label :name_en, "Name (English)", class: "form-label"
         .input-group
           %span.input-group-text

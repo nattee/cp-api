@@ -41,7 +41,7 @@ module Importers
           aliases: %w[program program_name program_id program_code หลักสูตร],
           help: "From file: looks up by program code (4-digit) first, then English name, then Thai name. " \
                 "If multiple programs share the same name, the latest one (by year started) is used.",
-          fixed_options: -> { Program.order(year_started: :desc).map { |p| ["#{p.program_code} — #{p.name_en} (#{p.year_started})", p.id] } } }
+          fixed_options: -> { Program.order(year_started: :desc).map { |p| [ "#{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } } }
       ]
     end
 
@@ -56,13 +56,18 @@ module Importers
     end
 
     def unique_key_fields
-      [:student_id]
+      [ :student_id ]
     end
 
     def resolve_program(value)
-      # 1. Try by program_code (4-digit code)
-      found = Program.find_by(program_code: value)
-      return found if found
+      # 1. Try by program_code (4-digit, zero-padded).
+      # Roo reads numeric cells as floats (e.g. 0018 → 18.0), so we
+      # strip the decimal, convert to integer, then zero-pad to 4 digits.
+      code = value.to_s.gsub(/\.0\z/, "")
+      if code.match?(/\A\d+\z/)
+        found = Program.find_by(program_code: code.to_i.to_s.rjust(4, "0"))
+        return found if found
+      end
 
       # 2. Try by English name (latest by year_started)
       found = Program.where(name_en: value).order(year_started: :desc).first

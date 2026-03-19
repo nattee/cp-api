@@ -45,6 +45,7 @@ AUTO_LOGIN=1 bin/dev     # bypass login, auto-authenticate as user ID 1
 
 - `AUTO_LOGIN` env var: set to a user ID to skip authentication. Only use in development.
 - Seed data: `bin/rails db:seed` creates a super admin at ID 1 (`superadmin` / `password123`).
+- Seed files in `db/seeds/` are auto-loaded by `seeds.rb`. To re-seed a single file: `bin/rails runner "load Rails.root.join('db/seeds/foo.rb')"`.
 
 ## Styling Guidelines
 
@@ -95,6 +96,11 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - **Visual hierarchy in forms**: Supporting elements (labels, icons) recede so input values stand out. Form labels use muted color + smaller font (like `thead th`). Select2 dropdown icons render at `16px` / `opacity: 0.5`. Input group icons use `$input-icon-color`. Do not give labels and values equal visual weight.
 - **CSS-only popovers**: Use `.help-popover-trigger` with a child `.help-popover-content` span. Shows on `:focus`, no JS needed. Used for field help text in import mapping. Prefer this over Bootstrap JS popovers (see Asset Pipeline note about Bootstrap JS being UMD).
 
+## Data Model Conventions
+
+- **Program `program_code`**: A unique 4-digit string (e.g. `"0018"`, `"4784"`) from the university's official system. This is the **business key** — use it for all external lookups (imports, seeds, APIs). Rails auto-increment `id` is only for internal associations/foreign keys. Seeds use `find_or_create_by!(program_code:)`.
+- **Year fields are Buddhist Era (B.E.)**: `admission_year_be` (Student), `year_started` (Program), `revision_year` (Course) all store B.E. years (e.g. 2567 = 2024 CE). Importers auto-convert CE→BE by adding 543 when the value is < 2400.
+
 ## Import System
 
 Multi-step flow: upload (`create`) → column mapping (`mapping`) → execute (`execute`). `DataImport` stays in `pending` state until the user confirms mapping. Failed imports can be retried (reset to `pending`).
@@ -105,3 +111,4 @@ Multi-step flow: upload (`create`) → column mapping (`mapping`) → execute (`
   - `fixed_options`: optional lambda returning `[[label, value], ...]` for relational fields — renders a `<select>` instead of text input when user picks "fixed value" mode
 - **Adding a new importer**: Create `app/services/importers/foo_importer.rb` extending `Base`, implement `self.attribute_definitions` + private methods (`find_existing_record`, `build_new_record`, `transform_attributes`, `unique_key_fields`), add an entry to `DataImport::IMPORTERS`.
 - **Column mapping storage**: `column_mapping` JSON maps attribute names to file column headers. `default_values` JSON maps attribute names to constant values. An attribute is in one or the other, never both.
+- **Roo float coercion**: Roo reads numeric Excel cells as floats (e.g. `0018` → `18.0`). For string-like numeric fields (program codes, student IDs), strip `.0` with `.to_s.gsub(/\.0\z/, "")`. For program_code lookups, also zero-pad to 4 digits with `.to_i.to_s.rjust(4, "0")`.

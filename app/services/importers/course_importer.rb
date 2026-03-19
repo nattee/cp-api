@@ -4,8 +4,9 @@ module Importers
       [
         { attribute: :course_no,        label: "Course No",          required: true,
           aliases: %w[course_no course_id รหัสวิชา] },
-        { attribute: :revision_year,    label: "Revision Year",      required: true,
-          aliases: %w[revision_year ปีหลักสูตร] },
+        { attribute: :revision_year,    label: "Revision Year (B.E.)", required: true,
+          aliases: %w[revision_year ปีหลักสูตร],
+          help: "Buddhist Era year (e.g. 2566). CE years (e.g. 2023) are auto-converted by adding 543." },
         { attribute: :name,             label: "Name (EN)",          required: true,
           aliases: %w[course_name name ชื่อวิชา] },
         { attribute: :name_th,          label: "Name (TH)",          required: false,
@@ -51,16 +52,18 @@ module Importers
     end
 
     def unique_key_fields
-      [:course_no, :revision_year]
+      [ :course_no, :revision_year ]
     end
 
     def resolve_program(value)
-      str = value.to_s.strip
+      str = value.to_s.gsub(/\.0\z/, "").strip
       return nil if str.blank?
 
-      # 1. Try by ID if numeric
-      if str.match?(/\A\d+(\.\d+)?\z/)
-        found = Program.find_by(id: str.to_f.to_i)
+      # 1. Try by program_code (4-digit, zero-padded).
+      # Roo reads numeric cells as floats (e.g. 0018 → 18.0), so we
+      # strip the decimal, convert to integer, then zero-pad to 4 digits.
+      if str.match?(/\A\d+\z/)
+        found = Program.find_by(program_code: str.to_i.to_s.rjust(4, "0"))
         return found if found
       end
 
@@ -94,6 +97,12 @@ module Importers
       # Coerce integers
       [:revision_year, :credits, :l_credits, :nl_credits, :l_hours, :nl_hours, :s_hours].each do |field|
         attrs[field] = coerce_integer(attrs[field]) if attrs[field]
+      end
+
+      # Auto-detect CE vs BE for revision_year (same logic as admission_year_be).
+      # BE years are >= 2400 (e.g. 2566), CE years are < 2400 (e.g. 2023).
+      if attrs[:revision_year]
+        attrs[:revision_year] += 543 if attrs[:revision_year] < 2400
       end
 
       # Coerce booleans
