@@ -8,9 +8,21 @@ import { Controller } from "@hotwired/stimulus"
 // because DataTables wraps the table in a new div, which causes Stimulus
 // to fire disconnect/connect in an infinite loop if the controller is on
 // the table element directly.
+//
+// Supports two modes:
+//
+// 1. Client-side (default): All data is in the HTML <tbody>. DataTables
+//    handles pagination/search on the existing rows. Optional column
+//    filters via "filter" targets apply column().search() calls.
+//
+// 2. Server-side: Enabled by setting data-datatable-server-side-url-value
+//    to a JSON endpoint URL. DataTables sends draw/start/length/search/order
+//    params and the server returns { draw, recordsTotal, recordsFiltered,
+//    data: [[col1, ...], ...] }.
 
 export default class extends Controller {
-  static targets = ["table"]
+  static targets = ["table", "filter"]
+  static values = { serverSideUrl: String, pageLength: { type: Number, default: 25 } }
 
   connect() {
     if (!window.DataTable) return
@@ -19,13 +31,48 @@ export default class extends Controller {
     const headerCells = this.tableTarget.querySelectorAll("thead th")
     const lastColIndex = headerCells.length - 1
 
-    this.dataTable = new window.DataTable(this.tableTarget, {
-      pageLength: 25,
+    const opts = {
+      pageLength: this.pageLengthValue,
       lengthMenu: [10, 25, 50, 100],
       columnDefs: [
         { orderable: false, searchable: false, targets: lastColIndex }
       ]
+    }
+
+    // Server-side mode: DataTables fetches data via AJAX
+    if (this.hasServerSideUrlValue && this.serverSideUrlValue) {
+      Object.assign(opts, {
+        serverSide: true,
+        ajax: this.serverSideUrlValue
+      })
+    }
+
+    this.dataTable = new window.DataTable(this.tableTarget, opts)
+
+    // Apply default filter values (e.g. staff status "Active" on load).
+    // Only meaningful for client-side mode.
+    this.filterTargets.forEach(el => {
+      const defaultVal = el.dataset.datatableDefaultValue
+      if (defaultVal !== undefined && defaultVal !== "") {
+        this._applyFilter(el, defaultVal)
+      }
     })
+  }
+
+  // Stimulus action: data-action="change->datatable#filter"
+  // Works with both <select> and <input type="radio"> elements.
+  filter(event) {
+    const el = event.currentTarget
+    this._applyFilter(el, el.value)
+  }
+
+  _applyFilter(el, value) {
+    if (!this.dataTable) return
+    const colIndex = parseInt(el.dataset.datatableColumnIndex, 10)
+    const useRegex = el.dataset.datatableRegex === "true"
+    // column().search(term, isRegex, isSmart) — disable smart search
+    // when using regex to prevent DataTables from escaping the pattern
+    this.dataTable.column(colIndex).search(value, useRegex, !useRegex).draw()
   }
 
   disconnect() {

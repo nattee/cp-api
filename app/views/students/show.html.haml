@@ -29,8 +29,12 @@
           - else
             .text-muted Not assigned
 
-        %dt.col-sm-3 Admission Year
-        %dd.col-sm-9= @student.admission_year
+        %dt.col-sm-3
+          Admission Year
+          %button.help-popover-trigger{type: "button", tabindex: "0"}
+            %span.material-symbols{style: "font-size: 16px"} help
+            %span.help-popover-content Buddhist Era year (B.E.). To convert to CE, subtract 543.
+        %dd.col-sm-9= @student.admission_year_be
 
         %dt.col-sm-3 Status
         %dd.col-sm-9

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_19_030302) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_19_070358) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -145,7 +145,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_030302) do
 
   create_table "students", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.text "address"
-    t.integer "admission_year", null: false
+    t.integer "admission_year_be", null: false
     t.datetime "created_at", null: false
     t.string "discord"
     t.string "email"
@@ -164,7 +164,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_030302) do
     t.string "status", default: "active", null: false
     t.string "student_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["admission_year"], name: "index_students_on_admission_year"
+    t.index ["admission_year_be"], name: "index_students_on_admission_year_be"
     t.index ["program_id"], name: "index_students_on_program_id"
     t.index ["student_id"], name: "index_students_on_student_id", unique: true
   end

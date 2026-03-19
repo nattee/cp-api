@@ -61,13 +61,16 @@
         - if student.errors[:program].any?
           .invalid-feedback= student.errors[:program].first
       .col-md-6.mb-3
-        = f.label :admission_year, class: "form-label"
+        = f.label :admission_year_be, "Admission year", class: "form-label"
+        %button.help-popover-trigger{type: "button", tabindex: "0"}
+          %span.material-symbols{style: "font-size: 16px"} help
+          %span.help-popover-content Buddhist Era year (e.g. 2567). CE years (e.g. 2024) are auto-converted by adding 543.
         .input-group
           %span.input-group-text
             %span.material-symbols calendar_month
-          = f.number_field :admission_year, class: "form-control #{'is-invalid' if student.errors[:admission_year].any?}"
-          - if student.errors[:admission_year].any?
-            .invalid-feedback= student.errors[:admission_year].first
+          = f.number_field :admission_year_be, class: "form-control #{'is-invalid' if student.errors[:admission_year_be].any?}"
+          - if student.errors[:admission_year_be].any?
+            .invalid-feedback= student.errors[:admission_year_be].first
 
     .row
       .col-md-6.mb-3

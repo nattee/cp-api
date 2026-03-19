@@ -10,25 +10,25 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     assert_includes attrs, :student_id
     assert_includes attrs, :first_name
     assert_includes attrs, :last_name
-    assert_includes attrs, :admission_year
+    assert_includes attrs, :admission_year_be
     assert_includes attrs, :program_name
   end
 
-  test "required_attributes includes student_id, first_name, last_name, admission_year" do
+  test "required_attributes includes student_id, first_name, last_name, admission_year_be" do
     required = Importers::StudentImporter.required_attributes
-    assert_equal [:student_id, :first_name, :last_name, :admission_year], required
+    assert_equal [:student_id, :first_name, :last_name, :admission_year_be], required
   end
 
   # --- auto_map ---
 
   test "auto_map matches English headers with column letter prefix" do
-    headers = ["student_id", "first_name", "last_name", "admission_year", "email"]
+    headers = ["student_id", "first_name", "last_name", "admission_year_be", "email"]
     mapping = Importers::StudentImporter.auto_map(headers)
 
     assert_equal "A: student_id", mapping[:student_id]
     assert_equal "B: first_name", mapping[:first_name]
     assert_equal "C: last_name", mapping[:last_name]
-    assert_equal "D: admission_year", mapping[:admission_year]
+    assert_equal "D: admission_year_be", mapping[:admission_year_be]
     assert_equal "E: email", mapping[:email]
   end
 
@@ -39,7 +39,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     assert_equal "A: รหัสนิสิต", mapping[:student_id]
     assert_equal "B: ชื่อ", mapping[:first_name]
     assert_equal "C: นามสกุล", mapping[:last_name]
-    assert_equal "D: ปีที่รับเข้า", mapping[:admission_year]
+    assert_equal "D: ปีที่รับเข้า", mapping[:admission_year_be]
   end
 
   test "auto_map is case-insensitive" do
@@ -51,7 +51,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   end
 
   test "auto_map skips unrecognized headers" do
-    headers = ["student_id", "unknown_column", "first_name", "last_name", "admission_year"]
+    headers = ["student_id", "unknown_column", "first_name", "last_name", "admission_year_be"]
     mapping = Importers::StudentImporter.auto_map(headers)
 
     assert_nil mapping[:unknown_column]
@@ -73,7 +73,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     program = programs(:cp_bachelor)
     importer = build_importer
 
-    attrs = { program_name: program.id.to_s, student_id: "1", admission_year: 2567, status: "active" }
+    attrs = { program_name: program.id.to_s, student_id: "1", admission_year_be: 2567, status: "active" }
     result = importer.send(:transform_attributes, attrs)
 
     assert_equal program.id, result[:program_id]
@@ -83,7 +83,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     program = programs(:cp_bachelor)
     importer = build_importer
 
-    attrs = { program_name: "Computer Engineering (Bachelor)", student_id: "1", admission_year: 2567, status: "active" }
+    attrs = { program_name: "Computer Engineering (Bachelor)", student_id: "1", admission_year_be: 2567, status: "active" }
     result = importer.send(:transform_attributes, attrs)
 
     assert_equal program.id, result[:program_id]
@@ -93,7 +93,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     program = programs(:cp_bachelor)
     importer = build_importer
 
-    attrs = { program_name: "วิศวกรรมคอมพิวเตอร์ (ปริญญาตรี)", student_id: "1", admission_year: 2567, status: "active" }
+    attrs = { program_name: "วิศวกรรมคอมพิวเตอร์ (ปริญญาตรี)", student_id: "1", admission_year_be: 2567, status: "active" }
     result = importer.send(:transform_attributes, attrs)
 
     assert_equal program.id, result[:program_id]
@@ -102,7 +102,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   test "resolve_program returns nil for unmatched name" do
     importer = build_importer
 
-    attrs = { program_name: "Nonexistent Program", student_id: "1", admission_year: 2567, status: "active" }
+    attrs = { program_name: "Nonexistent Program", student_id: "1", admission_year_be: 2567, status: "active" }
     result = importer.send(:transform_attributes, attrs)
 
     assert_nil result[:program_id]
@@ -121,7 +121,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     )
     importer = build_importer
 
-    attrs = { program_name: older.name_en, student_id: "1", admission_year: 2567, status: "active" }
+    attrs = { program_name: older.name_en, student_id: "1", admission_year_be: 2567, status: "active" }
     result = importer.send(:transform_attributes, attrs)
 
     assert_equal newer.id, result[:program_id]
@@ -130,13 +130,13 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   # --- full import via call ---
 
   test "call imports CSV with column_mapping" do
-    # CSV headers: student_id,first_name,last_name,admission_year,status,program
+    # CSV headers: student_id,first_name,last_name,admission_year_be,status,program
     data_import = create_data_import("students_import.csv",
       column_mapping: {
         "student_id" => "A: student_id",
         "first_name" => "B: first_name",
         "last_name" => "C: last_name",
-        "admission_year" => "D: admission_year",
+        "admission_year_be" => "D: admission_year_be",
         "status" => "E: status",
         "program_name" => "F: program"
       }
@@ -153,13 +153,13 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   end
 
   test "call applies default_values as constants" do
-    # CSV headers: student_id,first_name,last_name,admission_year
+    # CSV headers: student_id,first_name,last_name,admission_year_be
     data_import = create_data_import("students_minimal.csv",
       column_mapping: {
         "student_id" => "A: student_id",
         "first_name" => "B: first_name",
         "last_name" => "C: last_name",
-        "admission_year" => "D: admission_year"
+        "admission_year_be" => "D: admission_year_be"
       },
       default_values: {
         "status" => "on_leave",
@@ -183,7 +183,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
         "student_id" => "A: รหัสนิสิต",
         "first_name" => "B: ชื่อ",
         "last_name" => "C: นามสกุล",
-        "admission_year" => "D: ปีที่รับเข้า",
+        "admission_year_be" => "D: ปีที่รับเข้า",
         "status" => "E: สถานะ"
       },
       default_values: { "program_name" => programs(:cp_bachelor).id.to_s }
@@ -202,7 +202,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
       column_mapping: {
         "student_id" => "A: student_id",
         "first_name" => "B: first_name"
-        # missing last_name and admission_year
+        # missing last_name and admission_year_be
       }
     )
 

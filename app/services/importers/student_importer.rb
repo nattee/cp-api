@@ -30,8 +30,9 @@ module Importers
           aliases: %w[previous_school โรงเรียนเดิม] },
         { attribute: :enrollment_method, label: "Enrollment Method", required: false,
           aliases: %w[enrollment_method ประเภทการรับเข้า] },
-        { attribute: :admission_year,    label: "Admission Year",    required: true,
-          aliases: %w[admission_year start_academic_year ปีที่รับเข้า] },
+        { attribute: :admission_year_be,    label: "Admission Year (B.E.)",  required: true,
+          aliases: %w[admission_year_be admission_year start_academic_year ปีที่รับเข้า],
+          help: "Buddhist Era year (e.g. 2567). CE years (e.g. 2024) are auto-converted by adding 543." },
         { attribute: :status,            label: "Status",            required: false,
           aliases: %w[status สถานะ] },
         { attribute: :graduation_date,   label: "Graduation Date",   required: false,
@@ -74,8 +75,14 @@ module Importers
     end
 
     def transform_attributes(attrs)
-      # Roo reads numbers as floats — coerce to integer
-      attrs[:admission_year] = attrs[:admission_year].to_i if attrs[:admission_year]
+      # Roo reads numbers as floats — coerce to integer, then auto-detect CE vs BE.
+      # BE years are >= 2400 (e.g. 2567), CE years are < 2400 (e.g. 2024).
+      # The two ranges never overlap for realistic admission years.
+      if attrs[:admission_year_be]
+        year = attrs[:admission_year_be].to_i
+        year += 543 if year < 2400
+        attrs[:admission_year_be] = year
+      end
       attrs[:student_id] = attrs[:student_id].to_s.gsub(/\.0\z/, "") if attrs[:student_id]
 
       # Default status

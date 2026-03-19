@@ -4,7 +4,7 @@ class StudentTest < ActiveSupport::TestCase
   # --- Validations ---
 
   test "valid student" do
-    student = Student.new(student_id: "9999900001", first_name: "Test", last_name: "Student", admission_year: 2567, program: programs(:cp_bachelor))
+    student = Student.new(student_id: "9999900001", first_name: "Test", last_name: "Student", admission_year_be: 2567, program: programs(:cp_bachelor))
     assert student.valid?
   end
 
@@ -16,7 +16,7 @@ class StudentTest < ActiveSupport::TestCase
   end
 
   test "student_id must be unique" do
-    student = Student.new(student_id: students(:active_student).student_id, first_name: "Dup", last_name: "Student", admission_year: 2567)
+    student = Student.new(student_id: students(:active_student).student_id, first_name: "Dup", last_name: "Student", admission_year_be: 2567)
     assert_not student.valid?
     assert_includes student.errors[:student_id], "has already been taken"
   end
@@ -37,20 +37,20 @@ class StudentTest < ActiveSupport::TestCase
     assert_includes student.errors[:last_name], "can't be blank"
   end
 
-  test "requires admission_year" do
+  test "requires admission_year_be" do
     student = students(:active_student).dup
     student.student_id = "9999900004"
-    student.admission_year = nil
+    student.admission_year_be = nil
     assert_not student.valid?
-    assert_includes student.errors[:admission_year], "can't be blank"
+    assert_includes student.errors[:admission_year_be], "can't be blank"
   end
 
-  test "admission_year must be integer" do
+  test "admission_year_be must be integer" do
     student = students(:active_student).dup
     student.student_id = "9999900005"
-    student.admission_year = 25.5
+    student.admission_year_be = 25.5
     assert_not student.valid?
-    assert_includes student.errors[:admission_year], "must be an integer"
+    assert_includes student.errors[:admission_year_be], "must be an integer"
   end
 
   test "status must be valid" do

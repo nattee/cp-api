@@ -82,7 +82,7 @@ class DataImportsTest < ApplicationSystemTestCase
     assert_select_value "mapping[student_id]", "A: student_id"
     assert_select_value "mapping[first_name]", "B: first_name"
     assert_select_value "mapping[last_name]", "C: last_name"
-    assert_select_value "mapping[admission_year]", "D: admission_year"
+    assert_select_value "mapping[admission_year_be]", "D: admission_year_be"
   end
 
   test "mapping page auto-maps Thai headers" do
@@ -92,7 +92,7 @@ class DataImportsTest < ApplicationSystemTestCase
     assert_select_value "mapping[student_id]", "A: รหัสนิสิต"
     assert_select_value "mapping[first_name]", "B: ชื่อ"
     assert_select_value "mapping[last_name]", "C: นามสกุล"
-    assert_select_value "mapping[admission_year]", "D: ปีที่รับเข้า"
+    assert_select_value "mapping[admission_year_be]", "D: ปีที่รับเข้า"
   end
 
   test "execute import from mapping page" do
@@ -110,7 +110,7 @@ class DataImportsTest < ApplicationSystemTestCase
     visit mapping_data_import_path(di)
 
     # Unmap a required field
-    select2_pick_by_name "-- skip --", name: "mapping[admission_year]"
+    select2_pick_by_name "-- skip --", name: "mapping[admission_year_be]"
     click_on "Run Import"
 
     # Should redirect back to mapping with error

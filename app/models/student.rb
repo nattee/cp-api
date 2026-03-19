@@ -16,7 +16,7 @@ class Student < ApplicationRecord
   validates :student_id, presence: true, uniqueness: true
   validates :first_name, presence: true
   validates :last_name, presence: true
-  validates :admission_year, presence: true, numericality: { only_integer: true }
+  validates :admission_year_be, presence: true, numericality: { only_integer: true }
   validates :status, presence: true, inclusion: { in: STATUSES }
 
   scope :active, -> { where(status: "active") }

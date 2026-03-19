@@ -4,12 +4,6 @@ class StaffsController < ApplicationController
 
   def index
     @staffs = Staff.all
-    @staffs = @staffs.where.not(status: "retired") unless params[:status] == "all"
-    @staffs = case params[:type]
-              when "lecturer" then @staffs.where(staff_type: "lecturer")
-              when "non_lecturer" then @staffs.where.not(staff_type: "lecturer")
-              else @staffs
-              end
   end
 
   def show; end

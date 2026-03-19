@@ -259,6 +259,65 @@ class ThingsTest < ApplicationSystemTestCase
 end
 ```
 
+## Index Filters
+
+Two patterns for filtering index pages, both using the `datatable` Stimulus controller.
+
+### Client-side filters (radio buttons)
+
+For small datasets where all rows are in the HTML. Uses regex column search on the
+client — no server round-trip. Example: Staff index filtering by status/type.
+
+```haml
+.card{"data-controller" => "datatable", "data-datatable-page-length-value" => "50"}
+  .card-body.p-3
+    .d-flex.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        = resource_icon
+        Things
+      .d-flex.align-items-center.gap-4.mx-auto
+        .d-flex.align-items-center.gap-2
+          %span.form-label.mb-0.small.text-muted Status
+          .btn-group.btn-group-sm
+            -# Each radio: value is a regex pattern, "" means show all.
+            -# data-datatable-column-index: which table column to search.
+            -# data-datatable-regex="true": treat value as regex.
+            -# data-datatable-default-value: applied on page load (first checked radio).
+            - [["Active", "^(?!.*Retired)"], ["All", ""]].each_with_index do |(label, value), i|
+              - checked = i == 0
+              %input.btn-check{type: "radio", name: "filter-status", id: "filter-status-#{i}", value: value, checked: checked, "data-datatable-target" => "filter", "data-action" => "change->datatable#filter", "data-datatable-column-index" => "3", "data-datatable-regex" => "true", "data-datatable-default-value" => (checked ? value : nil)}
+              %label.btn.btn-outline-secondary{for: "filter-status-#{i}"}= label
+```
+
+### Server-side filters (Select2 dropdowns)
+
+For large datasets using server-side DataTables. Select2 fires `change` → datatable
+controller calls `column().search().draw()` → DataTables sends `columns[N][search][value]`
+to the server endpoint. The server applies exact-match WHERE clauses.
+
+**View:**
+```haml
+.card{"data-controller" => "datatable", "data-datatable-server-side-url-value" => datatable_things_path}
+  .card-body.p-3
+    .d-flex.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        = resource_icon
+        Things
+      .d-flex.align-items-center.gap-4.mx-auto
+        .d-flex.align-items-center.gap-2{style: "min-width: 320px"}
+          %span.form-label.mb-0.small.text-muted Category
+          -# "All" option has empty value — server skips empty filters.
+          -# data-datatable-column-index must match the column order in thead.
+          = select_tag "filter-category", options_for_select([["All", ""]] + @categories), data: { controller: "select2", datatable_target: "filter", action: "change->datatable#filter", datatable_column_index: "2" }
+```
+
+**Controller (datatable action):**
+```ruby
+# Read column-level search from DataTables server-side params
+col_search = params.dig(:columns, "2", :search, :value).to_s.strip
+base = base.where(category: col_search) if col_search.present?
+```
+
 ## Sidebar nav link
 ```haml
 %li.nav-item

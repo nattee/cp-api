@@ -31,7 +31,7 @@ class StudentsTest < ApplicationSystemTestCase
     assert_text student.full_name
     assert_text student.student_id
     assert_text student.email
-    assert_text student.admission_year.to_s
+    assert_text student.admission_year_be.to_s
     assert_text student.discord
   end
 

@@ -5,7 +5,7 @@ active_student:
   first_name_th: "ธนวัฒน์"
   last_name_th: "ศรีเจริญ"
   email: thanawat.s@student.chula.ac.th
-  admission_year: 2567
+  admission_year_be: 2567
   status: active
   discord: "thanawat#1234"
   program: cp_bachelor
@@ -17,7 +17,7 @@ graduated_student:
   first_name_th: "อรุณี"
   last_name_th: "พนมวัน"
   email: arunee.p@student.chula.ac.th
-  admission_year: 2565
+  admission_year_be: 2565
   status: graduated
   program: cp_bachelor
 
@@ -25,6 +25,6 @@ on_leave_student:
   student_id: "6632100063"
   first_name: Kittipat
   last_name: Thongkham
-  admission_year: 2566
+  admission_year_be: 2566
   status: on_leave
   program: cp_bachelor

@@ -24,7 +24,7 @@ class StudentsControllerTest < ActionDispatch::IntegrationTest
 
   test "non-admin cannot create" do
     assert_no_difference "Student.count" do
-      post students_path, params: { student: { student_id: "9999900099", first_name: "Test", last_name: "User", admission_year: 2567 } }
+      post students_path, params: { student: { student_id: "9999900099", first_name: "Test", last_name: "User", admission_year_be: 2567 } }
     end
     assert_redirected_to students_path
   end
