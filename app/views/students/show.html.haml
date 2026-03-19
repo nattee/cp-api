@@ -1,5 +1,5 @@
 .d-flex.justify-content-between.align-items-center.mb-3
-  %h1= @student.full_name
+  %h1= @student.display_name
   .d-flex.gap-2
     - if current_user.admin?
       = link_to "Edit", edit_student_path(@student), class: "btn btn-outline-secondary"

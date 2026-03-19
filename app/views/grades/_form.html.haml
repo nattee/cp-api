@@ -13,7 +13,7 @@
     .row
       .col-md-6.mb-3
         = f.label :student_id, "Student", class: "form-label"
-        = f.select :student_id, options_for_select(Student.order(:student_id).map { |s| ["#{s.student_id} — #{s.full_name}", s.id] }, grade.student_id), { include_blank: "Select a student" }, class: "form-select #{'is-invalid' if grade.errors[:student_id].any? || grade.errors[:student].any?}", data: { controller: "select2" }
+        = f.select :student_id, options_for_select(Student.order(:student_id).map { |s| ["#{s.student_id} — #{s.display_name}", s.id] }, grade.student_id), { include_blank: "Select a student" }, class: "form-select #{'is-invalid' if grade.errors[:student_id].any? || grade.errors[:student].any?}", data: { controller: "select2" }
         - if grade.errors[:student_id].any?
           .invalid-feedback= grade.errors[:student_id].first
         - if grade.errors[:student].any?

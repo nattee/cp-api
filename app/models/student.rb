@@ -30,6 +30,11 @@ class Student < ApplicationRecord
     "#{first_name_th} #{last_name_th}"
   end
 
+  # Prefer Thai name for display; fall back to English
+  def display_name
+    full_name_th.presence || full_name
+  end
+
   def active?
     status == "active"
   end

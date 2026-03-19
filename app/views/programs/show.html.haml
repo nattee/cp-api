@@ -112,7 +112,7 @@
             - @students.each do |student|
               %tr
                 %td= student.student_id
-                %td= student.full_name
+                %td= student.display_name
                 %td= student.admission_year_be
                 %td
                   %span.badge{class: "badge-#{student.status.dasherize}"}= student.status.titleize

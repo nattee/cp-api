@@ -2,7 +2,7 @@
   %h1
     = @grade.course.course_no
     \—
-    = @grade.student.full_name
+    = @grade.student.display_name
   .d-flex.gap-2
     - if current_user.admin? && @grade.manual?
       = link_to "Edit", edit_grade_path(@grade), class: "btn btn-outline-secondary"
@@ -17,7 +17,7 @@
         %dd.col-sm-9= link_to @grade.student.student_id, @grade.student
 
         %dt.col-sm-3 Name
-        %dd.col-sm-9= link_to @grade.student.full_name, @grade.student
+        %dd.col-sm-9= link_to @grade.student.display_name, @grade.student
 
     .detail-section
       %h6.section-title Course

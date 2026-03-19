@@ -56,7 +56,7 @@ class StudentsController < ApplicationController
     data = students.map do |student|
       [
         student.student_id,
-        student.full_name,
+        student.display_name,
         student.program&.name_en.to_s,
         ("<span class=\"badge badge-#{student.program&.degree_level}\">#{student.program&.degree_level&.titleize}</span>" if student.program).to_s,
         student.admission_year_be,

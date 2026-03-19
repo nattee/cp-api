@@ -11,7 +11,7 @@
         - @course_grades.each do |g|
           %tr
             %td= link_to g.student.student_id, g.student
-            %td= link_to g.student.full_name, g.student
+            %td= link_to g.student.display_name, g.student
             %td.text-center
               - if g.grade.present?
                 %span.badge{class: g.grade_badge_class}= g.grade

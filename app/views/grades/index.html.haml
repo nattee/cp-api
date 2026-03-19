@@ -37,7 +37,7 @@
             - @grades.each do |grade|
               %tr
                 %td= grade.student.student_id
-                %td= grade.student.full_name
+                %td= grade.student.display_name
                 %td= grade.course.course_no
                 %td= grade.course.name
                 %td
