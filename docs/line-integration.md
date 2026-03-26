@@ -66,3 +66,39 @@ line:
 ## Production
 
 Change Zoraxy target from `localhost:3000` to `10.0.5.59:3000` (or wherever the production server is) and drop the SSH tunnel.
+
+# Tool Calling System Design
+
+## Overview
+LINE chatbot uses vLLM (Qwen 2.5 32B) with tool calling to handle:
+- Information retrieval (direct LLM response)
+- Google Calendar event creation
+- GitHub issue creation
+
+## Architecture
+- WebhookController receives LINE webhook, enqueues ChatJob
+- ChatJob calls LlmService which runs the tool-calling loop
+- LlmService sends messages + tool definitions to vLLM
+- When vLLM returns tool_calls, ToolExecutor dispatches to handler classes
+- Results are sent back to vLLM for the next round
+- Loop ends when vLLM returns plain text (max 5 rounds)
+- Reply via reply_token, fallback to push_message if expired
+
+## Key classes
+- LlmService — manages conversation loop with vLLM
+- ToolRegistry — maps tool names to definitions + handlers
+- ToolExecutor — dispatches tool calls, wraps errors
+- CalendarTool — Google Calendar API wrapper
+- GithubIssueTool — Octokit wrapper
+- ChatJob — ActiveJob that ties it all together
+
+## vLLM endpoint
+- Add a .yml config file
+    - Base URL: http://localhost:8000
+    - Endpoint: POST /v1/chat/completions
+- OpenAI-compatible format with tools parameter
+
+## LINE integration
+- Reply token expires ~30s, fallback to push API
+- Pass both reply_token and user_id to ChatJob
+
