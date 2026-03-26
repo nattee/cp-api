@@ -8,7 +8,7 @@ default: &default
   # OpenAI-compatible chat completions endpoint
   endpoint: "/v1/chat/completions"
   # Model identifier as registered in vLLM
-  model: "Qwen/Qwen2.5-32B-Instruct"
+  model: "qwen2.5-coder-32b"
   # Maximum tool-calling rounds before forcing a text reply (unused until tool calling is added)
   max_rounds: 5
   # System prompt prepended to every conversation
