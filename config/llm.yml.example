@@ -1,20 +1,34 @@
 # vLLM / OpenAI-compatible LLM configuration.
 # Copy to config/llm.yml and adjust for your environment.
 # Used by Line::LlmService for the LINE chatbot's LLM-powered responses.
+#
+# Each entry under `models:` defines a selectable LLM backend.
+# `default_model` is the key used when a user has no preference (llm_model is nil).
 
 default: &default
-  # vLLM server base URL (no trailing slash)
-  base_url: "http://localhost:8000"
-  # OpenAI-compatible chat completions endpoint
-  endpoint: "/v1/chat/completions"
-  # Model identifier as registered in vLLM
-  model: "qwen2.5-coder-32b"
-  # Maximum tool-calling rounds before forcing a text reply (unused until tool calling is added)
+  default_model: qwen
+  # Maximum tool-calling rounds before forcing a text reply
   max_rounds: 5
   # System prompt prepended to every conversation
   system_prompt: |
     You are a helpful assistant for the Department of Computer Engineering, Chulalongkorn University.
     Answer concisely. You may respond in Thai or English depending on the user's language.
+  models:
+    qwen:
+      label: "Qwen 2.5 Coder 32B"
+      base_url: "http://localhost:8000"
+      endpoint: "/v1/chat/completions"
+      model: "qwen2.5-coder-32b"
+    glm:
+      label: "GLM-4"
+      base_url: "http://localhost:8000"
+      endpoint: "/v1/chat/completions"
+      model: "glm-4"
+    kimi:
+      label: "Kimi"
+      base_url: "http://localhost:8001"
+      endpoint: "/v1/chat/completions"
+      model: "kimi"
 
 development:
   <<: *default

@@ -22,6 +22,7 @@ class Line::Commands::LinkCommand < Line::Commands::BaseCommand
     user.update!(
       provider: "line",
       uid: line_user_id,
+      llm_consent: true,
       line_link_token: nil,
       line_link_token_expires_at: nil
     )

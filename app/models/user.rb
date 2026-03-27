@@ -16,6 +16,7 @@ class User < ApplicationRecord
   validates :name, presence: true
   validates :role, presence: true, inclusion: { in: ROLES }
   validates :uid, uniqueness: { scope: :provider }, allow_nil: true
+  validates :llm_model, inclusion: { in: LLM_CONFIG[:models].keys.map(&:to_s) }, allow_nil: true
 
   scope :active, -> { where(active: true) }
 

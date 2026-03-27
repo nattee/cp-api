@@ -14,7 +14,7 @@ class LineAccountsController < ApplicationController
   end
 
   def destroy
-    current_user.update!(provider: nil, uid: nil)
+    current_user.update!(provider: nil, uid: nil, llm_consent: false)
     redirect_to line_account_path, notice: "LINE account unlinked."
   end
 end

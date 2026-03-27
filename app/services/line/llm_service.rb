@@ -12,8 +12,8 @@ class Line::LlmService
     @user_message = user_message
     @line_user_id = line_user_id
     @user = user
-    @config = LLM_CONFIG
-    @max_rounds = @config[:max_rounds] || 5
+    @max_rounds = LLM_CONFIG[:max_rounds] || 5
+    @model_config = resolve_model_config
   end
 
   # Returns the assistant's final text reply as a plain String.
@@ -83,7 +83,14 @@ class Line::LlmService
   end
 
   def system_prompt
-    @config[:system_prompt]
+    LLM_CONFIG[:system_prompt]
+  end
+
+  # Picks the model config hash from LLM_CONFIG[:models] based on the user's
+  # preference, falling back to the default model if unset or invalid.
+  def resolve_model_config
+    key = @user&.llm_model.presence || LLM_CONFIG[:default_model].to_s
+    LLM_CONFIG[:models][key.to_sym] || LLM_CONFIG[:models][LLM_CONFIG[:default_model].to_sym]
   end
 
   def save_message(role:, content:, tool_calls: nil, tool_call_id: nil)
@@ -100,9 +107,9 @@ class Line::LlmService
   # Includes tool definitions when available.
   # Raises LlmError on non-2xx responses.
   def chat_completion(messages, tools: [])
-    uri = URI("#{@config[:base_url]}#{@config[:endpoint]}")
+    uri = URI("#{@model_config[:base_url]}#{@model_config[:endpoint]}")
     body = {
-      model: @config[:model],
+      model: @model_config[:model],
       messages: messages,
       temperature: 0.7
     }

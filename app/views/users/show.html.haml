@@ -32,6 +32,18 @@
         %dt.col-sm-3 SSO UID
         %dd.col-sm-9= @user.uid
 
+      %dt.col-sm-3 LLM Consent
+      %dd.col-sm-9
+        %span.badge{class: @user.llm_consent? ? "badge-active" : "badge-inactive"}
+          = @user.llm_consent? ? "Enabled" : "Disabled"
+
+      %dt.col-sm-3 LLM Model
+      %dd.col-sm-9
+        - if @user.llm_model.present?
+          = LLM_CONFIG[:models][@user.llm_model.to_sym]&.dig(:label) || @user.llm_model
+        - else
+          Default
+
       %dt.col-sm-3 Last sign in
       %dd.col-sm-9
         = @user.last_sign_in_at&.strftime("%B %d, %Y %H:%M") || "Never"

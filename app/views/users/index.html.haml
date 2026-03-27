@@ -15,6 +15,8 @@
             %th Name
             %th Role
             %th Active
+            %th LLM
+            %th Model
             %th Actions
         %tbody
           - @users.each do |user|
@@ -28,6 +30,14 @@
                 %span.badge{class: user.active? ? "badge-active" : "badge-inactive"}
                   = user.active? ? "Active" : "Inactive"
               %td
+                %span.badge{class: user.llm_consent? ? "badge-active" : "badge-inactive"}
+                  = user.llm_consent? ? "Enabled" : "Disabled"
+              %td
+                - if user.llm_model.present?
+                  = LLM_CONFIG[:models][user.llm_model.to_sym]&.dig(:label) || user.llm_model
+                - else
+                  Default
+              %td
                 = link_to user, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
                   %span.material-symbols{style: "font-size: 18px"} visibility
                 - if current_user.admin?
@@ -37,4 +47,4 @@
                     %span.material-symbols{style: "font-size: 18px"} delete
           - if @users.empty?
             %tr
-              %td.text-muted.text-center{colspan: 6} No users found.
+              %td.text-muted.text-center{colspan: 8} No users found.

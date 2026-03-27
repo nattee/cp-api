@@ -12,3 +12,6 @@ app/assets/builds/**
 config/master.key
 .claude/
 .ruby-lsp/
+
+# do not save this
+config/llm.yml
