@@ -4,7 +4,8 @@
 class Line::MessageRouter
   COMMAND_MAP = {
     "link" => Line::Commands::LinkCommand,
-    "help" => Line::Commands::HelpCommand
+    "help" => Line::Commands::HelpCommand,
+    "clear" => Line::Commands::ClearCommand
   }.freeze
 
   def self.call(event_data)

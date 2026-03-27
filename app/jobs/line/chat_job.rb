@@ -10,7 +10,7 @@ class Line::ChatJob < ApplicationJob
 
   def perform(line_user_id:, reply_token:, message:)
     user = User.find_by(provider: "line", uid: line_user_id)
-    response = Line::LlmService.new(message, user: user).call
+    response = Line::LlmService.new(message, line_user_id: line_user_id, user: user).call
 
     deliver(reply_token, line_user_id, response)
   rescue Line::LlmService::LlmError => e

@@ -2,18 +2,25 @@
 # the assistant's text reply. Runs a tool-calling loop: when vLLM returns
 # tool_calls, ToolExecutor dispatches them and feeds results back. The loop
 # ends when vLLM returns plain text or max_rounds is reached.
+#
+# Conversation history is stored in chat_messages and loaded per LINE user.
+# Only the last 20 messages within 24 hours are included.
 class Line::LlmService
   class LlmError < StandardError; end
 
-  def initialize(user_message, user: nil)
+  def initialize(user_message, line_user_id:, user: nil)
     @user_message = user_message
-    @user = user # reserved for future per-user context
+    @line_user_id = line_user_id
+    @user = user
     @config = LLM_CONFIG
     @max_rounds = @config[:max_rounds] || 5
   end
 
   # Returns the assistant's final text reply as a plain String.
   def call
+    # Save the incoming user message to history.
+    save_message(role: "user", content: @user_message)
+
     messages = build_initial_messages
     tools = Line::ToolRegistry.definitions
 
@@ -30,14 +37,15 @@ class Line::LlmService
         parsed = parse_tool_calls_from_content(assistant_message["content"].to_s)
         if parsed.present?
           tool_calls = parsed
-          # Rewrite assistant_message so the conversation history is well-formed.
           assistant_message = { "role" => "assistant", "tool_calls" => tool_calls }
         end
       end
 
       # No tool calls — the LLM produced a final text answer.
       if tool_calls.blank?
-        return assistant_message["content"].to_s.strip
+        reply = assistant_message["content"].to_s.strip
+        save_message(role: "assistant", content: reply)
+        return reply
       end
 
       # Append the assistant's tool-call message to the conversation.
@@ -47,26 +55,45 @@ class Line::LlmService
       tool_results = Line::ToolExecutor.execute(tool_calls)
       messages.concat(tool_results)
 
+      # Tool-calling rounds are not saved to history — they're transient
+      # within a single request. Only the final user/assistant pair persists.
+
       Rails.logger.info("LLM tool-calling round #{round + 1}: #{tool_calls.map { |tc| tc.dig("function", "name") }.join(", ")}")
     end
 
     # Safety net: max rounds exhausted, extract whatever content we have.
     Rails.logger.warn("LLM reached max rounds (#{@max_rounds}) without final text reply")
-    messages.last&.dig("content").to_s.strip.presence || "I'm sorry, I couldn't complete that request."
+    fallback = messages.last&.dig("content").to_s.strip.presence || "I'm sorry, I couldn't complete that request."
+    save_message(role: "assistant", content: fallback)
+    fallback
   end
 
   private
 
-  # Assembles the initial message array sent to the LLM.
+  # Assembles the message array: system prompt + recent history + current user message.
   def build_initial_messages
     messages = []
-    messages << { role: "system", content: system_prompt } if system_prompt.present?
-    messages << { role: "user", content: @user_message }
+    messages << { "role" => "system", "content" => system_prompt } if system_prompt.present?
+
+    # Load conversation history (already includes the message we just saved).
+    history = ChatMessage.recent_for(@line_user_id)
+    history.each { |msg| messages << msg.to_llm_message }
+
     messages
   end
 
   def system_prompt
     @config[:system_prompt]
+  end
+
+  def save_message(role:, content:, tool_calls: nil, tool_call_id: nil)
+    ChatMessage.create!(
+      line_user_id: @line_user_id,
+      role: role,
+      content: content,
+      tool_calls: tool_calls,
+      tool_call_id: tool_call_id
+    )
   end
 
   # POSTs to the OpenAI-compatible /v1/chat/completions endpoint.
