@@ -68,6 +68,10 @@
 
           - if current_user.admin?
             %li.nav-item
+              = link_to chat_messages_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'chat_messages'}" do
+                = resource_icon("chat_messages")
+                Chat History
+            %li.nav-item
               = link_to data_imports_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'data_imports'}" do
                 = resource_icon("data_imports")
                 Imports

@@ -29,6 +29,7 @@ Rails.application.routes.draw do
   end
   resources :grades
   resources :users
+  resources :chat_messages, only: [:index, :show]
   resources :data_imports, only: [:index, :new, :create, :show] do
     member do
       get :mapping

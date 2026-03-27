@@ -6,8 +6,9 @@ module ApplicationHelper
     "students"      => "school",
     "grades"        => "grading",
     "users"         => "group",
-    "line_accounts" => "chat",
-    "data_imports"  => "upload_file",
+    "line_accounts"  => "chat",
+    "chat_messages"  => "forum",
+    "data_imports"   => "upload_file",
   }.freeze
 
   def resource_icon(resource = controller_name)

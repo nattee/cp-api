@@ -1,0 +1,30 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h5.mb-0.fw-semibold
+    Conversation with
+    - if @linked_user
+      = link_to @linked_user.name, user_path(@linked_user)
+    - else
+      %code= @line_user_id
+  = link_to "Back", chat_messages_path, class: "btn btn-outline-primary btn-sm"
+
+.card
+  .card-body.p-3
+    .chat-history
+      - @messages.each do |msg|
+        - next if msg.role == "tool"
+        .chat-message.d-flex.mb-3{class: "chat-#{msg.role}"}
+          .chat-bubble.rounded-3.px-3.py-2{class: "chat-bubble-#{msg.role}"}
+            .chat-meta.d-flex.align-items-center.gap-2.mb-1
+              %span.badge{class: msg.role == "user" ? "badge-active" : "badge-inactive"}
+                = msg.role.capitalize
+              %small.text-muted= msg.created_at.strftime("%b %d, %Y %H:%M:%S")
+            - if msg.content.present?
+              .chat-content= simple_format(msg.content)
+            - if msg.tool_calls.present?
+              %details.mt-2
+                %summary.text-muted
+                  %small Tool calls
+                %pre.mt-1.mb-0.small= JSON.pretty_generate(msg.tool_calls)
+
+      - if @messages.where(role: %w[user assistant]).empty?
+        .text-muted.text-center No messages to display.

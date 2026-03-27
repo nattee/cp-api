@@ -561,3 +561,50 @@ table.dataTable tbody td.dt-empty {
   --sass-flatpickr-border-color: #{$flatpickr-border-color};
   --sass-flatpickr-spinner-color: #{$flatpickr-spinner-color};
 }
+
+// ---------------------------------------------------------------------------
+// Chat history viewer
+// Styles for the admin chat message log (/chat_messages/:id).
+// ---------------------------------------------------------------------------
+
+.chat-history {
+  max-width: 800px;
+}
+
+.chat-message {
+  &.chat-user {
+    justify-content: flex-end;
+  }
+
+  &.chat-assistant {
+    justify-content: flex-start;
+  }
+}
+
+.chat-bubble {
+  max-width: 85%;
+  line-height: 1.5;
+
+  &-user {
+    background-color: lighten($dark, 12%);
+  }
+
+  &-assistant {
+    background-color: lighten($dark, 6%);
+    border: 1px solid lighten($dark, 14%);
+  }
+
+  .chat-content {
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  pre {
+    background-color: lighten($dark, 3%);
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    overflow-x: auto;
+  }
+}
