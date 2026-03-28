@@ -67,6 +67,8 @@
               LINE Account
 
           - if current_user.admin?
+            %li.mt-3.mb-1.px-3
+              %small.text-uppercase.fw-semibold.text-body-secondary.letter-spacing-wide Admin
             %li.nav-item
               = link_to chat_messages_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'chat_messages'}" do
                 = resource_icon("chat_messages")
@@ -75,6 +77,17 @@
               = link_to data_imports_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'data_imports'}" do
                 = resource_icon("data_imports")
                 Imports
+            %li.nav-item
+              = link_to api_events_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'api_events'}" do
+                = resource_icon("api_events")
+                API Events
+                - error_count = ApiEvent.errors_since(24.hours.ago).count
+                - if error_count > 0
+                  %span.badge.bg-danger.ms-auto= error_count
+            %li.nav-item
+              = link_to dev_styleguide_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'dev'}" do
+                = resource_icon("dev")
+                Style Guide
 
         %hr
         .dropdown

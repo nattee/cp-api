@@ -9,6 +9,8 @@ module ApplicationHelper
     "line_accounts"  => "chat",
     "chat_messages"  => "forum",
     "data_imports"   => "upload_file",
+    "api_events"     => "monitor_heart",
+    "dev"            => "palette",
   }.freeze
 
   def resource_icon(resource = controller_name)

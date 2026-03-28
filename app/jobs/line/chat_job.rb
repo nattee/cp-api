@@ -8,6 +8,10 @@
 class Line::ChatJob < ApplicationJob
   queue_as :default
 
+  # LlmError wraps all vLLM failures (timeout, connection, bad response).
+  # Don't retry — the user gets a "sorry" message immediately.
+  discard_on Line::LlmService::LlmError
+
   def perform(line_user_id:, reply_token:, message:)
     user = User.find_by(provider: "line", uid: line_user_id)
     response = Line::LlmService.new(message, line_user_id: line_user_id, user: user).call
@@ -16,6 +20,10 @@ class Line::ChatJob < ApplicationJob
   rescue Line::LlmService::LlmError => e
     Rails.logger.error("LLM error: #{e.message}")
     Line::ReplyService.push(line_user_id, "Sorry, I'm having trouble processing your request right now.")
+  rescue => e
+    Rails.logger.error("[ChatJob] Unexpected error: #{e.class}: #{e.message}")
+    ApiEvent.log(source: "llm", message: "ChatJob failed: #{e.message}", details: { exception: e.class.name, line_user_id: line_user_id })
+    Line::ReplyService.push(line_user_id, "Sorry, something went wrong. Please try again later.")
   end
 
   private

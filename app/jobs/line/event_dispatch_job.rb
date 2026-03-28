@@ -3,5 +3,12 @@ class Line::EventDispatchJob < ApplicationJob
 
   def perform(event_data)
     Line::EventRouter.call(event_data)
+  rescue => e
+    Rails.logger.error("[EventDispatchJob] #{e.class}: #{e.message}")
+    ApiEvent.log(
+      source: "webhook",
+      message: "Event dispatch failed: #{e.message}",
+      details: { exception: e.class.name, event_type: event_data&.dig("type") }
+    )
   end
 end

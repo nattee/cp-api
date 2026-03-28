@@ -115,17 +115,27 @@ class Line::LlmService
     }
     body[:tools] = tools if tools.present?
 
-    response = Net::HTTP.post(
-      uri,
-      body.to_json,
-      "Content-Type" => "application/json"
-    )
+    response = Net::HTTP.start(uri.hostname, uri.port, open_timeout: 10, read_timeout: 30) do |http|
+      http.post(uri, body.to_json, "Content-Type" => "application/json")
+    end
 
     unless response.is_a?(Net::HTTPSuccess)
-      raise LlmError, "vLLM returned #{response.code}: #{response.body}"
+      msg = "vLLM returned #{response.code}: #{response.body}"
+      ApiEvent.log(source: "llm", message: msg, details: { endpoint: uri.to_s, status: response.code })
+      raise LlmError, msg
     end
 
     JSON.parse(response.body)
+  rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
+    msg = "vLLM connection failed: #{e.class} — #{e.message}"
+    Rails.logger.error("[vLLM] #{msg}")
+    ApiEvent.log(source: "llm", message: msg, details: { endpoint: uri.to_s, exception: e.class.name })
+    raise LlmError, msg
+  rescue JSON::ParserError => e
+    msg = "vLLM returned invalid JSON: #{e.message}"
+    Rails.logger.error("[vLLM] #{msg}")
+    ApiEvent.log(source: "llm", message: msg, details: { endpoint: uri.to_s, body: response&.body&.truncate(500) })
+    raise LlmError, msg
   end
 
   # Fallback parser for tool calls embedded in content as XML tags.

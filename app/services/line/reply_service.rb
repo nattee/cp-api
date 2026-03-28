@@ -11,6 +11,10 @@ class Line::ReplyService
       messages: [message]
     )
     LineBot.client.reply_message(reply_message_request: request)
+  rescue => e
+    Rails.logger.error("[LINE Reply] #{e.class}: #{e.message}")
+    ApiEvent.log(source: "line_reply", message: "Reply failed: #{e.message}", details: { exception: e.class.name })
+    raise
   end
 
   # Send a message using the user's LINE ID (works any time, uses quota).
@@ -21,5 +25,9 @@ class Line::ReplyService
       messages: [message]
     )
     LineBot.client.push_message(push_message_request: request)
+  rescue => e
+    Rails.logger.error("[LINE Push] #{e.class}: #{e.message}")
+    ApiEvent.log(source: "line_push", message: "Push to #{user_id} failed: #{e.message}", details: { exception: e.class.name, user_id: user_id })
+    raise
   end
 end

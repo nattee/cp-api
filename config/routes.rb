@@ -35,6 +35,7 @@ Rails.application.routes.draw do
     end
   end
   resources :chat_messages, only: [:index, :show]
+  resources :api_events, only: [:index]
   resources :data_imports, only: [:index, :new, :create, :show] do
     member do
       get :mapping
@@ -43,7 +44,7 @@ Rails.application.routes.draw do
     end
   end
 
-  get "dev/styleguide", to: "dev#styleguide" if Rails.env.development?
+  get "dev/styleguide", to: "dev#styleguide"
 
   root "users#index"
 end

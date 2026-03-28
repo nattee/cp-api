@@ -94,9 +94,10 @@ end
                     %span.material-symbols{style: "font-size: 18px"} edit
                   = link_to thing, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn-ghost btn-ghost-danger", title: "Delete" do
                     %span.material-symbols{style: "font-size: 18px"} delete
-          - if @things.empty?
-            %tr
-              %td.text-muted.text-center{colspan: N} No things found.
+          -# Do NOT add an empty-state row (colspan) inside a DataTable tbody.
+          -# DataTables requires every <tr> to have exactly the same number of
+          -# <td> cells as <th> headers. A colspan row breaks initialization.
+          -# DataTables shows its own "No data available" message automatically.
 ```
 
 ### show.html.haml
