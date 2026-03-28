@@ -28,7 +28,12 @@ Rails.application.routes.draw do
     end
   end
   resources :grades
-  resources :users
+  resources :users do
+    member do
+      post :generate_line_code
+      delete :unlink_line
+    end
+  end
   resources :chat_messages, only: [:index, :show]
   resources :data_imports, only: [:index, :new, :create, :show] do
     member do

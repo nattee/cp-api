@@ -53,3 +53,31 @@
 
       %dt.col-sm-3 Updated at
       %dd.col-sm-9= @user.updated_at.strftime("%B %d, %Y %H:%M")
+
+- if current_user.admin?
+  .card.mt-3
+    .card-body
+      .d-flex.justify-content-between.align-items-center.mb-3
+        %h5.card-title.mb-0 LINE Account
+        - if @user.provider == "line" && @user.uid.present?
+          %span.badge.badge-active Linked
+        - else
+          %span.badge.badge-inactive Not linked
+
+      - if @user.provider == "line" && @user.uid.present?
+        = button_to "Unlink LINE Account", unlink_line_user_path(@user), method: :delete, class: "btn btn-outline-danger",
+          data: { turbo_confirm: "Are you sure you want to unlink #{@user.name}'s LINE account?" }
+
+      - else
+        - if @user.line_link_token.present? && @user.line_link_token_expires_at&.future?
+          .alert.alert-info
+            %p.mb-1
+              %strong Linking code:
+            %p.mb-1
+              %code= @user.line_link_token
+            %p.mb-0.text-body-secondary
+              Send
+              %code= "link #{@user.line_link_token}"
+              to the LINE bot. Expires in #{time_ago_in_words(@user.line_link_token_expires_at)}.
+
+        = button_to "Generate Linking Code", generate_line_code_user_path(@user), method: :post, class: "btn btn-outline-primary"
