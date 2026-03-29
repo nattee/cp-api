@@ -19,6 +19,14 @@
       .col-md-4.mb-3
         = f.label :academic_title, class: "form-label"
         = f.select :academic_title, options_for_select(Staff::ACADEMIC_TITLES, staff.academic_title), { include_blank: "None" }, class: "form-select", data: { controller: "select2" }
+      .col-md-4.mb-3
+        = f.label :initials, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols badge
+          = f.text_field :initials, class: "form-control #{'is-invalid' if staff.errors[:initials].any?}"
+          - if staff.errors[:initials].any?
+            .invalid-feedback= staff.errors[:initials].first
 
     .row
       .col-md-6.mb-3

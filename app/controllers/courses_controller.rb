@@ -20,6 +20,8 @@ class CoursesController < ApplicationController
       @course_grades = scope.order("students.student_id")
     end
     prepare_grade_distribution_chart
+
+    @offerings = @course.course_offerings.includes(:semester, :sections).order("semesters.year_be DESC, semesters.semester_number DESC").references(:semesters)
   end
 
   def new

@@ -6,7 +6,24 @@ class StaffsController < ApplicationController
     @staffs = Staff.all
   end
 
-  def show; end
+  def show
+    @teaching_semesters = Semester.joins(course_offerings: { sections: :teachings })
+                                  .where(teachings: { staff_id: @staff.id })
+                                  .distinct.ordered
+
+    if @teaching_semesters.any?
+      @selected_semester = if params[:semester_id].present?
+                             Semester.find(params[:semester_id])
+                           else
+                             @teaching_semesters.first
+                           end
+
+      @teachings = Teaching.where(staff: @staff)
+                          .joins(section: { course_offering: :semester })
+                          .where(semesters: { id: @selected_semester.id })
+                          .includes(section: { course_offering: [:course, :semester] })
+    end
+  end
 
   def new
     @staff = Staff.new
@@ -53,7 +70,7 @@ class StaffsController < ApplicationController
     params.require(:staff).permit(
       :title, :academic_title, :first_name, :last_name,
       :first_name_th, :last_name_th, :staff_type,
-      :email, :phone, :birthdate, :employment_date, :room, :status
+      :email, :phone, :birthdate, :employment_date, :room, :status, :initials
     )
   end
 end

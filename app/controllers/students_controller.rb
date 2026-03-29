@@ -105,7 +105,35 @@ class StudentsController < ApplicationController
 
   def set_student
     @student = Student.find(params[:id])
-    @grades = @student.grades.includes(course: :program) if action_name == "show"
+    if action_name == "show"
+      @grades = @student.grades.includes(course: :program)
+      load_schedule_data
+    end
+  end
+
+  def load_schedule_data
+    @schedule_semesters = Semester.joins(:course_offerings)
+                                  .where(course_offerings: { course_id: @grades.select(:course_id) })
+                                  .distinct.ordered
+
+    if @schedule_semesters.any?
+      @schedule_semester = if params[:semester_id].present?
+                             Semester.find(params[:semester_id])
+                           else
+                             @schedule_semesters.first
+                           end
+
+      term_grades = @grades.where(year: @schedule_semester.year_be, semester: @schedule_semester.semester_number)
+      @schedule_entries = term_grades.map do |grade|
+        offering = CourseOffering.find_by(course: grade.course, semester: @schedule_semester)
+        section = if grade.section_id
+                    grade.section
+                  elsif offering
+                    offering.sections.order(:section_number).first
+                  end
+        { grade: grade, offering: offering, section: section }
+      end
+    end
   end
 
   def require_admin
