@@ -91,6 +91,10 @@ module Importers
       # Default status
       attrs[:status] ||= "active"
 
+      # Model requires Thai names; fall back to English names when not provided
+      attrs[:first_name_th] ||= attrs[:first_name] if attrs[:first_name].present?
+      attrs[:last_name_th] ||= attrs[:last_name] if attrs[:last_name].present?
+
       # Look up program: try ID, then name_en, then name_th (latest by year_started wins)
       if attrs.key?(:program_name)
         program_value = attrs.delete(:program_name).to_s.strip

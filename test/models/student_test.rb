@@ -4,7 +4,7 @@ class StudentTest < ActiveSupport::TestCase
   # --- Validations ---
 
   test "valid student" do
-    student = Student.new(student_id: "9999900001", first_name: "Test", last_name: "Student", admission_year_be: 2567, program: programs(:cp_bachelor))
+    student = Student.new(student_id: "9999900001", first_name_th: "ทดสอบ", last_name_th: "นิสิต", admission_year_be: 2567, status: "active", program: programs(:cp_bachelor))
     assert student.valid?
   end
 
@@ -21,20 +21,20 @@ class StudentTest < ActiveSupport::TestCase
     assert_includes student.errors[:student_id], "has already been taken"
   end
 
-  test "requires first_name" do
+  test "requires first_name_th" do
     student = students(:active_student).dup
     student.student_id = "9999900002"
-    student.first_name = nil
+    student.first_name_th = nil
     assert_not student.valid?
-    assert_includes student.errors[:first_name], "can't be blank"
+    assert_includes student.errors[:first_name_th], "can't be blank"
   end
 
-  test "requires last_name" do
+  test "requires last_name_th" do
     student = students(:active_student).dup
     student.student_id = "9999900003"
-    student.last_name = nil
+    student.last_name_th = nil
     assert_not student.valid?
-    assert_includes student.errors[:last_name], "can't be blank"
+    assert_includes student.errors[:last_name_th], "can't be blank"
   end
 
   test "requires admission_year_be" do

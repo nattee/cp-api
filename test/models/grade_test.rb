@@ -51,7 +51,7 @@ class GradeTest < ActiveSupport::TestCase
 
   test "grade must be valid" do
     grade = grades(:active_intro_computing).dup
-    grade.grade = "X"
+    grade.grade = "Z"
     assert_not grade.valid?
     assert_includes grade.errors[:grade], "is not included in the list"
   end

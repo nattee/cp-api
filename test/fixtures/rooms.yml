@@ -12,6 +12,6 @@ eng4_lab1:
 
 eng3_seminar:
   building: ENG3
-  room_number: "101"
+  room_number: "201"
   room_type: seminar
   capacity: 20
