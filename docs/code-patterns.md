@@ -319,9 +319,158 @@ col_search = params.dig(:columns, "2", :search, :value).to_s.strip
 base = base.where(category: col_search) if col_search.present?
 ```
 
+## Inline CRUD (Turbo Frames)
+
+For simple reference-data tables (e.g. Rooms) where separate new/edit pages feel heavy.
+The form appears inline above the table; submit does a full page redirect.
+
+**Why not Turbo Streams?** DataTables manages its own DOM — rows added via Turbo Streams
+are invisible to it. A full page reload reinitializes DataTables naturally.
+
+### Index view
+```haml
+.card{"data-controller" => "datatable"}
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        = resource_icon
+        Things
+      - if current_user.admin?
+        = link_to new_thing_path, class: "btn btn-primary btn-sm", data: { turbo_frame: "thing_form" } do
+          New Thing
+
+    = turbo_frame_tag "thing_form"
+
+    .table-responsive
+      %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
+        -# ... table rows with edit links targeting "thing_form" ...
+        -# = link_to edit_thing_path(thing), data: { turbo_frame: "thing_form" }
+```
+
+### new.html.haml / edit.html.haml
+```haml
+= turbo_frame_tag "thing_form" do
+  .card.mb-3.border-primary
+    .card-body.py-2.px-3
+      %h6.card-title.mb-2 New Thing
+      = render "form", thing: @thing
+```
+
+### _form.html.haml
+```haml
+-# data-turbo-frame="_top" makes the submit target the full page,
+-# so the redirect refreshes the entire index (including DataTable).
+-# Validation errors (422) also render at _top — acceptable trade-off.
+= form_with(model: thing, data: { turbo_frame: "_top" }) do |f|
+  -# ... form fields ...
+  = f.submit class: "btn btn-primary btn-sm"
+  = link_to "Cancel", things_path, class: "btn btn-outline-secondary btn-sm"
+```
+
+### Controller
+```ruby
+# No layout: false needed — Turbo Frame links extract just the frame
+# from the full response automatically.
+def new
+  @thing = Thing.new
+end
+
+def create
+  @thing = Thing.new(thing_params)
+  if @thing.save
+    redirect_to things_path, notice: "Thing was successfully created."
+  else
+    render :new, status: :unprocessable_entity
+  end
+end
+```
+
 ## Sidebar nav link
 ```haml
 %li.nav-item
   = link_to things_path, class: "nav-link #{'active' if controller_name == 'things'}" do
     Things
+```
+
+## Nested Fields (dynamic add/remove)
+
+For `accepts_nested_attributes_for` with dynamic rows. Uses `nested_fields_controller.js` Stimulus controller.
+
+**Multi-level nesting**: Each level uses a different placeholder (`NEW_RECORD`, `NEW_TIME_SLOT`, `NEW_TEACHING`). The controller's `placeholderValue` is configurable per instance.
+
+```haml
+-# Parent level (e.g. sections)
+%fieldset{"data-controller" => "nested-fields", "data-nested-fields-wrapper-selector-value" => ".section-fields"}
+  %div{"data-nested-fields-target" => "container"}
+    - parent.children.each_with_index do |child, i|
+      = f.fields_for :children, child, child_index: i do |cf|
+        = render "child_fields", f: cf
+  %template{"data-nested-fields-target" => "template"}
+    = f.fields_for :children, Child.new, child_index: "NEW_RECORD" do |cf|
+      = render "child_fields", f: cf
+  %button{type: "button", "data-action" => "nested-fields#add"} Add
+
+-# Sub-level inside child_fields partial (e.g. time slots inside sections)
+.child-fields{"data-controller" => "nested-fields", "data-nested-fields-placeholder-value" => "NEW_SUB_RECORD", "data-nested-fields-wrapper-selector-value" => ".sub-fields"}
+  -# Same template/container pattern with NEW_SUB_RECORD placeholder
+```
+
+Key points:
+- `<template>` content is inert — inner templates work correctly when outer is cloned
+- Select2 auto-connects on dynamically inserted elements (Stimulus MutationObserver)
+- No `reject_if: :all_blank` — let validations show errors for explicitly added blank rows
+
+## Week Calendar
+
+Shared partial for schedule reports. Server-rendered CSS grid with absolute-positioned blocks.
+
+```haml
+= render "shared/week_calendar", entries: @entries
+```
+
+Each entry is a hash:
+```ruby
+{
+  day_of_week: 1,           # 0=Sun..6=Sat
+  start_time: "09:00",      # HH:MM string
+  end_time: "10:30",
+  label: "2110101",         # primary text (bold)
+  sublabel: "Sec 1",        # secondary text
+  detail: "ENG4-303",       # tertiary text (dimmed)
+  color_key: "2110101",     # determines block color from 12-color palette
+  url: "/course_offerings/5", # optional — wraps block in <a>
+  badge: "<span>...</span>"   # optional raw HTML, positioned top-right
+}
+```
+
+## CSV Export
+
+Service class pattern for generating downloadable CSV.
+
+```ruby
+# app/services/exporters/foo_exporter.rb
+module Exporters
+  class FooExporter
+    def initialize(scope)
+      @scope = scope
+    end
+
+    def to_csv
+      CSV.generate do |csv|
+        csv << HEADERS
+        build_rows.each { |row| csv << row }
+      end
+    end
+
+    def filename
+      "foo_#{@scope.id}.csv"
+    end
+  end
+end
+
+# Controller action
+def export
+  exporter = Exporters::FooExporter.new(@thing)
+  send_data exporter.to_csv, filename: exporter.filename, type: "text/csv", disposition: "attachment"
+end
 ```

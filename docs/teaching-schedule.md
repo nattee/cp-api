@@ -267,20 +267,36 @@ Migration adds `section_id` column (nullable, FK → sections). No backfill — 
 
 ```ruby
 resources :semesters do
+  member do
+    get :export
+  end
   resources :course_offerings, only: [:index, :new, :create], shallow: true
 end
 resources :course_offerings, only: [:show, :edit, :update, :destroy]
 resources :rooms
+resources :scrapes, only: [:index, :new, :create, :show]
+
+namespace :schedules do
+  get :room
+  get :staff
+  get :workload
+  get :curriculum
+  get :student
+  get :conflicts
+end
 ```
 
 This gives us:
 - `GET /semesters` — semester list
 - `GET /semesters/:id` — semester detail (lists offerings)
+- `GET /semesters/:id/export` — CSV export for a semester
 - `GET /semesters/:semester_id/course_offerings/new` — add offering to semester
 - `POST /semesters/:semester_id/course_offerings` — create
 - `GET /course_offerings/:id` — offering detail (sections, time slots, teachings)
 - `GET /course_offerings/:id/edit` — nested form
 - `GET /rooms` — room directory
+- `GET /scrapes` — scrape history
+- `GET /schedules/room` — room schedule report (+ staff, workload, curriculum, student, conflicts)
 
 Sections, TimeSlots, and Teachings are **not** separate routes — they live inline on the CourseOffering form via `accepts_nested_attributes_for`.
 
@@ -443,6 +459,38 @@ Add to `DataImport::IMPORTERS`:
 ### Mode
 
 Only **upsert** makes sense — re-importing the same semester's schedule should update existing records, not create duplicates. The `unique_key_fields` concept doesn't map cleanly to a single model, so the importer uses find-or-create logic internally rather than the base class's upsert flow.
+
+## CSV Export
+
+The reverse of CSV import — exports schedule data for a chosen semester in the same flat format the importer expects. Enables round-tripping (export → edit in Excel → re-import).
+
+### Exporter service
+
+`Exporters::ScheduleExporter` takes a Semester and returns CSV data.
+
+CSV columns (matching `Importers::ScheduleImporter`):
+```
+course_no, revision_year, section_number, day, start_time, end_time, building, room_number, instructor, load_ratio, remark
+```
+
+- One row per time slot × teaching assignment
+- Multiple teachers on a time slot → multiple rows
+- Time slot with no teachers → one row with blank instructor/load_ratio
+- Day format: `Mon`, `Tue`, `Wed` etc.
+- Instructor: `staff.display_name` (full name, not initials)
+
+### Route and UI
+
+```ruby
+resources :semesters do
+  member do
+    get :export
+  end
+  resources :course_offerings, only: [:index, :new, :create], shallow: true
+end
+```
+
+"Export CSV" button on the semester show page. Downloads `schedule_2568_1.csv`.
 
 ## Web Scraper
 
@@ -618,44 +666,16 @@ A `staffs.yml` fixture file is also needed (does not currently exist).
 - admin can add time slots and teachings to sections (Phase 2)
 - non-admin sees read-only views
 
-## Implementation Steps
+## Implementation Status
 
-Concrete steps for building this feature across multiple Claude Code instances. Steps marked **(parallel)** can run simultaneously in separate terminals.
+All phases are implemented. Requires user testing with real data.
 
-**Note:** Steps differ from Phases above. Phases are ordered by *design logic* (what builds on what conceptually). Steps are reordered to *maximize parallelism* during implementation — work that has no dependency on each other is grouped into the same step even if it spans different phases.
-
-### Step 1: Foundation — models, routes, sidebar
-Single instance. All shared infrastructure that everything else depends on.
-- All 6 migrations (semesters, rooms, course_offerings, sections, time_slots, teachings)
-- Migrations for existing tables: `section_id` on grades, `initials` on staffs, `description`/`description_th` on courses, `enrollment_current`/`enrollment_max` on sections
-- All 6 new models + updates to Course, Staff, Grade
-- All fixture files (including `staffs.yml` if missing)
-- All model tests
-- Routes (`semesters`, `rooms`, shallow `course_offerings`, `scrapes`)
-- Sidebar "Teaching" section + entries
-- `RESOURCE_ICONS` entries
-
-### Step 2: Semester CRUD + Room CRUD **(parallel)**
-Two instances, separate files.
-- **Instance A**: `SemestersController` + views (index, show, new, edit, form) + controller tests + system tests
-- **Instance B**: `RoomsController` + views (inline add/edit on index) + controller tests + system tests
-
-### Step 3: CourseOffering CRUD with nested Section form
-Single instance. Depends on Step 2 (Semester views).
-- `CourseOfferingsController` (shallow nested under semesters)
-- Views: index (on semester show), show, new, edit, form with nested section fields
-- Controller tests + system tests
-
-### Step 4: CSV Import + CuGetReg scraper + Embedded sections **(parallel)**
-Three instances, all separate files. All depend on Step 3 only.
-- **Instance A**: `Importers::ScheduleImporter` + register in `DataImport::IMPORTERS` + tests
-- **Instance B**: `Scrapers::Base` + `Scrapers::CuGetReg` + `config/scraper.yml` + console helpers + fixture files + tests
-- **Instance C**: Embedded sections (Layer 2) — Staff show "Teaching" section, Course show "Offerings" section, Student show "Schedule" section
-
-### Step 5: Nested form Phase 2 + CAS Reg scraper **(parallel)**
-Two instances.
-- **Instance A**: Extend CourseOffering form with TimeSlot + Teaching nested fields + `nested_fields_controller.js` + system tests
-- **Instance B**: `Scrapers::CasReg` + rake task (`scraper:run`) + scraper web UI (`ScrapesController` + views) + tests
-
-### Step 6: Reports (Layer 3)
-Per `docs/schedule-reports.md`. Can be split across instances by report.
+| Phase | Status |
+|-------|--------|
+| 1. Foundation (models, routes, sidebar) | Done |
+| 2. Time Slots + Teachings (nested form) | Done |
+| 3. CSV Import (`ScheduleImporter`) | Done |
+| 4. Embedded sections (Staff/Course/Student show pages) | Done |
+| 5. Web Scraper (CuGetReg + CAS Reg) | Done |
+| 6. Reports (week calendar, workload, conflicts) | Done |
+| CSV Export (`ScheduleExporter`) | Done |

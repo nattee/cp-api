@@ -79,7 +79,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 
 ## UI Component Conventions
 
-- **Badges**: Every badge must use a named semantic `.badge-*` class — never raw Bootstrap `bg-*` classes. When introducing a new badge, add a new `.badge-<concept>` class in `application.scss` following the frosted style (semi-transparent tinted background, subtle border) rather than reusing an existing class with a different meaning. Existing classes: `.badge-admin`, `.badge-editor`, `.badge-viewer`, `.badge-active`, `.badge-inactive`, `.badge-graduated`, `.badge-on-leave`, `.badge-retired`, `.badge-bachelor`, `.badge-master`, `.badge-doctoral`. Two classes may share similar colors if they represent different domain concepts. **Render badges data-driven** — derive the class from the value (e.g. `"badge-#{status.dasherize}"`) instead of if/elsif chains. This way adding a new value only requires a model constant + SCSS class, no view changes.
+- **Badges**: Every badge must use a named semantic `.badge-*` class — never raw Bootstrap `bg-*` classes. When introducing a new badge, add a new `.badge-<concept>` class in `application.scss` following the frosted style (semi-transparent tinted background, subtle border) rather than reusing an existing class with a different meaning. Existing classes: `.badge-admin`, `.badge-editor`, `.badge-viewer`, `.badge-active`, `.badge-inactive`, `.badge-graduated`, `.badge-on-leave`, `.badge-retired`, `.badge-bachelor`, `.badge-master`, `.badge-doctoral`, `.badge-planned`, `.badge-confirmed`, `.badge-cancelled`, `.badge-pending`, `.badge-running`, `.badge-completed`, `.badge-failed`, `.badge-create-only`, `.badge-upsert`. Two classes may share similar colors if they represent different domain concepts. **Render badges data-driven** — derive the class from the value (e.g. `"badge-#{status.dasherize}"`) instead of if/elsif chains. This way adding a new value only requires a model constant + SCSS class, no view changes.
 - **Icon action buttons**: Use ghost button classes (`.btn-ghost .btn-ghost-*`) for icon-only action links in tables. These extend Bootstrap's `btn-link` with no underline, custom color per variant, and a subtle tinted background on hover. Variants: `-primary` (view/show), `-secondary` (edit), `-danger` (delete). Do not use `btn-outline-*` for icon-only actions.
 - **Icons**: Use Material Symbols (`%span.material-symbols`) for action icons, typically at `font-size: 18px` in tables.
 - **Input group icons**: Styled with `$input-icon-color` (defined post-import in `application.scss`). Currently `darken($light, 5%)` — a dimmed version of the `$light` theme color.
@@ -98,12 +98,40 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - **Domain icon mappings**: Codify icon associations as frozen hash constants on the model (e.g. `Student::STATUS_ICONS`). These map domain values (not pages) to icons. In forms, pass icons as `data-icon` attributes on `<option>` elements via `options_for_select`. The `select2_controller.js` is generic — it detects `data-icon` automatically and renders Material Symbols icons at reduced size and opacity so the text label remains primary.
 - **Visual hierarchy in forms**: Supporting elements (labels, icons) recede so input values stand out. Form labels use muted color + smaller font (like `thead th`). Select2 dropdown icons render at `16px` / `opacity: 0.5`. Input group icons use `$input-icon-color`. Do not give labels and values equal visual weight.
 - **CSS-only popovers**: Use `.help-popover-trigger` with a child `.help-popover-content` span. Shows on `:focus`, no JS needed. Used for field help text in import mapping. Prefer this over Bootstrap JS popovers (see Asset Pipeline note about Bootstrap JS being UMD).
+- **Inline editing (Turbo Frames)**: Used by Rooms for simple reference-data CRUD on the index page. Pattern: a `turbo_frame_tag "room_form"` placeholder on the index page; "New"/"Edit" links target this frame (`data-turbo-frame: "room_form"`) to load the form inline; the form itself targets `_top` (`data: { turbo_frame: "_top" }`) so the redirect after save does a full page navigation (refreshing the DataTable). This is necessary because DataTables manages its own DOM — Turbo Streams can't update it. Only use this pattern for simple reference tables; standard separate-page CRUD is preferred for complex resources.
 
 ## Data Model Conventions
 
 - **Program `program_code`**: A unique 4-digit string (e.g. `"0018"`, `"4784"`) from the university's official system. This is the **business key** — use it for all external lookups (imports, seeds, APIs). Rails auto-increment `id` is only for internal associations/foreign keys. Seeds use `find_or_create_by!(program_code:)`.
 - **Year fields are Buddhist Era (B.E.)**: `admission_year_be` (Student), `year_started` (Program), `revision_year` (Course) all store B.E. years (e.g. 2567 = 2024 CE). Importers auto-convert CE→BE by adding 543 when the value is < 2400.
 - **Student name display**: Use `Student#display_name` (prefers `full_name_th`, falls back to `full_name`) in all index pages, tables, and list contexts. Reserve `full_name` / `full_name_th` for show-page detail fields where both languages are displayed explicitly.
+- **Staff name display**: Use `Staff#display_name_th` (prefers Thai, falls back to English) in all dropdowns, tables, and display contexts. Reserve `display_name` (English) for export/import matching where column data is in English.
+
+## Teaching Schedule
+
+Course offering, section, time slot, and teaching assignment tracking. See `docs/teaching-schedule.md` for full design.
+
+- **Design docs**: `docs/teaching-schedule.md` (CRUD + import/export), `docs/schedule-reports.md` (reports), `docs/schedule-scraper.md` (web scraper)
+- **Models**: Semester, Room, CourseOffering, Section, TimeSlot, Teaching — plus changes to Course (`description`, `description_th`, `has_many :course_offerings`), Staff (`initials`, `has_many :teachings`), Grade (`section_id` nullable FK)
+- **Key conventions**:
+  - `Semester` is the navigational parent (not inline year+semester like Grade)
+  - `Teaching` belongs to **Section**, not TimeSlot — a staff member teaches the whole section
+  - Section numbers can be non-sequential (1, 5, 99, 302)
+  - `Staff#initials` maps to the 3-letter codes used by the university registration system (e.g., "NNN", "PKY")
+- **CSV import**: `Importers::ScheduleImporter` — flat format, one row per time slot, find-or-create nested records
+- **CSV export**: `Exporters::ScheduleExporter` — reverse of import, same format. Available via `GET /semesters/:id/export`
+- **Nested forms**: `accepts_nested_attributes_for` chain (CourseOffering → Sections → TimeSlots + Teachings). `nested_fields_controller.js` handles dynamic add/remove with configurable `placeholder` value for multi-level nesting (`NEW_RECORD` for sections, `NEW_TIME_SLOT` / `NEW_TEACHING` for sub-levels). Select2 auto-connects on dynamically inserted elements via Stimulus MutationObserver. No `reject_if: :all_blank` — blank nested records show validation errors instead of being silently dropped.
+- **Schedule reports**: `SchedulesController` with 6 read-only reports (room, staff, workload, curriculum, student, conflicts). Shared `_week_calendar.html.haml` partial accepts `entries` array of hashes. See `docs/schedule-reports.md`.
+
+## Schedule Scraper
+
+Fetches schedule data from external university websites. See `docs/schedule-scraper.md` for full design.
+
+- **Config**: `config/scraper.yml` — rate_limit, request_timeout, retry_count, retry_delay per environment
+- **Backends**: `Scrapers::CuGetReg` (GraphQL, recommended) and `Scrapers::CasReg` (HTML scraping, fallback)
+- **Console helpers**: `Scrapers::CuGetReg.scrape("2110327", 2568, 2)` (fetch only), `scrape!` (fetch + import)
+- **Rake task**: `bin/rails scraper:run SOURCE=cugetreg YEAR=2568 SEMESTER=2`
+- **Web UI**: `/scrapes` — admin triggers scrape job, monitors progress, views history
 
 ## Import System
 

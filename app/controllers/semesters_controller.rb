@@ -1,5 +1,5 @@
 class SemestersController < ApplicationController
-  before_action :set_semester, only: %i[show edit update destroy]
+  before_action :set_semester, only: %i[show edit update destroy export]
   before_action :require_admin, only: %i[new create edit update destroy]
 
   def index
@@ -38,6 +38,11 @@ class SemestersController < ApplicationController
   def destroy
     @semester.destroy!
     redirect_to semesters_path, notice: "Semester was successfully deleted."
+  end
+
+  def export
+    exporter = Exporters::ScheduleExporter.new(@semester)
+    send_data exporter.to_csv, filename: exporter.filename, type: "text/csv", disposition: "attachment"
   end
 
   private

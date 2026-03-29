@@ -406,3 +406,24 @@ Role-based, using the existing `User#role` field:
 - **viewer**: all reports
 
 Students can't log in currently. When student login is added in the future, restrict student timetable to their own data. Design the controller to check `current_user.role` so adding restrictions later is a one-line change, not a refactor.
+
+## Implementation Status
+
+All 6 reports are implemented. Requires user testing with real data.
+
+| Report | Status | Notes |
+|--------|--------|-------|
+| Room Schedule | Done | Week calendar, room+semester filter |
+| Staff Schedule | Done | Week calendar + load summary |
+| Staff Workload | Done | DataTable, year range + staff type filter, color thresholds |
+| Curriculum Calendar | Done | Multi-select courses, color-coded by course |
+| Student Timetable | Done | Grade badges, section resolution (grade.section_id → first section fallback) |
+| Conflict Detection | Done | Room + staff overlaps, strict overlap (adjacent slots NOT flagged) |
+
+### Implementation notes
+
+- **Routes**: `controller :schedules do ... end` pattern (not `namespace`), all under `SchedulesController`
+- **Week calendar partial**: `app/views/shared/_week_calendar.html.haml` — accepts `entries` array, 12-color palette, auto-fit time range, CSS absolute positioning
+- **Conflict algorithm**: `a.start_time < b.end_time && b.start_time < a.end_time` — strict inequality means 09:00-10:00 and 10:00-11:00 are NOT overlapping
+- **Workload thresholds**: user-adjustable via form fields, defaults `low_threshold=1`, `high_threshold=2`, cells colored with Bootstrap `table-success` / `table-danger`
+- **Landing page**: `/schedules` with 6 report cards linking to individual reports

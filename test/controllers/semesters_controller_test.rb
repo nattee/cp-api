@@ -46,4 +46,12 @@ class SemestersControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to semesters_path
   end
+
+  test "export returns CSV download" do
+    get export_semester_path(semesters(:sem_2568_1))
+    assert_response :success
+    assert_equal "text/csv", response.content_type.split(";").first
+    assert_match(/attachment.*schedule_2568_1\.csv/, response.headers["Content-Disposition"])
+    assert_match(/course_no/, response.body)
+  end
 end

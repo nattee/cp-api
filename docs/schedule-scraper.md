@@ -226,9 +226,13 @@ The official university course schedule system at `cas.reg.chula.ac.th`. HTML-ba
 
 ### Flow
 
-1. **Initialize session**: `GET /servlet/.../QueryCourseScheduleNewServlet` (get cookies)
-2. **Search**: `GET /servlet/.../CourseListNewServlet?studyProgram=S&semester=2&acadyearEfd=2567&courseno=2110&acadyear=2567&lang=T&...` → returns left frame with course list links
-3. **Detail**: `GET /servlet/.../CourseScheduleDtlNewServlet?courseNo=2110327&studyProgram=S` → returns section/time/room table
+The servlet package prefix is `com.dtm.chula.cs.servlet.QueryCourseScheduleNew`. Full paths:
+
+1. **Initialize session**: `GET /servlet/com.dtm.chula.cs.servlet.QueryCourseScheduleNew.QueryCourseScheduleNewServlet` (get cookies)
+2. **Search (course list)**: `GET /servlet/com.dtm.chula.cs.servlet.QueryCourseScheduleNew.CourseListNewServlet?studyProgram=S&semester=2&acadyearEfd=2568&courseno=2110&acadyear=2568&lang=T` — must be called before detail to set server-side session state
+3. **Detail**: `GET /servlet/com.dtm.chula.cs.servlet.QueryCourseScheduleNew.CourseScheduleDtlNewServlet?courseNo=2110327&studyProgram=S&semester=2&acadyear=2568` → returns section/time/room table
+
+The entry point HTML page is at `/cu/cs/QueryCourseScheduleNew/index.html` (frameset that loads the servlet).
 
 ### Key details
 - **Requires session cookie** from step 1 before queries work
@@ -247,6 +251,10 @@ section  | method | day  | time  | building | room | teacher | remark | enrollme
 ```
 
 Days are inline text (MO, TU, WE, etc. within the same `<TD>`), time is a separate cell. Needs Nokogiri for parsing.
+
+**Malformed HTML warning**: The detail table (`#Table3`) has unclosed `<TD>` tags. Starting from the second section row, cell[1] (section number) contains the section number concatenated with all subsequent cell content (e.g. `"2 LECT TH 8:00-11:00 ENG3 219 NPS ..."`). The parser extracts only the leading digits from cell[1] via regex.
+
+**Additional data available**: CAS Reg also provides Thai course name, English course name, and credits (parsed from `#Table2` and the credit table). It does not provide course descriptions.
 
 ### Advantages
 - Official source — authoritative data
@@ -337,29 +345,17 @@ Shows:
 | error_message       | text    | nullable |
 | timestamps          |         | |
 
-### courses table changes
+### courses table changes (implemented)
 
-Add description columns (populated from CuGetReg which provides `courseDescTh`/`courseDescEn`):
-```ruby
-add_column :courses, :description, :text
-add_column :courses, :description_th, :text
-```
+Description columns added: `description` (text), `description_th` (text). Populated from CuGetReg which provides `courseDescTh`/`courseDescEn`.
 
-### sections table changes
+### sections table changes (implemented)
 
-Add enrollment columns:
-```ruby
-add_column :sections, :enrollment_current, :integer
-add_column :sections, :enrollment_max, :integer
-```
+Enrollment columns added: `enrollment_current` (integer), `enrollment_max` (integer). Updated on each scrape.
 
-### staffs table change
+### staffs table change (implemented)
 
-Add column:
-```ruby
-add_column :staffs, :initials, :string
-add_index :staffs, :initials, unique: true
-```
+Column added: `initials` (string, unique index). Admin sets via Staff edit form.
 
 ## Three Ways to Run
 

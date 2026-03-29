@@ -20,6 +20,9 @@ Rails.application.routes.draw do
   resource :line_account, only: [:show, :create, :destroy], controller: "line_accounts"
 
   resources :semesters do
+    member do
+      get :export
+    end
     resources :course_offerings, only: [:index, :new, :create], shallow: true
   end
   resources :course_offerings, only: [:show, :edit, :update, :destroy]

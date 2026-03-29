@@ -3,6 +3,9 @@
     = @semester.display_name
     %small.text-muted= "— #{Semester::SEMESTER_LABELS[@semester.semester_number]} Semester"
   .d-flex.gap-2
+    = link_to export_semester_path(@semester), class: "btn btn-outline-secondary" do
+      %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} download
+      Export CSV
     - if current_user.admin?
       = link_to "Edit", edit_semester_path(@semester), class: "btn btn-outline-secondary"
     = link_to "Back", semesters_path, class: "btn btn-outline-primary"
