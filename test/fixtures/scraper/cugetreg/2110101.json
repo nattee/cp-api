@@ -1,0 +1,69 @@
+{
+  "data": {
+    "course": {
+      "courseNo": "2110101",
+      "courseNameEn": "COMPUTER PROGRAMMING",
+      "courseNameTh": "การเขียนโปรแกรมคอมพิวเตอร์",
+      "courseDescEn": "Introduction to computer programming concepts.",
+      "courseDescTh": "แนะนำแนวคิดการเขียนโปรแกรมคอมพิวเตอร์",
+      "credit": 3,
+      "sections": [
+        {
+          "sectionNo": "1",
+          "closed": false,
+          "note": "2CP",
+          "capacity": {
+            "current": 58,
+            "max": 60
+          },
+          "classes": [
+            {
+              "type": "LECT",
+              "dayOfWeek": "MO",
+              "period": {
+                "start": "09:30",
+                "end": "11:00"
+              },
+              "building": "ENG4",
+              "room": "303",
+              "teachers": ["JS"]
+            },
+            {
+              "type": "LECT",
+              "dayOfWeek": "WE",
+              "period": {
+                "start": "09:30",
+                "end": "11:00"
+              },
+              "building": "ENG4",
+              "room": "303",
+              "teachers": ["JS"]
+            }
+          ]
+        },
+        {
+          "sectionNo": "2",
+          "closed": false,
+          "note": null,
+          "capacity": {
+            "current": 45,
+            "max": 60
+          },
+          "classes": [
+            {
+              "type": "LECT",
+              "dayOfWeek": "TU",
+              "period": {
+                "start": "13:00",
+                "end": "14:30"
+              },
+              "building": "ENG4",
+              "room": "LAB1",
+              "teachers": ["JJ", "XYZ"]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

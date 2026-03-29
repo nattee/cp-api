@@ -20,16 +20,16 @@ class RoomsTest < ApplicationSystemTestCase
     click_on "New Room"
 
     within("turbo-frame#room_form") do
-      fill_in "Building", with: "ENG3"
-      fill_in "Room No", with: "201"
+      fill_in "Building", with: "ENG1"
+      fill_in "Room No", with: "501"
       select "Lecture", from: "Type"
       fill_in "Capacity", with: "80"
       click_on "Add Room"
     end
 
     assert_text "Room was successfully created"
-    assert_text "ENG3"
-    assert_text "201"
+    assert_text "ENG1"
+    assert_text "501"
   end
 
   test "admin can edit room inline" do

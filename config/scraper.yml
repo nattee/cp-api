@@ -1,0 +1,16 @@
+default: &default
+  rate_limit: 10          # requests per second
+  request_timeout: 10     # seconds per request
+  retry_count: 3          # retries on transient failure
+  retry_delay: 2          # seconds between retries
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  stub: true              # use fixture files instead of real HTTP
+
+production:
+  <<: *default
+  rate_limit: 5           # more conservative in production
