@@ -10,7 +10,10 @@ module ApplicationHelper
     "chat_messages"  => "forum",
     "data_imports"   => "upload_file",
     "api_events"     => "monitor_heart",
-    "dev"            => "palette",
+    "semesters"        => "calendar_month",
+    "course_offerings" => "event_note",
+    "rooms"            => "meeting_room",
+    "dev"              => "palette",
   }.freeze
 
   def resource_icon(resource = controller_name)

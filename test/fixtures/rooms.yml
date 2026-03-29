@@ -1,0 +1,11 @@
+eng4_303:
+  building: ENG4
+  room_number: "303"
+  room_type: lecture
+  capacity: 60
+
+eng4_lab1:
+  building: ENG4
+  room_number: LAB1
+  room_type: lab
+  capacity: 40

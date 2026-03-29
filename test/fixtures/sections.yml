@@ -1,0 +1,11 @@
+intro_sec_1:
+  course_offering: intro_computing_2568_1
+  section_number: 1
+
+intro_sec_2:
+  course_offering: intro_computing_2568_1
+  section_number: 2
+
+senior_sec_1:
+  course_offering: senior_project_2568_1
+  section_number: 1

@@ -19,6 +19,13 @@ Rails.application.routes.draw do
 
   resource :line_account, only: [:show, :create, :destroy], controller: "line_accounts"
 
+  resources :semesters do
+    resources :course_offerings, only: [:index, :new, :create], shallow: true
+  end
+  resources :course_offerings, only: [:show, :edit, :update, :destroy]
+  resources :rooms
+  resources :scrapes, only: [:index, :create, :show]
+
   resources :programs
   resources :courses
   resources :staffs

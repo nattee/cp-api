@@ -24,12 +24,15 @@ class Staff < ApplicationRecord
 
   has_many :staff_programs, dependent: :destroy
   has_many :programs, through: :staff_programs
+  has_many :teachings, dependent: :restrict_with_error
+  has_many :sections, through: :teachings
 
   validates :title, presence: true
   validates :first_name, presence: true
   validates :last_name, presence: true
   validates :staff_type, presence: true, inclusion: { in: STAFF_TYPES }
   validates :status, presence: true, inclusion: { in: STATUSES }
+  validates :initials, uniqueness: true, allow_nil: true
 
   scope :active, -> { where(status: "active") }
 

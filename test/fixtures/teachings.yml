@@ -1,0 +1,14 @@
+smith_intro_sec1:
+  section: intro_sec_1
+  staff: lecturer_smith
+  load_ratio: 1.0
+
+jones_intro_sec2:
+  section: intro_sec_2
+  staff: lecturer_jones
+  load_ratio: 0.5
+
+smith_intro_sec2:
+  section: intro_sec_2
+  staff: lecturer_smith
+  load_ratio: 0.5

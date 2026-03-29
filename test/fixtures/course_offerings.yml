@@ -1,0 +1,9 @@
+intro_computing_2568_1:
+  course: intro_computing
+  semester: sem_2568_1
+  status: confirmed
+
+senior_project_2568_1:
+  course: senior_project
+  semester: sem_2568_1
+  status: planned

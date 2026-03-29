@@ -61,6 +61,17 @@
               = resource_icon("users")
               Users
 
+          %li.mt-3.mb-1.px-3
+            %small.text-uppercase.fw-semibold.text-body-secondary.letter-spacing-wide Teaching
+          %li.nav-item
+            = link_to semesters_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'semesters'}" do
+              = resource_icon("semesters")
+              Semesters
+          %li.nav-item
+            = link_to rooms_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'rooms'}" do
+              = resource_icon("rooms")
+              Rooms
+
           %li.nav-item
             = link_to line_account_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'line_accounts'}" do
               = resource_icon("line_accounts")

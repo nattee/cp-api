@@ -1,6 +1,7 @@
 class Grade < ApplicationRecord
   belongs_to :student
   belongs_to :course
+  belongs_to :section, optional: true
 
   GRADES = %w[A B+ B C+ C D+ D F S U I W V M P R X].freeze
 

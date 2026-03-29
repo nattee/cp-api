@@ -1,6 +1,7 @@
 class Course < ApplicationRecord
   belongs_to :program
   has_many :grades, dependent: :destroy
+  has_many :course_offerings, dependent: :restrict_with_error
 
   AUTO_GENERATED_LEVELS = %w[none copied placeholder].freeze
 

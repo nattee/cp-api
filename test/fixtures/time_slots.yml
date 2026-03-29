@@ -1,0 +1,20 @@
+intro_sec1_mon:
+  section: intro_sec_1
+  room: eng4_303
+  day_of_week: 1
+  start_time: "09:00"
+  end_time: "10:30"
+
+intro_sec1_wed:
+  section: intro_sec_1
+  room: eng4_303
+  day_of_week: 3
+  start_time: "09:00"
+  end_time: "10:30"
+
+intro_sec2_tue:
+  section: intro_sec_2
+  room: eng4_lab1
+  day_of_week: 2
+  start_time: "13:00"
+  end_time: "14:30"

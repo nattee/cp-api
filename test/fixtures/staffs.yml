@@ -1,0 +1,30 @@
+lecturer_smith:
+  title: "นาย"
+  first_name: John
+  last_name: Smith
+  first_name_th: "จอห์น"
+  last_name_th: "สมิธ"
+  academic_title: "ผศ.ดร."
+  staff_type: lecturer
+  status: active
+  email: john.smith@example.com
+  initials: JS
+
+lecturer_jones:
+  title: "นาง"
+  first_name: Jane
+  last_name: Jones
+  first_name_th: "เจน"
+  last_name_th: "โจนส์"
+  academic_title: "รศ.ดร."
+  staff_type: lecturer
+  status: active
+  email: jane.jones@example.com
+  initials: JJ
+
+retired_staff:
+  title: "นาย"
+  first_name: Bob
+  last_name: Brown
+  staff_type: lecturer
+  status: retired

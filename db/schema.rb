@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_100208) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -62,6 +62,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
     t.index ["line_user_id", "created_at"], name: "index_chat_messages_on_line_user_id_and_created_at"
   end
 
+  create_table "course_offerings", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "course_id", null: false
+    t.datetime "created_at", null: false
+    t.text "remark"
+    t.bigint "semester_id", null: false
+    t.string "status", default: "planned", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id", "semester_id"], name: "index_course_offerings_on_course_id_and_semester_id", unique: true
+    t.index ["course_id"], name: "index_course_offerings_on_course_id"
+    t.index ["semester_id"], name: "index_course_offerings_on_semester_id"
+  end
+
   create_table "courses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "auto_generated", default: "none", null: false
     t.string "course_group"
@@ -69,6 +81,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
     t.datetime "created_at", null: false
     t.integer "credits"
     t.string "department_code"
+    t.text "description"
+    t.text "description_th"
     t.boolean "is_gened", default: false, null: false
     t.boolean "is_thesis", default: false, null: false
     t.integer "l_credits"
@@ -115,12 +129,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
     t.integer "credits_grant"
     t.string "grade"
     t.decimal "grade_weight", precision: 3, scale: 1
+    t.bigint "section_id"
     t.integer "semester", null: false
     t.string "source", default: "manual", null: false
     t.bigint "student_id", null: false
     t.datetime "updated_at", null: false
     t.integer "year", null: false
     t.index ["course_id"], name: "index_grades_on_course_id"
+    t.index ["section_id"], name: "index_grades_on_section_id"
     t.index ["student_id", "course_id", "year", "semester"], name: "idx_enrollments_unique_student_course_term", unique: true
     t.index ["student_id"], name: "index_grades_on_student_id"
   end
@@ -140,6 +156,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
     t.datetime "updated_at", null: false
     t.integer "year_started", null: false
     t.index ["program_code"], name: "index_programs_on_program_code", unique: true
+  end
+
+  create_table "rooms", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "building", null: false
+    t.integer "capacity"
+    t.datetime "created_at", null: false
+    t.string "room_number", null: false
+    t.string "room_type"
+    t.datetime "updated_at", null: false
+    t.index ["building", "room_number"], name: "index_rooms_on_building_and_room_number", unique: true
+  end
+
+  create_table "sections", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "course_offering_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "enrollment_current"
+    t.integer "enrollment_max"
+    t.text "remark"
+    t.integer "section_number", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_offering_id", "section_number"], name: "index_sections_on_course_offering_id_and_section_number", unique: true
+    t.index ["course_offering_id"], name: "index_sections_on_course_offering_id"
+  end
+
+  create_table "semesters", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "semester_number", null: false
+    t.datetime "updated_at", null: false
+    t.integer "year_be", null: false
+    t.index ["year_be", "semester_number"], name: "index_semesters_on_year_be_and_semester_number", unique: true
   end
 
   create_table "staff_programs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -162,6 +208,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
     t.date "employment_date"
     t.string "first_name", null: false
     t.string "first_name_th"
+    t.string "initials"
     t.string "last_name", null: false
     t.string "last_name_th"
     t.string "phone"
@@ -170,6 +217,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
     t.string "status", default: "active", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
+    t.index ["initials"], name: "index_staffs_on_initials", unique: true
   end
 
   create_table "students", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -198,6 +246,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
     t.index ["student_id"], name: "index_students_on_student_id", unique: true
   end
 
+  create_table "teachings", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "load_ratio", precision: 3, scale: 2, default: "1.0", null: false
+    t.bigint "section_id", null: false
+    t.bigint "staff_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["section_id", "staff_id"], name: "index_teachings_on_section_id_and_staff_id", unique: true
+    t.index ["section_id"], name: "index_teachings_on_section_id"
+    t.index ["staff_id"], name: "index_teachings_on_staff_id"
+  end
+
+  create_table "time_slots", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "day_of_week", null: false
+    t.time "end_time", null: false
+    t.string "remark"
+    t.bigint "room_id"
+    t.bigint "section_id", null: false
+    t.time "start_time", null: false
+    t.datetime "updated_at", null: false
+    t.index ["room_id"], name: "index_time_slots_on_room_id"
+    t.index ["section_id"], name: "index_time_slots_on_section_id"
+  end
+
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
@@ -222,11 +294,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "course_offerings", "courses"
+  add_foreign_key "course_offerings", "semesters"
   add_foreign_key "courses", "programs"
   add_foreign_key "data_imports", "users"
   add_foreign_key "grades", "courses"
+  add_foreign_key "grades", "sections"
   add_foreign_key "grades", "students"
+  add_foreign_key "sections", "course_offerings"
   add_foreign_key "staff_programs", "programs"
   add_foreign_key "staff_programs", "staffs"
   add_foreign_key "students", "programs"
+  add_foreign_key "teachings", "sections"
+  add_foreign_key "teachings", "staffs"
+  add_foreign_key "time_slots", "rooms"
+  add_foreign_key "time_slots", "sections"
 end
