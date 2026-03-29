@@ -133,6 +133,11 @@ $input-icon-color: darken($light, 5%);
 .badge-create-only { background-color: rgba($primary, 0.2);  color: lighten(saturate($primary, 30%), 10%); border: 1px solid rgba($primary, 0.4); }
 .badge-upsert      { background-color: rgba($warning, 0.2);  color: lighten($warning, 8%);                 border: 1px solid rgba($warning, 0.4); }
 
+// Course offering status badges
+.badge-planned   { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
+.badge-confirmed { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%); border: 1px solid rgba($success, 0.4); }
+.badge-cancelled { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                 border: 1px solid rgba($danger, 0.4); }
+
 // Grade badges — color-coded by grade tier to give instant visual feedback on performance.
 // Uses frosted style consistent with other badges. Derived via grade_badge_class helper method.
 $grade-green:  #3faa65;   // A, S — top marks

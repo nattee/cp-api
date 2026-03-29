@@ -1,0 +1,31 @@
+= form_with(model: semester, class: "needs-validation") do |f|
+  - if semester.errors.any?
+    .alert.alert-danger
+      %h5.alert-heading
+        = pluralize(semester.errors.count, "error")
+        prohibited this semester from being saved:
+      %ul.mb-0
+        - semester.errors.full_messages.each do |message|
+          %li= message
+
+  %fieldset.form-section
+    %legend Semester Info
+    .row
+      .col-md-6.mb-3
+        = f.label :year_be, "Year (B.E.)", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols calendar_month
+          = f.number_field :year_be, class: "form-control #{'is-invalid' if semester.errors[:year_be].any?}"
+          - if semester.errors[:year_be].any?
+            .invalid-feedback= semester.errors[:year_be].first
+      .col-md-6.mb-3
+        = f.label :semester_number, "Semester", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols format_list_numbered
+          = f.select :semester_number, options_for_select(Semester::SEMESTER_LABELS.map { |num, label| ["#{num} — #{label}", num] }, semester.semester_number), { include_blank: "Select semester" }, class: "form-select #{'is-invalid' if semester.errors[:semester_number].any?}"
+          - if semester.errors[:semester_number].any?
+            .invalid-feedback= semester.errors[:semester_number].first
+
+  = f.submit class: "btn btn-primary"

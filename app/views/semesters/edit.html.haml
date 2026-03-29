@@ -1,0 +1,7 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 Edit Semester
+  = link_to "Back", semester_path(@semester), class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    = render "form", semester: @semester

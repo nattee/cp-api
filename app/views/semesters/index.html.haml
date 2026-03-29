@@ -1,0 +1,30 @@
+.card{"data-controller" => "datatable", "data-datatable-order-value" => "0:desc,1:desc"}
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        = resource_icon
+        Semesters
+      - if current_user.admin?
+        = link_to "New Semester", new_semester_path, class: "btn btn-primary btn-sm"
+    .table-responsive
+      %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
+        %thead
+          %tr
+            %th Year
+            %th Semester
+            %th # Offerings
+            %th Actions
+        %tbody
+          - @semesters.each do |semester|
+            %tr
+              %td= semester.year_be
+              %td= Semester::SEMESTER_LABELS[semester.semester_number]
+              %td= semester.course_offerings.size
+              %td
+                = link_to semester, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
+                  %span.material-symbols{style: "font-size: 18px"} visibility
+                - if current_user.admin?
+                  = link_to edit_semester_path(semester), class: "btn-ghost btn-ghost-secondary me-1", title: "Edit" do
+                    %span.material-symbols{style: "font-size: 18px"} edit
+                  = link_to semester, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn-ghost btn-ghost-danger", title: "Delete" do
+                    %span.material-symbols{style: "font-size: 18px"} delete
