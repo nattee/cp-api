@@ -1,0 +1,24 @@
+= form_with(model: room, data: { turbo_frame: "_top" }) do |f|
+  - if room.errors.any?
+    .alert.alert-danger.py-2.px-3.mb-2
+      %ul.mb-0.small
+        - room.errors.full_messages.each do |message|
+          %li= message
+
+  .row.g-2.align-items-end
+    .col-md-2
+      = f.label :building, class: "form-label small text-muted mb-0"
+      = f.text_field :building, class: "form-control form-control-sm #{'is-invalid' if room.errors[:building].any?}", placeholder: "e.g. ENG4"
+    .col-md-2
+      = f.label :room_number, "Room No", class: "form-label small text-muted mb-0"
+      = f.text_field :room_number, class: "form-control form-control-sm #{'is-invalid' if room.errors[:room_number].any?}", placeholder: "e.g. 303"
+    .col-md-3
+      = f.label :room_type, "Type", class: "form-label small text-muted mb-0"
+      = f.select :room_type, options_for_select(Room::ROOM_TYPES.map { |t| [t.titleize, t] }, room.room_type), { include_blank: "— None —" }, class: "form-select form-select-sm"
+    .col-md-2
+      = f.label :capacity, class: "form-label small text-muted mb-0"
+      = f.number_field :capacity, class: "form-control form-control-sm #{'is-invalid' if room.errors[:capacity].any?}", placeholder: "Seats", min: 1
+    .col-md-3
+      .d-flex.gap-2
+        = f.submit (room.persisted? ? "Save" : "Add Room"), class: "btn btn-primary btn-sm"
+        = link_to "Cancel", rooms_path, class: "btn btn-outline-secondary btn-sm"

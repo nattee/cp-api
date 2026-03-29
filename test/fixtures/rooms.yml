@@ -9,3 +9,9 @@ eng4_lab1:
   room_number: LAB1
   room_type: lab
   capacity: 40
+
+eng3_seminar:
+  building: ENG3
+  room_number: "101"
+  room_type: seminar
+  capacity: 20
