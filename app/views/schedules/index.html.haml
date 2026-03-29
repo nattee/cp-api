@@ -1,0 +1,34 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1.d-flex.align-items-center
+    = resource_icon
+    Schedules
+
+.row.g-3
+  .col-md-4
+    = link_to schedules_room_path, class: "text-decoration-none" do
+      .card.schedule-report-card
+        .card-body
+          %span.material-symbols.schedule-report-icon meeting_room
+          %h6 Room Schedule
+          %p View room usage across the week for a semester
+  .col-md-4
+    = link_to schedules_staff_path, class: "text-decoration-none" do
+      .card.schedule-report-card
+        .card-body
+          %span.material-symbols.schedule-report-icon person
+          %h6 Staff Schedule
+          %p Weekly timetable and load for a staff member
+  .col-md-4
+    = link_to schedules_curriculum_path, class: "text-decoration-none" do
+      .card.schedule-report-card
+        .card-body
+          %span.material-symbols.schedule-report-icon calendar_month
+          %h6 Curriculum Calendar
+          %p Plan course sets for a semester
+  .col-md-4
+    = link_to schedules_student_path, class: "text-decoration-none" do
+      .card.schedule-report-card
+        .card-body
+          %span.material-symbols.schedule-report-icon school
+          %h6 Student Timetable
+          %p Student weekly schedule with grades

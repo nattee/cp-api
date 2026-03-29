@@ -67,7 +67,7 @@
                   - section.teachings.each do |teaching|
                     .d-inline-flex.align-items-center.me-3
                       %span.material-symbols.me-1{style: "font-size: 16px; opacity: 0.5"} person
-                      = link_to teaching.staff.display_name, staff_path(teaching.staff)
+                      = link_to teaching.staff.display_name_th, staff_path(teaching.staff)
                       %span.text-muted.ms-1.small= "(#{teaching.load_ratio})"
       - else
         %p.text-muted.mb-0 No sections defined.

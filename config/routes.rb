@@ -26,6 +26,14 @@ Rails.application.routes.draw do
   resources :rooms
   resources :scrapes, only: [:index, :create, :show]
 
+  controller :schedules do
+    get "schedules", action: :index
+    get "schedules/room", action: :room
+    get "schedules/staff", action: :staff
+    get "schedules/curriculum", action: :curriculum
+    get "schedules/student", action: :student
+  end
+
   resources :programs
   resources :courses
   resources :staffs

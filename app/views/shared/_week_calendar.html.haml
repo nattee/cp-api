@@ -1,0 +1,52 @@
+-# Week calendar grid for schedule reports.
+-# Input: `entries` — array of hashes with:
+-#   day_of_week (0-6), start_time ("HH:MM"), end_time ("HH:MM"),
+-#   label, sublabel, detail, color_key, url (optional), badge (optional raw HTML)
+- palette = ["rgba(164,198,212,0.25)", "rgba(177,91,149,0.25)", "rgba(63,170,101,0.25)", "rgba(233,203,61,0.25)", "rgba(242,35,48,0.2)", "rgba(98,51,107,0.25)", "rgba(111,207,255,0.25)", "rgba(255,152,0,0.25)", "rgba(0,188,212,0.25)", "rgba(139,195,74,0.25)", "rgba(255,87,34,0.2)", "rgba(103,58,183,0.25)"]
+- color_keys = entries.map { |e| e[:color_key] }.uniq
+- color_map = color_keys.each_with_index.to_h { |k, i| [k, palette[i % palette.size]] }
+- if entries.any?
+  - start_mins = entries.map { |e| e[:start_time].split(":").then { |h, m| h.to_i * 60 + m.to_i } }
+  - end_mins = entries.map { |e| e[:end_time].split(":").then { |h, m| h.to_i * 60 + m.to_i } }
+  - grid_start = [start_mins.min / 30 * 30, 480].min
+  - grid_end = [(end_mins.max + 29) / 30 * 30, 1080].max
+- else
+  - grid_start = 480
+  - grid_end = 1080
+- total_minutes = grid_end - grid_start
+- row_count = total_minutes / 30
+- row_height = 40
+- has_sunday = entries.any? { |e| e[:day_of_week] == 0 }
+- days = has_sunday ? (0..6).to_a : (1..6).to_a
+- day_names = %w[Sun Mon Tue Wed Thu Fri Sat]
+- by_day = entries.group_by { |e| e[:day_of_week] }
+.week-calendar
+  .wc-time-axis
+    .wc-time-label{style: "height: #{row_height - 12}px"}
+    - row_count.times do |i|
+      - minutes = grid_start + i * 30
+      .wc-time-label{style: "height: #{row_height}px"}
+        = "#{(minutes / 60).to_s.rjust(2, '0')}:#{(minutes % 60).to_s.rjust(2, '0')}"
+  - days.each do |day|
+    .wc-day-column
+      .wc-day-header= day_names[day]
+      .wc-day-body{style: "height: #{row_count * row_height}px"}
+        - row_count.times do |i|
+          .wc-grid-line{style: "top: #{i * row_height}px"}
+        - (by_day[day] || []).each do |entry|
+          - e_start = entry[:start_time].split(":").then { |h, m| h.to_i * 60 + m.to_i }
+          - e_end = entry[:end_time].split(":").then { |h, m| h.to_i * 60 + m.to_i }
+          - top_px = ((e_start - grid_start).to_f / total_minutes * row_count * row_height).round
+          - height_px = ((e_end - e_start).to_f / total_minutes * row_count * row_height).round
+          - bg = color_map[entry[:color_key]]
+          - block_style = "top: #{top_px}px; height: #{height_px}px; background: #{bg}"
+          = content_tag(entry[:url] ? :a : :div, class: "wc-block", style: block_style, href: entry[:url]) do
+            %span.wc-block-label= entry[:label]
+            - if entry[:sublabel]
+              %br
+              %span.wc-block-sublabel= entry[:sublabel]
+            - if entry[:detail]
+              %br
+              %span.wc-block-detail= entry[:detail]
+            - if entry[:badge]
+              .wc-block-badge= entry[:badge].html_safe

@@ -72,7 +72,7 @@ class CourseOfferingsTest < ApplicationSystemTestCase
     assert_text "Wednesday"
     assert_text "09:00-10:30"
     # Staff from fixtures
-    assert_text staffs(:lecturer_smith).display_name
+    assert_text staffs(:lecturer_smith).display_name_th
   end
 
   test "admin can add time slots and teachings to sections" do
@@ -100,7 +100,7 @@ class CourseOfferingsTest < ApplicationSystemTestCase
       end
     end
     # Select2 dropdown renders at body level, outside the within scope
-    find(".select2-dropdown .select2-results__option", text: staffs(:lecturer_smith).display_name).click
+    find(".select2-dropdown .select2-results__option", text: staffs(:lecturer_smith).display_name_th).click
 
     click_on "Create Course offering"
 
@@ -108,7 +108,7 @@ class CourseOfferingsTest < ApplicationSystemTestCase
     assert_text "Section 1"
     assert_text "Monday"
     assert_text "09:00-10:30"
-    assert_text staffs(:lecturer_smith).display_name
+    assert_text staffs(:lecturer_smith).display_name_th
   end
 
   test "admin can edit offering" do
