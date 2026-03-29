@@ -622,6 +622,8 @@ A `staffs.yml` fixture file is also needed (does not currently exist).
 
 Concrete steps for building this feature across multiple Claude Code instances. Steps marked **(parallel)** can run simultaneously in separate terminals.
 
+**Note:** Steps differ from Phases above. Phases are ordered by *design logic* (what builds on what conceptually). Steps are reordered to *maximize parallelism* during implementation — work that has no dependency on each other is grouped into the same step even if it spans different phases.
+
 ### Step 1: Foundation — models, routes, sidebar
 Single instance. All shared infrastructure that everything else depends on.
 - All 6 migrations (semesters, rooms, course_offerings, sections, time_slots, teachings)
@@ -644,21 +646,16 @@ Single instance. Depends on Step 2 (Semester views).
 - Views: index (on semester show), show, new, edit, form with nested section fields
 - Controller tests + system tests
 
-### Step 4: CSV Import + CuGetReg scraper **(parallel)**
-Two instances, completely separate service classes.
+### Step 4: CSV Import + CuGetReg scraper + Embedded sections **(parallel)**
+Three instances, all separate files. All depend on Step 3 only.
 - **Instance A**: `Importers::ScheduleImporter` + register in `DataImport::IMPORTERS` + tests
 - **Instance B**: `Scrapers::Base` + `Scrapers::CuGetReg` + `config/scraper.yml` + console helpers + fixture files + tests
+- **Instance C**: Embedded sections (Layer 2) — Staff show "Teaching" section, Course show "Offerings" section, Student show "Schedule" section
 
 ### Step 5: Nested form Phase 2 + CAS Reg scraper **(parallel)**
 Two instances.
 - **Instance A**: Extend CourseOffering form with TimeSlot + Teaching nested fields + `nested_fields_controller.js` + system tests
 - **Instance B**: `Scrapers::CasReg` + rake task (`scraper:run`) + scraper web UI (`ScrapesController` + views) + tests
 
-### Step 6: Embedded sections (Layer 2)
-Single instance.
-- Staff show page: "Teaching" section
-- Course show page: "Offerings" section
-- Student show page: "Schedule" section
-
-### Step 7: Reports (Layer 3)
+### Step 6: Reports (Layer 3)
 Per `docs/schedule-reports.md`. Can be split across instances by report.
