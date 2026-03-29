@@ -45,6 +45,7 @@ module Scrapers
 
           start_time = parse_time(cls[:start_time])
           end_time = parse_time(cls[:end_time])
+          next if start_time.nil? || end_time.nil?
 
           room = find_or_create_room(cls[:building], cls[:room])
 
@@ -92,7 +93,10 @@ module Scrapers
     end
 
     def parse_time(value)
+      return nil if value.blank?
       Time.zone.parse("2000-01-01 #{value}")
+    rescue ArgumentError
+      nil
     end
 
     def find_or_create_room(building, room_number)
@@ -107,4 +111,7 @@ module Scrapers
       course.update!(updates) if updates.any?
     end
   end
+
+  class ScraperError < StandardError; end
+  class RequestError < StandardError; end
 end

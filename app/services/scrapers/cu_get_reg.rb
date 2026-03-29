@@ -135,6 +135,4 @@ module Scrapers
     end
   end
 
-  class ScraperError < StandardError; end
-  class RequestError < StandardError; end
 end

@@ -1,0 +1,20 @@
+completed_scrape:
+  semester: sem_2568_1
+  user: admin
+  source: cugetreg
+  study_program: S
+  state: completed
+  total_courses: 3
+  courses_found: 2
+  courses_not_found: 1
+  sections_count: 4
+  time_slots_count: 8
+
+running_scrape:
+  semester: sem_2568_2
+  user: admin
+  source: cas_reg
+  study_program: S
+  state: running
+  total_courses: 3
+  courses_found: 1

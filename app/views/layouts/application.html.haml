@@ -71,6 +71,14 @@
             = link_to rooms_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'rooms'}" do
               = resource_icon("rooms")
               Rooms
+          %li.nav-item
+            = link_to scrapes_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'scrapes'}" do
+              = resource_icon("scrapes")
+              Scraper
+          %li.nav-item
+            = link_to schedules_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'schedules'}" do
+              = resource_icon("schedules")
+              Schedules
 
           %li.nav-item
             = link_to line_account_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'line_accounts'}" do

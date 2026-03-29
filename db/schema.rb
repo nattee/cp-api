@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_100208) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_174133) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -168,6 +168,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100208) do
     t.index ["building", "room_number"], name: "index_rooms_on_building_and_room_number", unique: true
   end
 
+  create_table "scrapes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "courses_found", default: 0
+    t.integer "courses_not_found", default: 0
+    t.datetime "created_at", null: false
+    t.json "error_log"
+    t.text "error_message"
+    t.integer "sections_count", default: 0
+    t.bigint "semester_id", null: false
+    t.string "source", null: false
+    t.string "state", default: "pending", null: false
+    t.string "study_program", default: "S", null: false
+    t.integer "time_slots_count", default: 0
+    t.integer "total_courses", default: 0
+    t.json "unresolved_teachers"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["semester_id"], name: "index_scrapes_on_semester_id"
+    t.index ["user_id"], name: "index_scrapes_on_user_id"
+  end
+
   create_table "sections", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "course_offering_id", null: false
     t.datetime "created_at", null: false
@@ -301,6 +321,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_100208) do
   add_foreign_key "grades", "courses"
   add_foreign_key "grades", "sections"
   add_foreign_key "grades", "students"
+  add_foreign_key "scrapes", "semesters"
+  add_foreign_key "scrapes", "users"
   add_foreign_key "sections", "course_offerings"
   add_foreign_key "staff_programs", "programs"
   add_foreign_key "staff_programs", "staffs"

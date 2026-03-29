@@ -13,6 +13,8 @@ module ApplicationHelper
     "semesters"        => "calendar_month",
     "course_offerings" => "event_note",
     "rooms"            => "meeting_room",
+    "scrapes"          => "cloud_sync",
+    "schedules"        => "date_range",
     "dev"              => "palette",
   }.freeze
 

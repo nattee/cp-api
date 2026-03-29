@@ -3,6 +3,7 @@ class Semester < ApplicationRecord
   SEMESTER_LABELS = { 1 => "First", 2 => "Second", 3 => "Summer" }.freeze
 
   has_many :course_offerings, dependent: :destroy
+  has_many :scrapes, dependent: :destroy
   has_many :courses, through: :course_offerings
 
   validates :year_be, presence: true, numericality: { only_integer: true }

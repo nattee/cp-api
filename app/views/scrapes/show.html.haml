@@ -1,0 +1,80 @@
+- if @scrape.running?
+  %meta{"http-equiv" => "refresh", content: "3"}
+
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1
+    Scrape
+    %small.text-muted= "— #{@scrape.semester.display_name} via #{@scrape.source_label}"
+  = link_to "Back", scrapes_path, class: "btn btn-outline-primary"
+
+.card.mb-3
+  .card-body
+    .detail-section
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 State
+        %dd.col-sm-9
+          %span.badge{class: "badge-#{@scrape.state.dasherize}"}= @scrape.state.titleize
+          - if @scrape.running?
+            %span.text-muted.ms-2.small
+              %span.material-symbols.me-1{style: "font-size: 14px; vertical-align: middle"} sync
+              Auto-refreshing...
+
+        %dt.col-sm-3 Semester
+        %dd.col-sm-9= link_to @scrape.semester.display_name, semester_path(@scrape.semester)
+
+        %dt.col-sm-3 Source
+        %dd.col-sm-9= @scrape.source_label
+
+        %dt.col-sm-3 Study Program
+        %dd.col-sm-9= @scrape.study_program
+
+        %dt.col-sm-3 Started by
+        %dd.col-sm-9= @scrape.user.name
+
+        %dt.col-sm-3 Started at
+        %dd.col-sm-9= @scrape.created_at.strftime("%Y-%m-%d %H:%M:%S")
+
+    .detail-section
+      %h6.section-title Progress
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Total Courses
+        %dd.col-sm-9= @scrape.total_courses
+
+        %dt.col-sm-3 Courses Found
+        %dd.col-sm-9= @scrape.courses_found
+
+        %dt.col-sm-3 Not Found
+        %dd.col-sm-9= @scrape.courses_not_found
+
+        %dt.col-sm-3 Sections
+        %dd.col-sm-9= @scrape.sections_count
+
+        %dt.col-sm-3 Time Slots
+        %dd.col-sm-9= @scrape.time_slots_count
+
+    - if @scrape.unresolved_teachers.present?
+      .detail-section
+        %h6.section-title Unresolved Teachers
+        %p.small.text-muted These initials could not be matched to staff records. Add initials on the Staff edit page, then re-scrape.
+        - @scrape.unresolved_teachers.each do |initials|
+          %span.badge.bg-secondary.me-1= initials
+
+    - if @scrape.error_log.present?
+      .detail-section
+        %h6.section-title Errors
+        .table-responsive
+          %table.table.table-sm.mb-0
+            %thead
+              %tr
+                %th Course No
+                %th Error
+            %tbody
+              - @scrape.error_log.each do |entry|
+                %tr
+                  %td= entry["course_no"]
+                  %td.small.text-muted= entry["error"]
+
+    - if @scrape.error_message.present?
+      .detail-section
+        %h6.section-title Fatal Error
+        .alert.alert-danger.mb-0= @scrape.error_message

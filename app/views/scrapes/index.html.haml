@@ -1,0 +1,54 @@
+.card{"data-controller" => "datatable"}
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        = resource_icon
+        Scrape History
+      - if current_user.admin?
+        = link_to scrapes_path, method: :post, class: "btn btn-primary btn-sm d-none" do
+          New Scrape
+
+    - if current_user.admin?
+      .card.mb-3.border-primary
+        .card-body.py-2.px-3
+          %h6.card-title.mb-2 New Scrape
+          = form_with(url: scrapes_path, method: :post) do |f|
+            .row.g-2.align-items-end
+              .col-md-3
+                = f.label "scrape[semester_id]", "Semester", class: "form-label small text-muted mb-0"
+                = f.select "scrape[semester_id]", options_for_select(Semester.ordered.map { |s| [s.display_name, s.id] }), {}, class: "form-select form-select-sm", data: { controller: "select2" }
+              .col-md-2
+                = f.label "scrape[study_program]", "Study Program", class: "form-label small text-muted mb-0"
+                = f.select "scrape[study_program]", options_for_select([["ทวิภาค (S)", "S"], ["นานาชาติ (I)", "I"], ["ไตรภาค (T)", "T"]]), {}, class: "form-select form-select-sm"
+              .col-md-3
+                = f.label "scrape[source]", "Source", class: "form-label small text-muted mb-0"
+                = f.select "scrape[source]", options_for_select([["CuGetReg (recommended)", "cugetreg"], ["CAS Reg Chula", "cas_reg"]]), {}, class: "form-select form-select-sm"
+              .col-md-2
+                = f.submit "Start Scrape", class: "btn btn-primary btn-sm"
+
+    .table-responsive
+      %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
+        %thead
+          %tr
+            %th Date
+            %th Semester
+            %th Source
+            %th State
+            %th Found
+            %th Not Found
+            %th Sections
+            %th Actions
+        %tbody
+          - @scrapes.each do |scrape|
+            %tr
+              %td= scrape.created_at.strftime("%Y-%m-%d %H:%M")
+              %td= scrape.semester.display_name
+              %td= scrape.source_label
+              %td
+                %span.badge{class: "badge-#{scrape.state.dasherize}"}= scrape.state.titleize
+              %td= scrape.courses_found
+              %td= scrape.courses_not_found
+              %td= scrape.sections_count
+              %td
+                = link_to scrape_path(scrape), class: "btn-ghost btn-ghost-primary", title: "Show" do
+                  %span.material-symbols{style: "font-size: 18px"} visibility
