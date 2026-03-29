@@ -24,6 +24,7 @@ Data is imported via CSV/Excel and fetched from external data providers.
 - **Stylesheet load order** (in `application.html.haml`): Vendor CSS (Select2, Flatpickr) loads **before** `application.css` so that our SCSS overrides win the cascade at equal specificity.
 - **Bootstrap JS is UMD** (not ESM). It's pinned in importmap but has no named or default exports — `import { Popover } from "bootstrap"` and `import Bootstrap from "bootstrap"` both fail at runtime. For interactive components that would normally need Bootstrap JS (popovers, tooltips, collapses), use **CSS-only implementations** (`:focus`/`:focus-within` patterns) instead. See `.help-popover-trigger` in `application.scss` for the pattern.
 - **Chart.js is UMD** (same situation as Bootstrap). Pinned in importmap as `chart.js`. Use a side-effect import (`import "chart.js"`) to load the UMD bundle, then access `window.Chart`. Do NOT use `import Chart from "chart.js"` — it returns `undefined`. The `chart_controller.js` Stimulus controller handles rendering; it supports chart types `stacked-bar`, `histogram`, and `grade-distribution`. Pass data as JSON via `data-chart-data-value` attributes.
+- **Turbo Drive is enabled globally**. Never use `DOMContentLoaded` in app code — it only fires once on the initial page load. Use `turbo:load` instead, which fires on both initial load and every Turbo navigation. Prefer Stimulus controllers over inline `<script>` blocks when possible.
 
 ## Version Control
 

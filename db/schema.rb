@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_28_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_100100) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -40,13 +40,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_28_100000) do
   end
 
   create_table "api_events", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "action"
     t.datetime "created_at", null: false
     t.json "details"
     t.string "message", null: false
+    t.integer "response_time_ms"
+    t.string "service", null: false
     t.string "severity", default: "error", null: false
-    t.string "source", null: false
     t.index ["created_at"], name: "index_api_events_on_created_at"
-    t.index ["source", "created_at"], name: "index_api_events_on_source_and_created_at"
+    t.index ["service", "created_at"], name: "index_api_events_on_service_and_created_at"
   end
 
   create_table "chat_messages", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

@@ -4,7 +4,7 @@ class ApiEventsController < ApplicationController
   def index
     @error_count_24h = ApiEvent.errors_since(24.hours.ago).count
     @api_events = ApiEvent.recent.limit(200)
-    @api_events = @api_events.where(source: params[:source]) if params[:source].present?
+    @api_events = @api_events.where(service: params[:service]) if params[:service].present?
     @api_events = @api_events.where(severity: params[:severity]) if params[:severity].present?
   end
 

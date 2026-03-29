@@ -10,10 +10,12 @@ class Line::ReplyService
       reply_token: reply_token,
       messages: [message]
     )
-    LineBot.client.reply_message(reply_message_request: request)
+    ApiEvent.timed(service: "line_reply", action: "reply") do
+      LineBot.client.reply_message(reply_message_request: request)
+    end
   rescue => e
     Rails.logger.error("[LINE Reply] #{e.class}: #{e.message}")
-    ApiEvent.log(source: "line_reply", message: "Reply failed: #{e.message}", details: { exception: e.class.name })
+    ApiEvent.log(service: "line_reply", action: "reply", message: "Reply failed: #{e.message}", details: { exception: e.class.name })
     raise
   end
 
@@ -24,10 +26,12 @@ class Line::ReplyService
       to: user_id,
       messages: [message]
     )
-    LineBot.client.push_message(push_message_request: request)
+    ApiEvent.timed(service: "line_push", action: "push", details: { user_id: user_id }) do
+      LineBot.client.push_message(push_message_request: request)
+    end
   rescue => e
     Rails.logger.error("[LINE Push] #{e.class}: #{e.message}")
-    ApiEvent.log(source: "line_push", message: "Push to #{user_id} failed: #{e.message}", details: { exception: e.class.name, user_id: user_id })
+    ApiEvent.log(service: "line_push", action: "push", message: "Push to #{user_id} failed: #{e.message}", details: { exception: e.class.name, user_id: user_id })
     raise
   end
 end

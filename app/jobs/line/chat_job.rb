@@ -22,7 +22,7 @@ class Line::ChatJob < ApplicationJob
     Line::ReplyService.push(line_user_id, "Sorry, I'm having trouble processing your request right now.")
   rescue => e
     Rails.logger.error("[ChatJob] Unexpected error: #{e.class}: #{e.message}")
-    ApiEvent.log(source: "llm", message: "ChatJob failed: #{e.message}", details: { exception: e.class.name, line_user_id: line_user_id })
+    ApiEvent.log(service: "llm", action: "chat_job", message: "ChatJob failed: #{e.message}", details: { exception: e.class.name, line_user_id: line_user_id })
     Line::ReplyService.push(line_user_id, "Sorry, something went wrong. Please try again later.")
   end
 

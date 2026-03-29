@@ -115,26 +115,33 @@ class Line::LlmService
     }
     body[:tools] = tools if tools.present?
 
+    started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
     response = Net::HTTP.start(uri.hostname, uri.port, open_timeout: 10, read_timeout: 30) do |http|
       http.post(uri, body.to_json, "Content-Type" => "application/json")
     end
 
+    elapsed_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_at) * 1000).round
+
     unless response.is_a?(Net::HTTPSuccess)
       msg = "vLLM returned #{response.code}: #{response.body}"
-      ApiEvent.log(source: "llm", message: msg, details: { endpoint: uri.to_s, status: response.code })
+      ApiEvent.log(service: "llm", action: "chat_completion", message: msg, details: { endpoint: uri.to_s, status: response.code }, response_time_ms: elapsed_ms)
       raise LlmError, msg
     end
+
+    ApiEvent.log(service: "llm", action: "chat_completion", severity: "info", message: "OK",
+                 details: { endpoint: uri.to_s, model: @model_config[:model] }, response_time_ms: elapsed_ms)
 
     JSON.parse(response.body)
   rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
     msg = "vLLM connection failed: #{e.class} — #{e.message}"
     Rails.logger.error("[vLLM] #{msg}")
-    ApiEvent.log(source: "llm", message: msg, details: { endpoint: uri.to_s, exception: e.class.name })
+    ApiEvent.log(service: "llm", action: "chat_completion", message: msg, details: { endpoint: uri.to_s, exception: e.class.name })
     raise LlmError, msg
   rescue JSON::ParserError => e
     msg = "vLLM returned invalid JSON: #{e.message}"
     Rails.logger.error("[vLLM] #{msg}")
-    ApiEvent.log(source: "llm", message: msg, details: { endpoint: uri.to_s, body: response&.body&.truncate(500) })
+    ApiEvent.log(service: "llm", action: "chat_completion", message: msg, details: { endpoint: uri.to_s, body: response&.body&.truncate(500) })
     raise LlmError, msg
   end
 

@@ -1,4 +1,4 @@
-.card{"data-controller" => "datatable"}
+.card{"data-controller" => "datatable", "data-datatable-order-value" => "0:desc"}
   .card-body.p-3
     .d-flex.justify-content-between.align-items-center.mb-3
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
@@ -9,29 +9,41 @@
           = "#{@error_count_24h} #{"error".pluralize(@error_count_24h)} in 24h"
 
     .d-flex.gap-2.mb-3
-      = link_to "All", api_events_path, class: "btn btn-sm #{params[:source].blank? && params[:severity].blank? ? 'btn-secondary' : 'btn-outline-secondary'}"
-      - ApiEvent::SOURCES.each do |source|
-        = link_to source.titleize, api_events_path(source: source, severity: params[:severity]), class: "btn btn-sm #{params[:source] == source ? 'btn-secondary' : 'btn-outline-secondary'}"
+      = link_to "All", api_events_path, class: "btn btn-sm #{params[:service].blank? && params[:severity].blank? ? 'btn-secondary' : 'btn-outline-secondary'}"
+      - ApiEvent::SERVICES.each do |service|
+        = link_to service.titleize, api_events_path(service: service, severity: params[:severity]), class: "btn btn-sm #{params[:service] == service ? 'btn-secondary' : 'btn-outline-secondary'}"
+      .vr
+      = link_to "Errors", api_events_path(service: params[:service], severity: "error"), class: "btn btn-sm #{params[:severity] == 'error' ? 'btn-danger' : 'btn-outline-danger'}"
 
     .table-responsive
       %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
         %thead
           %tr
             %th Time
-            %th Source
+            %th Service
+            %th Action
             %th Severity
             %th Message
+            %th Response
             %th Details
         %tbody
           - @api_events.each do |event|
             %tr
               %td.text-nowrap= event.created_at.strftime("%m-%d %H:%M:%S")
               %td
-                %code= event.source
+                %code= event.service
               %td
-                %span.badge{class: event.severity == "error" ? "bg-danger" : "bg-warning"}
-                  = event.severity
+                %code= event.action
+              %td
+                - badge_class = case event.severity
+                - when "error" then "bg-danger"
+                - when "warning" then "bg-warning"
+                - else "bg-secondary"
+                %span.badge{class: badge_class}= event.severity
               %td= truncate(event.message, length: 80)
+              %td.text-nowrap
+                - if event.response_time_ms
+                  = "#{event.response_time_ms} ms"
               %td
                 - if event.details.present?
                   %details

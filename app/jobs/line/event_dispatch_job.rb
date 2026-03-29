@@ -6,7 +6,8 @@ class Line::EventDispatchJob < ApplicationJob
   rescue => e
     Rails.logger.error("[EventDispatchJob] #{e.class}: #{e.message}")
     ApiEvent.log(
-      source: "webhook",
+      service: "webhook",
+      action: "dispatch",
       message: "Event dispatch failed: #{e.message}",
       details: { exception: e.class.name, event_type: event_data&.dig("type") }
     )
