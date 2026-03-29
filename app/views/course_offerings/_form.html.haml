@@ -1,0 +1,45 @@
+= form_with(model: [semester, course_offering], url: course_offering.persisted? ? course_offering_path(course_offering) : semester_course_offerings_path(semester), class: "needs-validation") do |f|
+  - if course_offering.errors.any?
+    .alert.alert-danger
+      %h5.alert-heading
+        = pluralize(course_offering.errors.count, "error")
+        prohibited this course offering from being saved:
+      %ul.mb-0
+        - course_offering.errors.full_messages.each do |message|
+          %li= message
+
+  %fieldset.form-section
+    %legend Offering Info
+    .row
+      .col-md-6.mb-3
+        = f.label :course_id, "Course", class: "form-label"
+        = f.select :course_id, options_for_select(Course.order(:course_no).map { |c| ["#{c.course_no} — #{c.name} (#{c.revision_year})", c.id] }, course_offering.course_id), { include_blank: "Select a course" }, class: "form-select #{'is-invalid' if course_offering.errors[:course_id].any?}", data: { controller: "select2" }
+        - if course_offering.errors[:course_id].any?
+          .invalid-feedback= course_offering.errors[:course_id].first
+      .col-md-6.mb-3
+        = f.label :status, class: "form-label"
+        = f.select :status, options_for_select(CourseOffering::STATUSES.map { |s| [s.titleize, s, { data: { icon: CourseOffering::STATUS_ICONS[s] } }] }, course_offering.status), {}, class: "form-select #{'is-invalid' if course_offering.errors[:status].any?}", data: { controller: "select2" }
+        - if course_offering.errors[:status].any?
+          .invalid-feedback= course_offering.errors[:status].first
+    .row
+      .col-12.mb-3
+        = f.label :remark, class: "form-label"
+        = f.text_area :remark, class: "form-control", rows: 2
+
+  %fieldset.form-section{"data-controller" => "nested-fields", "data-nested-fields-wrapper-selector-value" => ".section-fields"}
+    .d-flex.justify-content-between.align-items-center.mb-2
+      %span.section-title.mb-0 Sections
+      %button.btn.btn-outline-primary.btn-sm.flex-shrink-0{type: "button", "data-action" => "nested-fields#add"}
+        %span.material-symbols.me-1{style: "font-size: 16px"} add
+        Add Section
+
+    %div{"data-nested-fields-target" => "container"}
+      - course_offering.sections.each_with_index do |section, index|
+        = f.fields_for :sections, section, child_index: index do |sf|
+          = render "section_fields", f: sf, index: index
+
+    %template{"data-nested-fields-target" => "template"}
+      = f.fields_for :sections, Section.new, child_index: "NEW_RECORD" do |sf|
+        = render "section_fields", f: sf, index: nil
+
+  = f.submit class: "btn btn-primary"

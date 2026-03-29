@@ -1,0 +1,7 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1 New Course Offering
+  = link_to "Back", semester_path(@semester), class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    = render "form", course_offering: @course_offering, semester: @semester

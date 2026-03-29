@@ -12,7 +12,7 @@ class CourseOffering < ApplicationRecord
   has_many :time_slots, through: :sections
   has_many :teachings, through: :sections
 
-  accepts_nested_attributes_for :sections, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :sections, allow_destroy: true
 
   validates :status, presence: true, inclusion: { in: STATUSES }
   validates :course_id, uniqueness: { scope: :semester_id,

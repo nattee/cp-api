@@ -1,0 +1,15 @@
+.section-fields.card.mb-3{"data-nested-fields-target" => "wrapper", "data-new-record" => f.object.new_record?.to_s}
+  .card-body.py-2.px-3
+    .d-flex.justify-content-between.align-items-center.mb-2
+      %strong.text-muted Section
+      %button.btn.btn-outline-danger.btn-sm{type: "button", "data-action" => "nested-fields#remove"}
+        %span.material-symbols{style: "font-size: 16px"} close
+    = f.hidden_field :_destroy, "data-nested-fields-target": "destroyField"
+    = f.hidden_field :id if f.object.persisted?
+    .row
+      .col-md-4.mb-2
+        = f.label :section_number, "Section Number", class: "form-label"
+        = f.number_field :section_number, class: "form-control form-control-sm", min: 1
+      .col-md-8.mb-2
+        = f.label :remark, "Remark", class: "form-label"
+        = f.text_field :remark, class: "form-control form-control-sm"
