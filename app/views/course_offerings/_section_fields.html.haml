@@ -13,3 +13,33 @@
       .col-md-8.mb-2
         = f.label :remark, "Remark", class: "form-label"
         = f.text_field :remark, class: "form-control form-control-sm"
+
+    -# Time Slots
+    .mt-2{"data-controller" => "nested-fields", "data-nested-fields-wrapper-selector-value" => ".time-slot-fields", "data-nested-fields-placeholder-value" => "NEW_TIME_SLOT"}
+      .d-flex.justify-content-between.align-items-center.mb-1
+        %span.small.fw-semibold.text-muted Time Slots
+        %button.btn.btn-outline-secondary.btn-sm{type: "button", "data-action" => "nested-fields#add", style: "font-size: 0.75rem; padding: 0.15rem 0.5rem"}
+          %span.material-symbols{style: "font-size: 14px"} add
+          Time Slot
+      %div{"data-nested-fields-target" => "container"}
+        - f.object.time_slots.each_with_index do |ts, ts_index|
+          = f.fields_for :time_slots, ts, child_index: ts_index do |tsf|
+            = render "time_slot_fields", f: tsf
+      %template{"data-nested-fields-target" => "template"}
+        = f.fields_for :time_slots, TimeSlot.new, child_index: "NEW_TIME_SLOT" do |tsf|
+          = render "time_slot_fields", f: tsf
+
+    -# Teachings
+    .mt-2{"data-controller" => "nested-fields", "data-nested-fields-wrapper-selector-value" => ".teaching-fields", "data-nested-fields-placeholder-value" => "NEW_TEACHING"}
+      .d-flex.justify-content-between.align-items-center.mb-1
+        %span.small.fw-semibold.text-muted Teaching Staff
+        %button.btn.btn-outline-secondary.btn-sm{type: "button", "data-action" => "nested-fields#add", style: "font-size: 0.75rem; padding: 0.15rem 0.5rem"}
+          %span.material-symbols{style: "font-size: 14px"} add
+          Staff
+      %div{"data-nested-fields-target" => "container"}
+        - f.object.teachings.each_with_index do |t, t_index|
+          = f.fields_for :teachings, t, child_index: t_index do |tf|
+            = render "teaching_fields", f: tf
+      %template{"data-nested-fields-target" => "template"}
+        = f.fields_for :teachings, Teaching.new, child_index: "NEW_TEACHING" do |tf|
+          = render "teaching_fields", f: tf

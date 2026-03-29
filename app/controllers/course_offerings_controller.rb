@@ -64,7 +64,10 @@ class CourseOfferingsController < ApplicationController
   def course_offering_params
     params.require(:course_offering).permit(
       :course_id, :status, :remark,
-      sections_attributes: [:id, :section_number, :remark, :_destroy]
+      sections_attributes: [:id, :section_number, :remark, :_destroy,
+        time_slots_attributes: [:id, :day_of_week, :start_time, :end_time, :room_id, :remark, :_destroy],
+        teachings_attributes: [:id, :staff_id, :load_ratio, :_destroy]
+      ]
     )
   end
 end

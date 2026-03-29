@@ -1,0 +1,7 @@
+.teaching-fields.d-flex.align-items-center.gap-2.mb-1{"data-nested-fields-target" => "wrapper"}
+  = f.hidden_field :_destroy, "data-nested-fields-target": "destroyField"
+  = f.hidden_field :id if f.object.persisted?
+  = f.select :staff_id, options_for_select(Staff.active.map { |s| [s.display_name, s.id] }, f.object.staff_id), { include_blank: "Select staff" }, class: "form-select form-select-sm", style: "flex: 1; min-width: 200px", data: { controller: "select2" }
+  = f.number_field :load_ratio, value: f.object.load_ratio || 1.0, step: 0.1, min: 0.1, max: 1.0, class: "form-control form-control-sm", style: "width: 90px; flex-shrink: 0", placeholder: "Load"
+  %button.btn.btn-outline-danger.btn-sm{type: "button", "data-action" => "nested-fields#remove", style: "padding: 0.15rem 0.35rem; flex-shrink: 0"}
+    %span.material-symbols{style: "font-size: 14px"} close

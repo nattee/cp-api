@@ -1,0 +1,11 @@
+.time-slot-fields.d-flex.align-items-center.gap-2.mb-1{"data-nested-fields-target" => "wrapper"}
+  = f.hidden_field :_destroy, "data-nested-fields-target": "destroyField"
+  = f.hidden_field :id if f.object.persisted?
+  = f.select :day_of_week, options_for_select(TimeSlot::DAY_ABBRS.each_with_index.map { |name, i| [name, i] }, f.object.day_of_week), { include_blank: "Day" }, class: "form-select form-select-sm", style: "width: 90px; flex-shrink: 0"
+  = f.time_field :start_time, value: f.object.start_time&.strftime("%H:%M"), class: "form-control form-control-sm", style: "width: 110px; flex-shrink: 0"
+  %span.text-muted —
+  = f.time_field :end_time, value: f.object.end_time&.strftime("%H:%M"), class: "form-control form-control-sm", style: "width: 110px; flex-shrink: 0"
+  = f.select :room_id, options_for_select(Room.all.map { |r| [r.display_name, r.id] }, f.object.room_id), { include_blank: "Room (TBA)" }, class: "form-select form-select-sm", style: "width: 140px; flex-shrink: 0", data: { controller: "select2" }
+  = f.text_field :remark, placeholder: "Remark", class: "form-control form-control-sm", style: "flex: 1; min-width: 80px"
+  %button.btn.btn-outline-danger.btn-sm{type: "button", "data-action" => "nested-fields#remove", style: "padding: 0.15rem 0.35rem; flex-shrink: 0"}
+    %span.material-symbols{style: "font-size: 14px"} close

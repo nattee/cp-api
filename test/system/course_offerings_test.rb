@@ -59,7 +59,7 @@ class CourseOfferingsTest < ApplicationSystemTestCase
     assert_no_text "Section 2"
   end
 
-  test "show page displays sections" do
+  test "show page displays sections with time slots and staff" do
     offering = course_offerings(:intro_computing_2568_1)
     visit course_offering_path(offering)
 
@@ -67,6 +67,48 @@ class CourseOfferingsTest < ApplicationSystemTestCase
     assert_text offering.course.name
     assert_text "Section 1"
     assert_text "Section 2"
+    # Time slots from fixtures
+    assert_text "Monday"
+    assert_text "Wednesday"
+    assert_text "09:00-10:30"
+    # Staff from fixtures
+    assert_text staffs(:lecturer_smith).display_name
+  end
+
+  test "admin can add time slots and teachings to sections" do
+    semester = semesters(:sem_2568_2)
+    visit new_semester_course_offering_path(semester)
+
+    select2_pick "2110101 — Introduction to Computing (2565)", from: "Course"
+    fill_in_section(0, number: 1)
+
+    # Add a time slot inside the first section
+    within all(".section-fields")[0] do
+      find("button", text: "Time Slot").click
+      slot_row = all(".time-slot-fields").last
+      within slot_row do
+        find("select[name*='day_of_week']").select("Mon")
+        all("input[type='time']")[0].set("09:00")
+        all("input[type='time']")[1].set("10:30")
+      end
+
+      # Add a teaching and pick staff via Select2
+      find("button", text: "Staff").click
+      teaching_row = all(".teaching-fields").last
+      within teaching_row do
+        find(".select2-container").click
+      end
+    end
+    # Select2 dropdown renders at body level, outside the within scope
+    find(".select2-dropdown .select2-results__option", text: staffs(:lecturer_smith).display_name).click
+
+    click_on "Create Course offering"
+
+    assert_text "Course offering was successfully created"
+    assert_text "Section 1"
+    assert_text "Monday"
+    assert_text "09:00-10:30"
+    assert_text staffs(:lecturer_smith).display_name
   end
 
   test "admin can edit offering" do
