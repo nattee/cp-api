@@ -1,0 +1,61 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1.d-flex.align-items-center
+    %span.material-symbols.resource-icon.me-2 monitoring
+    Staff Workload
+  = link_to "Back", schedules_path, class: "btn btn-outline-primary"
+
+.card.mb-3
+  .card-body.p-3
+    = form_with(url: schedules_workload_path, method: :get, class: "row g-2 align-items-end") do |f|
+      .col-auto
+        %label.form-label.mb-0 Start Year (B.E.)
+        = number_field_tag :start_year, @start_year, class: "form-control form-control-sm", style: "width: 100px"
+      .col-auto
+        %label.form-label.mb-0 End Year (B.E.)
+        = number_field_tag :end_year, @end_year, class: "form-control form-control-sm", style: "width: 100px"
+      .col-auto
+        %label.form-label.mb-0 Staff Type
+        = select_tag :staff_type, options_for_select(Staff::STAFF_TYPES.map { |t| [t.titleize, t] }, @staff_type), include_blank: "All", class: "form-select form-select-sm", style: "width: 140px"
+      .col-auto
+        %label.form-label.mb-0 Low Threshold
+        = number_field_tag :low_threshold, @low_threshold, step: 0.1, min: 0, class: "form-control form-control-sm", style: "width: 80px"
+      .col-auto
+        %label.form-label.mb-0 High Threshold
+        = number_field_tag :high_threshold, @high_threshold, step: 0.1, min: 0, class: "form-control form-control-sm", style: "width: 80px"
+      .col-auto
+        %button.btn.btn-primary.btn-sm{type: "submit"}
+          %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} filter_list
+          View
+
+- if @workload_data.present?
+  .card{"data-controller" => "datatable"}
+    .card-body.p-3
+      .table-responsive
+        %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
+          %thead
+            %tr
+              %th Staff
+              - @semesters.each do |sem|
+                %th.text-center= sem.display_name
+              %th.text-center Total
+          %tbody
+            - @workload_data.each do |staff_id, semester_loads|
+              - staff = @staffs[staff_id]
+              - next unless staff
+              - total = semester_loads.values.sum
+              %tr
+                %td= link_to staff.display_name_th, staff_path(staff)
+                - @semesters.each do |sem|
+                  - load = semester_loads[[sem.year_be, sem.semester_number]]
+                  - cell_class = load_cell_class(load, @low_threshold, @high_threshold) if load
+                  %td.text-center{class: cell_class}
+                    - if load
+                      = link_to load, schedules_staff_path(semester_id: sem.id, staff_id: staff_id)
+                    - else
+                      %span.text-muted —
+                %td.text-center
+                  %strong= total
+- elsif @workload_data
+  .card
+    .card-body.p-3
+      %p.text-muted.mb-0 No teaching data found for this year range.

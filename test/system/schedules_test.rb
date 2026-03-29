@@ -15,6 +15,8 @@ class SchedulesTest < ApplicationSystemTestCase
     assert_text "Staff Schedule"
     assert_text "Curriculum Calendar"
     assert_text "Student Timetable"
+    assert_text "Staff Workload"
+    assert_text "Conflict Detection"
   end
 
   test "room schedule shows calendar for room and semester" do
@@ -60,6 +62,23 @@ class SchedulesTest < ApplicationSystemTestCase
 
     # Active student has grades in year 2024 but semester fixture is 2568 — no match expected
     assert_text "No grades found"
+  end
+
+  test "workload shows table with staff loads" do
+    visit schedules_workload_path(start_year: 2568, end_year: 2568)
+
+    assert_text "Staff Workload"
+    # Smith teaches sec 1 (1.0) + sec 2 (0.5) = 1.5 total
+    assert_text staffs(:lecturer_smith).display_name_th
+    assert_text "1.5"
+  end
+
+  test "conflicts page shows no conflicts message" do
+    visit schedules_conflicts_path(semester_id: semesters(:sem_2568_1).id)
+
+    assert_text "Conflict Detection"
+    # Fixture data has no overlapping time slots in the same room
+    assert_text "No conflicts" # badge or message
   end
 
   private

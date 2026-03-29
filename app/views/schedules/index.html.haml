@@ -32,3 +32,17 @@
           %span.material-symbols.schedule-report-icon school
           %h6 Student Timetable
           %p Student weekly schedule with grades
+  .col-md-4
+    = link_to schedules_workload_path, class: "text-decoration-none" do
+      .card.schedule-report-card
+        .card-body
+          %span.material-symbols.schedule-report-icon monitoring
+          %h6 Staff Workload
+          %p Load summary across semesters
+  .col-md-4
+    = link_to schedules_conflicts_path, class: "text-decoration-none" do
+      .card.schedule-report-card
+        .card-body
+          %span.material-symbols.schedule-report-icon warning
+          %h6 Conflict Detection
+          %p Room and staff double bookings

@@ -49,4 +49,34 @@ class SchedulesControllerTest < ActionDispatch::IntegrationTest
     get schedules_student_path, params: { semester_id: semesters(:sem_2568_1).id, student_id: students(:active_student).id }
     assert_response :success
   end
+
+  test "workload report is accessible" do
+    get schedules_workload_path
+    assert_response :success
+  end
+
+  test "workload report with year range" do
+    get schedules_workload_path, params: { start_year: 2568, end_year: 2568 }
+    assert_response :success
+  end
+
+  test "workload report with staff type filter" do
+    get schedules_workload_path, params: { start_year: 2568, end_year: 2568, staff_type: "lecturer" }
+    assert_response :success
+  end
+
+  test "conflicts report is accessible" do
+    get schedules_conflicts_path
+    assert_response :success
+  end
+
+  test "conflicts report with semester" do
+    get schedules_conflicts_path, params: { semester_id: semesters(:sem_2568_1).id }
+    assert_response :success
+  end
+
+  test "conflicts report with type filter" do
+    get schedules_conflicts_path, params: { semester_id: semesters(:sem_2568_1).id, conflict_type: "room" }
+    assert_response :success
+  end
 end
