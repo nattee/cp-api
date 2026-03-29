@@ -23,7 +23,8 @@ class DataImport < ApplicationRecord
   IMPORTERS = {
     "Student"    => "Importers::StudentImporter",
     "Course"     => "Importers::CourseImporter",
-    "Grade"      => "Importers::GradeImporter"
+    "Grade"      => "Importers::GradeImporter",
+    "Schedule"   => "Importers::ScheduleImporter"
   }.freeze
 
   TARGETS = IMPORTERS.keys.freeze

@@ -1,0 +1,5 @@
+course_no,section,day,start_time,end_time,building,room_number,instructor,load_ratio,remark
+2110101,1,Mon,09:00,10:30,ENG4,303,ผศ.ดร. John Smith,1.0,
+2110101,1,Wed,09:00,10:30,ENG4,303,ผศ.ดร. John Smith,1.0,
+2110101,2,Tue,13:00,14:30,ENG4,305,Jane Jones,0.5,Lab group
+2110499,1,Thu,09:00,12:00,,,,1.0,
