@@ -30,6 +30,16 @@
           = f.text_field :short_name, class: "form-control"
     .row
       .col-md-6.mb-3
+        = f.label :alternative_program_code, "Alternative Program Code", class: "form-label"
+        %button.help-popover-trigger{type: "button", tabindex: "0"}
+          %span.material-symbols{style: "font-size: 16px"} help
+          %span.help-popover-content Alternative code from external systems (e.g. 5-digit MAJORCODE from the registration system). Used as fallback when matching during student imports.
+        .input-group
+          %span.input-group-text
+            %span.material-symbols tag
+          = f.text_field :alternative_program_code, class: "form-control"
+    .row
+      .col-md-6.mb-3
         = f.label :name_en, "Name (English)", class: "form-label"
         .input-group
           %span.input-group-text

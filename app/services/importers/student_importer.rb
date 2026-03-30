@@ -3,15 +3,17 @@ module Importers
     def self.attribute_definitions
       [
         { attribute: :student_id,        label: "Student ID",        required: true,
-          aliases: %w[student_id studentid รหัสนิสิต รหัสนักศึกษา] },
+          aliases: %w[student_id studentid studentcode รหัสนิสิต รหัสนักศึกษา] },
         { attribute: :first_name,        label: "First Name",        required: true,
-          aliases: %w[first_name firstname ชื่อ] },
+          aliases: %w[first_name firstname nameenglish ชื่อ] },
         { attribute: :last_name,         label: "Last Name",         required: true,
-          aliases: %w[last_name lastname นามสกุล] },
+          aliases: %w[last_name lastname surnameenglish นามสกุล] },
         { attribute: :first_name_th,     label: "First Name (TH)",   required: false,
-          aliases: %w[first_name_th firstname_alt ชื่อไทย ชื่อภาษาไทย] },
+          aliases: %w[first_name_th firstname_alt namethai ชื่อไทย ชื่อภาษาไทย] },
         { attribute: :last_name_th,      label: "Last Name (TH)",    required: false,
-          aliases: %w[last_name_th lastname_alt นามสกุลไทย นามสกุลภาษาไทย] },
+          aliases: %w[last_name_th lastname_alt surnamethai นามสกุลไทย นามสกุลภาษาไทย] },
+        { attribute: :sex,               label: "Sex",               required: false,
+          aliases: %w[sex gender เพศ] },
         { attribute: :email,             label: "Email",             required: false,
           aliases: %w[email อีเมล] },
         { attribute: :phone,             label: "Phone",             required: false,
@@ -38,9 +40,9 @@ module Importers
         { attribute: :graduation_date,   label: "Graduation Date",   required: false,
           aliases: %w[graduation_date วันจบ วันสำเร็จการศึกษา] },
         { attribute: :program_name,      label: "Program",           required: false,
-          aliases: %w[program program_name program_id program_code หลักสูตร],
-          help: "From file: looks up by program code (4-digit) first, then English name, then Thai name. " \
-                "If multiple programs share the same name, the latest one (by year started) is used.",
+          aliases: %w[program program_name program_id program_code majorcode หลักสูตร],
+          help: "From file: looks up by program code (4-digit) first, then alternative program code, " \
+                "then English name, then Thai name. If multiple programs share the same name, the latest one (by year started) is used.",
           fixed_options: -> { Program.order(year_started: :desc).map { |p| [ "#{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } } }
       ]
     end
@@ -59,21 +61,32 @@ module Importers
       [ :student_id ]
     end
 
-    def resolve_program(value)
-      # 1. Try by program_code (4-digit, zero-padded).
+    def resolve_program(value, admission_year_be: nil)
       # Roo reads numeric cells as floats (e.g. 0018 → 18.0), so we
-      # strip the decimal, convert to integer, then zero-pad to 4 digits.
+      # strip the decimal suffix for all numeric matching below.
       code = value.to_s.gsub(/\.0\z/, "")
+
+      # 1. Try by program_code (4-digit, zero-padded).
       if code.match?(/\A\d+\z/)
         found = Program.find_by(program_code: code.to_i.to_s.rjust(4, "0"))
         return found if found
       end
 
-      # 2. Try by English name (latest by year_started)
+      # 2. Try by alternative_program_code (e.g. 5-digit MAJORCODE from reg system).
+      #    Multiple programs may share the same alternative code (curriculum revisions).
+      #    Pick the latest program that started on or before the student's admission year.
+      if code.match?(/\A\d+\z/)
+        scope = Program.where(alternative_program_code: code)
+        scope = scope.where("year_started <= ?", admission_year_be) if admission_year_be
+        found = scope.order(year_started: :desc).first
+        return found if found
+      end
+
+      # 3. Try by English name (latest by year_started)
       found = Program.where(name_en: value).order(year_started: :desc).first
       return found if found
 
-      # 3. Try by Thai name (latest by year_started)
+      # 4. Try by Thai name (latest by year_started)
       Program.where(name_th: value).order(year_started: :desc).first
     end
 
@@ -99,7 +112,7 @@ module Importers
       if attrs.key?(:program_name)
         program_value = attrs.delete(:program_name).to_s.strip
         if program_value.present?
-          program = resolve_program(program_value)
+          program = resolve_program(program_value, admission_year_be: attrs[:admission_year_be])
           attrs[:program_id] = program&.id
         end
       end

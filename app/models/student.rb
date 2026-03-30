@@ -1,4 +1,5 @@
 class Student < ApplicationRecord
+  SEXES = %w[M F].freeze
   STATUSES = %w[active graduated on_leave retired].freeze
 
   # Material Symbols icon for each status — used by Select2 dropdowns
@@ -17,6 +18,7 @@ class Student < ApplicationRecord
   validates :first_name_th, presence: true
   validates :last_name_th, presence: true
   validates :admission_year_be, presence: true, numericality: { only_integer: true }
+  validates :sex, inclusion: { in: SEXES }, allow_nil: true
   validates :status, presence: true, inclusion: { in: STATUSES }
 
   scope :active, -> { where(status: "active") }
