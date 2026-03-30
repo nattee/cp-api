@@ -10,14 +10,14 @@
           .btn-group.btn-group-sm
             - [["Active", "^(?!.*Retired)"], ["All", ""]].each_with_index do |(label, value), i|
               - checked = i == 0
-              %input.btn-check{type: "radio", name: "filter-status", id: "filter-status-#{i}", value: value, checked: checked, "data-datatable-target" => "filter", "data-action" => "change->datatable#filter", "data-datatable-column-index" => "3", "data-datatable-regex" => "true", "data-datatable-default-value" => (checked ? value : nil)}
+              %input.btn-check{type: "radio", name: "filter-status", id: "filter-status-#{i}", value: value, checked: checked, "data-datatable-target" => "filter", "data-action" => "change->datatable#filter", "data-datatable-column-index" => "4", "data-datatable-regex" => "true", "data-datatable-default-value" => (checked ? value : nil)}
               %label.btn.btn-outline-secondary{for: "filter-status-#{i}"}= label
         .d-flex.align-items-center.gap-2
           %span.form-label.mb-0.small.text-muted Type
           .btn-group.btn-group-sm
             - [["All", ""], ["Lecturers", "^Lecturer$"], ["Non-lecturers", "^(?!Lecturer$)"]].each_with_index do |(label, value), i|
-              - checked = i == 0
-              %input.btn-check{type: "radio", name: "filter-type", id: "filter-type-#{i}", value: value, checked: checked, "data-datatable-target" => "filter", "data-action" => "change->datatable#filter", "data-datatable-column-index" => "1", "data-datatable-regex" => "true"}
+              - checked = i == 1
+              %input.btn-check{type: "radio", name: "filter-type", id: "filter-type-#{i}", value: value, checked: checked, "data-datatable-target" => "filter", "data-action" => "change->datatable#filter", "data-datatable-column-index" => "2", "data-datatable-regex" => "true", "data-datatable-default-value" => (checked ? value : nil)}
               %label.btn.btn-outline-secondary{for: "filter-type-#{i}"}= label
       - if current_user.admin?
         = link_to "New Staff", new_staff_path, class: "btn btn-primary btn-sm"
@@ -25,6 +25,7 @@
       %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
         %thead
           %tr
+            %th Initials
             %th Name
             %th Type
             %th Room
@@ -33,6 +34,7 @@
         %tbody
           - @staffs.each do |staff|
             %tr
+              %td= staff.initials
               %td= staff.display_name_th
               %td
                 %span.badge{class: "badge-#{staff.staff_type.dasherize}"}= staff.staff_type.titleize

@@ -6,61 +6,61 @@
 # ============================================================
 faculty = [
   # --- ศาสตราจารย์ (Professor) ---
-  { initials: "AAA", title: "นาย",    academic_title: "ศ.ดร.", first_name: "Boonserm",  last_name: "Kijsirikul",       first_name_th: "บุญเสริม",   last_name_th: "กิจศิริกุล",          email: "boonserm@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ศ.ดร.", first_name: "Prabhas",   last_name: "Chongstitvatana",  first_name_th: "ประภาส",     last_name_th: "จงสถิตย์วัฒนา",      email: "Prabhas.C@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ศ.ดร.", first_name: "Wiwat",     last_name: "Vatanawood",       first_name_th: "วิวัฒน์",    last_name_th: "วัฒนาวุฒิ",          email: "wiwat@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ศ.ดร.", first_name: "Peerapon",  last_name: "Vateekul",         first_name_th: "พีรพล",      last_name_th: "เวทีกูล",             email: "peerapon.v@chula.ac.th" },
+  { initials: "BKK", title: "นาย",    academic_title: "ศ.ดร.", first_name: "Boonserm",  last_name: "Kijsirikul",       first_name_th: "บุญเสริม",   last_name_th: "กิจศิริกุล",          email: "boonserm@cp.eng.chula.ac.th" },
+  { initials: "PJW", title: "นาย",    academic_title: "ศ.ดร.", first_name: "Prabhas",   last_name: "Chongstitvatana",  first_name_th: "ประภาส",     last_name_th: "จงสถิตย์วัฒนา",      email: "Prabhas.C@chula.ac.th" },
+  { initials: "WWW", title: "นาย",    academic_title: "ศ.ดร.", first_name: "Wiwat",     last_name: "Vatanawood",       first_name_th: "วิวัฒน์",    last_name_th: "วัฒนาวุฒิ",          email: "wiwat@chula.ac.th" },
+  { initials: "PVK", title: "นาย",    academic_title: "ศ.ดร.", first_name: "Peerapon",  last_name: "Vateekul",         first_name_th: "พีรพล",      last_name_th: "เวทีกูล",             email: "peerapon.v@chula.ac.th" },
 
   # --- รองศาสตราจารย์ (Associate Professor) ---
-  { initials: "AAA", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Kultida",    last_name: "Rojviboonchai",    first_name_th: "กุลธิดา",    last_name_th: "โรจน์วิบูลย์ชัย",    email: "kultida@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Krerk",      last_name: "Piromsopa",        first_name_th: "เกริก",      last_name_th: "ภิรมย์โสภา",          email: "krerk@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Chotirat",   last_name: "Ratanamahatana",   first_name_th: "โชติรัตน์",  last_name_th: "รัตนามหัทธนะ",        email: "chotirat@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Yachai",     last_name: "Limpiyakorn",      first_name_th: "ญาใจ",       last_name_th: "ลิ่มปิยะกรณ์",        email: "limpyac@gmail.com" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Nuttapong",  last_name: "Chentanez",        first_name_th: "ณัฐพงศ์",    last_name_th: "ชินธเนศ",             email: "nuttapong@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Duangdao",   last_name: "Wichadakul",       first_name_th: "ดวงดาว",     last_name_th: "วิชาดากุล",           email: "duangdao.w@chula.ac.th" },
-  { initials: "AAA", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Twittie",    last_name: "Senivongse",       first_name_th: "ทวิตีย์",    last_name_th: "เสนีวงศ์ ณ อยุธยา",   email: "twittie.s@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Thanarat",   last_name: "Chalidabhongse",   first_name_th: "ธนารัตน์",   last_name_th: "ชลิดาพงศ์",           email: "Thanarat.C@Chula.ac.th" },
-  { initials: "AAA", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Taratip",    last_name: "Suwannasart",      first_name_th: "ธาราทิพย์",  last_name_th: "สุวรรณศาสตร์",        email: "Taratip.S@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Nattee",     last_name: "Niparnan",         first_name_th: "นัทที",      last_name_th: "นิภานันท์",           email: "nattee.n@chula.ac.th" },
-  { initials: "AAA", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Proadpran",  last_name: "Punyabukkana",     first_name_th: "โปรดปราน",   last_name_th: "บุณยพุกกณะ",          email: "Proadpran.P@Chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Pizzanu",    last_name: "Kanongchaiyos",    first_name_th: "พิษณุ",      last_name_th: "คนองชัยยศ",           email: "pizzanu.k@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Vishnu",     last_name: "Kotrajaras",       first_name_th: "วิษณุ",      last_name_th: "โคตรจรัส",            email: "vishnu@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Veera",      last_name: "Muangsin",         first_name_th: "วีระ",       last_name_th: "เหมืองสิน",           email: "veera.m@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Setha",      last_name: "Pan-ngum",         first_name_th: "เศรษฐา",     last_name_th: "ปานงาม",              email: "setha@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Atiwong",    last_name: "Suchato",          first_name_th: "อติวงศ์",    last_name_th: "สุชาโต",              email: "atiwong@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Athasit",    last_name: "Surarerks",        first_name_th: "อรรถสิทธิ์", last_name_th: "สุรฤกษ์",             email: "athasit@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นางสาว", academic_title: "รศ.",    first_name: "Nakornthip", last_name: "Prompoon",         first_name_th: "นครทิพย์",   last_name_th: "พร้อมพูล",            email: "Nakornthip.S@chula.ac.th" },
+  { initials: "KRC", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Kultida",    last_name: "Rojviboonchai",    first_name_th: "กุลธิดา",    last_name_th: "โรจน์วิบูลย์ชัย",    email: "kultida@cp.eng.chula.ac.th" },
+  { initials: "KPR", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Krerk",      last_name: "Piromsopa",        first_name_th: "เกริก",      last_name_th: "ภิรมย์โสภา",          email: "krerk@cp.eng.chula.ac.th" },
+  { initials: "CRN", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Chotirat",   last_name: "Ratanamahatana",   first_name_th: "โชติรัตน์",  last_name_th: "รัตนามหัทธนะ",        email: "chotirat@cp.eng.chula.ac.th" },
+  { initials: "YLK", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Yachai",     last_name: "Limpiyakorn",      first_name_th: "ญาใจ",       last_name_th: "ลิ่มปิยะกรณ์",        email: "limpyac@gmail.com" },
+  { initials: "NCN", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Nuttapong",  last_name: "Chentanez",        first_name_th: "ณัฐพงศ์",    last_name_th: "ชินธเนศ",             email: "nuttapong@cp.eng.chula.ac.th" },
+  { initials: "DWK", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Duangdao",   last_name: "Wichadakul",       first_name_th: "ดวงดาว",     last_name_th: "วิชาดากุล",           email: "duangdao.w@chula.ac.th" },
+  { initials: "TSV", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Twittie",    last_name: "Senivongse",       first_name_th: "ทวิตีย์",    last_name_th: "เสนีวงศ์ ณ อยุธยา",   email: "twittie.s@chula.ac.th" },
+  { initials: "TCB", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Thanarat",   last_name: "Chalidabhongse",   first_name_th: "ธนารัตน์",   last_name_th: "ชลิดาพงศ์",           email: "Thanarat.C@Chula.ac.th" },
+  { initials: "TSS", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Taratip",    last_name: "Suwannasart",      first_name_th: "ธาราทิพย์",  last_name_th: "สุวรรณศาสตร์",        email: "Taratip.S@chula.ac.th" },
+  { initials: "NNN", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Nattee",     last_name: "Niparnan",         first_name_th: "นัทที",      last_name_th: "นิภานันท์",           email: "nattee.n@chula.ac.th" },
+  { initials: "PPN", title: "นางสาว", academic_title: "รศ.ดร.", first_name: "Proadpran",  last_name: "Punyabukkana",     first_name_th: "โปรดปราน",   last_name_th: "บุณยพุกกณะ",          email: "Proadpran.P@Chula.ac.th" },
+  { initials: "PKY", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Pizzanu",    last_name: "Kanongchaiyos",    first_name_th: "พิษณุ",      last_name_th: "คนองชัยยศ",           email: "pizzanu.k@chula.ac.th" },
+  { initials: "VKJ", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Vishnu",     last_name: "Kotrajaras",       first_name_th: "วิษณุ",      last_name_th: "โคตรจรัส",            email: "vishnu@cp.eng.chula.ac.th" },
+  { initials: "VMS", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Veera",      last_name: "Muangsin",         first_name_th: "วีระ",       last_name_th: "เหมืองสิน",           email: "veera.m@chula.ac.th" },
+  { initials: "SPA", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Setha",      last_name: "Pan-ngum",         first_name_th: "เศรษฐา",     last_name_th: "ปานงาม",              email: "setha@cp.eng.chula.ac.th" },
+  { initials: "AST", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Atiwong",    last_name: "Suchato",          first_name_th: "อติวงศ์",    last_name_th: "สุชาโต",              email: "atiwong@cp.eng.chula.ac.th" },
+  { initials: "ASR", title: "นาย",    academic_title: "รศ.ดร.", first_name: "Athasit",    last_name: "Surarerks",        first_name_th: "อรรถสิทธิ์", last_name_th: "สุรฤกษ์",             email: "athasit@cp.eng.chula.ac.th" },
+  { initials: "NPP", title: "นางสาว", academic_title: "รศ.",    first_name: "Nakornthip", last_name: "Prompoon",         first_name_th: "นครทิพย์",   last_name_th: "พร้อมพูล",            email: "Nakornthip.S@chula.ac.th" },
 
   # --- ผู้ช่วยศาสตราจารย์ (Assistant Professor) ---
-  { initials: "AAA", title: "นางสาว", academic_title: "ผศ.ดร.", first_name: "Kunwadee",    last_name: "Sripanidkulchai",  first_name_th: "กุลวดี",     last_name_th: "ศรีพานิชกุลชัย",      email: "kunwadee.s@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Narongdech",  last_name: "Keeratipranon",    first_name_th: "ณรงค์เดช",   last_name_th: "กีรติพรานนท์",        email: "narongdech.k@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Natawut",     last_name: "Nupairoj",         first_name_th: "ณัฐวุฒิ",    last_name_th: "หนูไพโรจน์",          email: "natawut.n@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Nuengwong",   last_name: "Tuaycharoen",      first_name_th: "เนื่องวงศ์",  last_name_th: "ทวยเจริญ",            email: "nuengwong.t@chula.ac.th" },
-  { initials: "AAA", title: "นางสาว", academic_title: "ผศ.ดร.", first_name: "Punnarai",    last_name: "Siricharoen",      first_name_th: "พรรณราย",    last_name_th: "ศิริเจริญ",           email: "punnarai.s@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Pitchaya",    last_name: "Sitthi-amorn",     first_name_th: "พิชญะ",      last_name_th: "สิทธีอมร",            email: "pitchaya@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Pittipol",    last_name: "Kantavat",         first_name_th: "พิตติพล",    last_name_th: "คันธวัฒน์",           email: "pittipol.k@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Sukree",      last_name: "Sinthupinyo",      first_name_th: "สุกรี",      last_name_th: "สินธุภิญโญ",          email: "sukree@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Attawith",    last_name: "Sudsang",          first_name_th: "อรรถวิทย์",  last_name_th: "สุดแสง",              email: "attawith@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Arthit",      last_name: "Thongtak",         first_name_th: "อาทิตย์",    last_name_th: "ทองทักษ์",            email: "arthit@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Ekapol",      last_name: "Chuangsuwanich",   first_name_th: "เอกพล",      last_name_th: "ช่วงสุวนิช",          email: "Ekapol.C@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ผศ.",    first_name: "Chate",       last_name: "Patanothai",       first_name_th: "เชษฐ",       last_name_th: "พัฒโนทัย",            email: "chate.p@chula.ac.th" },
+  { initials: "KSC", title: "นางสาว", academic_title: "ผศ.ดร.", first_name: "Kunwadee",    last_name: "Sripanidkulchai",  first_name_th: "กุลวดี",     last_name_th: "ศรีพานิชกุลชัย",      email: "kunwadee.s@chula.ac.th" },
+  { initials: "NKN", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Narongdech",  last_name: "Keeratipranon",    first_name_th: "ณรงค์เดช",   last_name_th: "กีรติพรานนท์",        email: "narongdech.k@chula.ac.th" },
+  { initials: "NNP", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Natawut",     last_name: "Nupairoj",         first_name_th: "ณัฐวุฒิ",    last_name_th: "หนูไพโรจน์",          email: "natawut.n@chula.ac.th" },
+  { initials: "NTR", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Nuengwong",   last_name: "Tuaycharoen",      first_name_th: "เนื่องวงศ์",  last_name_th: "ทวยเจริญ",            email: "nuengwong.t@chula.ac.th" },
+  { initials: "PSC", title: "นางสาว", academic_title: "ผศ.ดร.", first_name: "Punnarai",    last_name: "Siricharoen",      first_name_th: "พรรณราย",    last_name_th: "ศิริเจริญ",           email: "punnarai.s@chula.ac.th" },
+  { initials: "PSA", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Pitchaya",    last_name: "Sitthi-amorn",     first_name_th: "พิชญะ",      last_name_th: "สิทธีอมร",            email: "pitchaya@cp.eng.chula.ac.th" },
+  { initials: "PKV", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Pittipol",    last_name: "Kantavat",         first_name_th: "พิตติพล",    last_name_th: "คันธวัฒน์",           email: "pittipol.k@chula.ac.th" },
+  { initials: "SSY", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Sukree",      last_name: "Sinthupinyo",      first_name_th: "สุกรี",      last_name_th: "สินธุภิญโญ",          email: "sukree@cp.eng.chula.ac.th" },
+  { initials: "ATS", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Attawith",    last_name: "Sudsang",          first_name_th: "อรรถวิทย์",  last_name_th: "สุดแสง",              email: "attawith@cp.eng.chula.ac.th" },
+  { initials: "ATT", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Arthit",      last_name: "Thongtak",         first_name_th: "อาทิตย์",    last_name_th: "ทองทักษ์",            email: "arthit@cp.eng.chula.ac.th" },
+  { initials: "ECN", title: "นาย",    academic_title: "ผศ.ดร.", first_name: "Ekapol",      last_name: "Chuangsuwanich",   first_name_th: "เอกพล",      last_name_th: "ช่วงสุวนิช",          email: "Ekapol.C@chula.ac.th" },
+  { initials: "CNP", title: "นาย",    academic_title: "ผศ.",    first_name: "Chate",       last_name: "Patanothai",       first_name_th: "เชษฐ",       last_name_th: "พัฒโนทัย",            email: "chate.p@chula.ac.th" },
 
   # --- อาจารย์ (Lecturer / Instructor) ---
-  { initials: "AAA", title: "นางสาว", academic_title: "อ.ดร.", first_name: "Kanokphan",   last_name: "Lertniphonphan",   first_name_th: "กนกพรรณ",    last_name_th: "เลิศนิพนธ์พันธุ์",    email: nil },
-  { initials: "AAA", title: "นางสาว", academic_title: "อ.ดร.", first_name: "Kamonluk",    last_name: "Suksen",           first_name_th: "กมลลักษณ์",  last_name_th: "สุขเสน",              email: "kamonluk@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "อ.ดร.", first_name: "Jessada",     last_name: "Thutkawkorapin",   first_name_th: "เจษฏา",      last_name_th: "ธัชแก้วกรพินธ์",      email: "jessada.t@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "ดร.",   first_name: "Nat",         last_name: "Pavasant",         first_name_th: "ณัท",        last_name_th: "ภวสันต์",             email: "Nat.p@chula.ac.th" },
-  { initials: "AAA", title: "นางสาว", academic_title: "อ.ดร.", first_name: "Machigar",    last_name: "Ongtang",          first_name_th: "มัชฌิกา",    last_name_th: "อ่องแตง",             email: nil },
-  { initials: "AAA", title: "นางสาว", academic_title: "อ.ดร.", first_name: "Warisa",      last_name: "Sritriratanarak",  first_name_th: "วริษา",      last_name_th: "ศรีไตรรัตนรักษ์",     email: "warisa.s@chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "อ.ดร.", first_name: "Sukhum",      last_name: "Sattaratnamai",    first_name_th: "สุขุม",      last_name_th: "สัตตรัตนามัย",        email: "sukhum.s@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "อ.ดร.", first_name: "Suthee",      last_name: "Ruangwises",       first_name_th: "สุธี",       last_name_th: "เรืองวิเศษ",          email: "suthee@cp.eng.chula.ac.th" },
-  { initials: "AAA", title: "นาย",    academic_title: "อ.",    first_name: "Thongchai",   last_name: "Rojakangsadan",    first_name_th: "ธงชัย",      last_name_th: "โรจน์กังสดาล",        email: "Thongchai.R@chula.ac.th" },
+  { initials: "", title: "นางสาว", academic_title: "อ.ดร.", first_name: "Kanokphan",   last_name: "Lertniphonphan",   first_name_th: "กนกพรรณ",    last_name_th: "เลิศนิพนธ์พันธุ์",    email: nil },
+  { initials: "KSS", title: "นางสาว", academic_title: "อ.ดร.", first_name: "Kamonluk",    last_name: "Suksen",           first_name_th: "กมลลักษณ์",  last_name_th: "สุขเสน",              email: "kamonluk@cp.eng.chula.ac.th" },
+  { initials: "JTP", title: "นาย",    academic_title: "อ.ดร.", first_name: "Jessada",     last_name: "Thutkawkorapin",   first_name_th: "เจษฏา",      last_name_th: "ธัชแก้วกรพินธ์",      email: "jessada.t@chula.ac.th" },
+  { initials: "NPS", title: "นาย",    academic_title: "ดร.",   first_name: "Nat",         last_name: "Pavasant",         first_name_th: "ณัท",        last_name_th: "ภวสันต์",             email: "Nat.p@chula.ac.th" },
+  { initials: "MOT", title: "นางสาว", academic_title: "อ.ดร.", first_name: "Machigar",    last_name: "Ongtang",          first_name_th: "มัชฌิกา",    last_name_th: "อ่องแตง",             email: nil },
+  { initials: "WSR", title: "นางสาว", academic_title: "อ.ดร.", first_name: "Warisa",      last_name: "Sritriratanarak",  first_name_th: "วริษา",      last_name_th: "ศรีไตรรัตนรักษ์",     email: "warisa.s@chula.ac.th" },
+  { initials: "SSM", title: "นาย",    academic_title: "อ.ดร.", first_name: "Sukhum",      last_name: "Sattaratnamai",    first_name_th: "สุขุม",      last_name_th: "สัตตรัตนามัย",        email: "sukhum.s@cp.eng.chula.ac.th" },
+  { initials: "SRS", title: "นาย",    academic_title: "อ.ดร.", first_name: "Suthee",      last_name: "Ruangwises",       first_name_th: "สุธี",       last_name_th: "เรืองวิเศษ",          email: "suthee@cp.eng.chula.ac.th" },
+  { initials: "TRD", title: "นาย",    academic_title: "อ.",    first_name: "Thongchai",   last_name: "Rojakangsadan",    first_name_th: "ธงชัย",      last_name_th: "โรจน์กังสดาล",        email: "Thongchai.R@chula.ac.th" },
 ]
 
 faculty.each do |attrs|
-  Staff.find_or_create_by!(first_name: attrs[:first_name], last_name: attrs[:last_name]) do |s|
-    s.assign_attributes(attrs.merge(staff_type: "lecturer", status: "active"))
-  end
+  s = Staff.find_or_initialize_by(first_name: attrs[:first_name], last_name: attrs[:last_name])
+  s.assign_attributes(attrs.merge(staff_type: "lecturer", status: "active"))
+  s.save!
 end
 
 # ============================================================
@@ -71,7 +71,7 @@ retired_faculty = [
   { title: "นางสาว", first_name: "Pornsiri",    last_name: "Muenchaisi",         first_name_th: "พรศิริ",       last_name_th: "หมื่นไชยศรี" },
   { title: "นาย",    first_name: "Wanchai",     last_name: "Rivpiboon",          first_name_th: "วันชัย",       last_name_th: "ริ้วไพบูลย์" },
   { title: "นาย",    first_name: "Somchai",     last_name: "Thayanyong",         first_name_th: "สมชาย",        last_name_th: "ทยานยง" },
-  { title: "นาย",    first_name: "Somchai",     last_name: "Prasitjutrakul",     first_name_th: "สมชาย",        last_name_th: "ประสิทธิจูตระกูล" },
+  { initials: 'SPJ', title: "นาย",    first_name: "Somchai",     last_name: "Prasitjutrakul",     first_name_th: "สมชาย",        last_name_th: "ประสิทธิจูตระกูล" },
   { title: "นาย",    first_name: "Sawat",       last_name: "Saengbangpla",       first_name_th: "สวัสดิ์",      last_name_th: "แสงบางปลา" },
   { title: "นาย",    first_name: "Sathit",      last_name: "Wongsapantip",       first_name_th: "สาธิต",        last_name_th: "วงศ์ประทีป" },
   { title: "นางสาว", first_name: "Duean",       last_name: "Sinthupantaprathum", first_name_th: "เดือน",        last_name_th: "สินธุพันธ์ประทุม" },
@@ -86,7 +86,7 @@ retired_faculty = [
   { title: "นาย",    first_name: "Methi",       last_name: "Srisangwan",         first_name_th: "เมธี",         last_name_th: "ศรีสังวาลย์" },
   { title: "นาย",    first_name: "Wichan",      last_name: "Lertwipattrakul",    first_name_th: "วิชาญ",        last_name_th: "เลิศวิภาตระกูล" },
   { title: "นาย",    first_name: "Sumet",       last_name: "Watcharachaisupol",  first_name_th: "สุเมธ",        last_name_th: "วัชรชัยสุรพล" },
-  { title: "นาย",    first_name: "Yanyong",     last_name: "Tengamnuay",         first_name_th: "ยรรยง",        last_name_th: "เต็งอำนวย" },
+  { initials: 'YTN', title: "นาย",    first_name: "Yanyong",     last_name: "Tengamnuay",         first_name_th: "ยรรยง",        last_name_th: "เต็งอำนวย" },
   { title: "นางสาว", first_name: "Jarumaat",    last_name: "Pinthong",           first_name_th: "จารุมาตร",     last_name_th: "ปิ่นทอง" },
   { title: "นางสาว", first_name: "Chidchanok",  last_name: "Lursinsap",          first_name_th: "ชิดชนก",       last_name_th: "เหลือสินทรัพย์" },
   { title: "นางสาว", first_name: "Nongluk",     last_name: "Covavisaruch",       first_name_th: "นงลักษณ์",     last_name_th: "โควาวิสารัช" },
@@ -101,9 +101,9 @@ retired_faculty = [
 ]
 
 retired_faculty.each do |attrs|
-  Staff.find_or_create_by!(first_name_th: attrs[:first_name_th], last_name_th: attrs[:last_name_th]) do |s|
-    s.assign_attributes(attrs.merge(staff_type: "lecturer", status: "retired"))
-  end
+  s = Staff.find_or_initialize_by(first_name_th: attrs[:first_name_th], last_name_th: attrs[:last_name_th])
+  s.assign_attributes(attrs.merge(staff_type: "lecturer", status: "retired"))
+  s.save!
 end
 
 # ============================================================
@@ -124,9 +124,9 @@ admin_staff = [
 ]
 
 admin_staff.each do |attrs|
-  Staff.find_or_create_by!(first_name_th: attrs[:first_name_th], last_name_th: attrs[:last_name_th]) do |s|
-    s.assign_attributes(attrs.merge(staff_type: "admin_permanent", status: "active"))
-  end
+  s = Staff.find_or_initialize_by(first_name_th: attrs[:first_name_th], last_name_th: attrs[:last_name_th])
+  s.assign_attributes(attrs.merge(staff_type: "admin_permanent", status: "active"))
+  s.save!
 end
 
 # ============================================================
@@ -141,9 +141,9 @@ retired_staff = [
 ]
 
 retired_staff.each do |attrs|
-  Staff.find_or_create_by!(first_name_th: attrs[:first_name_th], last_name_th: attrs[:last_name_th]) do |s|
-    s.assign_attributes(attrs.merge(staff_type: "admin_permanent", status: "retired"))
-  end
+  s = Staff.find_or_initialize_by(first_name_th: attrs[:first_name_th], last_name_th: attrs[:last_name_th])
+  s.assign_attributes(attrs.merge(staff_type: "admin_permanent", status: "retired"))
+  s.save!
 end
 
 puts "Staff seed complete. #{Staff.count} staff members seeded."

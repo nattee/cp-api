@@ -1,5 +1,5 @@
 namespace :scraper do
-  desc "Scrape course schedules from external source. SOURCE=cugetreg|cas_reg YEAR=2568 SEMESTER=2 PROGRAM=S"
+  desc "Scrape course schedules from external source. SOURCE=cugetreg|cas_reg YEAR=2568 SEMESTER=2 PROGRAM=S LIMIT=10"
   task run: :environment do
     $stdout.sync = true
     source_name = ENV.fetch("SOURCE", "cugetreg")
@@ -17,6 +17,7 @@ namespace :scraper do
 
     source = klass.new(semester: semester, study_program: study_program)
     courses = Course.all
+    courses = courses.limit(ENV["LIMIT"].to_i) if ENV["LIMIT"].present?
     total = courses.count
 
     scraper_config = Rails.application.config_for(:scraper)

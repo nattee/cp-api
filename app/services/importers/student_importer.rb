@@ -101,6 +101,12 @@ module Importers
       end
       attrs[:student_id] = attrs[:student_id].to_s.gsub(/\.0\z/, "") if attrs[:student_id]
 
+      # Roo reads phone numbers as floats (e.g. 081234567 → 81234567.0).
+      # Strip decimal, convert to integer, then zero-pad to at least 9 digits.
+      if attrs[:phone].present?
+        attrs[:phone] = attrs[:phone].to_s.gsub(/\.0\z/, "").to_i.to_s.rjust(9, "0")
+      end
+
       # Default status
       attrs[:status] ||= "active"
 

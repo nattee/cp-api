@@ -4,9 +4,6 @@
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
         = resource_icon
         Scrape History
-      - if current_user.admin?
-        = link_to scrapes_path, method: :post, class: "btn btn-primary btn-sm d-none" do
-          New Scrape
 
     - if current_user.admin?
       .card.mb-3.border-primary
