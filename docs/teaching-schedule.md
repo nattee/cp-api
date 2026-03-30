@@ -1,5 +1,7 @@
 # Teaching Schedule
 
+**Status: Implemented**
+
 Record which courses are offered each semester, their sections, teaching schedules, and staff assignments.
 
 ## Scope

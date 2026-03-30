@@ -1,5 +1,7 @@
 # Schedule Scraper
 
+**Status: Implemented**
+
 Fetch course schedule data from external sources and import it into the teaching schedule system. This is an alternative to CSV import — automated data collection from publicly available university websites.
 
 See `docs/teaching-schedule.md` for the data model.

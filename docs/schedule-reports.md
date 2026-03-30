@@ -1,5 +1,7 @@
 # Schedule Reports
 
+**Status: Implemented**
+
 Cross-cutting queries and visualizations for the teaching schedule data. This is **Layer 3** of the teaching schedule feature — see `docs/teaching-schedule.md` for the data model and CRUD (Layers 1-2).
 
 ## Prerequisites
