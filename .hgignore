@@ -1,4 +1,6 @@
 syntax: glob
+
+# usual suspect
 log/*.log
 log/develop*
 tmp/**
@@ -9,9 +11,14 @@ vendor/bundle/**
 public/assets/**
 app/assets/builds/**
 *.lock
+
+# ignore key files (but won't ignore .yml.enc)
 config/master.key
-.claude/
-.ruby-lsp/
+config/**/*.key
 
 # do not save this
 config/llm.yml
+
+# AI, artifact
+.claude/
+.ruby-lsp/
