@@ -1,14 +1,16 @@
 // Bootstrap variable overrides (must come before Bootstrap import)
-// Palette: shadcn warm theme (oklch values converted to hex)
+// Palette from shadcn themes generator (https://shadcnthemes.app/generator).
+// oklch values converted to hex. See docs/shadcn-color-mapping.md for the
+// full mapping between shadcn CSS variables and our Sass variables.
 
 $light:     #b8e6fe;    // primary-light — oklch(0.901 0.058 230.902)
-$dark:      #0c0a09;    // background    — oklch(0.147 0.004 49.25)
+$dark:      #030712;    // background    — oklch(0.13 0.028 261.692)
 $primary:   #74d4ff;    // primary       — oklch(0.828 0.111 230.318)
-$secondary: #f4a8ff;    // chart-1       — oklch(0.833 0.145 321.434)
-$info:      #ad46ff;    // chart-2       — oklch(0.627 0.265 303.9)
+$secondary: #fda5d5;    // chart-1       — oklch(0.823 0.12 346.018)
+$info:      #8e51ff;    // chart-2       — oklch(0.606 0.25 292.717)
 
-$success:   #05df72;    // chart-3       — oklch(0.792 0.209 151.711)
-$warning:   #f0b100;    // chart-4       — oklch(0.795 0.184 86.047)
+$success:   #7bf1a8;    // chart-3       — oklch(0.871 0.15 154.449)
+$warning:   #fdc700;    // chart-4       — oklch(0.852 0.199 91.936)
 $danger:    #e7000b;    // destructive   — oklch(0.577 0.245 27.325)
 
 // Font
@@ -23,15 +25,20 @@ $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetic
 // Font color (Bootstrap dark mode text)
 $body-color-dark: #ffffff;                   // pure white — oklch(1 0 0)
 
-// Surface colors derived from $dark (elevation = lightness)
-$body-bg:              $dark;                       // page canvas (lowest)
-$card-bg:              lighten($dark, 7%);           // cards (elevated)
-$input-bg:             lighten($dark, 2%);           // form controls (recessed into card)
-$input-group-addon-bg: lighten($dark, 1%);           // input group text (deeper recess)
-$table-bg:             transparent;                  // inherit card background, no extra layer
+// Surface colors
+$popover-bg:           #101828;                      // popover — oklch(0.21 0.034 264.665), opaque; for dropdowns, popovers, calendars
+$body-bg-dark:         $dark;                        // page canvas in dark mode (Bootstrap uses this, not $body-bg)
+$body-bg:              $dark;                        // page canvas (light mode fallback)
+$card-bg:              rgba(#101828, 0.6);            // card — oklch(0.21 0.034 264.665 / 0.6), semi-transparent
+$input-bg:             lighten($dark, 2%);            // form controls (recessed into card)
+$input-group-addon-bg: lighten($dark, 1%);            // input group text (deeper recess)
+$table-bg:             transparent;                   // inherit card background, no extra layer
 
-// Sidebar — override Bootstrap's .bg-body-tertiary for dark mode
-$body-tertiary-bg-dark: lighten($dark, 5%);           // sidebar (slightly darker than cards)
+// Sidebar — same as background in this palette
+$body-tertiary-bg-dark: $dark;
+
+// Nav pills — active pill text should match btn-primary (dark text on bright primary bg)
+$nav-pills-link-active-color: #000;
 
 
 // Table border customization
@@ -66,8 +73,16 @@ $input-icon-color: darken($light, 5%);
 // Resource icon — plain icon next to card/page titles.
 .resource-icon { font-size: 20px; vertical-align: middle; }
 
-// Sidebar nav links — match normal body text color instead of Bootstrap's dimmed nav-link default
-#sidebar .nav-link { color: var(--bs-body-color); }
+// Sidebar — match body text color, add border for separation (sidebar bg = page bg in this palette)
+#sidebar { border-right: 1px solid rgba(white, 0.125); } // --sidebar-border from palette
+#sidebar .nav-link {
+  color: var(--bs-body-color);
+  &:hover:not(.active) { background: rgba(white, 0.1); } // --sidebar-accent from palette
+  &.active { color: var(--bs-nav-pills-link-active-color); } // override the white above — dark text on primary bg
+}
+
+// Sidebar title and username — white, not Bootstrap's default link color
+#sidebar > a, #sidebar .dropdown > a { color: var(--bs-body-color) !important; }
 
 // Card title — use $light for visual hierarchy against muted body text.
 .card .card-title { color: $light; }
@@ -246,6 +261,12 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
 .btn-ghost-secondary { color: $secondary; &:hover { background-color: rgba($secondary, 0.15); color: lighten($secondary, 20%); } }
 .btn-ghost-danger    { color: $danger;    &:hover { background-color: rgba($danger, 0.15);    color: $danger; } }
 
+// Button hover — darken on hover (shadcn convention) instead of Bootstrap's default lighten
+.btn-primary {
+  --bs-btn-hover-bg: #{shade-color($primary, 15%)};
+  --bs-btn-hover-border-color: #{shade-color($primary, 20%)};
+}
+
 // Flatpickr calendar colors (post-import — uses $light)
 // These are project variables, not flatpickr's. Flatpickr hardcodes its own
 // colors; we override them in the rules below using these variables so that
@@ -281,7 +302,7 @@ $flatpickr-spinner-color:   $light;                      // year increment arrow
 // application.html.haml), so same-specificity rules here win the cascade.
 // ---------------------------------------------------------------------------
 .flatpickr-calendar {
-  background: $card-bg;                       // was #fff
+  background: $popover-bg;                     // was #fff — opaque, since calendar floats over content
   border: 1px solid $flatpickr-border-color;  // was #e6e6e6
   box-shadow: none;                           // was a light drop shadow
   // Flatpickr hardcodes font-size: 14px rather than inheriting from Bootstrap.
@@ -358,7 +379,7 @@ $flatpickr-spinner-color:   $light;                      // year increment arrow
 
 // Dropdown panel — slightly elevated above card-bg so it visually floats
 .select2-container--bootstrap-5 .select2-dropdown {
-  background-color: #292524;                   // popover — oklch(0.268 0.007 34.298), opaque card color
+  background-color: $popover-bg;               // opaque card color for floating surfaces
   border-color: rgba(white, 0.15);            // was Bootstrap border color
   color: $body-color-dark;                    // was #000
 }
@@ -525,7 +546,7 @@ table.dataTable tbody td.dt-empty {
     text-transform: none;      // reset thead th uppercase
     letter-spacing: normal;    // reset thead th letter-spacing
     color: $body-color-dark;
-    background: lighten($dark, 14%);
+    background: $popover-bg;
     border: 1px solid rgba(white, 0.15);
     border-radius: 0.375rem;
     z-index: 1050;
@@ -539,7 +560,7 @@ table.dataTable tbody td.dt-empty {
       left: 50%;
       transform: translateX(-50%);
       border: 6px solid transparent;
-      border-top-color: lighten($dark, 14%);
+      border-top-color: $popover-bg;
     }
   }
 
@@ -564,6 +585,7 @@ table.dataTable tbody td.dt-empty {
   --sass-input-bg: #{$input-bg};
   --sass-input-group-addon-bg: #{$input-group-addon-bg};
   --sass-body-color: #{$body-color-dark};
+  --sass-popover-bg: #{$popover-bg};
   --sass-input-icon-color: #{$input-icon-color};
   --sass-table-row-border-color: #{$table-row-border-color};
   --sass-table-head-border-color: #{$table-head-border-color};

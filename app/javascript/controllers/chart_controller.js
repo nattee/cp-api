@@ -5,9 +5,9 @@ import "chart.js" // UMD side-effect import — sets window.Chart
 const STACK_COLORS = [
   "rgba(184, 230, 254, 0.7)",  // $light (#b8e6fe)
   "rgba(116, 212, 255, 0.7)",  // $primary (#74d4ff)
-  "rgba(244, 168, 255, 0.7)",  // $secondary (#f4a8ff)
-  "rgba(5, 223, 114, 0.7)",    // $success (#05df72)
-  "rgba(240, 177, 0, 0.7)",    // $warning (#f0b100)
+  "rgba(253, 165, 213, 0.7)",  // $secondary (#fda5d5)
+  "rgba(123, 241, 168, 0.7)",  // $success (#7bf1a8)
+  "rgba(253, 199, 0, 0.7)",    // $warning (#fdc700)
 ]
 
 // Grade colors matching $grade-* Sass variables in application.scss

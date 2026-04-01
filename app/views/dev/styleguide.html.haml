@@ -32,7 +32,7 @@
     %h5.card-title.mb-3 Derived Colors
     %p.text-muted.small Auto-derived from base colors. Change the base and watch these update. Check Override to set independently.
     .row.g-3.align-items-end#surface-colors
-      - [["body-bg", "$body-bg", "= $dark"], ["card-bg", "$card-bg", "lighten($dark, 7%)"], ["input-bg", "$input-bg", "lighten($dark, 2%)"], ["input-group-addon-bg", "$input-group-addon-bg", "lighten($dark, 1%)"], ["input-icon-color", "$input-icon-color", "darken($light, 5%)"]].each do |key, label, formula|
+      - [["body-bg", "$body-bg", "= $dark"], ["card-bg", "$card-bg", "palette (0.6\u03B1)"], ["popover-bg", "$popover-bg", "palette (opaque)"], ["input-bg", "$input-bg", "lighten($dark, 2%)"], ["input-group-addon-bg", "$input-group-addon-bg", "lighten($dark, 1%)"], ["input-icon-color", "$input-icon-color", "darken($light, 5%)"]].each do |key, label, formula|
         .col-auto{style: "min-width: 120px"}
           %label.form-label.small.mb-1
             %code= label
@@ -40,7 +40,7 @@
             %span.text-muted= formula
           .d-flex.align-items-center.gap-2
             %input.form-control.form-control-color.surface-picker{type: "color", data: {surface_key: key}, style: "width: 40px; height: 34px; padding: 2px;"}
-            %input.form-control.form-control-sm.font-monospace.hex-input-surface{type: "text", data: {surface_key: key}, maxlength: 7, style: "width: 90px; font-size: 0.8rem;"}
+            %input.form-control.form-control-sm.font-monospace.hex-input-surface{type: "text", data: {surface_key: key}, maxlength: 13, style: "width: 110px; font-size: 0.8rem;"}
           .form-check.mt-1
             %input.form-check-input.surface-lock{type: "checkbox", data: {surface_key: key}, id: "lock-#{key}"}
             %label.form-check-label.small.text-muted{for: "lock-#{key}"} Override
@@ -351,6 +351,13 @@
       return "#000000";
     }
 
+    // Extract alpha from rgba CSS values (returns null for opaque/hex values)
+    function cssVarAlpha(varName) {
+      var val = cs.getPropertyValue(varName).trim();
+      var m = val.match(/rgba\([^,]+,\s*[^,]+,\s*[^,]+,\s*([\d.]+)/);
+      return m ? parseFloat(m[1]) : null;
+    }
+
     // --- State ---
     var colors = {
       "body-color": cssVarToHex("--sass-body-color"),
@@ -369,20 +376,28 @@
     var surfaces = {
       "body-bg": cssVarToHex("--sass-body-bg"),
       "card-bg": cssVarToHex("--sass-card-bg"),
+      "popover-bg": cssVarToHex("--sass-popover-bg"),
       "input-bg": cssVarToHex("--sass-input-bg"),
       "input-group-addon-bg": cssVarToHex("--sass-input-group-addon-bg"),
       "input-icon-color": cssVarToHex("--sass-input-icon-color")
+    };
+
+    // Track alpha for surfaces that use rgba (e.g. card-bg: 0.6)
+    var surfaceAlphas = {
+      "card-bg": cssVarAlpha("--sass-card-bg")
     };
 
     var originalSurfaces = Object.assign({}, surfaces);
 
     // --- Derive dependent colors from base colors ---
     // Formulas here MUST match the Sass variables in application.scss.
+    // card-bg and popover-bg come directly from the shadcn palette, not derived from $dark.
     function deriveSurfaces() {
       var dark = colors.dark;
       var derived = {
         "body-bg": dark,                            // $body-bg: $dark
-        "card-bg": lighten(dark, 7),                // $card-bg: lighten($dark, 7%)
+        // card-bg: direct from palette (not derived) — keep current value
+        // popover-bg: direct from palette (not derived) — keep current value
         "input-bg": lighten(dark, 2),               // $input-bg: lighten($dark, 2%)
         "input-group-addon-bg": lighten(dark, 1),   // $input-group-addon-bg: lighten($dark, 1%)
         "input-icon-color": darken(colors.light, 5) // $input-icon-color: darken($light, 5%)
@@ -588,9 +603,21 @@
         el.value = surfaces[el.dataset.surfaceKey];
       });
       document.querySelectorAll(".hex-input-surface").forEach(function(el) {
-        if (document.activeElement !== el) el.value = surfaces[el.dataset.surfaceKey];
+        if (document.activeElement !== el) {
+          var alpha = surfaceAlphas[el.dataset.surfaceKey];
+          el.value = surfaces[el.dataset.surfaceKey] + (alpha ? " @ " + alpha : "");
+        }
       });
     }
+
+    // --- Cleanup inline styles on Turbo navigation ---
+    // The Color Playground sets --sass-* inline styles on :root. Without cleanup,
+    // these persist across Turbo navigations since <html> is never replaced.
+    document.addEventListener("turbo:before-visit", function cleanup() {
+      Object.keys(colors).forEach(function(key) { root.style.removeProperty("--sass-" + key); });
+      Object.keys(surfaces).forEach(function(key) { root.style.removeProperty("--sass-" + key); });
+      document.removeEventListener("turbo:before-visit", cleanup);
+    });
 
     // --- Initialize pickers ---
     applyColors();
