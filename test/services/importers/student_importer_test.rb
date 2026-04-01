@@ -201,9 +201,8 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   test "call fails when required column missing from mapping" do
     data_import = create_data_import("students_import.csv",
       column_mapping: {
-        "student_id" => "A: student_id",
         "first_name" => "B: first_name"
-        # missing last_name and admission_year_be
+        # missing student_id (not derivable)
       }
     )
 

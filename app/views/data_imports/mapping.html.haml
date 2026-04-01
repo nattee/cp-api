@@ -70,7 +70,10 @@
               %td
                 = defn[:label]
                 - if defn[:required]
-                  %span.text-danger *
+                  - if @derivable_attributes&.include?(defn[:attribute])
+                    %span.text-muted *
+                  - else
+                    %span.text-danger *
                 - if defn[:help].present?
                   %button.help-popover-trigger{type: "button", tabindex: "0"}
                     %span.material-symbols{style: "font-size: 16px"} help

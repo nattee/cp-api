@@ -21,6 +21,12 @@ module Importers
       attribute_definitions.each_with_object({}) { |d, h| h[d[:attribute]] = d[:label] }
     end
 
+    # Attributes that are required but can be derived from other mapped fields.
+    # Subclasses override to list attributes that transform_attributes can compute.
+    def self.derivable_attributes
+      []
+    end
+
     # Convert 0-based column index to Excel-style letter (0 → A, 25 → Z, 26 → AA)
     def self.column_letter(index)
       letter = ""
@@ -87,9 +93,9 @@ module Importers
         # Build constant values hash (symbol keys)
         constants = (data_import.default_values || {}).transform_keys(&:to_sym)
 
-        # Validate required attributes are present (via column mapping or constants)
+        # Validate required attributes are present (via column mapping, constants, or derivation)
         mapped_attrs = col_indices.values + constants.keys
-        missing = self.class.required_attributes - mapped_attrs
+        missing = self.class.required_attributes - mapped_attrs - self.class.derivable_attributes
         raise "Required fields not mapped: #{missing.join(', ')}" if missing.any?
 
         row_errors = []

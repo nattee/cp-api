@@ -50,6 +50,7 @@ class DataImportsController < ApplicationController
     end
 
     @attribute_definitions = importer_class.attribute_definitions
+    @derivable_attributes = importer_class.derivable_attributes
     @auto_mapping = importer_class.auto_map(@file_headers.map { |h| h.sub(/\A[A-Z]+: /, "") })
   end
 
@@ -76,9 +77,10 @@ class DataImportsController < ApplicationController
       end
     end
 
-    # Validate required attributes are satisfied (by column mapping OR constant)
+    # Validate required attributes are satisfied (by column mapping, constant, or derivation)
     satisfied = column_mapping.keys + default_values.keys
-    missing = permitted_attrs.select { |a| importer_class.required_attributes.include?(a.to_sym) } - satisfied
+    derivable = importer_class.derivable_attributes.map(&:to_s)
+    missing = permitted_attrs.select { |a| importer_class.required_attributes.include?(a.to_sym) } - satisfied - derivable
     if missing.any?
       labels = importer_class.attribute_labels
       missing_labels = missing.map { |a| labels[a.to_sym] || a }
