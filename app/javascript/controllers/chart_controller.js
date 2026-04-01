@@ -3,11 +3,11 @@ import "chart.js" // UMD side-effect import — sets window.Chart
 
 // Dark-theme palette for stacked bar segments
 const STACK_COLORS = [
-  "rgba(111, 207, 255, 0.7)",  // light blue
-  "rgba(164, 198, 212, 0.7)",  // primary
-  "rgba(177, 91, 149, 0.7)",   // magenta
-  "rgba(63, 170, 101, 0.7)",   // green
-  "rgba(233, 203, 61, 0.7)",   // yellow
+  "rgba(184, 230, 254, 0.7)",  // $light (#b8e6fe)
+  "rgba(116, 212, 255, 0.7)",  // $primary (#74d4ff)
+  "rgba(244, 168, 255, 0.7)",  // $secondary (#f4a8ff)
+  "rgba(5, 223, 114, 0.7)",    // $success (#05df72)
+  "rgba(240, 177, 0, 0.7)",    // $warning (#f0b100)
 ]
 
 // Grade colors matching $grade-* Sass variables in application.scss
@@ -24,12 +24,12 @@ const GRADE_COLORS = {
   "U":  "rgba(224, 64, 64, 0.5)",    // $grade-red (lighter)
   "W":  "rgba(150, 150, 150, 0.5)",  // $grade-muted
   "V":  "rgba(150, 150, 150, 0.35)", // $grade-muted (lighter)
-  "P":  "rgba(111, 207, 255, 0.5)",  // blue
+  "P":  "rgba(116, 212, 255, 0.5)",  // $primary
   "M":  "rgba(150, 150, 150, 0.25)", // $grade-muted (lightest)
 }
 
 const GRID_COLOR = "rgba(255, 255, 255, 0.08)"
-const TICK_COLOR = "#dee2e6"
+const TICK_COLOR = "#ffffff"
 
 export default class extends Controller {
   static targets = ["canvas", "filter"]
@@ -93,8 +93,8 @@ export default class extends Controller {
         datasets: [{
           label: "Students",
           data: d.counts,
-          backgroundColor: "rgba(164, 198, 212, 0.6)",
-          borderColor: "rgba(164, 198, 212, 1)",
+          backgroundColor: "rgba(116, 212, 255, 0.6)",
+          borderColor: "rgba(116, 212, 255, 1)",
           borderWidth: 1,
         }],
       },

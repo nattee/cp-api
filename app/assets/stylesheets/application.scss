@@ -1,14 +1,15 @@
 // Bootstrap variable overrides (must come before Bootstrap import)
+// Palette: shadcn warm theme (oklch values converted to hex)
 
-$light:     #6fcfff;
-$dark:      #0c0e13;
-$primary:   #a4c6d4;
-$secondary: #62336b;
-$info:      #b15b95;
+$light:     #b8e6fe;    // primary-light — oklch(0.901 0.058 230.902)
+$dark:      #0c0a09;    // background    — oklch(0.147 0.004 49.25)
+$primary:   #74d4ff;    // primary       — oklch(0.828 0.111 230.318)
+$secondary: #f4a8ff;    // chart-1       — oklch(0.833 0.145 321.434)
+$info:      #ad46ff;    // chart-2       — oklch(0.627 0.265 303.9)
 
-$success:   #3faa65;
-$warning:   #e9cb3d;
-$danger:    #f22330;
+$success:   #05df72;    // chart-3       — oklch(0.792 0.209 151.711)
+$warning:   #f0b100;    // chart-4       — oklch(0.795 0.184 86.047)
+$danger:    #e7000b;    // destructive   — oklch(0.577 0.245 27.325)
 
 // Font
 // Bootstrap resolves fonts via $font-family-sans-serif → $font-family-base →
@@ -20,14 +21,17 @@ $danger:    #f22330;
 $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
 // Font color (Bootstrap dark mode text)
-$body-color-dark: #dee2e6;               // Bootstrap default — override to customize
+$body-color-dark: #ffffff;                   // pure white — oklch(1 0 0)
 
 // Surface colors derived from $dark (elevation = lightness)
-$body-bg:   $dark;                          // page canvas (lowest)
-$card-bg:   lighten($dark, 7%);             // cards & sidebar (elevated)
-$input-bg:  lighten($dark, 2%);             // form controls (recessed into card)
-$input-group-addon-bg: lighten($dark, 1%);  // input group text (deeper recess)
-$table-bg:  transparent;                    // inherit card background, no extra layer
+$body-bg:              $dark;                       // page canvas (lowest)
+$card-bg:              lighten($dark, 7%);           // cards (elevated)
+$input-bg:             lighten($dark, 2%);           // form controls (recessed into card)
+$input-group-addon-bg: lighten($dark, 1%);           // input group text (deeper recess)
+$table-bg:             transparent;                  // inherit card background, no extra layer
+
+// Sidebar — override Bootstrap's .bg-body-tertiary for dark mode
+$body-tertiary-bg-dark: lighten($dark, 5%);           // sidebar (slightly darker than cards)
 
 
 // Table border customization
@@ -61,6 +65,9 @@ $input-icon-color: darken($light, 5%);
 
 // Resource icon — plain icon next to card/page titles.
 .resource-icon { font-size: 20px; vertical-align: middle; }
+
+// Sidebar nav links — match normal body text color instead of Bootstrap's dimmed nav-link default
+#sidebar .nav-link { color: var(--bs-body-color); }
 
 // Card title — use $light for visual hierarchy against muted body text.
 .card .card-title { color: $light; }
@@ -97,52 +104,52 @@ $input-icon-color: darken($light, 5%);
 }
 
 // Outlined / frosted badges (neon-bright text, tinted glow bg)
-.badge-admin    { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                    border: 1px solid rgba($danger, 0.4); }
-.badge-editor   { background-color: rgba($primary, 0.2);   color: lighten(saturate($primary, 30%), 10%);    border: 1px solid rgba($primary, 0.4); }
-.badge-viewer   { background-color: rgba($secondary, 0.2); color: lighten(saturate($secondary, 20%), 35%);  border: 1px solid rgba($secondary, 0.4); }
-.badge-active    { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%);    border: 1px solid rgba($success, 0.4); }
+.badge-admin    { background-color: rgba($danger, 0.2);    color: $danger;                    border: 1px solid rgba($danger, 0.4); }
+.badge-editor   { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }
+.badge-viewer   { background-color: rgba($secondary, 0.2); color: $secondary;  border: 1px solid rgba($secondary, 0.4); }
+.badge-active    { background-color: rgba($success, 0.2);   color: $success;    border: 1px solid rgba($success, 0.4); }
 .badge-inactive  { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
-.badge-graduated { background-color: rgba($info, 0.2);    color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
-.badge-on-leave  { background-color: rgba($warning, 0.2); color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
+.badge-graduated { background-color: rgba($info, 0.2);    color: $info;       border: 1px solid rgba($info, 0.4); }
+.badge-on-leave  { background-color: rgba($warning, 0.2); color: $warning;                    border: 1px solid rgba($warning, 0.4); }
 .badge-retired   { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
-.badge-bachelor  { background-color: rgba($primary, 0.2);   color: lighten(saturate($primary, 30%), 10%);    border: 1px solid rgba($primary, 0.4); }
-.badge-master    { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
-.badge-doctoral  { background-color: rgba($warning, 0.2);   color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
+.badge-bachelor  { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }
+.badge-master    { background-color: rgba($info, 0.2);      color: $info;       border: 1px solid rgba($info, 0.4); }
+.badge-doctoral  { background-color: rgba($warning, 0.2);   color: $warning;                    border: 1px solid rgba($warning, 0.4); }
 
 // Staff type badges
-.badge-lecturer         { background-color: rgba($primary, 0.2);   color: lighten(saturate($primary, 30%), 10%);    border: 1px solid rgba($primary, 0.4); }
-.badge-adjunct          { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
-.badge-lab              { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%);    border: 1px solid rgba($success, 0.4); }
-.badge-admin-permanent  { background-color: rgba($secondary, 0.2); color: lighten(saturate($secondary, 20%), 35%);  border: 1px solid rgba($secondary, 0.4); }
-.badge-admin-annual     { background-color: rgba($warning, 0.2);   color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
-.badge-admin-short-term { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                    border: 1px solid rgba($danger, 0.4); }
+.badge-lecturer         { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }
+.badge-adjunct          { background-color: rgba($info, 0.2);      color: $info;       border: 1px solid rgba($info, 0.4); }
+.badge-lab              { background-color: rgba($success, 0.2);   color: $success;    border: 1px solid rgba($success, 0.4); }
+.badge-admin-permanent  { background-color: rgba($secondary, 0.2); color: $secondary;  border: 1px solid rgba($secondary, 0.4); }
+.badge-admin-annual     { background-color: rgba($warning, 0.2);   color: $warning;                    border: 1px solid rgba($warning, 0.4); }
+.badge-admin-short-term { background-color: rgba($danger, 0.2);    color: $danger;                    border: 1px solid rgba($danger, 0.4); }
 
 // Staff program role badges
-.badge-head      { background-color: rgba($warning, 0.2);   color: lighten($warning, 8%);                    border: 1px solid rgba($warning, 0.4); }
-.badge-secretary { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);       border: 1px solid rgba($info, 0.4); }
-.badge-member    { background-color: rgba($secondary, 0.2); color: lighten(saturate($secondary, 20%), 35%);  border: 1px solid rgba($secondary, 0.4); }
+.badge-head      { background-color: rgba($warning, 0.2);   color: $warning;                    border: 1px solid rgba($warning, 0.4); }
+.badge-secretary { background-color: rgba($info, 0.2);      color: $info;       border: 1px solid rgba($info, 0.4); }
+.badge-member    { background-color: rgba($secondary, 0.2); color: $secondary;  border: 1px solid rgba($secondary, 0.4); }
 
 // Import state badges
 .badge-pending    { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
-.badge-retrying   { background-color: rgba($warning, 0.2);   color: lighten(saturate($warning, 20%), 12%); border: 1px solid rgba($warning, 0.4); }
-.badge-processing { background-color: rgba($info, 0.2);      color: lighten(saturate($info, 20%), 12%);    border: 1px solid rgba($info, 0.4); }
-.badge-completed  { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%); border: 1px solid rgba($success, 0.4); }
-.badge-failed     { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                 border: 1px solid rgba($danger, 0.4); }
+.badge-retrying   { background-color: rgba($warning, 0.2);   color: $warning; border: 1px solid rgba($warning, 0.4); }
+.badge-processing { background-color: rgba($info, 0.2);      color: $info;    border: 1px solid rgba($info, 0.4); }
+.badge-completed  { background-color: rgba($success, 0.2);   color: $success; border: 1px solid rgba($success, 0.4); }
+.badge-failed     { background-color: rgba($danger, 0.2);    color: $danger;                 border: 1px solid rgba($danger, 0.4); }
 
 // Import mode badges
-.badge-create-only { background-color: rgba($primary, 0.2);  color: lighten(saturate($primary, 30%), 10%); border: 1px solid rgba($primary, 0.4); }
-.badge-upsert      { background-color: rgba($warning, 0.2);  color: lighten($warning, 8%);                 border: 1px solid rgba($warning, 0.4); }
+.badge-create-only { background-color: rgba($primary, 0.2);  color: $primary; border: 1px solid rgba($primary, 0.4); }
+.badge-upsert      { background-color: rgba($warning, 0.2);  color: $warning;                 border: 1px solid rgba($warning, 0.4); }
 
 // Course offering status badges
 .badge-planned   { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
-.badge-confirmed { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%); border: 1px solid rgba($success, 0.4); }
-.badge-cancelled { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                 border: 1px solid rgba($danger, 0.4); }
+.badge-confirmed { background-color: rgba($success, 0.2);   color: $success; border: 1px solid rgba($success, 0.4); }
+.badge-cancelled { background-color: rgba($danger, 0.2);    color: $danger;                 border: 1px solid rgba($danger, 0.4); }
 
 // Scrape state badges
 .badge-pending   { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
-.badge-running   { background-color: rgba($info, 0.2);      color: lighten($info, 12%);                   border: 1px solid rgba($info, 0.4); }
-.badge-completed { background-color: rgba($success, 0.2);   color: lighten(saturate($success, 20%), 12%); border: 1px solid rgba($success, 0.4); }
-.badge-failed    { background-color: rgba($danger, 0.2);    color: lighten($danger, 12%);                 border: 1px solid rgba($danger, 0.4); }
+.badge-running   { background-color: rgba($info, 0.2);      color: $info;                   border: 1px solid rgba($info, 0.4); }
+.badge-completed { background-color: rgba($success, 0.2);   color: $success; border: 1px solid rgba($success, 0.4); }
+.badge-failed    { background-color: rgba($danger, 0.2);    color: $danger;                 border: 1px solid rgba($danger, 0.4); }
 
 // Grade badges — color-coded by grade tier to give instant visual feedback on performance.
 // Uses frosted style consistent with other badges. Derived via grade_badge_class helper method.
@@ -167,14 +174,14 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
 .badge-grade-au      { background-color: rgba($grade-muted, 0.18); color: rgba(210, 210, 210, 0.8);    border: 1px solid rgba($grade-muted, 0.35); }
 
 // Enrollment source badges
-.badge-imported { background-color: rgba($primary, 0.2);              color: lighten(saturate($primary, 30%), 10%); border: 1px solid rgba($primary, 0.4); }
+.badge-imported { background-color: rgba($primary, 0.2);              color: $primary; border: 1px solid rgba($primary, 0.4); }
 .badge-manual   { background-color: rgba($grade-muted, 0.18);         color: rgba(210, 210, 210, 0.8);              border: 1px solid rgba($grade-muted, 0.35); }
 
 // Auto-generated course badges — courses created automatically during grade import.
 // "Copied" = another revision year existed and was duplicated (mild warning).
 // "Placeholder" = no matching course_no at all, minimal stub created (stronger warning).
-.badge-auto-copied      { background-color: rgba($warning, 0.2);  color: lighten($warning, 8%);  border: 1px solid rgba($warning, 0.4); }
-.badge-auto-placeholder { background-color: rgba($danger, 0.2);   color: lighten($danger, 12%);  border: 1px solid rgba($danger, 0.4); }
+.badge-auto-copied      { background-color: rgba($warning, 0.2);  color: $warning;  border: 1px solid rgba($warning, 0.4); }
+.badge-auto-placeholder { background-color: rgba($danger, 0.2);   color: $danger;  border: 1px solid rgba($danger, 0.4); }
 
 // Section dividers for forms and detail pages
 // Section title — quiet label style used in detail pages, forms, and cards.
@@ -351,7 +358,7 @@ $flatpickr-spinner-color:   $light;                      // year increment arrow
 
 // Dropdown panel — slightly elevated above card-bg so it visually floats
 .select2-container--bootstrap-5 .select2-dropdown {
-  background-color: lighten($dark, 10%);      // was #fff — one step above card-bg for separation
+  background-color: #292524;                   // popover — oklch(0.268 0.007 34.298), opaque card color
   border-color: rgba(white, 0.15);            // was Bootstrap border color
   color: $body-color-dark;                    // was #000
 }

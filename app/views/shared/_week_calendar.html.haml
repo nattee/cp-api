@@ -2,7 +2,7 @@
 -# Input: `entries` — array of hashes with:
 -#   day_of_week (0-6), start_time ("HH:MM"), end_time ("HH:MM"),
 -#   label, sublabel, detail, color_key, url (optional), badge (optional raw HTML)
-- palette = ["rgba(164,198,212,0.25)", "rgba(177,91,149,0.25)", "rgba(63,170,101,0.25)", "rgba(233,203,61,0.25)", "rgba(242,35,48,0.2)", "rgba(98,51,107,0.25)", "rgba(111,207,255,0.25)", "rgba(255,152,0,0.25)", "rgba(0,188,212,0.25)", "rgba(139,195,74,0.25)", "rgba(255,87,34,0.2)", "rgba(103,58,183,0.25)"]
+- palette = ["rgba(116,212,255,0.25)", "rgba(244,168,255,0.25)", "rgba(5,223,114,0.25)", "rgba(240,177,0,0.25)", "rgba(231,0,11,0.2)", "rgba(173,70,255,0.25)", "rgba(184,230,254,0.25)", "rgba(255,100,103,0.25)", "rgba(0,188,212,0.25)", "rgba(139,195,74,0.25)", "rgba(255,87,34,0.2)", "rgba(103,58,183,0.25)"]
 - color_keys = entries.map { |e| e[:color_key] }.uniq
 - color_map = color_keys.each_with_index.to_h { |k, i| [k, palette[i % palette.size]] }
 - if entries.any?
