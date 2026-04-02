@@ -38,21 +38,34 @@ module Importers
           aliases: %w[guardian_phone เบอร์ผู้ปกครอง] },
         { attribute: :previous_school,   label: "Previous School",   required: false,
           aliases: %w[previous_school โรงเรียนเดิม] },
+        { attribute: :tcas,              label: "TCAS Round",        required: false,
+          aliases: %w[tcas_round tcas รอบ],
+          help: "Accepted values: TCAS1, TCAS2, TCAS3, TCAS4, other, unknown.",
+          fixed_options: -> { Student::TCAS_ROUNDS.map { |t| [ t, t ] } } },
         { attribute: :enrollment_method, label: "Enrollment Method", required: false,
-          aliases: %w[enrollment_method ประเภทการรับเข้า] },
+          aliases: %w[tcas_project project enrollment_method ประเภทการรับเข้า] },
         { attribute: :admission_year_be,    label: "Admission Year (B.E.)",  required: true,
           aliases: %w[admission_year_be admission_year start_academic_year ปีที่รับเข้า],
           help: "Buddhist Era year (e.g. 2567). CE years (e.g. 2024) are auto-converted by adding 543. " \
                 "If not mapped, derived from the first 2 digits of Student ID (e.g. 66xxxxx → 2566)." },
         { attribute: :status,            label: "Status",            required: false,
-          aliases: %w[status สถานะ] },
-        { attribute: :graduation_date,   label: "Graduation Date",   required: false,
-          aliases: %w[graduation_date วันจบ วันสำเร็จการศึกษา] },
+          aliases: %w[status สถานะ],
+          fixed_options: -> { Student::STATUSES.map { |s| [ s.humanize, s ] } },
+          default_fixed_value: "active" },
+        { attribute: :graduation_year_be, label: "Graduation Year (B.E.)", required: false,
+          aliases: %w[fromacadyear graduation_year_be graduation_year ปีที่จบ ปีสำเร็จการศึกษา],
+          help: "Buddhist Era year (e.g. 2567). CE years (e.g. 2024) are auto-converted by adding 543." },
         { attribute: :program_name,      label: "Program",           required: false,
-          aliases: %w[program program_name program_id program_code majorcode หลักสูตร],
+          aliases: %w[coursecodeno program program_name program_id program_code majorcode หลักสูตร],
           help: "From file: looks up by program code (4-digit) first, then alternative program code, " \
                 "then English name, then Thai name. If multiple programs share the same name, the latest one (by year started) is used.",
-          fixed_options: -> { Program.order(year_started: :desc).map { |p| [ "#{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } } }
+          fixed_options: -> { Program.order(year_started: :desc).map { |p| [ "#{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } } },
+        { attribute: :old_program,       label: "Old Program",       required: false,
+          aliases: %w[oldmajor old_program old_major หลักสูตรเดิม] },
+        { attribute: :status_note,       label: "Status Note",       required: false,
+          aliases: %w[current_status status_note หมายเหตุสถานะ] },
+        { attribute: :remark,            label: "Remark",            required: false,
+          aliases: %w[remark หมายเหตุ] }
       ]
     end
 
@@ -155,13 +168,11 @@ module Importers
         end
       end
 
-      # Coerce graduation_date
-      if attrs[:graduation_date].present?
-        attrs[:graduation_date] = begin
-          attrs[:graduation_date].to_date
-        rescue
-          attrs[:graduation_date]
-        end
+      # Coerce graduation_year_be: CE→BE auto-convert (same logic as admission_year_be)
+      if attrs[:graduation_year_be].present?
+        year = attrs[:graduation_year_be].to_i
+        year += 543 if year < 2400
+        attrs[:graduation_year_be] = year
       end
 
       attrs

@@ -61,6 +61,14 @@
         - if student.errors[:program].any?
           .invalid-feedback= student.errors[:program].first
       .col-md-6.mb-3
+        = f.label :old_program, "Old Program", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols swap_horiz
+          = f.text_field :old_program, class: "form-control"
+
+    .row
+      .col-md-6.mb-3
         = f.label :admission_year_be, "Admission year", class: "form-label"
         %button.help-popover-trigger{type: "button", tabindex: "0"}
           %span.material-symbols{style: "font-size: 16px"} help
@@ -81,13 +89,16 @@
 
     .row
       .col-md-6.mb-3
-        = f.label :graduation_date, "Graduation Date", class: "form-label"
+        = f.label :graduation_year_be, "Graduation Year (B.E.)", class: "form-label"
+        %button.help-popover-trigger{type: "button", tabindex: "0"}
+          %span.material-symbols{style: "font-size: 16px"} help
+          %span.help-popover-content Buddhist Era year (e.g. 2567). CE years (e.g. 2024) are auto-converted by adding 543.
         .input-group
           %span.input-group-text
             %span.material-symbols school
-          = f.text_field :graduation_date, value: student.graduation_date&.iso8601, class: "form-control #{'is-invalid' if student.errors[:graduation_date].any?}", data: { controller: "datepicker" }
-          - if student.errors[:graduation_date].any?
-            .invalid-feedback= student.errors[:graduation_date].first
+          = f.number_field :graduation_year_be, class: "form-control #{'is-invalid' if student.errors[:graduation_year_be].any?}"
+          - if student.errors[:graduation_year_be].any?
+            .invalid-feedback= student.errors[:graduation_year_be].first
 
   %fieldset.form-section
     %legend Contact
@@ -154,5 +165,25 @@
           %span.input-group-text
             %span.material-symbols how_to_reg
           = f.text_field :enrollment_method, class: "form-control"
+    .row
+      .col-md-6.mb-3
+        = f.label :tcas, "TCAS Round", class: "form-label"
+        = f.select :tcas, options_for_select(Student::TCAS_ROUNDS.map { |t| [t, t] }, student.tcas), { include_blank: "— None —" }, class: "form-select #{'is-invalid' if student.errors[:tcas].any?}", data: { controller: "select2" }
+        - if student.errors[:tcas].any?
+          .invalid-feedback= student.errors[:tcas].first
+
+    .row
+      .col-md-6.mb-3
+        = f.label :status_note, "Status Note", class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols sticky_note_2
+          = f.text_field :status_note, class: "form-control"
+      .col-md-6.mb-3
+        = f.label :remark, class: "form-label"
+        .input-group
+          %span.input-group-text
+            %span.material-symbols notes
+          = f.text_field :remark, class: "form-control"
 
   = f.submit class: "btn btn-primary"

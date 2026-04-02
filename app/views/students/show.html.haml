@@ -29,6 +29,10 @@
           - else
             .text-muted Not assigned
 
+        - if @student.old_program.present?
+          %dt.col-sm-3 Old Program
+          %dd.col-sm-9= @student.old_program
+
         %dt.col-sm-3
           Admission Year
           %button.help-popover-trigger{type: "button", tabindex: "0"}
@@ -40,9 +44,9 @@
         %dd.col-sm-9
           %span.badge{class: "badge-#{@student.status.dasherize}"}= @student.status.titleize
 
-        - if @student.graduation_date.present?
-          %dt.col-sm-3 Graduation Date
-          %dd.col-sm-9= @student.graduation_date.strftime("%B %-d, %Y")
+        - if @student.graduation_year_be.present?
+          %dt.col-sm-3 Graduation Year
+          %dd.col-sm-9= @student.graduation_year_be
 
     - if [@student.email, @student.phone, @student.discord, @student.line_id, @student.address].any?(&:present?)
       .detail-section
@@ -80,7 +84,7 @@
             %dt.col-sm-3 Guardian Phone
             %dd.col-sm-9= @student.guardian_phone
 
-    - if [@student.previous_school, @student.enrollment_method].any?(&:present?)
+    - if [@student.previous_school, @student.enrollment_method, @student.tcas, @student.status_note, @student.remark].any?(&:present?)
       .detail-section
         %h6.section-title Background
         %dl.dl-fields.row.mb-0
@@ -91,6 +95,18 @@
           - if @student.enrollment_method.present?
             %dt.col-sm-3 Enrollment Method
             %dd.col-sm-9= @student.enrollment_method
+
+          - if @student.tcas.present?
+            %dt.col-sm-3 TCAS Round
+            %dd.col-sm-9= @student.tcas
+
+          - if @student.status_note.present?
+            %dt.col-sm-3 Status Note
+            %dd.col-sm-9= @student.status_note
+
+          - if @student.remark.present?
+            %dt.col-sm-3 Remark
+            %dd.col-sm-9= @student.remark
 
     .detail-section
       %dl.dl-fields.row.mb-0

@@ -1,6 +1,7 @@
 class Student < ApplicationRecord
   SEXES = %w[M F].freeze
   STATUSES = %w[active graduated on_leave retired].freeze
+  TCAS_ROUNDS = %w[TCAS1 TCAS2 TCAS3 TCAS4 other unknown].freeze
 
   # Material Symbols icon for each status — used by Select2 dropdowns
   # and anywhere else that needs a visual indicator for status.
@@ -20,6 +21,7 @@ class Student < ApplicationRecord
   validates :admission_year_be, presence: true, numericality: { only_integer: true }
   validates :sex, inclusion: { in: SEXES }, allow_nil: true
   validates :status, presence: true, inclusion: { in: STATUSES }
+  validates :tcas, inclusion: { in: TCAS_ROUNDS }, allow_nil: true
 
   scope :active, -> { where(status: "active") }
 

@@ -147,7 +147,8 @@ class StudentsController < ApplicationController
       :student_id, :first_name, :last_name, :first_name_th, :last_name_th,
       :email, :phone, :address, :discord, :line_id,
       :guardian_name, :guardian_phone, :previous_school, :enrollment_method,
-      :program_id, :admission_year_be, :status, :graduation_date
+      :program_id, :old_program, :admission_year_be, :status, :graduation_year_be,
+      :tcas, :status_note, :remark
     )
   end
 end

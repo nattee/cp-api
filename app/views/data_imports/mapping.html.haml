@@ -64,6 +64,8 @@
           - @attribute_definitions.each do |defn|
             - attr = defn[:attribute]
             - auto_mapped_header = @auto_mapping[attr]
+            - use_default_fixed = !auto_mapped_header && defn[:default_fixed_value].present?
+            - selected_source = auto_mapped_header || (use_default_fixed ? "__constant__" : nil)
             - preview_idx = auto_mapped_header ? @file_headers.index(auto_mapped_header) : nil
             - source_options = [["-- skip --", ""], ["-- fixed value --", "__constant__"]] + @file_headers.map { |h| [h, h] }
             %tr
@@ -79,17 +81,17 @@
                     %span.material-symbols{style: "font-size: 16px"} help
                     %span.help-popover-content= defn[:help]
               %td
-                = select_tag "mapping[#{attr}]", options_for_select(source_options, auto_mapped_header), class: "form-select form-select-sm mapping-source-select", "data-controller" => "select2", "data-select2-allow-clear" => "", "data-select2-dropdown-class" => "select2-dropdown--monospace", "data-mapping-attr" => attr
+                = select_tag "mapping[#{attr}]", options_for_select(source_options, selected_source), class: "form-select form-select-sm mapping-source-select", "data-controller" => "select2", "data-select2-allow-clear" => "", "data-select2-dropdown-class" => "select2-dropdown--monospace", "data-mapping-attr" => attr
               %td.preview-cell{"data-mapping-preview" => attr}
-                %span.text-muted{"data-mapping-preview-text" => attr}
+                %span.text-muted{"data-mapping-preview-text" => attr, hidden: use_default_fixed || nil}
                   - if preview_idx
                     = @preview_row[preview_idx]
                   - else
                     \--
                 - if defn[:fixed_options]
-                  = select_tag "defaults[#{attr}]", options_for_select([["Select...", ""]] + defn[:fixed_options].call), class: "form-select form-select-sm", hidden: true, "data-mapping-constant" => attr
+                  = select_tag "defaults[#{attr}]", options_for_select([["Select...", ""]] + defn[:fixed_options].call, use_default_fixed ? defn[:default_fixed_value] : nil), class: "form-select form-select-sm", hidden: !use_default_fixed || nil, "data-mapping-constant" => attr
                 - else
-                  = text_field_tag "defaults[#{attr}]", nil, class: "form-control form-control-sm", placeholder: "Enter value...", hidden: true, "data-mapping-constant" => attr
+                  = text_field_tag "defaults[#{attr}]", (use_default_fixed ? defn[:default_fixed_value] : nil), class: "form-control form-control-sm", placeholder: "Enter value...", hidden: !use_default_fixed || nil, "data-mapping-constant" => attr
 
   - if @data_import.target_type == "Grade"
     .card.mb-3
