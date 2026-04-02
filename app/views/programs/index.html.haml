@@ -1,9 +1,9 @@
-.card{"data-controller" => "datatable", "data-datatable-order-value" => "5:desc"}
+.card{"data-controller" => "datatable", "data-datatable-order-value" => "6:desc"}
   .card-body.p-3
     .d-flex.justify-content-between.align-items-center.mb-3
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
         = resource_icon
-        Programs
+        All Program Revisions
       - if current_user.admin?
         = link_to "New Program", new_program_path, class: "btn btn-primary btn-sm"
     .table-responsive
@@ -11,6 +11,7 @@
         %thead
           %tr
             %th Code
+            %th Group
             %th Short Name
             %th Name
             %th Degree Level
@@ -21,6 +22,7 @@
           - @programs.each do |program|
             %tr
               %td= program.program_code
+              %td= link_to program.program_group.code, program.program_group
               %td= program.short_name
               %td= program.name_en
               %td
@@ -35,6 +37,3 @@
                     %span.material-symbols{style: "font-size: 18px"} edit
                   = link_to program, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn-ghost btn-ghost-danger", title: "Delete" do
                     %span.material-symbols{style: "font-size: 18px"} delete
-          - if @programs.empty?
-            %tr
-              %td.text-muted.text-center{colspan: 7} No programs found.

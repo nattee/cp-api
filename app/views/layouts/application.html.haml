@@ -37,8 +37,8 @@
         %hr.d-none.d-lg-block
         %ul.nav.nav-pills.flex-column.mb-auto
           %li.nav-item
-            = link_to programs_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'programs'}" do
-              = resource_icon("programs")
+            = link_to program_groups_path, class: "nav-link d-flex align-items-center #{'active' if controller_name.in?(%w[program_groups programs])}" do
+              = resource_icon("program_groups")
               Programs
           %li.nav-item
             = link_to courses_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'courses'}" do

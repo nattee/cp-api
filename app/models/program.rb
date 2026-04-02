@@ -1,38 +1,33 @@
 class Program < ApplicationRecord
-  DEGREE_LEVELS = %w[bachelor master doctoral].freeze
-
-  DEGREE_LEVEL_ICONS = {
-    "bachelor" => "school",
-    "master"   => "psychology",
-    "doctoral" => "science"
-  }.freeze
+  # Constants kept here for backward compatibility; canonical source is ProgramGroup
+  DEGREE_LEVELS = ProgramGroup::DEGREE_LEVELS
+  DEGREE_LEVEL_ICONS = ProgramGroup::DEGREE_LEVEL_ICONS
 
   PLACEHOLDER_NAME = "Unknown Program".freeze
 
+  belongs_to :program_group
   has_many :courses, dependent: :restrict_with_error
   has_many :students, dependent: :restrict_with_error
   has_many :staff_programs, dependent: :destroy
   has_many :staffs, through: :staff_programs
 
+  # Delegate removed columns to program_group so program.name_en etc. still work
+  delegate :name_en, :name_th, :degree_level, :degree_name, :degree_name_th,
+           :field_of_study, to: :program_group
+
   validates :program_code, presence: true, uniqueness: true
-  validates :name_en, presence: true
-  validates :degree_level, presence: true, inclusion: { in: DEGREE_LEVELS }
-  validates :degree_name, presence: true
-  validates :field_of_study, presence: true
   validates :year_started, presence: true, numericality: { only_integer: true }
   validates :total_credit, numericality: { only_integer: true }, allow_nil: true
 
   def self.placeholder
-    find_or_create_by!(name_en: PLACEHOLDER_NAME) do |p|
-      p.program_code = "0000"
-      p.degree_level = "bachelor"
-      p.degree_name = "Unknown"
-      p.field_of_study = "Unknown"
+    other_group = ProgramGroup.find_by!(code: "OTHER")
+    find_or_create_by!(program_code: "0000") do |p|
+      p.program_group = other_group
       p.year_started = 0
     end
   end
 
   def placeholder?
-    name_en == PLACEHOLDER_NAME
+    program_code == "0000"
   end
 end

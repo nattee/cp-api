@@ -39,6 +39,7 @@ Rails.application.routes.draw do
     get "schedules/conflicts", action: :conflicts
   end
 
+  resources :program_groups, only: [:index, :show]
   resources :programs
   resources :courses
   resources :staffs

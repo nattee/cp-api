@@ -4,7 +4,7 @@ class StudentsController < ApplicationController
 
   def index
     @admission_years = Student.distinct.order(admission_year_be: :desc).pluck(:admission_year_be)
-    @programs = Program.order(:name_en).pluck(:name_en)
+    @programs = ProgramGroup.where.not(code: "OTHER").order(:name_en).pluck(:name_en).uniq
   end
 
   def datatable
@@ -19,13 +19,13 @@ class StudentsController < ApplicationController
     columns_map = {
       0 => "students.student_id",
       1 => "students.first_name",
-      2 => "programs.name_en",
-      3 => "programs.degree_level",
+      2 => "program_groups.name_en",
+      3 => "program_groups.degree_level",
       4 => "students.admission_year_be",
       5 => "students.status"
     }
 
-    base = Student.includes(:program).references(:program)
+    base = Student.left_joins(program: :program_group).includes(program: :program_group).references(:program_groups)
     records_total = Student.count
 
     if search_value.present?
@@ -33,7 +33,7 @@ class StudentsController < ApplicationController
       base = base.where(
         "students.student_id LIKE :q OR students.first_name LIKE :q OR students.last_name LIKE :q " \
         "OR students.first_name_th LIKE :q OR students.last_name_th LIKE :q " \
-        "OR programs.name_en LIKE :q",
+        "OR program_groups.name_en LIKE :q",
         q: like
       )
     end
@@ -42,8 +42,8 @@ class StudentsController < ApplicationController
     col_search_program = params.dig(:columns, "2", :search, :value).to_s.strip
     col_search_degree = params.dig(:columns, "3", :search, :value).to_s.strip
     col_search_year = params.dig(:columns, "4", :search, :value).to_s.strip
-    base = base.where("programs.name_en" => col_search_program) if col_search_program.present?
-    base = base.where("programs.degree_level" => col_search_degree) if col_search_degree.present?
+    base = base.where("program_groups.name_en" => col_search_program) if col_search_program.present?
+    base = base.where("program_groups.degree_level" => col_search_degree) if col_search_degree.present?
     base = base.where("students.admission_year_be" => col_search_year.to_i) if col_search_year.present?
 
     records_filtered = base.count
@@ -106,7 +106,7 @@ class StudentsController < ApplicationController
   def set_student
     @student = Student.find(params[:id])
     if action_name == "show"
-      @grades = @student.grades.includes(course: :program)
+      @grades = @student.grades.includes(course: { program: :program_group })
       load_schedule_data
     end
   end

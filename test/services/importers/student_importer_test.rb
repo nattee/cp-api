@@ -80,20 +80,21 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   end
 
   test "resolve_program finds by English name" do
-    program = programs(:cp_bachelor)
+    # "Computer Engineering" matches both CP and CM groups — picks latest year_started
+    program = programs(:cp_master) # year_started: 2545, newer than cp_bachelor's 2540
     importer = build_importer
 
-    attrs = { program_name: "Computer Engineering (Bachelor)", student_id: "1", admission_year_be: 2567, status: "active" }
+    attrs = { program_name: "Computer Engineering", student_id: "1", admission_year_be: 2567, status: "active" }
     result = importer.send(:transform_attributes, attrs)
 
     assert_equal program.id, result[:program_id]
   end
 
   test "resolve_program finds by Thai name" do
-    program = programs(:cp_bachelor)
+    program = programs(:cp_master) # latest "วิศวกรรมคอมพิวเตอร์"
     importer = build_importer
 
-    attrs = { program_name: "วิศวกรรมคอมพิวเตอร์ (ปริญญาตรี)", student_id: "1", admission_year_be: 2567, status: "active" }
+    attrs = { program_name: "วิศวกรรมคอมพิวเตอร์", student_id: "1", admission_year_be: 2567, status: "active" }
     result = importer.send(:transform_attributes, attrs)
 
     assert_equal program.id, result[:program_id]
@@ -109,15 +110,11 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
   end
 
   test "resolve_program prefers latest year_started when names match" do
-    # Create a newer program with the same English name
+    # Create a newer program in the same group
     older = programs(:cp_bachelor) # year_started: 2540
     newer = Program.create!(
       program_code: "9999",
-      name_en: older.name_en,
-      name_th: "วิศวกรรมคอมพิวเตอร์ (ปริญญาตรี) ฉบับใหม่",
-      degree_level: "bachelor",
-      degree_name: "Bachelor of Engineering",
-      field_of_study: "Computer Engineering",
+      program_group: older.program_group,
       year_started: 2560
     )
     importer = build_importer

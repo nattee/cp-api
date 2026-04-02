@@ -19,7 +19,7 @@ module Importers
           aliases: %w[program_id program_name program หลักสูตร],
           help: "Looks up by ID first, then English name, then Thai name. " \
                 "If multiple programs share the same name, the latest one (by year started) is used.",
-          fixed_options: -> { Program.order(year_started: :desc).map { |p| ["#{p.name_en} (#{p.year_started})", p.id] } } },
+          fixed_options: -> { Program.includes(:program_group).order(year_started: :desc).map { |p| ["#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started})", p.id] } } },
         { attribute: :is_gened,         label: "GenEd",              required: false,
           aliases: %w[gened is_gened วิชาศึกษาทั่วไป] },
         { attribute: :department_code,  label: "Department Code",    required: false,
@@ -68,11 +68,11 @@ module Importers
       end
 
       # 2. Try by English name (latest by year_started)
-      found = Program.where(name_en: str).order(year_started: :desc).first
+      found = Program.joins(:program_group).where(program_groups: { name_en: str }).order(year_started: :desc).first
       return found if found
 
       # 3. Try by Thai name (latest by year_started)
-      Program.where(name_th: str).order(year_started: :desc).first
+      Program.joins(:program_group).where(program_groups: { name_th: str }).order(year_started: :desc).first
     end
 
     def coerce_boolean(value)

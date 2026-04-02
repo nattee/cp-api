@@ -1,0 +1,21 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+    = resource_icon
+    Programs
+  = link_to "All Revisions", programs_path, class: "btn btn-outline-secondary btn-sm"
+
+.row.g-3
+  - @program_groups.each do |group|
+    .col-md-6.col-lg-4
+      .card.h-100
+        .card-body.p-3
+          %h5.card-title.mb-1
+            = link_to group.display_name, group, class: "text-decoration-none"
+          - if group.name_th.present?
+            %p.text-muted.mb-2.small= group.name_th
+          .d-flex.align-items-center.gap-2.mb-2
+            %span.badge{class: "badge-#{group.degree_level}"}= group.degree_level.titleize
+          .small.text-muted
+            = pluralize(group.programs.size, "revision")
+            |
+            = pluralize(group.students.count, "student")

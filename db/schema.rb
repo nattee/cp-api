@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_01_154632) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_02_154535) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -141,9 +141,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_01_154632) do
     t.index ["student_id"], name: "index_grades_on_student_id"
   end
 
-  create_table "programs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.boolean "active", default: true, null: false
-    t.string "alternative_program_code"
+  create_table "program_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "code", null: false
     t.datetime "created_at", null: false
     t.string "degree_level", null: false
     t.string "degree_name", null: false
@@ -151,12 +150,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_01_154632) do
     t.string "field_of_study", null: false
     t.string "name_en", null: false
     t.string "name_th"
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_program_groups_on_code", unique: true
+  end
+
+  create_table "programs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "alternative_program_code"
+    t.datetime "created_at", null: false
     t.string "program_code", null: false
+    t.bigint "program_group_id", null: false
     t.string "short_name"
     t.integer "total_credit"
     t.datetime "updated_at", null: false
     t.integer "year_started", null: false
     t.index ["program_code"], name: "index_programs_on_program_code", unique: true
+    t.index ["program_group_id"], name: "index_programs_on_program_group_id"
   end
 
   create_table "rooms", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -327,6 +336,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_01_154632) do
   add_foreign_key "grades", "courses"
   add_foreign_key "grades", "sections"
   add_foreign_key "grades", "students"
+  add_foreign_key "programs", "program_groups"
   add_foreign_key "scrapes", "semesters"
   add_foreign_key "scrapes", "users"
   add_foreign_key "sections", "course_offerings"

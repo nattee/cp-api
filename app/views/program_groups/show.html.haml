@@ -1,0 +1,102 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1= @program_group.display_name
+  .d-flex.gap-2
+    - if current_user.admin?
+      = link_to "Add Revision", new_program_path(program_group_id: @program_group.id), class: "btn btn-primary"
+    = link_to "Back", program_groups_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    .detail-section
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Code
+        %dd.col-sm-9= @program_group.code
+
+        %dt.col-sm-3 Name (EN)
+        %dd.col-sm-9= @program_group.name_en
+
+        - if @program_group.name_th.present?
+          %dt.col-sm-3 Name (TH)
+          %dd.col-sm-9= @program_group.name_th
+
+    .detail-section
+      %h6.section-title Degree
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Degree Level
+        %dd.col-sm-9
+          %span.badge{class: "badge-#{@program_group.degree_level}"}= @program_group.degree_level.titleize
+
+        %dt.col-sm-3 Degree Name (EN)
+        %dd.col-sm-9= @program_group.degree_name
+
+        - if @program_group.degree_name_th.present?
+          %dt.col-sm-3 Degree Name (TH)
+          %dd.col-sm-9= @program_group.degree_name_th
+
+        %dt.col-sm-3 Field of Study
+        %dd.col-sm-9= @program_group.field_of_study
+
+- if @students.exists?
+  .row.mt-3
+    .col-lg-7.mb-3.mb-lg-0
+      .card.h-100{"data-controller" => "chart", "data-chart-type-value" => "stacked-bar",
+                   "data-chart-data-value" => @admission_chart_data.to_json}
+        .card-body.p-3
+          .d-flex.justify-content-between.align-items-center.mb-3
+            %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+              %span.material-symbols.resource-icon.me-2 bar_chart
+              Students by Admission Year
+            %select.form-select.form-select-sm{"data-chart-target" => "filter",
+                    "data-action" => "change->chart#filterChanged",
+                    style: "width: auto"}
+              %option{value: "all"} All Statuses
+              - Student::STATUSES.each do |s|
+                %option{value: s}= s.titleize
+          %div{style: "height: 300px"}
+            %canvas{"data-chart-target" => "canvas"}
+
+    .col-lg-5
+      .card.h-100{"data-controller" => "chart", "data-chart-type-value" => "histogram",
+                   "data-chart-data-value" => @gpa_chart_data.to_json}
+        .card-body.p-3
+          %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center.mb-3
+            %span.material-symbols.resource-icon.me-2 equalizer
+            GPA Distribution
+          %div{style: "height: 300px"}
+            %canvas{"data-chart-target" => "canvas"}
+
+.card.mt-3{"data-controller" => "datatable", "data-datatable-order-value" => "2:desc"}
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        %span.material-symbols.resource-icon.me-2 description
+        Revisions
+        %span.text-muted.ms-2.fw-normal
+          (#{@programs.size})
+    .table-responsive
+      %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
+        %thead
+          %tr
+            %th Code
+            %th Short Name
+            %th Year Started
+            %th Credits
+            %th Status
+            %th Students
+            %th Actions
+        %tbody
+          - @programs.each do |program|
+            %tr
+              %td= program.program_code
+              %td= program.short_name
+              %td= program.year_started
+              %td= program.total_credit || "—"
+              %td
+                %span.badge{class: program.active? ? "badge-active" : "badge-inactive"}= program.active? ? "Active" : "Inactive"
+              %td= program.students.size
+              %td
+                = link_to program, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
+                  %span.material-symbols{style: "font-size: 18px"} visibility
+                - if current_user.admin?
+                  = link_to edit_program_path(program), class: "btn-ghost btn-ghost-secondary me-1", title: "Edit" do
+                    %span.material-symbols{style: "font-size: 18px"} edit

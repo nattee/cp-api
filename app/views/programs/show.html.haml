@@ -3,12 +3,15 @@
   .d-flex.gap-2
     - if current_user.admin?
       = link_to "Edit", edit_program_path(@program), class: "btn btn-outline-secondary"
-    = link_to "Back", programs_path, class: "btn btn-outline-primary"
+    = link_to "Back", program_group_path(@program.program_group), class: "btn btn-outline-primary"
 
 .card
   .card-body
     .detail-section
       %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Program Group
+        %dd.col-sm-9= link_to @program.program_group.display_name, @program.program_group
+
         %dt.col-sm-3 Program Code
         %dd.col-sm-9= @program.program_code
 

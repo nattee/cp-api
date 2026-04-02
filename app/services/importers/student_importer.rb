@@ -59,7 +59,7 @@ module Importers
           aliases: %w[coursecodeno program program_name program_id program_code majorcode หลักสูตร],
           help: "From file: looks up by program code (4-digit) first, then alternative program code, " \
                 "then English name, then Thai name. If multiple programs share the same name, the latest one (by year started) is used.",
-          fixed_options: -> { Program.order(year_started: :desc).map { |p| [ "#{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } } },
+          fixed_options: -> { Program.includes(:program_group).order(year_started: :desc).map { |p| [ "#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } } },
         { attribute: :old_program,       label: "Old Program",       required: false,
           aliases: %w[oldmajor old_program old_major หลักสูตรเดิม] },
         { attribute: :status_note,       label: "Status Note",       required: false,
@@ -115,11 +115,11 @@ module Importers
       end
 
       # 3. Try by English name (latest by year_started)
-      found = Program.where(name_en: value).order(year_started: :desc).first
+      found = Program.joins(:program_group).where(program_groups: { name_en: value }).order(year_started: :desc).first
       return found if found
 
       # 4. Try by Thai name (latest by year_started)
-      Program.where(name_th: value).order(year_started: :desc).first
+      Program.joins(:program_group).where(program_groups: { name_th: value }).order(year_started: :desc).first
     end
 
     def transform_attributes(attrs)

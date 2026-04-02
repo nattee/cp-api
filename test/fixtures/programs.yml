@@ -1,17 +1,11 @@
 cp_bachelor:
   program_code: "2101"
-  name_en: Computer Engineering (Bachelor)
-  name_th: วิศวกรรมคอมพิวเตอร์ (ปริญญาตรี)
-  degree_level: bachelor
-  degree_name: Bachelor of Engineering
-  field_of_study: Computer Engineering
+  program_group: cp_group
+  short_name: "วศ.บ. (CP)"
   year_started: 2540
 
 cp_master:
   program_code: "2102"
-  name_en: Computer Engineering (Master)
-  name_th: วิศวกรรมคอมพิวเตอร์ (ปริญญาโท)
-  degree_level: master
-  degree_name: Master of Engineering
-  field_of_study: Computer Engineering
+  program_group: cm_group
+  short_name: "วศ.ม. (CM)"
   year_started: 2545

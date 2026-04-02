@@ -1,0 +1,22 @@
+cp_group:
+  code: CP
+  name_en: Computer Engineering
+  name_th: วิศวกรรมคอมพิวเตอร์
+  degree_level: bachelor
+  degree_name: Bachelor of Engineering
+  field_of_study: Computer Engineering
+
+cm_group:
+  code: CM
+  name_en: Computer Engineering
+  name_th: วิศวกรรมคอมพิวเตอร์
+  degree_level: master
+  degree_name: Master of Engineering
+  field_of_study: Computer Engineering
+
+other_group:
+  code: OTHER
+  name_en: Unknown Program
+  degree_level: bachelor
+  degree_name: Unknown
+  field_of_study: Unknown
