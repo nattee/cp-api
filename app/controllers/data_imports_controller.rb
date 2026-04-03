@@ -31,17 +31,22 @@ class DataImportsController < ApplicationController
 
     importer_class = @data_import.importer_class
 
-    @data_import.file.open do |tempfile|
-      spreadsheet = open_spreadsheet_from(tempfile, @data_import.file.filename.to_s)
+    begin
+      @data_import.file.open do |tempfile|
+        spreadsheet = open_spreadsheet_from(tempfile, @data_import.file.filename.to_s)
 
-      @sheets = spreadsheet.sheets
-      @selected_sheet = params[:sheet].presence || @sheets.first
-      @show_sheet_selector = @sheets.size > 1
-      spreadsheet.default_sheet = @selected_sheet if @selected_sheet
+        @sheets = spreadsheet.sheets
+        @selected_sheet = params[:sheet].presence || @sheets.first
+        @show_sheet_selector = @sheets.size > 1
+        spreadsheet.default_sheet = @selected_sheet if @selected_sheet
 
-      raw_headers = spreadsheet.row(1).map { |h| h.to_s.strip }
-      @preview_row = spreadsheet.last_row >= 2 ? spreadsheet.row(2) : []
-      @file_headers = importer_class.label_headers(raw_headers)
+        raw_headers = spreadsheet.row(1).map { |h| h.to_s.strip }
+        @preview_row = spreadsheet.last_row >= 2 ? spreadsheet.row(2) : []
+        @file_headers = importer_class.label_headers(raw_headers)
+      end
+    rescue Zip::Error, Ole::Storage::FormatError, CSV::MalformedCSVError, ArgumentError => e
+      redirect_to new_data_import_path, alert: "Could not read the uploaded file. Please check that it is a valid .csv or .xlsx file."
+      return
     end
 
     if @file_headers.blank?
@@ -130,7 +135,7 @@ class DataImportsController < ApplicationController
     when ".xlsx" then Roo::Excelx.new(tempfile.path)
     when ".xls"  then Roo::Excel.new(tempfile.path)
     when ".csv"  then Roo::CSV.new(tempfile.path)
-    else raise "Unsupported file format"
+    else raise ArgumentError, "Unsupported file format: #{File.extname(filename)}"
     end
   end
 end
