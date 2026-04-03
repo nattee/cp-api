@@ -5,8 +5,12 @@
 #
 # Conversation history is stored in chat_messages and loaded per LINE user.
 # Only the last 20 messages within 24 hours are included.
+#
+# Returns a Result with .reply (String) and .tool_rounds (Array of hashes).
+# Callers that only need the text can use .reply directly.
 class Line::LlmService
   class LlmError < StandardError; end
+  Result = Struct.new(:reply, :tool_rounds, keyword_init: true)
 
   def initialize(user_message, line_user_id:, user: nil)
     @user_message = user_message
@@ -14,9 +18,10 @@ class Line::LlmService
     @user = user
     @max_rounds = LLM_CONFIG[:max_rounds] || 5
     @model_config = resolve_model_config
+    @tool_rounds = []
   end
 
-  # Returns the assistant's final text reply as a plain String.
+  # Returns a Result with .reply and .tool_rounds.
   def call
     # Save the incoming user message to history.
     save_message(role: "user", content: @user_message)
@@ -45,7 +50,7 @@ class Line::LlmService
       if tool_calls.blank?
         reply = assistant_message["content"].to_s.strip
         save_message(role: "assistant", content: reply)
-        return reply
+        return Result.new(reply: reply, tool_rounds: @tool_rounds)
       end
 
       # Append the assistant's tool-call message to the conversation.
@@ -55,8 +60,15 @@ class Line::LlmService
       tool_results = Line::ToolExecutor.execute(tool_calls)
       messages.concat(tool_results)
 
-      # Tool-calling rounds are not saved to history — they're transient
-      # within a single request. Only the final user/assistant pair persists.
+      # Record the round for debugging (not saved to chat history).
+      tool_calls.zip(tool_results).each do |tc, tr|
+        @tool_rounds << {
+          round: round + 1,
+          tool: tc.dig("function", "name"),
+          arguments: tc.dig("function", "arguments"),
+          result: tr[:content]
+        }
+      end
 
       Rails.logger.info("LLM tool-calling round #{round + 1}: #{tool_calls.map { |tc| tc.dig("function", "name") }.join(", ")}")
     end
@@ -65,7 +77,7 @@ class Line::LlmService
     Rails.logger.warn("LLM reached max rounds (#{@max_rounds}) without final text reply")
     fallback = messages.last&.dig("content").to_s.strip.presence || "I'm sorry, I couldn't complete that request."
     save_message(role: "assistant", content: fallback)
-    fallback
+    Result.new(reply: fallback, tool_rounds: @tool_rounds)
   end
 
   private
@@ -145,35 +157,51 @@ class Line::LlmService
     raise LlmError, msg
   end
 
-  # Fallback parser for tool calls embedded in content as XML tags.
-  # Handles both <tool_call>...</tool_call> and <tools>...</tools> formats.
+  # Fallback parser for tool calls embedded in content as XML tags or bare JSON.
+  # Handles: <tool_call>...</tool_call>, <tools>...</tools>, and bare JSON with
+  # "name" + "arguments" keys (some models skip the XML wrapper entirely).
   # Returns an array of tool_call hashes matching the OpenAI format, or nil.
   TOOL_CALL_PATTERN = /<tool_call>\s*(.*?)\s*<\/tool_call>|<tools>\s*(.*?)\s*<\/tools>/m
 
   def parse_tool_calls_from_content(content)
+    # Try XML-wrapped format first.
     matches = content.scan(TOOL_CALL_PATTERN)
-    return nil if matches.empty?
-
-    calls = matches.flat_map do |tool_call_match, tools_match|
-      raw = (tool_call_match || tools_match).strip
-      # Content may have multiple JSON objects (one per line)
-      raw.split("\n").filter_map do |line|
-        line = line.strip
-        next if line.empty?
-        parsed = JSON.parse(line)
-        {
-          "id" => "fallback_#{SecureRandom.hex(4)}",
-          "type" => "function",
-          "function" => {
-            "name" => parsed["name"],
-            "arguments" => parsed["arguments"].is_a?(String) ? parsed["arguments"] : parsed["arguments"].to_json
-          }
-        }
-      rescue JSON::ParserError
-        nil
-      end
+    if matches.present?
+      return build_calls_from_matches(matches)
     end
 
+    # Try bare JSON: the entire content (or a line) is a JSON object with "name" + "arguments".
+    bare = try_parse_bare_tool_call(content)
+    bare.presence
+  end
+
+  def build_calls_from_matches(matches)
+    calls = matches.flat_map do |tool_call_match, tools_match|
+      raw = (tool_call_match || tools_match).strip
+      raw.split("\n").filter_map { |line| parse_single_tool_json(line) }
+    end
     calls.presence
+  end
+
+  def try_parse_bare_tool_call(content)
+    calls = content.strip.split("\n").filter_map { |line| parse_single_tool_json(line) }
+    calls.presence
+  end
+
+  def parse_single_tool_json(line)
+    line = line.strip
+    return nil if line.empty?
+    parsed = JSON.parse(line)
+    return nil unless parsed.is_a?(Hash) && parsed["name"].present? && parsed.key?("arguments")
+    {
+      "id" => "fallback_#{SecureRandom.hex(4)}",
+      "type" => "function",
+      "function" => {
+        "name" => parsed["name"],
+        "arguments" => parsed["arguments"].is_a?(String) ? parsed["arguments"] : parsed["arguments"].to_json
+      }
+    }
+  rescue JSON::ParserError
+    nil
   end
 end

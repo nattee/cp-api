@@ -55,6 +55,7 @@ Rails.application.routes.draw do
       delete :unlink_line
     end
   end
+  resource :chat, only: [:show, :create]
   resources :chat_messages, only: [:index, :show]
   resources :api_events, only: [:index]
   resources :data_imports, only: [:index, :new, :create, :show] do

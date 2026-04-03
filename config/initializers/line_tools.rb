@@ -6,4 +6,10 @@ Rails.application.config.after_initialize do
     definition: Line::Tools::EchoTool::DEFINITION,
     handler: Line::Tools::EchoTool
   )
+
+  Line::ToolRegistry.register(
+    "student_lookup",
+    definition: Line::Tools::StudentLookupTool::DEFINITION,
+    handler: Line::Tools::StudentLookupTool
+  )
 end

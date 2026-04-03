@@ -761,3 +761,27 @@ table.dataTable tbody td.dt-empty {
     .wc-time-axis { border-color: #ccc; }
   }
 }
+
+// ------------------------------------------------------------------
+// Chat Playground bubbles
+// User messages: primary-tinted, right-aligned.
+// Assistant messages: surface-colored, left-aligned.
+// ------------------------------------------------------------------
+.chat-bubble {
+  border-radius: 12px;
+  word-break: break-word;
+}
+.chat-user {
+  background-color: rgba($primary, 0.15);
+  border: 1px solid rgba($primary, 0.25);
+}
+.chat-assistant {
+  background-color: lighten($dark, 8%);
+  border: 1px solid lighten($dark, 12%);
+}
+.chat-tool-round {
+  background-color: lighten($dark, 5%);
+  border: 1px dashed lighten($dark, 15%);
+  border-radius: 8px;
+  code { font-size: 0.8em; word-break: break-all; }
+}

@@ -8,6 +8,7 @@ module ApplicationHelper
     "grades"        => "grading",
     "users"         => "group",
     "line_accounts"  => "chat",
+    "chats"          => "smart_toy",
     "chat_messages"  => "forum",
     "data_imports"   => "upload_file",
     "api_events"     => "monitor_heart",
