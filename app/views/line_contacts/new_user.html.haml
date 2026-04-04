@@ -56,22 +56,15 @@
                 .invalid-feedback= @user.errors[:name].first
 
           .mb-3
-            = f.label :password, class: "form-label"
+            = f.label :password, "Generated Password", class: "form-label"
             .input-group
               %span.input-group-text
                 %span.material-symbols lock
-              = f.password_field :password, class: "form-control #{'is-invalid' if @user.errors[:password].any?}"
+              = f.text_field :password, class: "form-control font-monospace #{'is-invalid' if @user.errors[:password].any?}", value: @generated_password, readonly: true
               - if @user.errors[:password].any?
                 .invalid-feedback= @user.errors[:password].first
-
-          .mb-3
-            = f.label :password_confirmation, class: "form-label"
-            .input-group
-              %span.input-group-text
-                %span.material-symbols lock
-              = f.password_field :password_confirmation, class: "form-control #{'is-invalid' if @user.errors[:password_confirmation].any?}"
-              - if @user.errors[:password_confirmation].any?
-                .invalid-feedback= @user.errors[:password_confirmation].first
+            = f.hidden_field :password_confirmation, value: @generated_password
+            .form-text Share this password with the user if they need web access. They primarily use LINE.
 
           .mb-3
             = f.label :role, class: "form-label"

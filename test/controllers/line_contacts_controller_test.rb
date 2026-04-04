@@ -96,4 +96,26 @@ class LineContactsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
   end
+
+  test "create_user fails when LINE uid is already linked to another user" do
+    # Simulate: someone already linked this LINE account via the link command
+    users(:editor).update!(provider: "line", uid: "U_CTRL_TEST")
+
+    post login_path, params: { username: users(:admin).username, password: "password123" }
+
+    assert_no_difference "User.count" do
+      post create_user_line_contact_path(@contact), params: {
+        user: {
+          username: "vip_user",
+          email: "vip@example.com",
+          name: "VIP Person",
+          password: "password123",
+          password_confirmation: "password123",
+          role: "viewer"
+        }
+      }
+    end
+
+    assert_response :unprocessable_entity
+  end
 end

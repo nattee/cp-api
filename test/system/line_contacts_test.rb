@@ -41,8 +41,7 @@ class LineContactsTest < ApplicationSystemTestCase
     fill_in "Username", with: "vip_student"
     fill_in "Email", with: "vip@example.com"
     fill_in "Name", with: "VIP Student"
-    fill_in "Password", with: "password123"
-    fill_in "Password confirmation", with: "password123"
+    # Password is auto-generated and pre-filled
     click_on "Create & Link"
 
     assert_text "created and linked"

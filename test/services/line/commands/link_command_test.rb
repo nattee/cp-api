@@ -78,6 +78,22 @@ class Line::Commands::LinkCommandTest < ActiveSupport::TestCase
     assert_match(/already linked/, reply_text)
   end
 
+  test "quick-linked user cannot use a link code meant for another user" do
+    # Admin quick-linked this LINE account to viewer
+    @user.update!(provider: "line", uid: @line_user_id, llm_consent: true)
+
+    # Editor has a pending link code
+    token = "WXYZ5678"
+    users(:editor).update!(line_link_token: token, line_link_token_expires_at: 24.hours.from_now)
+
+    # LINE user tries to use editor's code — should be rejected because already linked
+    reply_text = execute_command(token)
+
+    assert_match(/already linked/, reply_text)
+    # Editor's code should not be consumed
+    assert_equal token, users(:editor).reload.line_link_token
+  end
+
   private
 
   def execute_command(token)

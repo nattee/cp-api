@@ -12,6 +12,7 @@ class LineContactsController < ApplicationController
   # GET /line_contacts/:id/new_user — form to create a user and link
   def new_user
     @line_contact = LineContact.find(params[:id])
+    @generated_password = SecureRandom.alphanumeric(16)
     @user = User.new(
       name: @line_contact.display_name,
       role: "viewer"
