@@ -47,7 +47,7 @@ AUTO_LOGIN=1 bin/dev     # bypass login, auto-authenticate as user ID 1
 ```
 
 - `AUTO_LOGIN` env var: set to a user ID to skip authentication. Only use in development.
-- Seed data: `bin/rails db:seed` creates a super admin at ID 1 (`superadmin` / `password123`).
+- Seed data: `bin/rails db:seed` creates a super admin at ID 1 (`root` / `password123`), a placeholder program, and loads staff/program seeds from `db/seeds/`.
 - Seed files in `db/seeds/` are auto-loaded by `seeds.rb`. To re-seed a single file: `bin/rails runner "load Rails.root.join('db/seeds/foo.rb')"`.
 
 ## Styling Guidelines
