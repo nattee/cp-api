@@ -95,6 +95,43 @@ For VIPs who just chat without going through the linking flow. See `docs/line-qu
 2. Register in `config/initializers/line_tools.rb`
 3. See `docs/llm-data-query.md` for the planned meta-tool pattern
 
+## Tool Design Principles
+
+Tools are organized by **domain entity**, not by individual query type. The LLM
+selects tools and fills parameters based on the user's natural language — no
+intent classification code is needed on our side.
+
+Keep the total tool count low (aim for ~5) to maintain LLM selection accuracy.
+Each tool accepts **flexible optional parameters** so one tool covers many
+intents. The LLM can chain tools across rounds (up to `max_rounds`).
+
+### Tool inventory
+
+| Tool | Purpose | Example queries |
+|---|---|---|
+| `student_lookup` | Find students by ID/name/program/year/status. Returns profile, GPA, credits. | "ขอข้อมูล 6530200321", "หานิสิตชื่อสมชาย", "how many 2nd year CP students?" |
+| `course_lookup` | Find courses by course_no/name/program. Returns course info + who teaches it. | "who teaches Algorithm Design?", "courses in CP curriculum" |
+| `staff_lookup` | Find staff by name/initials. Returns staff info + current teaching assignments. | "what does อ.ณัฐ teach?", "staff NNN" |
+| `schedule_lookup` | Query sections/time slots for a semester — by course, staff, or room. | "what room is 2110327 in?", "Tuesday schedule for ENG 305" |
+| `grade_summary` | Aggregate queries: grade distribution, pass rates, program statistics. | "grade distribution for 2110327", "average GPA of CP 65" |
+
+### Tool parameter pattern
+
+Each tool uses a single `query` string for free-text search plus **optional
+typed filters** for structured narrowing. Example for `student_lookup`:
+
+```
+query:          "name or student ID" (optional)
+program_code:   "CP", "CEDT", etc. (optional)
+admission_year: Buddhist Era year (optional)
+status:         "active" / "graduated" / "on_leave" / "retired" (optional)
+limit:          max results, default 10 (optional)
+```
+
+The LLM maps natural language to parameters:
+- "how many active 2nd year CP students?" → `student_lookup(program_code: "CP", admission_year: 2568, status: "active")`
+- "who is 6530200321?" → `student_lookup(query: "6530200321")`
+
 ## Dev Setup (LINE webhook via SSH tunnel)
 
 1. Open SSH reverse tunnel to the proxy machine:

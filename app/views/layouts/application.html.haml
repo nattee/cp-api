@@ -89,6 +89,10 @@
             %li.mt-3.mb-1.px-3
               %small.text-uppercase.fw-semibold.text-body-secondary.letter-spacing-wide Admin
             %li.nav-item
+              = link_to chat_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'chats'}" do
+                = resource_icon("chats")
+                Chat Playground
+            %li.nav-item
               = link_to chat_messages_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'chat_messages'}" do
                 = resource_icon("chat_messages")
                 Chat History

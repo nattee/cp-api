@@ -17,7 +17,7 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     responses = [text_response("Hello!")]
     stub_chat_completion(service, responses) do
       result = service.call
-      assert_equal "Hello!", result
+      assert_equal "Hello!", result.reply
     end
 
     messages = ChatMessage.where(line_user_id: @line_user_id).order(:created_at)
@@ -36,7 +36,7 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     ]
     stub_chat_completion(service, responses) do
       result = service.call
-      assert_equal "The echo said: ping", result
+      assert_equal "The echo said: ping", result.reply
     end
 
     messages = ChatMessage.where(line_user_id: @line_user_id).order(:created_at)
@@ -67,7 +67,7 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     ]
     stub_chat_completion(service, responses) do
       result = service.call
-      assert_equal "Done with two rounds", result
+      assert_equal "Done with two rounds", result.reply
     end
 
     messages = ChatMessage.where(line_user_id: @line_user_id).order(:created_at)

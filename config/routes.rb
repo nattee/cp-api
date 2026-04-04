@@ -55,6 +55,7 @@ Rails.application.routes.draw do
       delete :unlink_line
     end
   end
+  resource :chat, only: [:show, :create]
   resources :line_contacts, only: [:index, :show] do
     member do
       get :new_user
