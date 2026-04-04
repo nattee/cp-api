@@ -76,6 +76,38 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     assert_equal %w[user assistant tool assistant tool assistant], messages.map(&:role)
   end
 
+  # --- Result struct ---
+
+  test "call returns Result with reply and empty tool_rounds when no tools used" do
+    service = Line::LlmService.new("Hi", line_user_id: @line_user_id, user: @user)
+    responses = [text_response("Hello!")]
+    stub_chat_completion(service, responses) do
+      result = service.call
+      assert_instance_of Line::LlmService::Result, result
+      assert_equal "Hello!", result.reply
+      assert_equal [], result.tool_rounds
+    end
+  end
+
+  test "call returns Result with populated tool_rounds when tools used" do
+    service = Line::LlmService.new("Test", line_user_id: @line_user_id, user: @user)
+    responses = [
+      tool_call_response("echo", '{"text":"ping"}', call_id: "call_1"),
+      text_response("Done")
+    ]
+    stub_chat_completion(service, responses) do
+      result = service.call
+      assert_equal "Done", result.reply
+      assert_equal 1, result.tool_rounds.size
+
+      round = result.tool_rounds.first
+      assert_equal 1, round[:round]
+      assert_equal "echo", round[:tool]
+      assert_equal '{"text":"ping"}', round[:arguments]
+      assert_equal '{"text":"ping"}', round[:result]
+    end
+  end
+
   private
 
   def text_response(content)
