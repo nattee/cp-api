@@ -16,6 +16,9 @@
       = link_to "Errors", api_events_path(service: params[:service], severity: "error"), class: "btn btn-sm #{params[:severity] == 'error' ? 'btn-danger' : 'btn-outline-danger'}"
 
     .table-responsive
+      -# Column 0 (Time) uses DataTables orthogonal data: the td has a
+      -# data-order attribute with millisecond precision for correct sorting,
+      -# while the visible text shows only HH:MM:SS for readability.
       %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
         %thead
           %tr
@@ -23,24 +26,30 @@
             %th Service
             %th Action
             %th Severity
-            %th Message
             %th Response
             %th Details
         %tbody
           - @api_events.each do |event|
             %tr
-              %td.text-nowrap= event.created_at.strftime("%m-%d %H:%M:%S")
+              -# Orthogonal data: data-order has millisecond-precision timestamp for
+              -# correct sorting; the visible text omits milliseconds for readability.
+              %td.text-nowrap{"data-order" => event.created_at.strftime("%Y-%m-%d %H:%M:%S.%L")}
+                = event.created_at.strftime("%m-%d %H:%M:%S")
               %td
                 %code= event.service
               %td
-                %code= event.action
+                - action_label = event.action
+                - if event.action == "tool_call" && event.details&.dig("tool")
+                  - action_label = "tool: #{event.details["tool"]}"
+                - if event.severity == "error" || event.severity == "warning"
+                  - action_label += " — #{event.message}" unless event.message == "OK"
+                %code= action_label
               %td
                 - badge_class = case event.severity
                 - when "error" then "bg-danger"
                 - when "warning" then "bg-warning"
                 - else "bg-secondary"
                 %span.badge{class: badge_class}= event.severity
-              %td= truncate(event.message, length: 80)
               %td.text-nowrap
                 - if event.response_time_ms
                   = "#{event.response_time_ms} ms"
@@ -48,4 +57,4 @@
                 - if event.details.present?
                   %details
                     %summary.text-body-secondary Details
-                    %pre.mt-1.mb-0.small= JSON.pretty_generate(event.details)
+                    = render_api_event_details(event.details)

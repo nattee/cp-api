@@ -40,7 +40,7 @@
                           %code= round[:arguments]
                         %div.mt-1
                           Result:
-                          %code= round[:result].truncate(300)
+                          %code= round[:result].to_s.truncate(300)
               .d-flex.justify-content-start.mb-2
                 .chat-bubble.chat-assistant.px-3.py-2{style: "max-width: 80%;"}
                   = simple_format(msg.content, {}, wrapper_tag: "span")

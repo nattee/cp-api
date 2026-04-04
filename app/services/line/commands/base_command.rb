@@ -1,8 +1,22 @@
+# Base class for slash commands shared by LINE and the web chat playground.
+#
+# Commands receive a context hash with :line_user_id, :user (optional), and
+# :source (either :line or :web). They return a Result that the caller uses
+# to deliver the response through the appropriate channel.
+#
+# LINE path:  MessageRouter builds context from event_data, calls execute,
+#             sends result.text via ReplyService.
+# Web path:   ChatsController builds context from session, calls execute,
+#             shows result.text as a flash message.
 class Line::Commands::BaseCommand
-  attr_reader :event_data
+  Result = Struct.new(:text, :error, keyword_init: true) do
+    def error? = !!error
+  end
 
-  def initialize(event_data)
-    @event_data = event_data
+  attr_reader :context
+
+  def initialize(context)
+    @context = context
   end
 
   def execute(args)
@@ -12,29 +26,18 @@ class Line::Commands::BaseCommand
   private
 
   def line_user_id
-    event_data.dig("source", "user_id")
-  end
-
-  def reply_token
-    event_data["reply_token"]
+    context[:line_user_id]
   end
 
   def current_user
-    @current_user ||= User.find_by(provider: "line", uid: line_user_id)
+    context[:user]
   end
 
-  def linked?
-    current_user.present?
+  def result(text)
+    Result.new(text: text)
   end
 
-  def require_linked!
-    unless linked?
-      reply("Your LINE account is not linked. Link it first by sending: link <your-code>")
-      throw :halt
-    end
-  end
-
-  def reply(text)
-    Line::ReplyService.reply(reply_token, text)
+  def error(text)
+    Result.new(text: text, error: true)
   end
 end

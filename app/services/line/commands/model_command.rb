@@ -1,6 +1,6 @@
 class Line::Commands::ModelCommand < Line::Commands::BaseCommand
   def execute(args)
-    require_linked!
+    return error("Your account is not linked.") unless current_user
 
     model_key = args.strip.downcase
     available = LLM_CONFIG[:models]
@@ -26,19 +26,18 @@ class Line::Commands::ModelCommand < Line::Commands::BaseCommand
       lines << "  #{key} - #{config[:label]}#{marker}"
     end
     lines << ""
-    lines << "Switch with: model <name>"
-    reply(lines.join("\n"))
+    lines << "Switch with: /model <name>"
+    result(lines.join("\n"))
   end
 
   def switch_model(model_key, available)
     unless available.key?(model_key.to_sym)
       names = available.keys.map(&:to_s).join(", ")
-      reply("Unknown model \"#{model_key}\". Available: #{names}")
-      return
+      return error("Unknown model \"#{model_key}\". Available: #{names}")
     end
 
     current_user.update!(llm_model: model_key)
     label = available.dig(model_key.to_sym, :label)
-    reply("Switched to #{label}.")
+    result("Switched to #{label}.")
   end
 end

@@ -3,20 +3,17 @@ class Line::Commands::LinkCommand < Line::Commands::BaseCommand
     token = args.strip
 
     if token.blank?
-      reply("Usage: link <your-code>\nGet a code from the LINE Account page in CP-API.")
-      return
+      return error("Usage: /link <your-code>\nGet a code from the LINE Account page in CP-API.")
     end
 
-    if linked?
-      reply("Your LINE account is already linked to #{current_user.name}.")
-      return
+    if current_user
+      return error("Your LINE account is already linked to #{current_user.name}.")
     end
 
     user = User.find_by(line_link_token: token)
 
     if user.nil? || user.line_link_token_expires_at&.past?
-      reply("Invalid or expired code. Please generate a new one.")
-      return
+      return error("Invalid or expired code. Please generate a new one.")
     end
 
     user.update!(
@@ -27,6 +24,6 @@ class Line::Commands::LinkCommand < Line::Commands::BaseCommand
       line_link_token_expires_at: nil
     )
 
-    reply("Linked successfully! Your LINE account is now linked to #{user.name}.")
+    result("Linked successfully! Your LINE account is now linked to #{user.name}.")
   end
 end
