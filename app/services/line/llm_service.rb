@@ -147,10 +147,21 @@ class Line::LlmService
       raise LlmError, msg
     end
 
-    ApiEvent.log(service: "llm", action: "chat_completion", severity: "info", message: "OK",
-                 details: { endpoint: uri.to_s, model: @model_config[:model] }, response_time_ms: elapsed_ms)
+    parsed = JSON.parse(response.body)
+    assistant_msg = parsed.dig("choices", 0, "message")
+    tool_names = tools.map { |t| t.dig(:function, :name) }
+    has_tool_calls = assistant_msg&.key?("tool_calls") && assistant_msg["tool_calls"].present?
 
-    JSON.parse(response.body)
+    ApiEvent.log(service: "llm", action: "chat_completion", severity: "info", message: "OK",
+                 details: {
+                   endpoint: uri.to_s,
+                   model: @model_config[:model],
+                   tools_sent: tool_names,
+                   tool_calls_returned: has_tool_calls,
+                   response_preview: assistant_msg&.slice("role", "content", "tool_calls").to_s.truncate(1000)
+                 }, response_time_ms: elapsed_ms)
+
+    parsed
   rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
     msg = "vLLM connection failed: #{e.class} — #{e.message}"
     Rails.logger.error("[vLLM] #{msg}")
