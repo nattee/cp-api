@@ -20,27 +20,41 @@
                 %code /clear
                 to reset history.
 
-          - @messages.each_with_index do |msg, i|
+          -# Render messages as chat bubbles. Assistant messages with tool_calls
+          -# and tool-result messages are not rendered as bubbles — instead they
+          -# are collected and shown as tool-round boxes before the next assistant
+          -# text message. This mirrors the actual flow: call tool → get result →
+          -# assistant responds.
+          - pending_rounds = []
+          - @messages.each do |msg|
             - if msg.role == "user"
               .d-flex.justify-content-end.mb-2
                 .chat-bubble.chat-user.px-3.py-2{style: "max-width: 80%;"}
                   = simple_format(msg.content, {}, wrapper_tag: "span")
+            - elsif msg.role == "assistant" && msg.tool_calls.present?
+              -# Assistant requested tool calls — collect them for display.
+              - msg.tool_calls.each do |tc|
+                - fn = tc.is_a?(Hash) ? (tc["function"] || tc[:function]) : nil
+                - if fn
+                  - pending_rounds << { tool: fn["name"] || fn[:name], arguments: fn["arguments"] || fn[:arguments] }
+            - elsif msg.role == "tool"
+              -# Attach tool result to the most recent pending round.
+              - if pending_rounds.any?
+                - pending_rounds.last[:result] = msg.content
             - elsif msg.role == "assistant"
-              -# Show tool rounds before the last assistant message
-              - if @tool_rounds.any? && i == @messages.size - 1
+              -# Final assistant text response — show any pending tool rounds first.
+              - if pending_rounds.any?
                 .mb-2
-                  - @tool_rounds.each do |round|
+                  - pending_rounds.each do |round|
                     .chat-tool-round.mx-2.mb-1.px-3.py-2.small
                       .d-flex.align-items-center.gap-1.mb-1
                         %span.material-symbols{style: "font-size: 14px;"} build
                         %strong= round[:tool]
-                      .text-body-secondary
-                        %div
-                          Arguments:
-                          %code= round[:arguments]
-                        %div.mt-1
-                          Result:
-                          %code= round[:result].to_s.truncate(300)
+                        %code.ms-2= round[:arguments]
+                      %details
+                        %summary.text-body-secondary Result
+                        %pre.mt-1.mb-0= round[:result].to_s
+                  - pending_rounds = []
               .d-flex.justify-content-start.mb-2
                 .chat-bubble.chat-assistant.px-3.py-2{style: "max-width: 80%;"}
                   = simple_format(msg.content, {}, wrapper_tag: "span")

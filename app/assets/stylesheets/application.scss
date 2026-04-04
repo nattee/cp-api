@@ -802,9 +802,24 @@ table.dataTable tbody td.dt-empty {
   background-color: lighten($dark, 8%);
   border: 1px solid lighten($dark, 12%);
 }
+// Tool-call rounds sit between the user message and the assistant response.
+// Visually distinct from chat bubbles: monospace feel, left accent border,
+// muted background. Should read as "system internals", not conversation.
 .chat-tool-round {
-  background-color: lighten($dark, 5%);
-  border: 1px dashed lighten($dark, 15%);
-  border-radius: 8px;
+  background-color: rgba($dark, 0.6);
+  border-left: 3px solid rgba($primary, 0.4);
+  border-radius: 0 6px 6px 0;
+  font-family: var(--bs-font-monospace);
   code { font-size: 0.8em; word-break: break-all; }
+  // Collapsible result sections
+  details summary {
+    cursor: pointer;
+    &::marker { color: rgba($light, 0.4); }
+  }
+  details pre {
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
 }
