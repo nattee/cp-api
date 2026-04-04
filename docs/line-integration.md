@@ -139,10 +139,12 @@ The LLM maps natural language to parameters:
    ssh -R 3000:localhost:3000 10.44.0.2
    ```
 
-   autossh version:
+   autossh version (with keepalives so it recovers from sleep/network drops):
    ```
-   autossh -M 0 -R 3000:localhost:3000 10.44.0.2
+   autossh -M 0 -o "ServerAliveInterval 15" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure yes" -R 3000:localhost:3000 10.44.0.2
    ```
+   `-M 0` disables autossh's own monitoring port and relies on SSH keepalives instead.
+   The remote (`10.44.0.2`) should also have `ClientAliveInterval 15` and `ClientAliveCountMax 3` in `/etc/ssh/sshd_config` so stale sessions are cleaned up quickly.
 2. Zoraxy rule: `cp-line.nattee.net` → `http://localhost:3000`
 3. LINE Console webhook URL: `https://cp-line.nattee.net/line/webhook`
 4. `config/environments/development.rb` has `cp-line.nattee.net` in allowed hosts
