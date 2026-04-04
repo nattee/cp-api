@@ -22,15 +22,25 @@ class Line::ToolExecutor
   def self.invoke(name, raw_args)
     handler = Line::ToolRegistry.handler_for(name)
     unless handler
+      ApiEvent.log(service: "llm", action: "tool_call", severity: "warning",
+                   message: "Unknown tool: #{name}", details: { tool: name, arguments: raw_args })
       return "Error: unknown tool '#{name}'"
     end
 
     arguments = raw_args.is_a?(String) ? JSON.parse(raw_args) : raw_args
-    handler.call(arguments)
+    result = handler.call(arguments)
+
+    ApiEvent.log(service: "llm", action: "tool_call", severity: "info",
+                 message: "Tool: #{name}", details: { tool: name, arguments: arguments, result: result.to_s.truncate(500) })
+    result
   rescue JSON::ParserError => e
+    ApiEvent.log(service: "llm", action: "tool_call", severity: "error",
+                 message: "Tool parse error: #{name}", details: { tool: name, arguments: raw_args, error: e.message })
     "Error: invalid arguments JSON — #{e.message}"
   rescue => e
     Rails.logger.error("Tool '#{name}' failed: #{e.message}")
+    ApiEvent.log(service: "llm", action: "tool_call", severity: "error",
+                 message: "Tool failed: #{name}", details: { tool: name, arguments: raw_args, error: e.message })
     "Error: #{e.message}"
   end
   private_class_method :invoke

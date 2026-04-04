@@ -16,6 +16,7 @@ class ChatMessagesController < ApplicationController
     @line_user_id = params[:id]
     @messages = ChatMessage.where(line_user_id: @line_user_id).order(created_at: :asc)
     @linked_user = User.find_by(provider: "line", uid: @line_user_id)
+    @debug_mode = current_user.debug_tool_calls?
 
     redirect_to chat_messages_path, alert: "No messages found for this user." if @messages.empty?
   end

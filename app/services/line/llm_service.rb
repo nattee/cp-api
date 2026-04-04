@@ -55,8 +55,11 @@ class Line::LlmService
       tool_results = Line::ToolExecutor.execute(tool_calls)
       messages.concat(tool_results)
 
-      # Tool-calling rounds are not saved to history — they're transient
-      # within a single request. Only the final user/assistant pair persists.
+      # Persist intermediate messages for audit trail.
+      save_message(role: "assistant", content: assistant_message["content"], tool_calls: tool_calls)
+      tool_results.each do |tr|
+        save_message(role: "tool", content: tr[:content], tool_call_id: tr[:tool_call_id])
+      end
 
       Rails.logger.info("LLM tool-calling round #{round + 1}: #{tool_calls.map { |tc| tc.dig("function", "name") }.join(", ")}")
     end

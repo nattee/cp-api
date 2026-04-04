@@ -1,7 +1,7 @@
 # Stores conversation history for LINE chatbot LLM interactions.
 # Each row is one message (user, assistant, or tool) in a conversation.
 class ChatMessage < ApplicationRecord
-  HISTORY_LIMIT = 20
+  HISTORY_LIMIT = 40
   EXPIRY = 24.hours
 
   validates :line_user_id, presence: true

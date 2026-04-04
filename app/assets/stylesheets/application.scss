@@ -649,6 +649,29 @@ table.dataTable tbody td.dt-empty {
   }
 }
 
+// Tool chain inspector — visible when debug_tool_calls is enabled.
+// Shows intermediate tool-call steps between user and assistant bubbles.
+.chat-tool-chain {
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 2px dashed lighten($dark, 18%);
+}
+
+.chat-tool-step {
+  background-color: lighten($dark, 4%);
+  border: 1px dashed lighten($dark, 16%);
+}
+
+.chat-tool-json {
+  background-color: lighten($dark, 2%);
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 // Week calendar for schedule reports.
 // Server-rendered grid with absolute-positioned time blocks.
 // Each day column is position:relative, blocks use top/height in %.

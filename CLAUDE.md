@@ -29,6 +29,7 @@ Data is imported via CSV/Excel and fetched from external data providers.
 ## Version Control
 
 - Uses **Mercurial (hg)**, not Git. The `.git` directory does not exist.
+- **Commit messages must lead with WHY, not what.** The first paragraph explains the problem or motivation — why this change exists and what was wrong before. The bullet list or second paragraph covers what changed. The diff already shows the "what"; the message must provide the "why" that the diff cannot. This is top priority for every commit.
 
 ## Authentication
 
@@ -77,12 +78,14 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - Account linking: web UI at `/line_account` generates a token, user sends `link <token>` in LINE chat
 - Adding commands: one file in `app/services/line/commands/` + one entry in `MessageRouter::COMMAND_MAP`
 - Webhook controller inherits `ActionController::API` (not `ApplicationController`) to skip CSRF, auth, and browser checks
+- **LLM data query tools**: See `docs/llm-data-query.md` for the meta-tool design (enum-based dispatch, query handlers)
+- **Tool chain audit**: See `docs/tool-chain-audit.md` for how tool calls are persisted, logged, and inspected
 
 ## UI Component Conventions
 
 - **Badges**: Every badge must use a named semantic `.badge-*` class — never raw Bootstrap `bg-*` classes. When introducing a new badge, add a new `.badge-<concept>` class in `application.scss` following the frosted style (semi-transparent tinted background, subtle border) rather than reusing an existing class with a different meaning. Existing classes: `.badge-admin`, `.badge-editor`, `.badge-viewer`, `.badge-active`, `.badge-inactive`, `.badge-graduated`, `.badge-on-leave`, `.badge-retired`, `.badge-bachelor`, `.badge-master`, `.badge-doctoral`, `.badge-planned`, `.badge-confirmed`, `.badge-cancelled`, `.badge-pending`, `.badge-running`, `.badge-completed`, `.badge-failed`, `.badge-create-only`, `.badge-upsert`. Two classes may share similar colors if they represent different domain concepts. **Render badges data-driven** — derive the class from the value (e.g. `"badge-#{status.dasherize}"`) instead of if/elsif chains. This way adding a new value only requires a model constant + SCSS class, no view changes.
 - **Icon action buttons**: Use ghost button classes (`.btn-ghost .btn-ghost-*`) for icon-only action links in tables. These extend Bootstrap's `btn-link` with no underline, custom color per variant, and a subtle tinted background on hover. Variants: `-primary` (view/show), `-secondary` (edit), `-danger` (delete). Do not use `btn-outline-*` for icon-only actions.
-- **Icons**: Use Material Symbols (`%span.material-symbols`) for action icons, typically at `font-size: 18px` in tables.
+- **Icons**: Use Material Symbols (`%span.material-symbols`) for action icons, typically at `font-size: 18px` in tables. When placing icons inline with text, add `vertical-align: middle` — see `docs/material-symbols-vertical-align.md`.
 - **Input group icons**: Styled with `$input-icon-color` (defined post-import in `application.scss`). Currently `darken($light, 5%)` — a dimmed version of the `$light` theme color.
 - **Index page layout**: Title + action button live inside `.card-body.p-3` (no `.card-header`). The title row uses `.d-flex.justify-content-between.align-items-center.mb-3` with an `%h5.card-title`. See `docs/code-patterns.md` for the canonical template.
 - **Card titles**: Use `.card-title` class on headings inside cards. Styled with `$light` color in `application.scss` to create visual hierarchy against muted body text.

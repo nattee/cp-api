@@ -91,5 +91,9 @@
       = f.label :llm_model, "LLM Model", class: "form-label"
       = f.select :llm_model, options_for_select([["Default", ""]] + LLM_CONFIG[:models].map { |k, v| [v[:label], k.to_s] }, user.llm_model), {}, class: "form-select"
       .form-text Preferred LLM model. "Default" uses the system default.
+    .mb-3.form-check
+      = f.check_box :debug_tool_calls, class: "form-check-input"
+      = f.label :debug_tool_calls, "Debug Tool Calls", class: "form-check-label"
+      .form-text Show full LLM tool chain details in chat history.
 
   = f.submit class: "btn btn-primary"
