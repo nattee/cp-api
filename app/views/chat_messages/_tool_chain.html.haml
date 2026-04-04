@@ -1,0 +1,24 @@
+.chat-tool-chain.mb-3
+  - msg.tool_calls.each do |tc|
+    - tool_name = tc.dig("function", "name")
+    - tool_args = tc.dig("function", "arguments")
+    - tool_id = tc["id"]
+    - tool_result_msg = round_msgs.find { |m| m.role == "tool" && m.tool_call_id == tool_id }
+    .chat-tool-step.rounded-3.px-3.py-2.mb-2
+      .d-flex.align-items-center.gap-2.mb-1
+        %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} build
+        %span.badge.badge-pending= tool_name
+        %small.text-muted= msg.created_at.strftime("%H:%M:%S")
+      %details
+        %summary.text-muted
+          %small Arguments
+        %pre.chat-tool-json.mt-1.mb-0
+          - begin
+            = JSON.pretty_generate(JSON.parse(tool_args.is_a?(String) ? tool_args : tool_args.to_json))
+          - rescue
+            = tool_args
+      - if tool_result_msg
+        %details.mt-2
+          %summary.text-muted
+            %small Result
+          %pre.chat-tool-json.mt-1.mb-0= tool_result_msg.content

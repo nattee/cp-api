@@ -59,6 +59,11 @@ line:
    ```
    ssh -R 3000:localhost:3000 10.44.0.2
    ```
+
+   auto ssh version is 
+   ```
+    autossh -M 0 -R 3000:localhost:3000 10.44.0.2
+   ```
 2. Zoraxy rule: `cp-line.nattee.net` → `http://localhost:3000`
 3. LINE Console webhook URL: `https://cp-line.nattee.net/line/webhook`
 4. `config/environments/development.rb` has `cp-line.nattee.net` in allowed hosts for this to work
