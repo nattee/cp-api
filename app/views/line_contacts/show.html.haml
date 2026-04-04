@@ -1,0 +1,41 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h5.mb-0.fw-semibold
+    LINE Contact
+    %code.ms-2= @line_contact.line_user_id
+  .d-flex.align-items-center.gap-2
+    = link_to "Create & Link", new_user_line_contact_path(@line_contact), class: "btn btn-primary btn-sm"
+    = link_to "Back", line_contacts_path, class: "btn btn-outline-primary btn-sm"
+
+.card.mb-3
+  .card-body
+    %dl.dl-fields.row.mb-0
+      %dt.col-sm-3 LINE User ID
+      %dd.col-sm-9
+        %code= @line_contact.line_user_id
+
+      %dt.col-sm-3 Display Name
+      %dd.col-sm-9= @line_contact.display_name || "—"
+
+      %dt.col-sm-3 Messages
+      %dd.col-sm-9= @line_contact.message_count
+
+      %dt.col-sm-3 First Seen
+      %dd.col-sm-9= @line_contact.first_seen_at.strftime("%b %d, %Y %H:%M:%S")
+
+      %dt.col-sm-3 Last Seen
+      %dd.col-sm-9= @line_contact.last_seen_at.strftime("%b %d, %Y %H:%M:%S")
+
+.card
+  .card-body.p-3
+    %h6.card-title.mb-3 Recent Messages
+    - if @line_contact.recent_messages.present?
+      .chat-history
+        - @line_contact.recent_messages.each do |msg|
+          .chat-message.d-flex.mb-3.chat-user
+            .chat-bubble.rounded-3.px-3.py-2.chat-bubble-user
+              .chat-meta.d-flex.align-items-center.gap-2.mb-1
+                %span.badge.badge-active User
+                %small.text-muted= Time.parse(msg["at"]).strftime("%b %d, %Y %H:%M:%S") rescue msg["at"]
+              .chat-content= simple_format(msg["text"])
+    - else
+      .text-muted.text-center No messages recorded.

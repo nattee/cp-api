@@ -24,14 +24,17 @@ class Line::MessageRouter
 
   # Enqueue a ChatJob so the LLM call doesn't block the current job.
   # Checks llm_consent before dispatching — unlinked or non-consenting users
-  # get a reply asking them to link their account.
+  # are recorded as LineContact for admin review.
   def self.dispatch_to_llm(event_data, text)
     line_user_id = event_data.dig("source", "user_id")
     reply_token = event_data["reply_token"]
     user = User.find_by(provider: "line", uid: line_user_id)
 
     unless user&.llm_consent?
-      Line::ReplyService.reply(reply_token, "Please link your LINE account first to use the chatbot.\nGet a linking code from the LINE Account page in CP-API, then send: link <code>")
+      result = LineContact.record_message(line_user_id, text)
+      if result == :first_contact
+        Line::ReplyService.reply(reply_token, "Thanks for your message! An admin will set up your account shortly.")
+      end
       return
     end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_04_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_04_120000) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -139,6 +139,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_100000) do
     t.index ["section_id"], name: "index_grades_on_section_id"
     t.index ["student_id", "course_id", "year", "semester"], name: "idx_enrollments_unique_student_course_term", unique: true
     t.index ["student_id"], name: "index_grades_on_student_id"
+  end
+
+  create_table "line_contacts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "display_name"
+    t.datetime "first_seen_at", null: false
+    t.datetime "last_seen_at", null: false
+    t.string "line_user_id", null: false
+    t.integer "message_count", default: 0, null: false
+    t.json "recent_messages"
+    t.datetime "updated_at", null: false
+    t.index ["line_user_id"], name: "index_line_contacts_on_line_user_id", unique: true
   end
 
   create_table "program_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

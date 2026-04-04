@@ -1,0 +1,94 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h5.mb-0.fw-semibold Create & Link User
+  = link_to "Back", line_contact_path(@line_contact), class: "btn btn-outline-primary btn-sm"
+
+.row
+  .col-lg-8
+    .card
+      .card-body
+        .alert.alert-info.mb-3
+          %strong Linking to LINE:
+          %code.ms-1= @line_contact.line_user_id
+          - if @line_contact.display_name.present?
+            %span.ms-2 (#{@line_contact.display_name})
+          %p.mb-0.mt-1.small
+            The user will be created with
+            %code provider: line
+            and
+            %code llm_consent: true
+            automatically.
+
+        = form_with(model: @user, url: create_user_line_contact_path(@line_contact), class: "needs-validation") do |f|
+          - if @user.errors.any?
+            .alert.alert-danger
+              %h5.alert-heading
+                = pluralize(@user.errors.count, "error")
+                prohibited this user from being saved:
+              %ul.mb-0
+                - @user.errors.full_messages.each do |message|
+                  %li= message
+
+          .mb-3
+            = f.label :username, class: "form-label"
+            .input-group
+              %span.input-group-text
+                %span.material-symbols person
+              = f.text_field :username, class: "form-control #{'is-invalid' if @user.errors[:username].any?}"
+              - if @user.errors[:username].any?
+                .invalid-feedback= @user.errors[:username].first
+
+          .mb-3
+            = f.label :email, class: "form-label"
+            .input-group
+              %span.input-group-text
+                %span.material-symbols mail
+              = f.email_field :email, class: "form-control #{'is-invalid' if @user.errors[:email].any?}"
+              - if @user.errors[:email].any?
+                .invalid-feedback= @user.errors[:email].first
+
+          .mb-3
+            = f.label :name, class: "form-label"
+            .input-group
+              %span.input-group-text
+                %span.material-symbols badge
+              = f.text_field :name, class: "form-control #{'is-invalid' if @user.errors[:name].any?}", value: @user.name || @line_contact.display_name
+              - if @user.errors[:name].any?
+                .invalid-feedback= @user.errors[:name].first
+
+          .mb-3
+            = f.label :password, class: "form-label"
+            .input-group
+              %span.input-group-text
+                %span.material-symbols lock
+              = f.password_field :password, class: "form-control #{'is-invalid' if @user.errors[:password].any?}"
+              - if @user.errors[:password].any?
+                .invalid-feedback= @user.errors[:password].first
+
+          .mb-3
+            = f.label :password_confirmation, class: "form-label"
+            .input-group
+              %span.input-group-text
+                %span.material-symbols lock
+              = f.password_field :password_confirmation, class: "form-control #{'is-invalid' if @user.errors[:password_confirmation].any?}"
+              - if @user.errors[:password_confirmation].any?
+                .invalid-feedback= @user.errors[:password_confirmation].first
+
+          .mb-3
+            = f.label :role, class: "form-label"
+            = f.select :role, options_for_select(User::ROLES.map { |r| [r.titleize, r, { data: { icon: User::ROLE_ICONS[r] } }] }, @user.role || "viewer"), {}, class: "form-select #{'is-invalid' if @user.errors[:role].any?}", data: { controller: "select2" }
+            - if @user.errors[:role].any?
+              .invalid-feedback= @user.errors[:role].first
+
+          = f.submit "Create & Link", class: "btn btn-primary"
+
+  .col-lg-4
+    .card
+      .card-body.p-3
+        %h6.card-title.mb-3 Recent Messages
+        - if @line_contact.recent_messages.present?
+          - @line_contact.recent_messages.last(5).each do |msg|
+            .mb-2.small
+              .text-muted= Time.parse(msg["at"]).strftime("%m-%d %H:%M") rescue msg["at"]
+              = msg["text"]
+        - else
+          .text-muted.small No messages recorded.

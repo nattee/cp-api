@@ -93,6 +93,13 @@
                 = resource_icon("chat_messages")
                 Chat History
             %li.nav-item
+              = link_to line_contacts_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'line_contacts'}" do
+                = resource_icon("line_contacts")
+                LINE Contacts
+                - contact_count = LineContact.count
+                - if contact_count > 0
+                  %span.badge.badge-pending.ms-auto= contact_count
+            %li.nav-item
               = link_to data_imports_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'data_imports'}" do
                 = resource_icon("data_imports")
                 Imports

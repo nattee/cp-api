@@ -80,6 +80,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - Webhook controller inherits `ActionController::API` (not `ApplicationController`) to skip CSRF, auth, and browser checks
 - **LLM data query tools**: See `docs/llm-data-query.md` for the meta-tool design (enum-based dispatch, query handlers)
 - **Tool chain audit**: See `docs/tool-chain-audit.md` for how tool calls are persisted, logged, and inspected
+- **Quick link (admin onboarding)**: See `docs/line-quick-link.md`. Unlinked LINE users are recorded as `LineContact` (bounded JSON messages, rate-limited). Admin reviews at `/line_contacts` and clicks "Create & Link" — zero friction for the VIP.
 
 ## UI Component Conventions
 

@@ -1,0 +1,33 @@
+.card{"data-controller" => "datatable", "data-datatable-order-value" => "4:desc"}
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        = resource_icon
+        LINE Contacts
+      %span.badge.badge-pending
+        = pluralize(@line_contacts.size, "unlinked contact")
+
+    .table-responsive
+      %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
+        %thead
+          %tr
+            %th LINE User ID
+            %th Display Name
+            %th Messages
+            %th Latest Message
+            %th Last Seen
+            %th Actions
+        %tbody
+          - @line_contacts.each do |contact|
+            %tr
+              %td
+                %code= contact.line_user_id.truncate(20)
+              %td= contact.display_name || "—"
+              %td= contact.message_count
+              %td= truncate(contact.latest_message, length: 60) || "—"
+              %td.text-nowrap= contact.last_seen_at.strftime("%b %d, %Y %H:%M")
+              %td.text-nowrap
+                = link_to line_contact_path(contact), class: "btn-ghost btn-ghost-primary", title: "View" do
+                  %span.material-symbols{style: "font-size: 18px"} visibility
+                = link_to new_user_line_contact_path(contact), class: "btn-ghost btn-ghost-secondary", title: "Create & Link" do
+                  %span.material-symbols{style: "font-size: 18px"} person_add

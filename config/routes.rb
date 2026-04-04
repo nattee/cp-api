@@ -55,6 +55,12 @@ Rails.application.routes.draw do
       delete :unlink_line
     end
   end
+  resources :line_contacts, only: [:index, :show] do
+    member do
+      get :new_user
+      post :create_user
+    end
+  end
   resources :chat_messages, only: [:index, :show]
   resources :api_events, only: [:index]
   resources :data_imports, only: [:index, :new, :create, :show] do
