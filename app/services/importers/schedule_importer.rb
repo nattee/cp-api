@@ -80,6 +80,7 @@ module Importers
         row_errors = []
         created = 0
         updated = 0
+        unchanged = 0
         skipped = 0
         total = spreadsheet.last_row - 1
 
@@ -93,6 +94,7 @@ module Importers
             case result[:status]
             when :created then created += result[:count]
             when :updated then updated += result[:count]
+            when :unchanged then unchanged += 1
             when :skipped then skipped += 1
             when :error
               row_errors << { row: row_num, errors: result[:errors] }
@@ -110,6 +112,7 @@ module Importers
             total_rows: total,
             created_count: 0,
             updated_count: 0,
+            unchanged_count: unchanged,
             skipped_count: skipped,
             error_count: row_errors.size,
             row_errors: row_errors
@@ -120,6 +123,7 @@ module Importers
             total_rows: total,
             created_count: created,
             updated_count: updated,
+            unchanged_count: unchanged,
             skipped_count: skipped,
             error_count: row_errors.size,
             row_errors: row_errors.presence
@@ -180,6 +184,7 @@ module Importers
 
       # 8. Find-or-create TimeSlot
       created_count = 0
+      updated_count = 0
       time_slot = section.time_slots.find_or_initialize_by(
         day_of_week: day_of_week,
         start_time: start_time,
@@ -191,6 +196,7 @@ module Importers
         created_count += 1
       elsif time_slot.changed?
         time_slot.save!
+        updated_count += 1
       end
 
       # 9. Find-or-create Teaching (if instructor present)
@@ -206,13 +212,20 @@ module Importers
             created_count += 1
           elsif teaching.changed?
             teaching.save!
+            updated_count += 1
           end
         else
           return { status: :error, errors: ["Instructor not found: #{instructor_name}"] }
         end
       end
 
-      { status: created_count > 0 ? :created : :updated, count: [created_count, 1].max }
+      if created_count > 0
+        { status: :created, count: created_count }
+      elsif updated_count > 0
+        { status: :updated, count: updated_count }
+      else
+        { status: :unchanged }
+      end
     rescue ActiveRecord::RecordInvalid => e
       { status: :error, errors: [e.message] }
     end

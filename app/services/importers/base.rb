@@ -101,6 +101,7 @@ module Importers
         row_errors = []
         created = 0
         updated = 0
+        unchanged = 0
         skipped = 0
         total = spreadsheet.last_row - 1 # exclude header
 
@@ -125,6 +126,8 @@ module Importers
                 else
                   row_errors << { row: row_num, errors: existing.errors.full_messages }
                 end
+              else
+                unchanged += 1
               end
             else
               record = build_new_record(attrs)
@@ -149,6 +152,7 @@ module Importers
             total_rows: total,
             created_count: 0,
             updated_count: 0,
+            unchanged_count: unchanged,
             skipped_count: skipped,
             error_count: row_errors.size,
             row_errors: row_errors
@@ -160,6 +164,7 @@ module Importers
             total_rows: total,
             created_count: created,
             updated_count: updated,
+            unchanged_count: unchanged,
             skipped_count: skipped,
             error_count: row_errors.size,
             row_errors: row_errors.presence

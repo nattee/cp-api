@@ -31,7 +31,32 @@
         %dd.col-sm-9= @data_import.created_at.strftime("%B %-d, %Y %H:%M")
 
     .detail-section
-      %h6.section-title Results
+      %h6.section-title
+        Results
+        %button.help-popover-trigger{type: "button", tabindex: "0"}
+          %span.material-symbols help
+          %span.help-popover-content
+            %strong Total Rows
+            \— number of data rows in the file (excluding header).
+            %br
+            %strong Created
+            \— new records inserted into the database.
+            %br
+            %strong Updated
+            \— existing records found and modified (upsert mode only).
+            %br
+            %strong Unchanged
+            \— existing records found but already up-to-date (upsert mode only).
+            %br
+            %strong Skipped
+            \— rows the importer chose to skip (e.g. blank grades with skip action).
+            %br
+            %strong Errors
+            \— rows that failed validation.
+            %br
+            %br
+            Total Rows = Created + Updated + Unchanged + Skipped + Errors.
+            When errors occur without "Skip failures", all creates/updates are rolled back to zero.
       %dl.dl-fields.row.mb-0
         %dt.col-sm-3 Total Rows
         %dd.col-sm-9= @data_import.total_rows
@@ -41,6 +66,10 @@
 
         %dt.col-sm-3 Updated
         %dd.col-sm-9= @data_import.updated_count
+
+        - if @data_import.unchanged_count.to_i > 0
+          %dt.col-sm-3 Unchanged
+          %dd.col-sm-9= @data_import.unchanged_count
 
         - if @data_import.skipped_count.to_i > 0
           %dt.col-sm-3 Skipped
