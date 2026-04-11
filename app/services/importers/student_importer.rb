@@ -152,6 +152,16 @@ module Importers
         attrs[:phone] = attrs[:phone].to_s.gsub(/\.0\z/, "").to_i.to_s.rjust(9, "0")
       end
 
+      # Normalize Thai status values to internal status codes
+      if attrs[:status].present?
+        attrs[:status] = normalize_status(attrs[:status].to_s.strip)
+      end
+
+      # Normalize TCAS round
+      if attrs[:tcas].present?
+        attrs[:tcas] = normalize_tcas(attrs[:tcas].to_s.strip)
+      end
+
       # Default status
       attrs[:status] ||= "active"
 
@@ -176,6 +186,51 @@ module Importers
       end
 
       attrs
+    end
+
+    # Maps Thai status strings from university systems to internal status codes.
+    # Exact matches checked first, then prefix patterns for the many "retired" variants.
+    STATUS_EXACT = {
+      "ขอจบการศึกษา" => "active",
+      "ลงทะเบียนแรกเข้า" => "active",
+      "จบการศึกษา" => "graduated",
+      "สำเร็จการศึกษา" => "graduated",
+      "เกียรตินิยมอันดับหนึ่ง" => "graduated",
+      "เกียรตินิยมอันดับสอง" => "graduated",
+      "ลาพัก" => "on_leave",
+      "ลาพักการศึกษา" => "on_leave"
+    }.freeze
+
+    # Prefixes that indicate "retired" — covers พ้นสถานภาพลาออก, พ้นสถานภาพไม่มาลงทะเบียน...,
+    # พ้นฯเนื่องจาก..., ครบระยะเวลาการศึกษา
+    STATUS_ACTIVE_PREFIXES = %w[
+      ปกติ
+    ].freeze
+
+    STATUS_RETIRED_PREFIXES = [
+      "พ้น",
+      "ครบระยะเวลา",
+      "ประเมินผลวิทยานิพนธ์ได้u",
+      "โครงร่างวิทยานิพนธ์ครบระยะเวลา",
+      "การสอบประมวลความรู้ได้รับสัญลักษณ์ U"
+    ].freeze
+
+    TCAS_EXACT = {
+      "สกอ." => "TCAS3",
+      "โครงการรับตรง" => "TCAS3",
+      "โครงการพิเศษ" => "TCAS3"
+    }.freeze
+
+    def normalize_tcas(value)
+      return TCAS_EXACT[value] if TCAS_EXACT.key?(value)
+      value
+    end
+
+    def normalize_status(value)
+      return STATUS_EXACT[value] if STATUS_EXACT.key?(value)
+      return "active" if STATUS_ACTIVE_PREFIXES.any? { |p| value.start_with?(p) }
+      return "retired" if STATUS_RETIRED_PREFIXES.any? { |p| value.start_with?(p) }
+      value.downcase.tr(" ", "_")
     end
 
     # Splits a combined "Title FirstName LastName" field into first/last name attributes.

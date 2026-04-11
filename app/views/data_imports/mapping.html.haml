@@ -18,6 +18,36 @@
       %dt.col-sm-3 File
       %dd.col-sm-9= @data_import.file.filename
 
+-# Already-configured sheets
+- if @configured_sheets.any?
+  .card.mb-3
+    .card-body.p-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center.mb-3
+        %span.material-symbols.resource-icon.me-2 playlist_add_check
+        Configured Sheets
+      - labels = @data_import.importer_class.attribute_labels
+      %table.table.table-sm.mb-0
+        %thead
+          %tr
+            %th Sheet
+            %th Mapped Fields
+            %th{style: "width: 1%"}
+        %tbody
+          - @configured_sheets.each do |config|
+            %tr
+              %td= config["sheet_name"]
+              %td
+                - mapped = (config["column_mapping"] || {}).keys + (config["default_values"] || {}).reject { |k, _| k.start_with?("_") }.keys
+                = mapped.map { |a| labels[a.to_sym] || a }.join(", ")
+              %td.text-nowrap
+                = link_to mapping_data_import_path(@data_import, sheet: config["sheet_name"]), class: "btn-ghost btn-ghost-secondary", title: "Edit" do
+                  %span.material-symbols{style: "font-size: 18px"} edit
+                = button_to remove_sheet_data_import_path(@data_import, sheet_name: config["sheet_name"]), method: :delete, class: "btn-ghost btn-ghost-danger", title: "Remove", form: { class: "d-inline" } do
+                  %span.material-symbols{style: "font-size: 18px"} close
+      .d-flex.justify-content-end.mt-3
+        = form_tag execute_data_import_path(@data_import), method: :patch, class: "d-inline" do
+          = submit_tag "Run Import", class: "btn btn-primary"
+
 -# Sheet selector and skip_failures side by side
 - show_sheet = @show_sheet_selector
 - show_skip = @data_import.state == "retrying"
@@ -54,6 +84,8 @@
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center.mb-3
         %span.material-symbols.resource-icon.me-2 table_chart
         Column Mapping
+        - if @selected_sheet
+          %span.text-muted.ms-2.fw-normal= "— #{@selected_sheet}"
       %table.table.table-hover.mb-0
         %thead
           %tr
@@ -63,10 +95,30 @@
         %tbody
           - @attribute_definitions.each do |defn|
             - attr = defn[:attribute]
-            - auto_mapped_header = @auto_mapping[attr]
-            - use_default_fixed = !auto_mapped_header && defn[:default_fixed_value].present?
-            - selected_source = auto_mapped_header || (use_default_fixed ? "__constant__" : nil)
-            - preview_idx = auto_mapped_header ? @file_headers.index(auto_mapped_header) : nil
+            - if @editing_sheet
+              - saved_col = @saved_mapping[attr.to_s]
+              - saved_default = @saved_defaults[attr.to_s]
+              - if saved_col
+                - selected_source = saved_col
+                - preview_idx = @file_headers.index(saved_col)
+                - use_default_fixed = false
+                - default_val = nil
+              - elsif saved_default
+                - selected_source = "__constant__"
+                - preview_idx = nil
+                - use_default_fixed = true
+                - default_val = saved_default
+              - else
+                - selected_source = nil
+                - preview_idx = nil
+                - use_default_fixed = false
+                - default_val = nil
+            - else
+              - auto_mapped_header = @auto_mapping[attr]
+              - use_default_fixed = !auto_mapped_header && defn[:default_fixed_value].present?
+              - selected_source = auto_mapped_header || (use_default_fixed ? "__constant__" : nil)
+              - preview_idx = auto_mapped_header ? @file_headers.index(auto_mapped_header) : nil
+              - default_val = use_default_fixed ? defn[:default_fixed_value] : nil
             - source_options = [["-- skip --", ""], ["-- fixed value --", "__constant__"]] + @file_headers.map { |h| [h, h] }
             %tr
               %td
@@ -89,9 +141,9 @@
                   - else
                     \--
                 - if defn[:fixed_options]
-                  = select_tag "defaults[#{attr}]", options_for_select([["Select...", ""]] + defn[:fixed_options].call, use_default_fixed ? defn[:default_fixed_value] : nil), class: "form-select form-select-sm", hidden: !use_default_fixed || nil, "data-mapping-constant" => attr
+                  = select_tag "defaults[#{attr}]", options_for_select([["Select...", ""]] + defn[:fixed_options].call, default_val), class: "form-select form-select-sm", hidden: !use_default_fixed || nil, "data-mapping-constant" => attr
                 - else
-                  = text_field_tag "defaults[#{attr}]", (use_default_fixed ? defn[:default_fixed_value] : nil), class: "form-control form-control-sm", placeholder: "Enter value...", hidden: !use_default_fixed || nil, "data-mapping-constant" => attr
+                  = text_field_tag "defaults[#{attr}]", default_val, class: "form-control form-control-sm", placeholder: "Enter value...", hidden: !use_default_fixed || nil, "data-mapping-constant" => attr
 
   - if @data_import.target_type == "Grade"
     .card.mb-3
@@ -102,9 +154,19 @@
         .row
           .col-md-6
             %label.form-label When grade is blank
-            = select_tag "defaults[_blank_grade]", options_for_select([["Skip row — do not import", "skip"], ["Import without grade", "import"]], "skip"), class: "form-select form-select-sm"
+            - blank_grade_val = @editing_sheet ? (@saved_defaults["_blank_grade"] || "skip") : "skip"
+            = select_tag "defaults[_blank_grade]", options_for_select([["Skip row — do not import", "skip"], ["Import without grade", "import"]], blank_grade_val), class: "form-select form-select-sm"
             .form-text.text-muted
               Rows where the grade column is empty or missing.
 
-  .d-flex.justify-content-end
-    = submit_tag "Run Import", class: "btn btn-primary"
+  .d-flex.justify-content-end.gap-2
+    - if @show_sheet_selector
+      - if @editing_sheet
+        = button_tag class: "btn btn-outline-primary", type: "submit", formaction: save_sheet_data_import_path(@data_import) do
+          %span.material-symbols.me-1{style: "font-size: 18px; vertical-align: middle"} save
+          Save Sheet
+      - elsif @available_sheets.size > 1
+        = button_tag class: "btn btn-outline-primary", type: "submit", formaction: save_sheet_data_import_path(@data_import) do
+          %span.material-symbols.me-1{style: "font-size: 18px; vertical-align: middle"} add
+          Save & Add Next Sheet
+    = submit_tag "Save & Run Import", class: "btn btn-primary"

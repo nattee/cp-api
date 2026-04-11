@@ -69,6 +69,8 @@ Rails.application.routes.draw do
       get :mapping
       patch :execute
       patch :retry_import
+      patch :save_sheet
+      delete :remove_sheet
     end
   end
 

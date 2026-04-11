@@ -67,13 +67,11 @@
         %dt.col-sm-3 Updated
         %dd.col-sm-9= @data_import.updated_count
 
-        - if @data_import.unchanged_count.to_i > 0
-          %dt.col-sm-3 Unchanged
-          %dd.col-sm-9= @data_import.unchanged_count
+        %dt.col-sm-3 Unchanged
+        %dd.col-sm-9= @data_import.unchanged_count
 
-        - if @data_import.skipped_count.to_i > 0
-          %dt.col-sm-3 Skipped
-          %dd.col-sm-9= @data_import.skipped_count
+        %dt.col-sm-3 Skipped
+        %dd.col-sm-9= @data_import.skipped_count
 
         %dt.col-sm-3 Errors
         %dd.col-sm-9= @data_import.error_count
@@ -89,10 +87,49 @@
             %dt.col-sm-3 Sheet
             %dd.col-sm-9= @data_import.sheet_name
 
-    - if @data_import.column_mapping.present? || @data_import.default_values.present?
+    - sheet_configs = @data_import.sheet_configs || []
+    - labels = @data_import.importer_class.attribute_labels
+    - if sheet_configs.size > 1
+      -# Per-sheet breakdown for multi-sheet imports
+      - sheet_configs.each do |config|
+        .detail-section
+          %h6.section-title
+            %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} description
+            = config["sheet_name"]
+          .row.mb-2
+            .col-sm-6
+              %dl.dl-fields.row.mb-0
+                %dt.col-sm-4 Rows
+                %dd.col-sm-8= config["total_rows"]
+                %dt.col-sm-4 Created
+                %dd.col-sm-8= config["created_count"]
+                %dt.col-sm-4 Updated
+                %dd.col-sm-8= config["updated_count"]
+                - if config["error_count"].to_i > 0
+                  %dt.col-sm-4 Errors
+                  %dd.col-sm-8
+                    %span.text-danger= config["error_count"]
+            .col-sm-6
+              %table.table.table-sm.mb-0
+                %thead
+                  %tr
+                    %th Field
+                    %th Source
+                %tbody
+                  - (config["column_mapping"] || {}).each do |attr, header|
+                    %tr
+                      %td= labels[attr.to_sym] || attr
+                      %td= header
+                  - (config["default_values"] || {}).reject { |k, _| k.start_with?("_") }.each do |attr, value|
+                    %tr
+                      %td= labels[attr.to_sym] || attr
+                      %td
+                        %span.badge.badge-pending constant
+                        = value
+    - elsif @data_import.column_mapping.present? || @data_import.default_values.present?
+      -# Single-sheet column mapping (legacy or single sheet)
       .detail-section
         %h6.section-title Column Mapping
-        - labels = @data_import.importer_class.attribute_labels
         %table.table.table-sm.mb-0
           %thead
             %tr
@@ -125,10 +162,14 @@
         %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
           %thead
             %tr
+              - if sheet_configs.size > 1
+                %th Sheet
               %th Row
               %th Errors
           %tbody
             - @data_import.row_errors.each do |row_error|
               %tr
+                - if sheet_configs.size > 1
+                  %td= row_error["sheet"]
                 %td= row_error["row"]
                 %td= row_error["errors"].join(", ")

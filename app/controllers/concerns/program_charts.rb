@@ -4,7 +4,7 @@ module ProgramCharts
   private
 
   def prepare_admission_chart_data(students)
-    all_counts = students.group(:admission_year_be, :enrollment_method).count
+    all_counts = students.reorder("").group(:admission_year_be, :enrollment_method).count
     years = all_counts.keys.map(&:first).uniq.sort
     methods = all_counts.keys.map(&:last).map { |m| m.presence || "Unknown" }.uniq.sort
 
@@ -17,7 +17,7 @@ module ProgramCharts
 
     datasets = { "all" => build_dataset.call(all_counts) }
     Student::STATUSES.each do |status|
-      status_counts = students.where(status: status).group(:admission_year_be, :enrollment_method).count
+      status_counts = students.reorder("").where(status: status).group(:admission_year_be, :enrollment_method).count
       datasets[status] = build_dataset.call(status_counts)
     end
 

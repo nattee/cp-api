@@ -78,98 +78,137 @@ module Importers
     def call
       data_import.update!(state: "processing")
 
+      configs = data_import.sheet_configs.presence || [single_sheet_config]
+
+      total_rows = 0
+      total_created = 0
+      total_updated = 0
+      total_unchanged = 0
+      total_skipped = 0
+      total_errors = 0
+      all_row_errors = []
+
       with_spreadsheet do |spreadsheet|
-        # Build col_indices from stored column_mapping.
-        # Mapping values are labeled headers like "A: name" — parse the column
-        # letter to get a 0-based index directly (handles duplicate header names).
-        col_indices = {}
-        data_import.column_mapping.each do |attr_str, labeled_header|
-          if labeled_header =~ /\A([A-Z]+): /
-            idx = self.class.column_index_from_letter($1)
-            col_indices[idx] = attr_str.to_sym
-          end
-        end
+        configs.each_with_index do |config, config_idx|
+          sheet_name = config["sheet_name"]
+          col_mapping = config["column_mapping"] || {}
+          constants_raw = config["default_values"] || {}
 
-        # Build constant values hash (symbol keys)
-        constants = (data_import.default_values || {}).transform_keys(&:to_sym)
+          spreadsheet.default_sheet = sheet_name if sheet_name.present?
 
-        # Validate required attributes are present (via column mapping, constants, or derivation)
-        mapped_attrs = col_indices.values + constants.keys
-        missing = self.class.required_attributes - mapped_attrs - self.class.derivable_attributes
-        raise "Required fields not mapped: #{missing.join(', ')}" if missing.any?
-
-        row_errors = []
-        created = 0
-        updated = 0
-        unchanged = 0
-        skipped = 0
-        total = spreadsheet.last_row - 1 # exclude header
-
-        ActiveRecord::Base.transaction do
-          (2..spreadsheet.last_row).each do |row_num|
-            row = spreadsheet.row(row_num)
-            attrs = extract_attributes(row, col_indices)
-            constants.each { |attr, value| attrs[attr] = value }
-            attrs = transform_attributes(attrs)
-
-            # Subclass returned nil to signal "skip this row"
-            if attrs.nil?
-              skipped += 1
-              next
+          # Build col_indices from stored column_mapping
+          col_indices = {}
+          col_mapping.each do |attr_str, labeled_header|
+            if labeled_header =~ /\A([A-Z]+): /
+              idx = self.class.column_index_from_letter($1)
+              col_indices[idx] = attr_str.to_sym
             end
+          end
 
-            if data_import.mode == "upsert" && (existing = find_existing_record(attrs))
-              existing.assign_attributes(attrs.except(*unique_key_fields))
-              if existing.changed?
-                if existing.save
-                  updated += 1
+          constants = constants_raw.transform_keys(&:to_sym)
+
+          # Validate required attributes
+          mapped_attrs = col_indices.values + constants.keys
+          missing = self.class.required_attributes - mapped_attrs - self.class.derivable_attributes
+          raise "Required fields not mapped for sheet \"#{sheet_name}\": #{missing.join(', ')}" if missing.any?
+
+          row_errors = []
+          created = 0
+          updated = 0
+          unchanged = 0
+          skipped = 0
+          total = spreadsheet.last_row - 1
+
+          ActiveRecord::Base.transaction do
+            (2..spreadsheet.last_row).each do |row_num|
+              row = spreadsheet.row(row_num)
+              attrs = extract_attributes(row, col_indices)
+              constants.each { |attr, value| attrs[attr] = value }
+              attrs = transform_attributes(attrs)
+
+              if attrs.nil?
+                skipped += 1
+                next
+              end
+
+              if data_import.mode == "upsert" && (existing = find_existing_record(attrs))
+                existing.assign_attributes(attrs.except(*unique_key_fields))
+                if existing.changed?
+                  if existing.save
+                    updated += 1
+                  else
+                    row_errors << { row: row_num, sheet: sheet_name, errors: existing.errors.full_messages }
+                  end
                 else
-                  row_errors << { row: row_num, errors: existing.errors.full_messages }
+                  unchanged += 1
                 end
               else
-                unchanged += 1
+                record = build_new_record(attrs)
+                if record.save
+                  created += 1
+                else
+                  row_errors << { row: row_num, sheet: sheet_name, errors: record.errors.full_messages }
+                end
               end
-            else
-              record = build_new_record(attrs)
-              if record.save
-                created += 1
-              else
-                row_errors << { row: row_num, errors: record.errors.full_messages }
-              end
+            end
+
+            if row_errors.any? && !data_import.skip_failures
+              raise ActiveRecord::Rollback
             end
           end
 
-          # Transactional mode: roll back all changes if any row failed
+          # Store per-sheet results back into config
+          config.merge!(
+            "total_rows" => total,
+            "created_count" => row_errors.any? && !data_import.skip_failures ? 0 : created,
+            "updated_count" => row_errors.any? && !data_import.skip_failures ? 0 : updated,
+            "unchanged_count" => unchanged,
+            "skipped_count" => skipped,
+            "error_count" => row_errors.size,
+            "row_errors" => row_errors.presence
+          )
+
+          total_rows += total
           if row_errors.any? && !data_import.skip_failures
-            raise ActiveRecord::Rollback
+            total_errors += row_errors.size
+            all_row_errors.concat(row_errors)
+            # Stop processing further sheets on transactional failure
+            break
+          else
+            total_created += created
+            total_updated += updated
+            total_unchanged += unchanged
+            total_skipped += skipped
+            total_errors += row_errors.size
+            all_row_errors.concat(row_errors)
           end
         end
+      end
 
-        if row_errors.any? && !data_import.skip_failures
-          # Transactional: all rolled back
-          data_import.update!(
-            state: "failed",
-            total_rows: total,
-            created_count: 0,
-            updated_count: 0,
-            unchanged_count: unchanged,
-            skipped_count: skipped,
-            error_count: row_errors.size,
-            row_errors: row_errors
-          )
-        else
-          # Success (or partial success with skip_failures)
-          data_import.update!(
-            state: "completed",
-            total_rows: total,
-            created_count: created,
-            updated_count: updated,
-            unchanged_count: unchanged,
-            skipped_count: skipped,
-            error_count: row_errors.size,
-            row_errors: row_errors.presence
-          )
-        end
+      if all_row_errors.any? && !data_import.skip_failures
+        data_import.update!(
+          state: "failed",
+          sheet_configs: configs,
+          total_rows: total_rows,
+          created_count: 0,
+          updated_count: 0,
+          unchanged_count: total_unchanged,
+          skipped_count: total_skipped,
+          error_count: total_errors,
+          row_errors: all_row_errors
+        )
+      else
+        data_import.update!(
+          state: "completed",
+          sheet_configs: configs,
+          total_rows: total_rows,
+          created_count: total_created,
+          updated_count: total_updated,
+          unchanged_count: total_unchanged,
+          skipped_count: total_skipped,
+          error_count: total_errors,
+          row_errors: all_row_errors.presence
+        )
       end
     rescue => e
       data_import.update!(
@@ -179,6 +218,15 @@ module Importers
     end
 
     private
+
+    # Fallback for imports that don't use sheet_configs (legacy single-sheet)
+    def single_sheet_config
+      {
+        "sheet_name" => data_import.sheet_name,
+        "column_mapping" => data_import.column_mapping,
+        "default_values" => data_import.default_values
+      }
+    end
 
     def with_spreadsheet(&block)
       data_import.file.open do |tempfile|
@@ -192,7 +240,7 @@ module Importers
         else
           raise "Unsupported file format. Please upload .xlsx, .xls, or .csv"
         end
-        spreadsheet.default_sheet = data_import.sheet_name if data_import.sheet_name.present?
+        # Don't set default_sheet here — each config sets its own sheet
         block.call(spreadsheet)
       end
     end
