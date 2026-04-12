@@ -19,3 +19,13 @@
             = pluralize(group.programs.size, "revision")
             |
             = pluralize(group.students.count, "student")
+
+- if @overview_chart_data[:labels].any?
+  .card.mt-3
+    .card-body.p-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center.mb-3
+        %span.material-symbols.resource-icon.me-2 bar_chart
+        Students by Admission Year
+      - chart_height = [@overview_chart_data[:labels].size * 28, 200].max
+      %div{"data-controller" => "chart", "data-chart-type-value" => "horizontal-stacked-bar", "data-chart-data-value" => @overview_chart_data.to_json}
+        %canvas{"data-chart-target" => "canvas", style: "height: #{chart_height}px"}

@@ -13,7 +13,7 @@
     .row
       .col-md-6.mb-3
         = f.label :program_group_id, "Program Group", class: "form-label"
-        = f.select :program_group_id, options_for_select(ProgramGroup.where.not(code: "OTHER").order(:code).map { |g| [g.display_name, g.id] }, program.program_group_id), { include_blank: "Select a group" }, class: "form-select #{'is-invalid' if program.errors[:program_group].any?}", data: { controller: "select2" }
+        = f.select :program_group_id, options_for_select(ProgramGroup.where.not(code: "OTHER").order(:id).map { |g| [g.display_name, g.id] }, program.program_group_id), { include_blank: "Select a group" }, class: "form-select #{'is-invalid' if program.errors[:program_group].any?}", data: { controller: "select2" }
         - if program.errors[:program_group].any?
           .invalid-feedback= program.errors[:program_group].first
       .col-md-6.mb-3

@@ -1,13 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 import "chart.js" // UMD side-effect import — sets window.Chart
 
-// Dark-theme palette for stacked bar segments
+// Dark-theme palette for stacked bar segments — mapped to shadcn theme colors
 const STACK_COLORS = [
-  "rgba(184, 230, 254, 0.7)",  // $light (#b8e6fe)
   "rgba(116, 212, 255, 0.7)",  // $primary (#74d4ff)
   "rgba(253, 165, 213, 0.7)",  // $secondary (#fda5d5)
+  "rgba(142, 81, 255, 0.7)",   // $info (#8e51ff)
   "rgba(123, 241, 168, 0.7)",  // $success (#7bf1a8)
   "rgba(253, 199, 0, 0.7)",    // $warning (#fdc700)
+  "rgba(184, 230, 254, 0.7)",  // $light (#b8e6fe)
 ]
 
 // Grade colors matching $grade-* Sass variables in application.scss
@@ -40,6 +41,7 @@ export default class extends Controller {
     const ctx = this.canvasTarget.getContext("2d")
     let config
     if (this.typeValue === "stacked-bar") config = this.stackedBarConfig("all")
+    else if (this.typeValue === "horizontal-stacked-bar") config = this.horizontalStackedBarConfig()
     else if (this.typeValue === "grade-distribution") config = this.gradeDistributionConfig()
     else config = this.histogramConfig()
     this.chart = new window.Chart(ctx, config)
@@ -75,6 +77,34 @@ export default class extends Controller {
         scales: {
           x: { stacked: true, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR } },
           y: { stacked: true, beginAtZero: true, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR, stepSize: 1 } },
+        },
+        plugins: {
+          legend: { labels: { color: TICK_COLOR, boxWidth: 14 } },
+          tooltip: { mode: "index", intersect: false },
+        },
+      },
+    }
+  }
+
+  horizontalStackedBarConfig() {
+    const d = this.dataValue
+    const datasets = d.datasets.map((ds, i) => ({
+      label: ds.code,
+      data: ds.data,
+      backgroundColor: STACK_COLORS[i % STACK_COLORS.length],
+      borderWidth: 0,
+    }))
+
+    return {
+      type: "bar",
+      data: { labels: d.labels, datasets },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { stacked: true, beginAtZero: true, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR } },
+          y: { stacked: true, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR } },
         },
         plugins: {
           legend: { labels: { color: TICK_COLOR, boxWidth: 14 } },

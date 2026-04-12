@@ -79,9 +79,9 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     assert_equal program.id, result[:program_id]
   end
 
-  test "resolve_program finds by English name" do
-    # "Computer Engineering" matches both CP and CM groups — picks latest year_started
-    program = programs(:cp_master) # year_started: 2545, newer than cp_bachelor's 2540
+  test "resolve_program finds by English name via program group" do
+    # "Computer Engineering" matches CP group first, picks latest revision ≤ admission year
+    program = programs(:cp_bachelor) # CP group, year_started: 2540
     importer = build_importer
 
     attrs = { program_name: "Computer Engineering", student_id: "1", admission_year_be: 2567, status: "active" }
@@ -90,8 +90,9 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     assert_equal program.id, result[:program_id]
   end
 
-  test "resolve_program finds by Thai name" do
-    program = programs(:cp_master) # latest "วิศวกรรมคอมพิวเตอร์"
+  test "resolve_program finds by Thai name via program group" do
+    # "วิศวกรรมคอมพิวเตอร์" matches CP group first, picks latest revision ≤ admission year
+    program = programs(:cp_bachelor) # CP group, year_started: 2540
     importer = build_importer
 
     attrs = { program_name: "วิศวกรรมคอมพิวเตอร์", student_id: "1", admission_year_be: 2567, status: "active" }

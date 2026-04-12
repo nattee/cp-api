@@ -49,22 +49,27 @@ module Importers
           help: "Buddhist Era year (e.g. 2567). CE years (e.g. 2024) are auto-converted by adding 543. " \
                 "If not mapped, derived from the first 2 digits of Student ID (e.g. 66xxxxx → 2566)." },
         { attribute: :status,            label: "Status",            required: false,
-          aliases: %w[status สถานะ],
+          aliases: %w[status CURRENT_STATUS สถานะ สถานภาพ],
           fixed_options: -> { Student::STATUSES.map { |s| [ s.humanize, s ] } },
           default_fixed_value: "active" },
         { attribute: :graduation_year_be, label: "Graduation Year (B.E.)", required: false,
           aliases: %w[fromacadyear graduation_year_be graduation_year ปีที่จบ ปีสำเร็จการศึกษา],
           help: "Buddhist Era year (e.g. 2567). CE years (e.g. 2024) are auto-converted by adding 543." },
+        { attribute: :degree_level,      label: "Degree Level",      required: false,
+          aliases: %w[degree_level degree ระดับ ระดับการศึกษา],
+          help: "Used to disambiguate programs with the same name but different degree levels " \
+                "(e.g. วิศวกรรมคอมพิวเตอร์ exists at bachelor, master, and doctoral). " \
+                "Accepted: ปริญญาตรี, ปริญญาโท, ปริญญาเอก, bachelor, master, doctoral." },
         { attribute: :program_name,      label: "Program",           required: false,
-          aliases: %w[coursecodeno program program_name program_id program_code majorcode หลักสูตร],
+          aliases: %w[coursecodeno program program_name program_id program_code majorcode major หลักสูตร สาขา],
           help: "From file: looks up by program code (4-digit) first, then alternative program code, " \
                 "then English name, then Thai name. If multiple programs share the same name, the latest one (by year started) is used.",
           fixed_options: -> { Program.includes(:program_group).order(year_started: :desc).map { |p| [ "#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } },
-          group_options: -> { ProgramGroup.where.not(code: "OTHER").order(:code).map { |g| [ "#{g.code} — #{g.name_en}", g.id ] } } },
+          group_options: -> { ProgramGroup.where.not(code: "OTHER").order(:id).map { |g| [ "#{g.code} — #{g.name_en}", g.id ] } } },
         { attribute: :old_program,       label: "Old Program",       required: false,
           aliases: %w[oldmajor old_program old_major หลักสูตรเดิม] },
         { attribute: :status_note,       label: "Status Note",       required: false,
-          aliases: %w[current_status status_note หมายเหตุสถานะ] },
+          aliases: %w[status_note หมายเหตุสถานะ] },
         { attribute: :remark,            label: "Remark",            required: false,
           aliases: %w[remark หมายเหตุ] }
       ]
@@ -94,7 +99,7 @@ module Importers
       [ :student_id ]
     end
 
-    def resolve_program(value, admission_year_be: nil)
+    def resolve_program(value, admission_year_be: nil, degree_level: nil)
       # Roo reads numeric cells as floats (e.g. 0018 → 18.0), so we
       # strip the decimal suffix for all numeric matching below.
       code = value.to_s.gsub(/\.0\z/, "")
@@ -119,12 +124,14 @@ module Importers
       found = resolve_program_by_group(ProgramGroup.find_by(code: value), admission_year_be)
       return found if found
 
-      # 4. Try by English name (via program group)
-      found = resolve_program_by_group(ProgramGroup.find_by(name_en: value), admission_year_be)
+      # 4-5. Try by English/Thai name — degree_level disambiguates when multiple groups share the same name
+      group_scope = ProgramGroup.all
+      group_scope = group_scope.where(degree_level: degree_level) if degree_level.present?
+
+      found = resolve_program_by_group(group_scope.find_by(name_en: value), admission_year_be)
       return found if found
 
-      # 5. Try by Thai name (via program group)
-      resolve_program_by_group(ProgramGroup.find_by(name_th: value), admission_year_be)
+      resolve_program_by_group(group_scope.find_by(name_th: value), admission_year_be)
     end
 
     def resolve_program_by_group(group, admission_year_be)
@@ -164,9 +171,15 @@ module Importers
         attrs[:phone] = attrs[:phone].to_s.gsub(/\.0\z/, "").to_i.to_s.rjust(9, "0")
       end
 
-      # Normalize Thai status values to internal status codes
+      # Normalize Thai status values to internal status codes.
+      # Auto-fill status_note with the original text when it differs from the normalized value.
       if attrs[:status].present?
-        attrs[:status] = normalize_status(attrs[:status].to_s.strip)
+        original_status = attrs[:status].to_s.strip
+        normalized = normalize_status(original_status)
+        if attrs[:status_note].blank? && original_status != normalized
+          attrs[:status_note] = original_status
+        end
+        attrs[:status] = normalized
       end
 
       # Normalize TCAS round
@@ -183,11 +196,17 @@ module Importers
       attrs[:first_name] ||= attrs[:first_name_th] if attrs[:first_name_th].present?
       attrs[:last_name] ||= attrs[:last_name_th] if attrs[:last_name_th].present?
 
+      # Normalize degree_level (transient — used for program resolution only)
+      degree_level = attrs.delete(:degree_level)
+      if degree_level.present?
+        degree_level = normalize_degree_level(degree_level.to_s.strip)
+      end
+
       # Look up program: try ID, then name_en, then name_th (latest by year_started wins)
       if attrs.key?(:program_name)
         program_value = attrs.delete(:program_name).to_s.strip
         if program_value.present?
-          program = resolve_program(program_value, admission_year_be: attrs[:admission_year_be])
+          program = resolve_program(program_value, admission_year_be: attrs[:admission_year_be], degree_level: degree_level)
           attrs[:program_id] = program&.id
         end
       end
@@ -220,8 +239,7 @@ module Importers
       "ลงทะเบียนแรกเข้า" => "active",
       "ไม่จำแนกสภาพนิสิต" => "active",
       "จบการศึกษา" => "graduated",
-      "ลาพัก" => "on_leave",
-      "ลาพักการศึกษา" => "on_leave"
+      "ลาพัก" => "on_leave"
     }.freeze
 
     # Prefixes that indicate "retired" — covers พ้นสถานภาพลาออก, พ้นสถานภาพไม่มาลงทะเบียน...,
@@ -230,6 +248,7 @@ module Importers
       ปกติ
       ลงปกติ
       ขอจบ
+      รักษาสถานภาพ
     ].freeze
 
     STATUS_GRADUATED_PREFIXES = %w[
@@ -237,13 +256,31 @@ module Importers
       เกียรตินิยม
     ].freeze
 
+    STATUS_ON_LEAVE_PREFIXES = %w[
+      ลาพักการศึกษา
+    ].freeze
+
     STATUS_RETIRED_PREFIXES = [
       "พ้น",
       "ครบระยะเวลา",
       "ประเมินผลวิทยานิพนธ์ได้u",
       "โครงร่างวิทยานิพนธ์ครบระยะเวลา",
-      "การสอบประมวลความรู้ได้รับสัญลักษณ์ U"
+      "การสอบประมวลความรู้ได้รับสัญลักษณ์ U",
+      "การสอบวัดคุณสมบัติได้รับสัญลักษณ์ U"
     ].freeze
+
+    DEGREE_LEVEL_MAPPING = {
+      "ปริญญาตรี" => "bachelor",
+      "ปริญญาโท" => "master",
+      "ปริญญาเอก" => "doctoral",
+      "bachelor" => "bachelor",
+      "master" => "master",
+      "doctoral" => "doctoral"
+    }.freeze
+
+    def normalize_degree_level(value)
+      DEGREE_LEVEL_MAPPING[value] || DEGREE_LEVEL_MAPPING[value.downcase]
+    end
 
     TCAS_EXACT = {
       "สกอ." => "TCAS3",
@@ -261,6 +298,7 @@ module Importers
       return STATUS_EXACT[value] if STATUS_EXACT.key?(value)
       return "active" if STATUS_ACTIVE_PREFIXES.any? { |p| value.start_with?(p) }
       return "graduated" if STATUS_GRADUATED_PREFIXES.any? { |p| value.start_with?(p) }
+      return "on_leave" if STATUS_ON_LEAVE_PREFIXES.any? { |p| value.start_with?(p) }
       return "retired" if STATUS_RETIRED_PREFIXES.any? { |p| value.start_with?(p) }
       value.downcase.tr(" ", "_")
     end
