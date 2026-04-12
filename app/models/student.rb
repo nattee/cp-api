@@ -1,6 +1,6 @@
 class Student < ApplicationRecord
   SEXES = %w[M F].freeze
-  STATUSES = %w[active graduated on_leave retired].freeze
+  STATUSES = %w[active graduated on_leave retired unknown].freeze
   TCAS_ROUNDS = %w[TCAS1 TCAS2 TCAS3 TCAS4 other unknown].freeze
 
   # Material Symbols icon for each status — used by Select2 dropdowns
@@ -9,7 +9,8 @@ class Student < ApplicationRecord
     "active"    => "check_circle",
     "graduated" => "school",
     "on_leave"  => "pause_circle",
-    "retired"   => "exit_to_app"
+    "retired"   => "exit_to_app",
+    "unknown"   => "help"
   }.freeze
 
   belongs_to :program

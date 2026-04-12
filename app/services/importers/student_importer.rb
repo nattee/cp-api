@@ -23,11 +23,11 @@ module Importers
         { attribute: :sex,               label: "Sex",               required: false,
           aliases: %w[sex gender เพศ] },
         { attribute: :email,             label: "Email",             required: false,
-          aliases: %w[email อีเมล] },
+          aliases: %w[email e-mail อีเมล] },
         { attribute: :phone,             label: "Phone",             required: false,
-          aliases: %w[phone CENSUSTEL โทรศัพท์ เบอร์โทร] },
+          aliases: %w[phone CENSUSTEL MOBILEPHONENUMBER โทรศัพท์ เบอร์โทร เบอร์โทรศัพท์] },
         { attribute: :address,           label: "Address",           required: false,
-          aliases: %w[address ที่อยู่] },
+          aliases: %w[address ที่อยู่ ที่อยู่ปัจจุบัน] },
         { attribute: :discord,           label: "Discord",           required: false,
           aliases: %w[discord] },
         { attribute: :line_id,           label: "LINE ID",           required: false,
@@ -35,9 +35,9 @@ module Importers
         { attribute: :guardian_name,     label: "Guardian Name",     required: false,
           aliases: %w[guardian_name ชื่อผู้ปกครอง] },
         { attribute: :guardian_phone,    label: "Guardian Phone",    required: false,
-          aliases: %w[guardian_phone เบอร์ผู้ปกครอง] },
+          aliases: %w[guardian_phone เบอร์ผู้ปกครอง เบอร์โทรผู้ปกครอง] },
         { attribute: :previous_school,   label: "Previous School",   required: false,
-          aliases: %w[previous_school โรงเรียนเดิม] },
+          aliases: %w[previous_school SCHOOLNAME โรงเรียนเดิม] },
         { attribute: :tcas,              label: "TCAS Round",        required: false,
           aliases: %w[tcas_round tcas รอบ],
           help: "Accepted values: TCAS1, TCAS2, TCAS3, TCAS4, other, unknown.",
@@ -187,8 +187,8 @@ module Importers
         attrs[:tcas] = normalize_tcas(attrs[:tcas].to_s.strip)
       end
 
-      # Default status
-      attrs[:status] ||= "active"
+      # Default status — blank means unknown, not active
+      attrs[:status] = "unknown" if attrs[:status].blank?
 
       # Cross-fill names: prefer each language's own value, fall back to the other.
       # Use .blank? not ||= because empty strings from Excel cells are truthy.
@@ -321,8 +321,9 @@ module Importers
         rest = match[2].strip
       end
 
-      # Split remainder: last space-separated token is surname, rest is first name
-      parts = rest.split(/\s+/, 2)
+      # Split remainder: last space-separated token is surname, rest is first name.
+      # Include \u00A0 (non-breaking space) which appears in some Excel exports.
+      parts = rest.split(/[\s\u00A0]+/, 2)
       if parts.size == 2
         attrs[first_key] ||= parts[0]
         attrs[last_key] ||= parts[1]

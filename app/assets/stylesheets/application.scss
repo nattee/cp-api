@@ -127,6 +127,7 @@ $input-icon-color: darken($light, 5%);
 .badge-graduated { background-color: rgba($info, 0.2);    color: $info;       border: 1px solid rgba($info, 0.4); }
 .badge-on-leave  { background-color: rgba($warning, 0.2); color: $warning;                    border: 1px solid rgba($warning, 0.4); }
 .badge-retired   { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
+.badge-unknown   { background-color: rgba(150, 150, 150, 0.12); color: rgba(180, 180, 180, 0.7); border: 1px solid rgba(150, 150, 150, 0.25); }
 .badge-bachelor  { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }
 .badge-master    { background-color: rgba($info, 0.2);      color: $info;       border: 1px solid rgba($info, 0.4); }
 .badge-doctoral  { background-color: rgba($warning, 0.2);   color: $warning;                    border: 1px solid rgba($warning, 0.4); }
