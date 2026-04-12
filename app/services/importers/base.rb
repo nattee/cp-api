@@ -131,6 +131,12 @@ module Importers
                 next
               end
 
+              # Skip rows where any unique key field is blank
+              if unique_key_fields.any? && unique_key_fields.any? { |k| attrs[k].blank? }
+                skipped += 1
+                next
+              end
+
               if data_import.mode == "upsert" && (existing = find_existing_record(attrs))
                 existing.assign_attributes(attrs.except(*unique_key_fields))
                 if existing.changed?

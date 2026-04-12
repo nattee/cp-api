@@ -95,14 +95,22 @@
         %tbody
           - @attribute_definitions.each do |defn|
             - attr = defn[:attribute]
+            - use_default_fixed = false
+            - use_group = false
             - if @editing_sheet
               - saved_col = @saved_mapping[attr.to_s]
               - saved_default = @saved_defaults[attr.to_s]
+              - saved_group = @saved_defaults["_program_group_id"] if defn[:group_options]
               - if saved_col
                 - selected_source = saved_col
                 - preview_idx = @file_headers.index(saved_col)
-                - use_default_fixed = false
                 - default_val = nil
+              - elsif saved_group && defn[:group_options]
+                - selected_source = "__program_group__"
+                - preview_idx = nil
+                - use_group = true
+                - default_val = nil
+                - group_val = saved_group
               - elsif saved_default
                 - selected_source = "__constant__"
                 - preview_idx = nil
@@ -111,7 +119,6 @@
               - else
                 - selected_source = nil
                 - preview_idx = nil
-                - use_default_fixed = false
                 - default_val = nil
             - else
               - auto_mapped_header = @auto_mapping[attr]
@@ -119,7 +126,10 @@
               - selected_source = auto_mapped_header || (use_default_fixed ? "__constant__" : nil)
               - preview_idx = auto_mapped_header ? @file_headers.index(auto_mapped_header) : nil
               - default_val = use_default_fixed ? defn[:default_fixed_value] : nil
-            - source_options = [["-- skip --", ""], ["-- fixed value --", "__constant__"]] + @file_headers.map { |h| [h, h] }
+            - source_options = [["-- skip --", ""], ["-- fixed value --", "__constant__"]]
+            - if defn[:group_options]
+              - source_options << ["-- from program group --", "__program_group__"]
+            - source_options += @file_headers.map { |h| [h, h] }
             %tr
               %td
                 = defn[:label]
@@ -144,6 +154,9 @@
                   = select_tag "defaults[#{attr}]", options_for_select([["Select...", ""]] + defn[:fixed_options].call, default_val), class: "form-select form-select-sm", hidden: !use_default_fixed || nil, "data-mapping-constant" => attr
                 - else
                   = text_field_tag "defaults[#{attr}]", default_val, class: "form-control form-control-sm", placeholder: "Enter value...", hidden: !use_default_fixed || nil, "data-mapping-constant" => attr
+                - if defn[:group_options]
+                  %span{"data-mapping-group" => attr, hidden: !use_group || nil}
+                    = select_tag "defaults[_program_group_id]", options_for_select([["Select group...", ""]] + defn[:group_options].call, use_group ? group_val : nil), class: "form-select form-select-sm", "data-controller" => "select2"
 
   - if @data_import.target_type == "Grade"
     .card.mb-3

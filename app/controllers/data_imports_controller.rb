@@ -81,6 +81,7 @@ class DataImportsController < ApplicationController
   end
 
   CONSTANT_MARKER = "__constant__"
+  PROGRAM_GROUP_MARKER = "__program_group__"
 
   # Save current sheet's column mapping and add another sheet
   def save_sheet
@@ -206,6 +207,9 @@ class DataImportsController < ApplicationController
     raw_mapping.each do |attr, value|
       if value == CONSTANT_MARKER
         default_values[attr] = raw_defaults[attr] if raw_defaults[attr].present?
+      elsif value == PROGRAM_GROUP_MARKER
+        group_id = params.dig(:defaults, :_program_group_id)
+        default_values["_program_group_id"] = group_id if group_id.present?
       elsif value.present?
         column_mapping[attr] = value
       end

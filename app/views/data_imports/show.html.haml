@@ -126,6 +126,12 @@
                       %td
                         %span.badge.badge-pending constant
                         = value
+                  - if (group_id = (config["default_values"] || {})["_program_group_id"])
+                    %tr
+                      %td= labels[:program_name] || "Program"
+                      %td
+                        %span.badge.badge-pending from group
+                        = ProgramGroup.find_by(id: group_id)&.display_name
     - elsif @data_import.column_mapping.present? || @data_import.default_values.present?
       -# Single-sheet column mapping (legacy or single sheet)
       .detail-section
@@ -146,6 +152,12 @@
                 %td
                   %span.badge.badge-pending constant
                   = value
+            - if (group_id = (@data_import.default_values || {})["_program_group_id"])
+              %tr
+                %td= labels[:program_name] || "Program"
+                %td
+                  %span.badge.badge-pending from group
+                  = ProgramGroup.find_by(id: group_id)&.display_name
 
 - if @data_import.error_message.present?
   .alert.alert-danger

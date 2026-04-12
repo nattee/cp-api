@@ -59,7 +59,8 @@ module Importers
           aliases: %w[coursecodeno program program_name program_id program_code majorcode หลักสูตร],
           help: "From file: looks up by program code (4-digit) first, then alternative program code, " \
                 "then English name, then Thai name. If multiple programs share the same name, the latest one (by year started) is used.",
-          fixed_options: -> { Program.includes(:program_group).order(year_started: :desc).map { |p| [ "#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } } },
+          fixed_options: -> { Program.includes(:program_group).order(year_started: :desc).map { |p| [ "#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } },
+          group_options: -> { ProgramGroup.where.not(code: "OTHER").order(:code).map { |g| [ "#{g.code} — #{g.name_en}", g.id ] } } },
         { attribute: :old_program,       label: "Old Program",       required: false,
           aliases: %w[oldmajor old_program old_major หลักสูตรเดิม] },
         { attribute: :status_note,       label: "Status Note",       required: false,
@@ -114,12 +115,23 @@ module Importers
         return found if found
       end
 
-      # 3. Try by English name (latest by year_started)
-      found = Program.joins(:program_group).where(program_groups: { name_en: value }).order(year_started: :desc).first
+      # 3. Try by program group code (e.g. "CP", "CEDT", "SE")
+      found = resolve_program_by_group(ProgramGroup.find_by(code: value), admission_year_be)
       return found if found
 
-      # 4. Try by Thai name (latest by year_started)
-      Program.joins(:program_group).where(program_groups: { name_th: value }).order(year_started: :desc).first
+      # 4. Try by English name (via program group)
+      found = resolve_program_by_group(ProgramGroup.find_by(name_en: value), admission_year_be)
+      return found if found
+
+      # 5. Try by Thai name (via program group)
+      resolve_program_by_group(ProgramGroup.find_by(name_th: value), admission_year_be)
+    end
+
+    def resolve_program_by_group(group, admission_year_be)
+      return nil unless group
+      scope = group.programs
+      scope = scope.where("year_started <= ?", admission_year_be) if admission_year_be
+      scope.order(year_started: :desc).first
     end
 
     def transform_attributes(attrs)
@@ -165,15 +177,29 @@ module Importers
       # Default status
       attrs[:status] ||= "active"
 
-      # Model requires Thai names; fall back to English names when not provided
+      # Cross-fill names: prefer each language's own value, fall back to the other
       attrs[:first_name_th] ||= attrs[:first_name] if attrs[:first_name].present?
       attrs[:last_name_th] ||= attrs[:last_name] if attrs[:last_name].present?
+      attrs[:first_name] ||= attrs[:first_name_th] if attrs[:first_name_th].present?
+      attrs[:last_name] ||= attrs[:last_name_th] if attrs[:last_name_th].present?
 
       # Look up program: try ID, then name_en, then name_th (latest by year_started wins)
       if attrs.key?(:program_name)
         program_value = attrs.delete(:program_name).to_s.strip
         if program_value.present?
           program = resolve_program(program_value, admission_year_be: attrs[:admission_year_be])
+          attrs[:program_id] = program&.id
+        end
+      end
+
+      # Resolve program from program group + admission year
+      if attrs.key?(:_program_group_id) && attrs[:program_id].blank?
+        group_id = attrs.delete(:_program_group_id).to_i
+        if group_id > 0 && attrs[:admission_year_be].present?
+          program = Program.where(program_group_id: group_id)
+                           .where("year_started <= ?", attrs[:admission_year_be])
+                           .order(year_started: :desc)
+                           .first
           attrs[:program_id] = program&.id
         end
       end
@@ -191,12 +217,9 @@ module Importers
     # Maps Thai status strings from university systems to internal status codes.
     # Exact matches checked first, then prefix patterns for the many "retired" variants.
     STATUS_EXACT = {
-      "ขอจบการศึกษา" => "active",
       "ลงทะเบียนแรกเข้า" => "active",
+      "ไม่จำแนกสภาพนิสิต" => "active",
       "จบการศึกษา" => "graduated",
-      "สำเร็จการศึกษา" => "graduated",
-      "เกียรตินิยมอันดับหนึ่ง" => "graduated",
-      "เกียรตินิยมอันดับสอง" => "graduated",
       "ลาพัก" => "on_leave",
       "ลาพักการศึกษา" => "on_leave"
     }.freeze
@@ -205,6 +228,13 @@ module Importers
     # พ้นฯเนื่องจาก..., ครบระยะเวลาการศึกษา
     STATUS_ACTIVE_PREFIXES = %w[
       ปกติ
+      ลงปกติ
+      ขอจบ
+    ].freeze
+
+    STATUS_GRADUATED_PREFIXES = %w[
+      สำเร็จการศึก
+      เกียรตินิยม
     ].freeze
 
     STATUS_RETIRED_PREFIXES = [
@@ -218,7 +248,8 @@ module Importers
     TCAS_EXACT = {
       "สกอ." => "TCAS3",
       "โครงการรับตรง" => "TCAS3",
-      "โครงการพิเศษ" => "TCAS3"
+      "โครงการพิเศษ" => "TCAS3",
+      "-" => "unknown"
     }.freeze
 
     def normalize_tcas(value)
@@ -229,6 +260,7 @@ module Importers
     def normalize_status(value)
       return STATUS_EXACT[value] if STATUS_EXACT.key?(value)
       return "active" if STATUS_ACTIVE_PREFIXES.any? { |p| value.start_with?(p) }
+      return "graduated" if STATUS_GRADUATED_PREFIXES.any? { |p| value.start_with?(p) }
       return "retired" if STATUS_RETIRED_PREFIXES.any? { |p| value.start_with?(p) }
       value.downcase.tr(" ", "_")
     end

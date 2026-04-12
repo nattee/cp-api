@@ -8,11 +8,12 @@ import { Controller } from "@hotwired/stimulus"
 //   data-mapping-preview-row-value      — JSON array of preview row values
 //
 // Each mapping row has:
-//   select[data-mapping-attr]           — source selector (column header, "__constant__", or "")
+//   select[data-mapping-attr]           — source selector (column header, "__constant__", "__program_group__", or "")
 //   [data-mapping-preview-text]         — span showing column preview text
-//   [data-mapping-constant]             — fixed value input or select (in preview cell, hidden unless active)
+//   [data-mapping-constant]             — fixed value input or select (shown when __constant__ selected)
+//   [data-mapping-group]                — program group select (shown when __program_group__ selected)
 
-const CONSTANT_VALUE = "__constant__"
+const SPECIAL_SOURCES = ["__constant__", "__program_group__"]
 
 export default class extends Controller {
   static values = {
@@ -35,13 +36,25 @@ export default class extends Controller {
     const attr = select.dataset.mappingAttr
     const previewText = this.element.querySelector(`[data-mapping-preview-text="${attr}"]`)
     const constantInput = this.element.querySelector(`[data-mapping-constant="${attr}"]`)
+    const groupInput = this.element.querySelector(`[data-mapping-group="${attr}"]`)
 
-    if (select.value === CONSTANT_VALUE) {
+    // Hide all special inputs first
+    if (constantInput) constantInput.hidden = true
+    if (groupInput) groupInput.hidden = true
+
+    if (select.value === "__constant__") {
       previewText.hidden = true
-      constantInput.hidden = false
-      constantInput.focus()
+      if (constantInput) {
+        constantInput.hidden = false
+        constantInput.focus()
+      }
+    } else if (select.value === "__program_group__") {
+      previewText.hidden = true
+      if (groupInput) {
+        groupInput.hidden = false
+        groupInput.focus()
+      }
     } else {
-      constantInput.hidden = true
       previewText.hidden = false
       this.setPreviewText(previewText, select.value)
     }

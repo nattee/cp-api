@@ -4,7 +4,7 @@ class StudentTest < ActiveSupport::TestCase
   # --- Validations ---
 
   test "valid student" do
-    student = Student.new(student_id: "9999900001", first_name_th: "ทดสอบ", last_name_th: "นิสิต", admission_year_be: 2567, status: "active", program: programs(:cp_bachelor))
+    student = Student.new(student_id: "9999900001", first_name: "Test", last_name: "Student", first_name_th: "ทดสอบ", last_name_th: "นิสิต", admission_year_be: 2567, status: "active", program: programs(:cp_bachelor))
     assert student.valid?
   end
 
