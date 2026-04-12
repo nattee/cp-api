@@ -190,11 +190,12 @@ module Importers
       # Default status
       attrs[:status] ||= "active"
 
-      # Cross-fill names: prefer each language's own value, fall back to the other
-      attrs[:first_name_th] ||= attrs[:first_name] if attrs[:first_name].present?
-      attrs[:last_name_th] ||= attrs[:last_name] if attrs[:last_name].present?
-      attrs[:first_name] ||= attrs[:first_name_th] if attrs[:first_name_th].present?
-      attrs[:last_name] ||= attrs[:last_name_th] if attrs[:last_name_th].present?
+      # Cross-fill names: prefer each language's own value, fall back to the other.
+      # Use .blank? not ||= because empty strings from Excel cells are truthy.
+      attrs[:first_name_th] = attrs[:first_name] if attrs[:first_name_th].blank? && attrs[:first_name].present?
+      attrs[:last_name_th] = attrs[:last_name] if attrs[:last_name_th].blank? && attrs[:last_name].present?
+      attrs[:first_name] = attrs[:first_name_th] if attrs[:first_name].blank? && attrs[:first_name_th].present?
+      attrs[:last_name] = attrs[:last_name_th] if attrs[:last_name].blank? && attrs[:last_name_th].present?
 
       # Normalize degree_level (transient — used for program resolution only)
       degree_level = attrs.delete(:degree_level)

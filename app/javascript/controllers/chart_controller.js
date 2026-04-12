@@ -108,7 +108,7 @@ export default class extends Controller {
         },
         plugins: {
           legend: { labels: { color: TICK_COLOR, boxWidth: 14 } },
-          tooltip: { mode: "index", intersect: false },
+          tooltip: { mode: "nearest", axis: "y", intersect: false },
         },
       },
     }
