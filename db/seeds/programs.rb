@@ -37,8 +37,8 @@ programs = {
     { program_code: "4239", total_credit: 72, short_name: "วศ.ด. (CD)", year_started: 2023 + 543 },
   ],
   "SE" => [
-    { program_code: "0072", total_credit: 36, short_name: "วท.ม. (SE)", year_started: 2002 + 543 },
-    { program_code: "0073", total_credit: 36, short_name: "วท.ม. (SE)", year_started: 2002 + 543 },
+    { program_code: "0772", total_credit: 36, short_name: "วท.ม. (SE)", year_started: 2002 + 543 },
+    { program_code: "0773", total_credit: 36, short_name: "วท.ม. (SE)", year_started: 2002 + 543 },
     { program_code: "2628", total_credit: 36, short_name: "วท.ม. (SE)", year_started: 2015 + 543 },
     { program_code: "2629", total_credit: 36, short_name: "วท.ม. (SE)", year_started: 2015 + 543 },
     { program_code: "3338", total_credit: 36, short_name: "วท.ม. (SE)", year_started: 2018 + 543 },

@@ -11,7 +11,7 @@
             Clear
 
         .chat-messages{style: "max-height: 60vh; overflow-y: auto;", "data-controller" => "scroll-bottom"}
-          - if @messages.empty? && @tool_rounds.empty?
+          - if @messages.empty?
             .text-center.text-body-secondary.py-5
               %span.material-symbols{style: "font-size: 48px; display: block; margin-bottom: 8px;"} forum
               %p Send a message to test the LLM tool-calling loop.
