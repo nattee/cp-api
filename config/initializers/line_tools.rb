@@ -17,4 +17,16 @@ Rails.application.config.to_prepare do
     definition: Line::Tools::StudentLookupTool::DEFINITION,
     handler: Line::Tools::StudentLookupTool
   )
+
+  Line::ToolRegistry.register(
+    "staff_lookup",
+    definition: Line::Tools::StaffLookupTool::DEFINITION,
+    handler: Line::Tools::StaffLookupTool
+  )
+
+  Line::ToolRegistry.register(
+    "search",
+    definition: Line::Tools::SearchTool::DEFINITION,
+    handler: Line::Tools::SearchTool
+  )
 end
