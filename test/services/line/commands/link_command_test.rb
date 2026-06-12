@@ -4,18 +4,16 @@ class Line::Commands::LinkCommandTest < ActiveSupport::TestCase
   setup do
     @user = users(:viewer)
     @line_user_id = "U_LINE_TEST_123"
-    @event_data = {
-      "source" => { "user_id" => @line_user_id },
-      "reply_token" => "test_reply_token",
-      "message" => { "text" => "link TOKEN" }
-    }
   end
 
   test "links user when token is valid and not expired" do
     token = "ABCD1234"
     @user.update!(line_link_token: token, line_link_token_expires_at: 24.hours.from_now)
 
-    execute_command(token)
+    result = execute_command(token)
+
+    assert_not result.error?
+    assert_match(/Linked successfully/, result.text)
 
     @user.reload
     assert_equal "line", @user.provider
@@ -31,22 +29,25 @@ class Line::Commands::LinkCommandTest < ActiveSupport::TestCase
 
     travel 25.hours
 
-    reply_text = execute_command(token)
+    result = execute_command(token)
 
-    assert_match(/expired/, reply_text)
+    assert result.error?
+    assert_match(/expired/, result.text)
     assert_nil @user.reload.provider
   end
 
   test "rejects invalid token" do
-    reply_text = execute_command("INVALID")
+    result = execute_command("INVALID")
 
-    assert_match(/Invalid/, reply_text)
+    assert result.error?
+    assert_match(/Invalid/, result.text)
   end
 
   test "rejects blank token" do
-    reply_text = execute_command("")
+    result = execute_command("")
 
-    assert_match(/Usage/, reply_text)
+    assert result.error?
+    assert_match(/Usage/, result.text)
   end
 
   test "token cannot be reused after linking" do
@@ -57,13 +58,10 @@ class Line::Commands::LinkCommandTest < ActiveSupport::TestCase
     assert_equal "line", @user.reload.provider
 
     # Second attempt with the same token by a different LINE user
-    other_event = @event_data.merge("source" => { "user_id" => "U_OTHER" })
-    cmd = Line::Commands::LinkCommand.new(other_event)
-    reply_text = nil
-    cmd.define_singleton_method(:reply) { |text| reply_text = text }
-    cmd.execute(token)
+    result = execute_command(token, line_user_id: "U_OTHER")
 
-    assert_match(/Invalid/, reply_text)
+    assert result.error?
+    assert_match(/Invalid/, result.text)
   end
 
   test "rejects if LINE account is already linked to another user" do
@@ -73,9 +71,10 @@ class Line::Commands::LinkCommandTest < ActiveSupport::TestCase
     token = "ABCD1234"
     @user.update!(line_link_token: token, line_link_token_expires_at: 24.hours.from_now)
 
-    reply_text = execute_command(token)
+    result = execute_command(token)
 
-    assert_match(/already linked/, reply_text)
+    assert result.error?
+    assert_match(/already linked/, result.text)
   end
 
   test "quick-linked user cannot use a link code meant for another user" do
@@ -87,20 +86,24 @@ class Line::Commands::LinkCommandTest < ActiveSupport::TestCase
     users(:editor).update!(line_link_token: token, line_link_token_expires_at: 24.hours.from_now)
 
     # LINE user tries to use editor's code — should be rejected because already linked
-    reply_text = execute_command(token)
+    result = execute_command(token)
 
-    assert_match(/already linked/, reply_text)
+    assert result.error?
+    assert_match(/already linked/, result.text)
     # Editor's code should not be consumed
     assert_equal token, users(:editor).reload.line_link_token
   end
 
   private
 
-  def execute_command(token)
-    cmd = Line::Commands::LinkCommand.new(@event_data)
-    replied_text = nil
-    cmd.define_singleton_method(:reply) { |text| replied_text = text }
-    cmd.execute(token)
-    replied_text
+  # Builds context the same way MessageRouter.build_context does: the user is
+  # whoever is already linked to this LINE account, nil otherwise.
+  def execute_command(token, line_user_id: @line_user_id)
+    context = {
+      line_user_id: line_user_id,
+      user: User.find_by(provider: "line", uid: line_user_id),
+      source: :line
+    }
+    Line::Commands::LinkCommand.new(context).execute(token)
   end
 end
