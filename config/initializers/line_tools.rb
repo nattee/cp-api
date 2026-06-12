@@ -25,6 +25,12 @@ Rails.application.config.to_prepare do
   )
 
   Line::ToolRegistry.register(
+    "course_lookup",
+    definition: Line::Tools::CourseLookupTool::DEFINITION,
+    handler: Line::Tools::CourseLookupTool
+  )
+
+  Line::ToolRegistry.register(
     "search",
     definition: Line::Tools::SearchTool::DEFINITION,
     handler: Line::Tools::SearchTool

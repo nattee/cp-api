@@ -2,6 +2,13 @@
 
 Design doc for adding data query capabilities to the LINE bot's LLM chat.
 
+> **Status (June 2026): superseded.** The implementation went with per-entity
+> tools (`student_lookup`, `staff_lookup`, `course_lookup`, `search`) instead
+> of the single `query_data` meta-tool proposed below — in practice the models
+> handled a small number of entity tools fine. See the "Tool inventory" in
+> `line-integration.md` for the current design. Kept for the analysis and
+> rationale, which still apply (keep tool count low, shared parameter pattern).
+
 ## Problem
 
 Users want to get department reports by chatting with the LLM in LINE (e.g. "What's my schedule?", "What does อ.สมชาย teach?"). The existing tool-calling infrastructure (ToolRegistry, ToolExecutor, LlmService multi-round loop) is in place but only has an EchoTool.

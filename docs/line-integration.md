@@ -110,10 +110,10 @@ intents. The LLM can chain tools across rounds (up to `max_rounds`).
 | Tool | Purpose | Example queries |
 |---|---|---|
 | `student_lookup` | Find students by ID/name/program/year/status. Returns profile, GPA, credits. | "ขอข้อมูล 6530200321", "หานิสิตชื่อสมชาย", "how many 2nd year CP students?" |
-| `course_lookup` | Find courses by course_no/name/program. Returns course info + who teaches it. | "who teaches Algorithm Design?", "courses in CP curriculum" |
+| `course_lookup` | Find courses by course_no or name (TH/EN), filter by program group or revision year. Returns names, credits, revision year, program. | "วิชา 2110327 กี่หน่วยกิต", "มีวิชาเกี่ยวกับปัญญาประดิษฐ์ไหม" |
 | `staff_lookup` | Find staff by name/initials. Returns staff info + current teaching assignments. | "what does อ.ณัฐ teach?", "staff NNN" |
-| `schedule_lookup` | Query sections/time slots for a semester — by course, staff, or room. | "what room is 2110327 in?", "Tuesday schedule for ENG 305" |
-| `grade_summary` | Aggregate queries: grade distribution, pass rates, program statistics. | "grade distribution for 2110327", "average GPA of CP 65" |
+| `schedule_lookup` *(planned)* | Query sections/time slots for a semester — by course, staff, or room. | "what room is 2110327 in?", "Tuesday schedule for ENG 305" |
+| `grade_summary` *(planned)* | Aggregate queries: grade distribution, pass rates, program statistics. | "grade distribution for 2110327", "average GPA of CP 65" |
 
 ### Tool parameter pattern
 
