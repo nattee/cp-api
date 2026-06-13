@@ -40,6 +40,12 @@ bin/rails test               # Unit/model tests
 bin/rails test:system        # System tests (headless Firefox)
 ```
 
+System tests drive Firefox via **geckodriver**, whose version must match the
+installed Firefox or Selenium logs a compatibility warning (e.g. Firefox 151
+needs geckodriver ≥ 0.37.0). selenium-webdriver's Selenium Manager
+auto-provisions a matching driver **only when none is found on `PATH`** — if you
+keep a geckodriver in `PATH`, you must bump it yourself when Firefox updates.
+
 ## Data Import
 
 Multi-step flow via the web UI at `/data_imports`:
