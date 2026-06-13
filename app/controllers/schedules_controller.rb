@@ -1,5 +1,10 @@
 class SchedulesController < ApplicationController
-  helper_method :load_cell_class
+  WORKLOAD_METRICS = [
+    { key: "credits",  label: "Credits",     icon: "school" },
+    { key: "sections", label: "Sections",    icon: "view_agenda" },
+    { key: "courses",  label: "Courses",     icon: "menu_book" },
+    { key: "hours",    label: "Contact hrs", icon: "schedule" }
+  ].freeze
 
   def index
   end
@@ -95,33 +100,57 @@ class SchedulesController < ApplicationController
     end
   end
 
+  # Staff × semester teaching-load matrix. Each cell can show any of several
+  # metrics (credits, sections, distinct courses, contact hours); the view
+  # toggles between them client-side. Per-staff totals (summed across the
+  # range) are static sortable columns. load_ratio multiplies the size
+  # metrics so co-taught sections split correctly (it is 1.0 by default, so
+  # today this degrades gracefully to un-split sums).
   def workload
-    current_year = Time.current.year + 543
-    @start_year = (params[:start_year].presence || current_year).to_i
-    @end_year = (params[:end_year].presence || current_year).to_i
+    default_end = Semester.maximum(:year_be) || (Time.current.year + 543)
+    @end_year = (params[:end_year].presence || default_end).to_i
+    @start_year = (params[:start_year].presence || (@end_year - 3)).to_i
+    @start_year, @end_year = @end_year, @start_year if @start_year > @end_year
     @staff_type = params[:staff_type].presence
-    @low_threshold = (params[:low_threshold].presence || 1).to_f
-    @high_threshold = (params[:high_threshold].presence || 2).to_f
+    @metrics = WORKLOAD_METRICS
 
     year_range = @start_year..@end_year
+    # Ascending so columns read oldest → newest: the row is a load trajectory.
+    @semesters = Semester.where(year_be: year_range).order(:year_be, :semester_number).to_a
 
-    @semesters = Semester.where(year_be: year_range).ordered.to_a
-
-    base = Teaching.joins(:staff, section: { course_offering: :semester })
+    base = Teaching.joins(:staff, section: { course_offering: [:semester, :course] })
                    .where(semesters: { year_be: year_range })
     base = base.where(staffs: { staff_type: @staff_type }) if @staff_type.present?
 
-    raw = base.group(:staff_id, "semesters.year_be", "semesters.semester_number")
-              .sum(:load_ratio)
+    raw = base.group("teachings.staff_id", "semesters.year_be", "semesters.semester_number")
+              .pluck(
+                Arel.sql("teachings.staff_id"),
+                Arel.sql("semesters.year_be"),
+                Arel.sql("semesters.semester_number"),
+                Arel.sql("COUNT(teachings.id)"),
+                Arel.sql("COUNT(DISTINCT courses.course_no)"),
+                Arel.sql("COALESCE(SUM(COALESCE(courses.credits, 0) * teachings.load_ratio), 0)"),
+                Arel.sql("COALESCE(SUM((COALESCE(courses.l_hours, 0) + COALESCE(courses.nl_hours, 0)) * teachings.load_ratio), 0)")
+              )
 
-    staff_ids = raw.keys.map(&:first).uniq
-    @staffs = Staff.where(id: staff_ids).index_by(&:id)
+    @workload = {}
+    @totals = Hash.new { |h, k| h[k] = Hash.new(0) }
 
-    @workload_data = {}
-    raw.each do |(staff_id, year_be, semester_number), load|
-      @workload_data[staff_id] ||= {}
-      @workload_data[staff_id][[year_be, semester_number]] = load
+    raw.each do |staff_id, year_be, semester_number, sections, courses, credits, hours|
+      cell = {
+        "sections" => sections.to_i,
+        "courses"  => courses.to_i,
+        "credits"  => clean_number(credits),
+        "hours"    => clean_number(hours)
+      }
+      (@workload[staff_id] ||= {})[[year_be, semester_number]] = cell
+      cell.each { |metric, value| @totals[staff_id][metric] += value }
     end
+
+    @staffs = Staff.where(id: @workload.keys).index_by(&:id)
+    # First-paint order: busiest by credits. The DataTable lets the user
+    # re-sort by any column, so this is just a sensible default.
+    @staff_ids = @workload.keys.sort_by { |id| -@totals[id]["credits"] }
   end
 
   def conflicts
@@ -192,13 +221,11 @@ class SchedulesController < ApplicationController
 
   private
 
-  def load_cell_class(load, low, high)
-    return nil unless load
-    if load < low
-      "table-success"
-    elsif load > high
-      "table-danger"
-    end
+  # Floats from SUM come back as BigDecimal; show whole numbers as integers
+  # and fractional loads (from co-teaching splits) to one decimal place.
+  def clean_number(value)
+    f = value.to_f
+    f == f.to_i ? f.to_i : f.round(1)
   end
 
   def find_room_conflicts(semester)

@@ -22,7 +22,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["table", "filter"]
-  static values = { serverSideUrl: String, pageLength: { type: Number, default: 25 }, order: String }
+  static values = { serverSideUrl: String, pageLength: { type: Number, default: 25 }, order: String, disableLastColumn: { type: Boolean, default: true } }
 
   connect() {
     if (!window.DataTable) return
@@ -38,13 +38,19 @@ export default class extends Controller {
       order = [[parseInt(col, 10), dir || "asc"]]
     }
 
+    // Tables ending in an Actions column disable sorting/searching on it
+    // (the default). Tables whose last column IS data (e.g. the workload
+    // matrix's last total column) opt out via data-datatable-disable-last-column-value="false".
+    const columnDefs = []
+    if (this.disableLastColumnValue) {
+      columnDefs.push({ orderable: false, searchable: false, targets: lastColIndex })
+    }
+
     const opts = {
       pageLength: this.pageLengthValue,
       lengthMenu: [10, 25, 50, 100],
       order,
-      columnDefs: [
-        { orderable: false, searchable: false, targets: lastColIndex }
-      ]
+      columnDefs
     }
 
     // Server-side mode: DataTables fetches data via AJAX

@@ -118,6 +118,25 @@ $input-icon-color: darken($light, 5%);
   font-weight: 600;
 }
 
+// Staff Workload matrix heatmap. Cells are tinted by load intensity relative
+// to the active metric's max (bucketed 1–5 in workload_controller.js, which
+// recomputes on every metric toggle). A single hue with increasing alpha
+// reads as pure magnitude — heavier load = stronger tint — so the trajectory
+// across a staff row is scannable at a glance. Uses the theme primary so it
+// tracks palette changes.
+.wl-heat-1 { background-color: rgba(var(--bs-primary-rgb), 0.10); }
+.wl-heat-2 { background-color: rgba(var(--bs-primary-rgb), 0.20); }
+.wl-heat-3 { background-color: rgba(var(--bs-primary-rgb), 0.32); }
+.wl-heat-4 { background-color: rgba(var(--bs-primary-rgb), 0.46); }
+.wl-heat-5 { background-color: rgba(var(--bs-primary-rgb), 0.62); }
+// The Σ total column that matches the active metric — subtle emphasis so the
+// body cells and the column that sums them stay visually linked when toggling.
+.wl-total-active { background-color: rgba(var(--bs-primary-rgb), 0.14); }
+// Cell links inherit the body color so the heatmap tint isn't fighting the
+// link blue; the underline still appears on hover.
+.wl-cell-link { color: inherit; text-decoration: none; }
+.wl-cell-link:hover { text-decoration: underline; }
+
 // Outlined / frosted badges (neon-bright text, tinted glow bg)
 .badge-admin    { background-color: rgba($danger, 0.2);    color: $danger;                    border: 1px solid rgba($danger, 0.4); }
 .badge-editor   { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }

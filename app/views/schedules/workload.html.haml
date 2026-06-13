@@ -15,21 +15,26 @@
         = number_field_tag :end_year, @end_year, class: "form-control form-control-sm", style: "width: 100px"
       .col-auto
         %label.form-label.mb-0 Staff Type
-        = select_tag :staff_type, options_for_select(Staff::STAFF_TYPES.map { |t| [t.titleize, t] }, @staff_type), include_blank: "All", class: "form-select form-select-sm", style: "width: 140px"
-      .col-auto
-        %label.form-label.mb-0 Low Threshold
-        = number_field_tag :low_threshold, @low_threshold, step: 0.1, min: 0, class: "form-control form-control-sm", style: "width: 80px"
-      .col-auto
-        %label.form-label.mb-0 High Threshold
-        = number_field_tag :high_threshold, @high_threshold, step: 0.1, min: 0, class: "form-control form-control-sm", style: "width: 80px"
+        = select_tag :staff_type, options_for_select(Staff::STAFF_TYPES.map { |t| [t.titleize, t] }, @staff_type), include_blank: "All", class: "form-select form-select-sm", style: "width: 160px"
       .col-auto
         %button.btn.btn-primary.btn-sm{type: "submit"}
           %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} filter_list
           View
 
-- if @workload_data.present?
-  .card{"data-controller" => "datatable"}
+- if @workload.present?
+  .card{"data-controller" => "datatable workload", "data-datatable-order-value" => "#{@semesters.size + 1}:desc", "data-datatable-disable-last-column-value" => "false", "data-datatable-page-length-value" => "50", "data-workload-default-metric-value" => "credits"}
     .card-body.p-3
+      .d-flex.justify-content-between.align-items-center.mb-3.flex-wrap.gap-2
+        %h5.card-title.mb-0 Teaching load by semester
+        / Metric toggle: switches what the body cells show (and recolors the
+        / heatmap) client-side. The Σ total columns always stay visible and
+        / sortable regardless of the active metric.
+        .btn-group.btn-group-sm{role: "group", "aria-label" => "Workload metric"}
+          - @metrics.each_with_index do |m, i|
+            = radio_button_tag "wl_metric", m[:key], i.zero?, class: "btn-check", id: "wl_metric_#{m[:key]}", "data-action" => "change->workload#switch", autocomplete: "off"
+            %label.btn.btn-outline-primary{for: "wl_metric_#{m[:key]}"}
+              %span.material-symbols{style: "font-size: 16px; vertical-align: middle; margin-right: 2px"}= m[:icon]
+              = m[:label]
       .table-responsive
         %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
           %thead
@@ -37,25 +42,27 @@
               %th Staff
               - @semesters.each do |sem|
                 %th.text-center= sem.display_name
-              %th.text-center Total
+              - @metrics.each do |m|
+                %th.text-center{"data-wl-total" => m[:key]}= "Σ #{m[:label]}"
           %tbody
-            - @workload_data.each do |staff_id, semester_loads|
+            - @staff_ids.each do |staff_id|
               - staff = @staffs[staff_id]
               - next unless staff
-              - total = semester_loads.values.sum
+              - cells = @workload[staff_id]
               %tr
                 %td= link_to staff.display_name_th, staff_path(staff)
                 - @semesters.each do |sem|
-                  - load = semester_loads[[sem.year_be, sem.semester_number]]
-                  - cell_class = load_cell_class(load, @low_threshold, @high_threshold) if load
-                  %td.text-center{class: cell_class}
-                    - if load
-                      = link_to load, schedules_staff_path(semester_id: sem.id, staff_id: staff_id)
-                    - else
-                      %span.text-muted —
-                %td.text-center
-                  %strong= total
-- elsif @workload_data
+                  - cell = cells[[sem.year_be, sem.semester_number]]
+                  - if cell
+                    %td.text-center{"data-wl-cell" => "", "data-credits" => cell["credits"], "data-sections" => cell["sections"], "data-courses" => cell["courses"], "data-hours" => cell["hours"], "data-order" => cell["credits"]}
+                      = link_to cell["credits"], schedules_staff_path(semester_id: sem.id, staff_id: staff_id), class: "wl-cell-link"
+                  - else
+                    %td.text-center.text-muted{"data-wl-cell" => "", "data-wl-empty" => "", "data-credits" => 0, "data-sections" => 0, "data-courses" => 0, "data-hours" => 0, "data-order" => 0}
+                      —
+                - @metrics.each do |m|
+                  %td.text-center{"data-wl-total" => m[:key], "data-order" => @totals[staff_id][m[:key]]}
+                    %strong= @totals[staff_id][m[:key]]
+- else
   .card
     .card-body.p-3
       %p.text-muted.mb-0 No teaching data found for this year range.
