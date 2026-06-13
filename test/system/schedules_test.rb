@@ -68,9 +68,28 @@ class SchedulesTest < ApplicationSystemTestCase
     visit schedules_workload_path(start_year: 2568, end_year: 2568)
 
     assert_text "Staff Workload"
-    # Smith teaches sec 1 (1.0) + sec 2 (0.5) = 1.5 total
     assert_text staffs(:lecturer_smith).display_name_th
-    assert_text "1.5"
+    # Smith co-teaches 2110101 sec1 (1.0) + sec2 (0.5): 3*1.0 + 3*0.5 = 4.5 credits
+    assert_text "4.5"
+  end
+
+  test "workload metric toggle swaps the displayed cell values" do
+    visit schedules_workload_path(start_year: 2568, end_year: 2568)
+
+    # Smith's 2568/1 cell. The data-* attributes are stable; only the shown
+    # text changes when the metric toggles, so they make a reliable locator.
+    cell = "td[data-credits='4.5'][data-sections='2']"
+    assert_selector cell, text: "4.5"            # credits shown by default
+
+    find("label[for='wl_metric_sections']").click
+    assert_selector cell, text: "2"              # now the section count
+    assert_no_selector cell, text: "4.5"
+
+    find("label[for='wl_metric_courses']").click
+    assert_selector cell, text: "1"              # distinct course count
+
+    # The Σ column matching the active metric gets highlighted.
+    assert_selector "th[data-wl-total='courses'].wl-total-active"
   end
 
   test "conflicts page shows no conflicts message" do
