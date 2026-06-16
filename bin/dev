@@ -8,4 +8,29 @@ fi
 # Default to port 3000 if not specified
 export PORT="${PORT:-3000}"
 
+# Foreman has no bind-address flag, so intercept -b/--binding here and pass it
+# to `rails server` via the BINDING env var it reads. All other arguments
+# (e.g. -p) still go to foreman. Usage: bin/dev -b 0.0.0.0
+n=$#
+i=0
+while [ "$i" -lt "$n" ]; do
+  case "$1" in
+    -b|--binding)
+      export BINDING="$2"
+      shift 2
+      i=$((i + 2))
+      ;;
+    -b=*|--binding=*)
+      export BINDING="${1#*=}"
+      shift
+      i=$((i + 1))
+      ;;
+    *)
+      set -- "$@" "$1"
+      shift
+      i=$((i + 1))
+      ;;
+  esac
+done
+
 exec foreman start -f Procfile.dev "$@"
