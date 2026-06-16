@@ -29,6 +29,13 @@ const GRADE_COLORS = {
   "M":  "rgba(150, 150, 150, 0.25)", // $grade-muted (lightest)
 }
 
+// Distinct line colors for the GPA-trend chart (one per subject). Bright hues
+// that read on the dark theme; cycles if there are more lines than colors.
+const LINE_COLORS = [
+  "#74d4ff", "#fda5d5", "#8e51ff", "#7bf1a8", "#fdc700",
+  "#ff8904", "#b8e6fe", "#fb64b6", "#00d3f2", "#a684ff",
+]
+
 const GRID_COLOR = "rgba(255, 255, 255, 0.08)"
 const TICK_COLOR = "#ffffff"
 
@@ -43,6 +50,7 @@ export default class extends Controller {
     if (this.typeValue === "stacked-bar") config = this.stackedBarConfig("all")
     else if (this.typeValue === "horizontal-stacked-bar") config = this.horizontalStackedBarConfig()
     else if (this.typeValue === "grade-distribution") config = this.gradeDistributionConfig()
+    else if (this.typeValue === "gpa-trend") config = this.gpaTrendConfig()
     else config = this.histogramConfig()
     this.chart = new window.Chart(ctx, config)
   }
@@ -161,6 +169,42 @@ export default class extends Controller {
         scales: {
           x: { stacked: true, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR } },
           y: { stacked: true, beginAtZero: true, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR, stepSize: 1 } },
+        },
+        plugins: {
+          legend: { labels: { color: TICK_COLOR, boxWidth: 14 } },
+          tooltip: { mode: "index", intersect: false },
+        },
+      },
+    }
+  }
+
+  // Multi-line GPA trend: x = term, y = class GPA (0–4), one line per subject.
+  // data = { labels: [terms], datasets: [{ label: course_no, data: [gpa|null] }] }
+  gpaTrendConfig() {
+    const d = this.dataValue
+    const datasets = d.datasets.map((ds, i) => ({
+      label: ds.label,
+      data: ds.data,
+      borderColor: LINE_COLORS[i % LINE_COLORS.length],
+      backgroundColor: LINE_COLORS[i % LINE_COLORS.length],
+      spanGaps: true, // connect across terms a subject wasn't offered
+      tension: 0.3,
+      borderWidth: 2,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+    }))
+
+    return {
+      type: "line",
+      data: { labels: d.labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "nearest", axis: "x", intersect: false },
+        scales: {
+          x: { grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR } },
+          // GPA is always on the 0–4 scale, so fix the axis for honest comparison.
+          y: { min: 0, max: 4, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR, stepSize: 1 } },
         },
         plugins: {
           legend: { labels: { color: TICK_COLOR, boxWidth: 14 } },

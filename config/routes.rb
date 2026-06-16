@@ -48,7 +48,11 @@ Rails.application.routes.draw do
       get :datatable
     end
   end
-  resources :grades
+  resources :grades do
+    collection do
+      get :distribution
+    end
+  end
   resources :users do
     member do
       post :generate_line_code

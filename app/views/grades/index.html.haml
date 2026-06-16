@@ -4,8 +4,12 @@
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
         = resource_icon
         Grades
-      - if current_user.admin?
-        = link_to "New Grade", new_grade_path, class: "btn btn-primary btn-sm"
+      .d-flex.gap-2
+        = link_to distribution_grades_path, class: "btn btn-outline-primary btn-sm" do
+          %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} bar_chart
+          Distribution
+        - if current_user.admin?
+          = link_to "New Grade", new_grade_path, class: "btn btn-primary btn-sm"
     = form_with(url: grades_path, method: :get, class: "row g-2 align-items-end") do |f|
       .col-auto
         %label.form-label.mb-0{for: "year"} Year

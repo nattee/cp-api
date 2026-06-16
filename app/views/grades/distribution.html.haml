@@ -1,0 +1,83 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1.d-flex.align-items-center
+    %span.material-symbols.resource-icon.me-2 bar_chart
+    Grade Distribution
+  = link_to "Back", grades_path, class: "btn btn-outline-primary"
+
+.card.mb-3
+  .card-body.p-3
+    = form_with(url: distribution_grades_path, method: :get, class: "row g-2 align-items-end") do |f|
+      .col-auto
+        %label.form-label.mb-0{for: "prefix"} Course prefix
+        = text_field_tag :prefix, @prefix, class: "form-control form-control-sm", style: "width: 120px", placeholder: "2110"
+      .col-auto
+        %label.form-label.mb-0{for: "program_code"} Program
+        = select_tag :program_code, options_for_select(@program_groups, @program_code), include_blank: "All", class: "form-select form-select-sm", style: "width: 110px"
+      .col-auto
+        %label.form-label.mb-0{for: "start_year"} From (C.E.)
+        = number_field_tag :start_year, @start_year, class: "form-control form-control-sm", style: "width: 100px"
+      .col-auto
+        %label.form-label.mb-0{for: "end_year"} To (C.E.)
+        = number_field_tag :end_year, @end_year, class: "form-control form-control-sm", style: "width: 100px"
+      .col-auto
+        = hidden_field_tag :split, "0"
+        .form-check
+          = check_box_tag :split, "1", @split, class: "form-check-input"
+          %label.form-check-label{for: "split"} Split by semester
+      .col-auto
+        %button.btn.btn-primary.btn-sm{type: "submit"}
+          %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} filter_list
+          View
+
+- if @rows.present?
+  - if @gpa_trend_data[:datasets].any?
+    .card.mb-3{"data-controller" => "chart", "data-chart-type-value" => "gpa-trend", "data-chart-data-value" => @gpa_trend_data.to_json}
+      .card-body.p-3
+        %h5.card-title.mb-0.d-flex.align-items-center.mb-3
+          %span.material-symbols.resource-icon.me-2 trending_up
+          Class GPA by term
+        - if @trend_truncated
+          %p.text-muted.small.mb-2
+            Showing the #{GradesController::CHART_LINE_CAP} most-enrolled subjects of #{@trend_total}. Narrow the course prefix to chart specific subjects.
+        %div{style: "height: 340px"}
+          %canvas{"data-chart-target" => "canvas"}
+
+  .card{"data-controller" => "datatable", "data-datatable-disable-last-column-value" => "false", "data-datatable-page-length-value" => "50"}
+    .card-body.p-3
+      .table-responsive
+        %table.table.table-hover.table-sm.mb-0{"data-datatable-target" => "table"}
+          %thead
+            %tr
+              %th Course
+              %th Title
+              - if @split
+                %th Term
+              - GradesController::LETTER_GRADES.each do |g|
+                %th.text-center= g
+              %th.text-center W
+              %th.text-center Other
+              %th.text-center N
+              %th.text-center GPA
+              %th.text-center{title: "Percent of A–F grades that are C or higher"} % ≥ C
+          %tbody
+            - @rows.each do |r|
+              %tr
+                %td
+                  - if (cid = @course_ids[r[:course_no]])
+                    = link_to r[:course_no], course_path(cid)
+                  - else
+                    = r[:course_no]
+                %td= r[:title]
+                - if @split
+                  %td= r[:term]
+                - GradesController::LETTER_GRADES.each do |g|
+                  %td.text-center{class: ("text-muted" if r[:buckets][g].zero?)}= r[:buckets][g]
+                %td.text-center{class: ("text-muted" if r[:buckets]["W"].zero?)}= r[:buckets]["W"]
+                %td.text-center{class: ("text-muted" if r[:other].zero?)}= r[:other]
+                %td.text-center= r[:n]
+                %td.text-center{"data-order" => (r[:gpa] || -1)}= r[:gpa] ? ("%.2f" % r[:gpa]) : "—"
+                %td.text-center{"data-order" => (r[:pass_rate] || -1)}= r[:pass_rate] ? "#{r[:pass_rate]}%" : "—"
+- else
+  .card
+    .card-body.p-3
+      %p.text-muted.mb-0 No grades found for this prefix and year range.
