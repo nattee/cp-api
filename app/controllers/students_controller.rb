@@ -1,6 +1,17 @@
 class StudentsController < ApplicationController
   before_action :set_student, only: %i[show edit update destroy]
-  before_action :require_admin, only: %i[new create edit update destroy]
+  before_action :require_admin, only: %i[new create edit update destroy export]
+
+  # Maps DataTables column indices to DB columns (matches the thead order in
+  # the index view). Shared by the datatable and export actions for ordering.
+  COLUMNS_MAP = {
+    0 => "students.student_id",
+    1 => "students.first_name",
+    2 => "program_groups.name_en",
+    3 => "program_groups.degree_level",
+    4 => "students.admission_year_be",
+    5 => "students.status"
+  }.freeze
 
   def index
     @admission_years = Student.distinct.order(admission_year_be: :desc).pluck(:admission_year_be)
@@ -11,45 +22,11 @@ class StudentsController < ApplicationController
     draw = params[:draw].to_i
     start = params[:start].to_i
     length = params[:length].to_i
-    search_value = params.dig(:search, :value).to_s.strip
-    order_col = params.dig(:order, "0", :column).to_i
-    order_dir = params.dig(:order, "0", :dir) == "desc" ? "DESC" : "ASC"
 
-    # Column index to DB column (matches thead order)
-    columns_map = {
-      0 => "students.student_id",
-      1 => "students.first_name",
-      2 => "program_groups.name_en",
-      3 => "program_groups.degree_level",
-      4 => "students.admission_year_be",
-      5 => "students.status"
-    }
-
-    base = Student.left_joins(program: :program_group).includes(program: :program_group).references(:program_groups)
+    base = filtered_students
     records_total = Student.count
-
-    if search_value.present?
-      like = "%#{Student.sanitize_sql_like(search_value)}%"
-      base = base.where(
-        "students.student_id LIKE :q OR students.first_name LIKE :q OR students.last_name LIKE :q " \
-        "OR students.first_name_th LIKE :q OR students.last_name_th LIKE :q " \
-        "OR program_groups.name_en LIKE :q",
-        q: like
-      )
-    end
-
-    # Column-level filters (sent by DataTables column().search())
-    col_search_program = params.dig(:columns, "2", :search, :value).to_s.strip
-    col_search_degree = params.dig(:columns, "3", :search, :value).to_s.strip
-    col_search_year = params.dig(:columns, "4", :search, :value).to_s.strip
-    base = base.where("program_groups.name_en" => col_search_program) if col_search_program.present?
-    base = base.where("program_groups.degree_level" => col_search_degree) if col_search_degree.present?
-    base = base.where("students.admission_year_be" => col_search_year.to_i) if col_search_year.present?
-
     records_filtered = base.count
-    order_column = columns_map[order_col] || "students.student_id"
-    students = base.order(Arel.sql("#{order_column} #{order_dir}"))
-                   .offset(start).limit(length)
+    students = base.order(order_clause).offset(start).limit(length)
 
     is_admin = current_user.admin?
 
@@ -66,6 +43,15 @@ class StudentsController < ApplicationController
     end
 
     render json: { draw: draw, recordsTotal: records_total, recordsFiltered: records_filtered, data: data }
+  end
+
+  # Excel (.xlsx) of the current student list. The export button serializes the
+  # live DataTables request params (search + column filters + order) onto this
+  # URL, so the file reflects exactly what the user is viewing — full result
+  # set, not just the visible page. Admin-only (see require_admin before_action).
+  def export
+    exporter = Exporters::StudentExporter.new(filtered_students.order(order_clause))
+    send_data exporter.data, filename: exporter.filename, type: exporter.content_type, disposition: "attachment"
   end
 
   def show
@@ -102,6 +88,40 @@ class StudentsController < ApplicationController
   end
 
   private
+
+  # Builds the filtered student relation from DataTables request params (global
+  # search + per-column program/degree/year filters). Shared by #datatable
+  # (paginated JSON) and #export (full CSV) so both honour identical filtering.
+  def filtered_students
+    base = Student.left_joins(program: :program_group).includes(program: :program_group).references(:program_groups)
+
+    search_value = params.dig(:search, :value).to_s.strip
+    if search_value.present?
+      like = "%#{Student.sanitize_sql_like(search_value)}%"
+      base = base.where(
+        "students.student_id LIKE :q OR students.first_name LIKE :q OR students.last_name LIKE :q " \
+        "OR students.first_name_th LIKE :q OR students.last_name_th LIKE :q " \
+        "OR program_groups.name_en LIKE :q",
+        q: like
+      )
+    end
+
+    # Column-level filters (sent by DataTables column().search())
+    col_search_program = params.dig(:columns, "2", :search, :value).to_s.strip
+    col_search_degree = params.dig(:columns, "3", :search, :value).to_s.strip
+    col_search_year = params.dig(:columns, "4", :search, :value).to_s.strip
+    base = base.where("program_groups.name_en" => col_search_program) if col_search_program.present?
+    base = base.where("program_groups.degree_level" => col_search_degree) if col_search_degree.present?
+    base = base.where("students.admission_year_be" => col_search_year.to_i) if col_search_year.present?
+    base
+  end
+
+  def order_clause
+    order_col = params.dig(:order, "0", :column).to_i
+    order_dir = params.dig(:order, "0", :dir) == "desc" ? "DESC" : "ASC"
+    column = COLUMNS_MAP[order_col] || "students.student_id"
+    Arel.sql("#{column} #{order_dir}")
+  end
 
   def set_student
     @student = Student.find(params[:id])

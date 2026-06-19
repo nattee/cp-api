@@ -1,7 +1,5 @@
-require "csv"
-
 module Exporters
-  class ScheduleExporter
+  class ScheduleExporter < Base
     HEADERS = %w[course_no revision_year section_number day start_time end_time building room_number instructor load_ratio remark].freeze
     DAY_ABBRS = %w[Sun Mon Tue Wed Thu Fri Sat].freeze
 
@@ -11,22 +9,13 @@ module Exporters
       @semester = semester
     end
 
-    def to_csv
-      rows = build_rows
-
-      CSV.generate do |csv|
-        csv << HEADERS
-        rows.each { |row| csv << row }
-      end
-    end
-
     def filename
       "schedule_#{semester.year_be}_#{semester.semester_number}.csv"
     end
 
     private
 
-    def build_rows
+    def rows
       time_slots = TimeSlot.joins(section: { course_offering: [:course, :semester] })
                            .where(course_offerings: { semester_id: semester.id })
                            .includes(:room, section: [:teachings => :staff, course_offering: :course])

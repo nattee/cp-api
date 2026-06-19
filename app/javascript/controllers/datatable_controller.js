@@ -22,7 +22,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["table", "filter"]
-  static values = { serverSideUrl: String, pageLength: { type: Number, default: 25 }, order: String, disableLastColumn: { type: Boolean, default: true } }
+  static values = { serverSideUrl: String, exportUrl: String, pageLength: { type: Number, default: 25 }, order: String, disableLastColumn: { type: Boolean, default: true } }
 
   connect() {
     if (!window.DataTable) return
@@ -78,6 +78,24 @@ export default class extends Controller {
   filter(event) {
     const el = event.currentTarget
     this._applyFilter(el, el.value)
+  }
+
+  // Stimulus action: data-action="datatable#export"
+  // Downloads the current view as a file. In server-side mode the visible
+  // <tbody> holds only one page, so we forward the exact DataTables request
+  // params (search/column filters/order) to the export URL — the server then
+  // returns the full filtered result set, not just the current page. jQuery
+  // (bundled with the DataTables UMD) serializes the nested params object.
+  export(event) {
+    if (event) event.preventDefault()
+    if (!this.hasExportUrlValue || !this.exportUrlValue) return
+
+    let url = this.exportUrlValue
+    if (this.dataTable && this.hasServerSideUrlValue && window.jQuery) {
+      const query = window.jQuery.param(this.dataTable.ajax.params())
+      if (query) url += (url.includes("?") ? "&" : "?") + query
+    }
+    window.location = url
   }
 
   _applyFilter(el, value) {

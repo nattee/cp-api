@@ -1,4 +1,4 @@
-.card{"data-controller" => "datatable", "data-datatable-server-side-url-value" => datatable_students_path}
+.card{"data-controller" => "datatable", "data-datatable-server-side-url-value" => datatable_students_path, "data-datatable-export-url-value" => export_students_path}
   .card-body.p-3
     .d-flex.align-items-center.mb-3
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
@@ -15,7 +15,11 @@
           %span.form-label.mb-0.small.text-muted Year
           = select_tag "filter-year", options_for_select([["All", ""]] + @admission_years.map { |y| [y, y] }), data: { controller: "select2", datatable_target: "filter", action: "change->datatable#filter", datatable_column_index: "4" }
       - if current_user.admin?
-        = link_to "New Student", new_student_path, class: "btn btn-primary btn-sm"
+        .d-flex.align-items-center.gap-2
+          %button.btn.btn-outline-secondary.btn-sm.d-flex.align-items-center.gap-1{type: "button", data: { action: "datatable#export" }}
+            %span.material-symbols{style: "font-size: 18px"} download
+            Export
+          = link_to "New Student", new_student_path, class: "btn btn-primary btn-sm"
     .table-responsive
       %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
         %thead

@@ -1,4 +1,5 @@
 require "test_helper"
+require "roo"
 
 class StudentsControllerTest < ActionDispatch::IntegrationTest
   setup do
@@ -46,5 +47,39 @@ class StudentsControllerTest < ActionDispatch::IntegrationTest
       delete student_path(students(:active_student))
     end
     assert_redirected_to students_path
+  end
+
+  test "non-admin cannot export" do
+    get export_students_path
+    assert_redirected_to students_path
+    assert_equal "Only admins can perform this action.", flash[:alert]
+  end
+
+  test "admin export returns an xlsx attachment" do
+    post login_path, params: { username: users(:admin).username, password: "password123" }
+
+    get export_students_path
+    assert_response :success
+    assert_equal Exporters::Base::XLSX_CONTENT_TYPE, response.media_type
+    assert_match(/filename="students\.xlsx"/, response.headers["Content-Disposition"])
+    assert_equal "PK", response.body[0, 2]
+  end
+
+  test "admin export honours datatable filter params" do
+    post login_path, params: { username: users(:admin).username, password: "password123" }
+
+    # Filter to a single student via the global search param the datatable uses.
+    target = students(:active_student)
+    get export_students_path, params: { search: { value: target.student_id } }
+    assert_response :success
+
+    Tempfile.create(["export", ".xlsx"]) do |f|
+      f.binmode
+      f.write(response.body)
+      f.flush
+      sheet = Roo::Excelx.new(f.path)
+      assert_equal 2, sheet.last_row, "expected header + exactly one matching student row"
+      assert_equal target.student_id, sheet.row(2).first
+    end
   end
 end

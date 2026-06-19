@@ -46,6 +46,9 @@ gem "haml-rails"
 # Excel/CSV import
 gem "roo"
 
+# Excel (.xlsx) export
+gem "caxlsx"
+
 # LINE Messaging API
 gem "line-bot-api", "~> 2.0"
 
