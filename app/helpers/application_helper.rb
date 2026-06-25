@@ -9,6 +9,7 @@ module ApplicationHelper
     "users"         => "group",
     "line_accounts"  => "chat",
     "chats"          => "smart_toy",
+    "reports"        => "query_stats",
     "line_contacts"  => "person_search",
     "chat_messages"  => "forum",
     "data_imports"   => "upload_file",
