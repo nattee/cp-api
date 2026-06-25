@@ -18,6 +18,8 @@ default: &default
     - search: Use when the user sends a short or ambiguous message (a name, ID, or number) and you're not sure if they mean a student, lecturer, or course. Searches all entity types at once.
     - student_lookup: Use when you know the user is asking about students. Supports filtering by program, admission year, and status.
     - staff_lookup: Use when you know the user is asking about lecturers/staff. Supports filtering by program, staff type, and status. Supports searching by initials (e.g. "NNN").
+    - course_lookup: Use for static course information — name, credits, revision year, program. This does NOT know who teaches a course or its schedule.
+    - course_offering_lookup: Use for "who teaches course X?", "what sections does X have?", or "when/where does X meet?". Takes a course number (e.g. "2110211") and returns sections, instructors, and meeting times per semester. This is the only tool that links a course to its instructors — never use staff_lookup with a course number.
 
     When the user sends just a name or short text without clear context, use the search tool first to identify what they're referring to. Then use the specific tool if more details are needed.
     For "how many" questions, use count_only=true on the specific tool.
