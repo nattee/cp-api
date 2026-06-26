@@ -1,0 +1,18 @@
+-# app/views/reports/_form.html.haml
+-# Built from @report.params_spec — input widget chosen by param :type.
+= form_with url: report_path(@report.key), method: :get, class: "row g-3 align-items-end" do
+  = hidden_field_tag :run, 1
+  - @report.params_spec.each do |p|
+    .col-md-3
+      = label_tag p[:name], p[:name].to_s.humanize, class: "form-label small text-muted"
+      - case p[:type]
+      - when :term
+        = select_tag p[:name], options_for_select([["First", 1], ["Second", 2], ["Summer", 3]], params[p[:name]]), include_blank: true, class: "form-select"
+      - when :semester_record
+        = select_tag p[:name], options_for_select(Semester.ordered.map { |s| [s.display_name, s.id] }, params[p[:name]]), include_blank: true, class: "form-select"
+      - when :academic_year, :integer
+        = number_field_tag p[:name], params[p[:name]], class: "form-control"
+      - else
+        = text_field_tag p[:name], params[p[:name]], class: "form-control"
+  .col-md-3
+    = submit_tag "Run report", class: "btn btn-primary"
