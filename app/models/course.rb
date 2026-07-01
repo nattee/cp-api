@@ -1,5 +1,7 @@
 class Course < ApplicationRecord
   belongs_to :program
+  has_many :program_courses, dependent: :destroy
+  has_many :programs, through: :program_courses
   has_many :grades, dependent: :destroy
   has_many :course_offerings, dependent: :restrict_with_error
 

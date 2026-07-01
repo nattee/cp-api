@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_11_030255) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_01_103258) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -153,6 +153,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_11_030255) do
     t.json "recent_messages"
     t.datetime "updated_at", null: false
     t.index ["line_user_id"], name: "index_line_contacts_on_line_user_id", unique: true
+  end
+
+  create_table "program_courses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "course_group_code"
+    t.bigint "course_id", null: false
+    t.integer "course_type"
+    t.datetime "created_at", null: false
+    t.bigint "program_id", null: false
+    t.string "remark"
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_program_courses_on_course_id"
+    t.index ["program_id", "course_id"], name: "index_program_courses_on_program_id_and_course_id", unique: true
+    t.index ["program_id"], name: "index_program_courses_on_program_id"
   end
 
   create_table "program_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -351,6 +364,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_11_030255) do
   add_foreign_key "grades", "courses"
   add_foreign_key "grades", "sections"
   add_foreign_key "grades", "students"
+  add_foreign_key "program_courses", "courses"
+  add_foreign_key "program_courses", "programs"
   add_foreign_key "programs", "program_groups"
   add_foreign_key "scrapes", "semesters"
   add_foreign_key "scrapes", "users"

@@ -1,0 +1,11 @@
+intro_cp:
+  program: cp_bachelor
+  course: intro_computing
+
+senior_cp:
+  program: cp_bachelor
+  course: senior_project
+
+gened_cp:
+  program: cp_bachelor
+  course: gened_course
