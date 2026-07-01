@@ -30,8 +30,10 @@
 
             %dt.col-sm-4 Program
             %dd.col-sm-8
-              - if @course.program
-                = link_to @course.program.name_en, @course.program
+              - if @course.programs.any?
+                - @course.programs.each do |program|
+                  = link_to program.name_en, program
+                  %br
               - else
                 .text-muted Not assigned
 

@@ -6,7 +6,8 @@ class Program < ApplicationRecord
   PLACEHOLDER_NAME = "Unknown Program".freeze
 
   belongs_to :program_group
-  has_many :courses, dependent: :restrict_with_error
+  has_many :program_courses, dependent: :destroy
+  has_many :courses, through: :program_courses
   has_many :students, dependent: :restrict_with_error
   has_many :staff_programs, dependent: :destroy
   has_many :staffs, through: :staff_programs

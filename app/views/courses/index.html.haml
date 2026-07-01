@@ -28,7 +28,7 @@
                   %span.badge.badge-auto-placeholder.ms-1 Placeholder
               %td= course.name
               %td= course.revision_year
-              %td= course.program&.short_name.presence || course.program&.name_en
+              %td= course.programs.map { |p| p.short_name.presence || p.name_en }.join(", ")
               %td= course.credits
               %td
                 - if course.is_gened?

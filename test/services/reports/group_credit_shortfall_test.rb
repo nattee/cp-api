@@ -5,9 +5,11 @@ class Reports::GroupCreditShortfallTest < ActiveSupport::TestCase
   # in it; isolated records keep the locked fixture counts untouched.
   setup do
     @c1 = Course.create!(course_no: "9900010", name: "Core A", revision_year: 2565,
-                         program: programs(:cp_bachelor), course_group: "TestCore")
+                         course_group: "TestCore")
+    ProgramCourse.create!(program: programs(:cp_bachelor), course: @c1)
     @c2 = Course.create!(course_no: "9900011", name: "Core B", revision_year: 2565,
-                         program: programs(:cp_bachelor), course_group: "TestCore")
+                         course_group: "TestCore")
+    ProgramCourse.create!(program: programs(:cp_bachelor), course: @c2)
     @below = make_student("9900000010", admission_year_be: 2566)
     @above = make_student("9900000011", admission_year_be: 2567)
     # @above earns 6 Core credits (two passing courses); @below earns none.

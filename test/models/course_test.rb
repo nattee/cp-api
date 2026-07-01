@@ -4,7 +4,7 @@ class CourseTest < ActiveSupport::TestCase
   # --- Validations ---
 
   test "valid course" do
-    course = Course.new(name: "Test Course", course_no: "9999999", revision_year: 2565, program: programs(:cp_bachelor))
+    course = Course.new(name: "Test Course", course_no: "9999999", revision_year: 2565)
     assert course.valid?
   end
 
@@ -43,8 +43,7 @@ class CourseTest < ActiveSupport::TestCase
     course = Course.new(
       name: "Duplicate",
       course_no: courses(:intro_computing).course_no,
-      revision_year: courses(:intro_computing).revision_year,
-      program: programs(:cp_bachelor)
+      revision_year: courses(:intro_computing).revision_year
     )
     assert_not course.valid?
     assert_includes course.errors[:course_no], "already exists for this revision year"
@@ -54,8 +53,7 @@ class CourseTest < ActiveSupport::TestCase
     course = Course.new(
       name: "Same No Different Year",
       course_no: courses(:intro_computing).course_no,
-      revision_year: courses(:intro_computing).revision_year + 5,
-      program: programs(:cp_bachelor)
+      revision_year: courses(:intro_computing).revision_year + 5
     )
     assert course.valid?
   end
@@ -69,20 +67,19 @@ class CourseTest < ActiveSupport::TestCase
   end
 
   test "credits allows nil" do
-    course = Course.new(name: "No Credits", course_no: "0000005", revision_year: 2565, program: programs(:cp_bachelor), credits: nil)
+    course = Course.new(name: "No Credits", course_no: "0000005", revision_year: 2565, credits: nil)
     assert course.valid?
   end
 
   # --- Associations ---
 
-  test "belongs to program" do
+  test "has many programs through program_courses" do
     course = courses(:intro_computing)
-    assert_equal programs(:cp_bachelor), course.program
+    assert_includes course.programs, programs(:cp_bachelor)
   end
 
-  test "requires program" do
-    course = Course.new(name: "No Program", course_no: "0000006", revision_year: 2565, program_id: nil)
-    assert_not course.valid?
-    assert_includes course.errors[:program], "must exist"
+  test "valid without any program" do
+    course = Course.new(name: "No Program", course_no: "0000006", revision_year: 2565)
+    assert course.valid?
   end
 end

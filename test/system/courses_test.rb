@@ -35,7 +35,7 @@ class CoursesTest < ApplicationSystemTestCase
   test "show page links to program" do
     course = courses(:intro_computing)
     visit course_path(course)
-    assert_selector "a", text: course.program.name_en
+    assert_selector "a", text: course.programs.first.name_en
   end
 
   test "admin can create a course" do

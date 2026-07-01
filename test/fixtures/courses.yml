@@ -4,7 +4,6 @@ intro_computing:
   name_abbr: INTRO COMP
   course_no: "2110101"
   revision_year: 2565
-  program: cp_bachelor
   is_gened: false
   department_code: "21"
   credits: 3
@@ -21,7 +20,6 @@ senior_project:
   name_abbr: SR PROJ
   course_no: "2110499"
   revision_year: 2565
-  program: cp_bachelor
   course_group: Project
   is_gened: false
   department_code: "21"
@@ -37,7 +35,6 @@ gened_course:
   name: General Physics
   course_no: "2103106"
   revision_year: 2560
-  program: cp_bachelor
   is_gened: true
   credits: 3
   l_credits: 3

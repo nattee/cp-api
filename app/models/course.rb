@@ -1,9 +1,14 @@
 class Course < ApplicationRecord
-  belongs_to :program
   has_many :program_courses, dependent: :destroy
   has_many :programs, through: :program_courses
   has_many :grades, dependent: :destroy
   has_many :course_offerings, dependent: :restrict_with_error
+
+  # Transient: the CourseImporter sets this so a resolved program is linked
+  # (additively) after the row is saved. Not a DB column.
+  attr_accessor :import_program
+
+  after_save :link_import_program, if: -> { import_program.present? }
 
   AUTO_GENERATED_LEVELS = %w[none copied placeholder].freeze
 
@@ -27,5 +32,11 @@ class Course < ApplicationRecord
 
   def auto_generated?
     auto_generated != "none"
+  end
+
+  private
+
+  def link_import_program
+    ProgramCourse.find_or_create_by!(program: import_program, course: self)
   end
 end

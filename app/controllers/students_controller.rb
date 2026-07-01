@@ -126,7 +126,7 @@ class StudentsController < ApplicationController
   def set_student
     @student = Student.find(params[:id])
     if action_name == "show"
-      @grades = @student.grades.includes(course: { program: :program_group })
+      @grades = @student.grades.includes(course: { programs: :program_group })
       load_schedule_data
     end
   end

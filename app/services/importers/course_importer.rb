@@ -109,12 +109,19 @@ module Importers
       attrs[:is_gened] = coerce_boolean(attrs[:is_gened]) if attrs.key?(:is_gened)
       attrs[:is_thesis] = coerce_boolean(attrs[:is_thesis]) if attrs.key?(:is_thesis)
 
-      # Resolve program
+      # Resolve program and link it through the join (courses no longer carry program_id).
       if attrs.key?(:program_name)
         program_value = attrs.delete(:program_name)
-        if program_value.present?
-          program = resolve_program(program_value)
-          attrs[:program_id] = program&.id
+        program = resolve_program(program_value) if program_value.present?
+        if program
+          existing = Course.find_by(course_no: attrs[:course_no], revision_year: attrs[:revision_year])
+          if existing
+            # Course already persisted (upsert/unchanged path): link immediately.
+            ProgramCourse.find_or_create_by!(program: program, course: existing)
+          else
+            # New course: link after it is saved, via the transient hook.
+            attrs[:import_program] = program
+          end
         end
       end
 

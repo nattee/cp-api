@@ -92,8 +92,9 @@ class Line::Tools::CourseLookupToolTest < ActiveSupport::TestCase
   # --- Multiple revisions of the same course ---
 
   test "orders same course_no by newest revision first" do
-    Course.create!(course_no: "2110101", name: "Introduction to Computing",
-                   revision_year: 2566, program: programs(:cp_bachelor))
+    c = Course.create!(course_no: "2110101", name: "Introduction to Computing",
+                       revision_year: 2566)
+    ProgramCourse.create!(program: programs(:cp_bachelor), course: c)
 
     result = call_tool(query: "2110101")
     data = JSON.parse(result)

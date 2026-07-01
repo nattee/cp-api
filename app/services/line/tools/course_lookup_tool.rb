@@ -60,7 +60,7 @@ class Line::Tools::CourseLookupTool
   end
 
   def self.build_scope(query, program_code:, revision_year:)
-    scope = Course.joins(program: :program_group)
+    scope = Course.left_joins(program_courses: { program: :program_group }).distinct
 
     if query.present?
       if query.match?(/\A\d+\z/)
@@ -82,13 +82,14 @@ class Line::Tools::CourseLookupTool
   private_class_method :build_scope
 
   def self.serialize(course)
+    prog = course.programs.first
     {
       course_no: course.course_no,
       name_en: course.name,
       name_th: course.name_th,
       credits: course.credits,
       revision_year: course.revision_year,
-      program: "#{course.program.program_group.code} (#{course.program.year_started})",
+      program: prog ? "#{prog.program_group.code} (#{prog.year_started})" : nil,
       is_gened: course.is_gened,
       is_thesis: course.is_thesis
     }

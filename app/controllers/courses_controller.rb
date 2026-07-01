@@ -3,7 +3,7 @@ class CoursesController < ApplicationController
   before_action :require_admin, only: %i[new create edit update destroy]
 
   def index
-    @courses = Course.all
+    @courses = Course.includes(:programs)
   end
 
   # Grade stack order: bottom (worst) to top (best)
@@ -30,6 +30,7 @@ class CoursesController < ApplicationController
 
   def create
     @course = Course.new(course_params)
+    @course.program_ids = program_ids_param
     if @course.save
       redirect_to @course, notice: "Course was successfully created."
     else
@@ -40,7 +41,9 @@ class CoursesController < ApplicationController
   def edit; end
 
   def update
-    if @course.update(course_params)
+    @course.assign_attributes(course_params)
+    @course.program_ids = program_ids_param
+    if @course.save
       redirect_to @course, notice: "Course was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -89,8 +92,12 @@ class CoursesController < ApplicationController
   def course_params
     params.require(:course).permit(
       :name, :name_th, :name_abbr, :course_group, :course_no, :revision_year,
-      :program_id, :is_gened, :department_code, :credits,
+      :is_gened, :department_code, :credits,
       :l_credits, :nl_credits, :l_hours, :nl_hours, :s_hours, :is_thesis
     )
+  end
+
+  def program_ids_param
+    Array(params.dig(:course, :program_id).presence)
   end
 end

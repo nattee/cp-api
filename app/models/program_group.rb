@@ -11,7 +11,8 @@ class ProgramGroup < ApplicationRecord
 
   has_many :programs, dependent: :restrict_with_error
   has_many :students, through: :programs
-  has_many :courses, through: :programs
+  has_many :program_courses, through: :programs
+  has_many :courses, -> { distinct }, through: :program_courses
   has_many :staff_programs, through: :programs
   has_many :staffs, -> { distinct }, through: :staff_programs
 
