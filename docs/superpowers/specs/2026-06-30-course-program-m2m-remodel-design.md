@@ -241,6 +241,29 @@ Recorded from live probing of the ChulaBooster External API (`/api/ext/`; creds 
 - **Pagination/delta:** keyset via opaque `next_cursor` (base64 of `update_time|pk`); `changed_since` for
   deltas; `limit ≤ 500` for export, search capped at 200.
 
+## Project 2 — Phase 1: Reconciliation (dry-run diff) — REQUIRED before any write
+
+Because Project 2 is an **authoritative** sync (CB overwrites managed fields), its first phase is a
+**read-only reconciliation report** that runs *after* this re-model and *before* any write. It diffs each CB
+export against the data already in the local DB (from earlier CSV imports), keyed by business key, and
+buckets every record as **identical / field-mismatch / CB-only / local-only**. Purpose: validate the field
+mapping and crosswalks against real data, and preview exactly what an authoritative sync would change — the
+decision to enable overwriting sync is gated on reviewing this report.
+
+| Entity | Match key | Fields compared |
+|---|---|---|
+| Courses | `(course_no, revision_year→BE)` | name, name_th, credits, hours, is_gened, is_thesis |
+| Programs | `program_code ↔ CB program_id` | names (via group), year_started, `alternative_program_code ↔ CB program_code` |
+| Students | `student_id` | names (EN / `*_alt`=TH), sex↔gender, admission_year_be ↔ start_academic_year (CE→BE), status |
+| Grades | `(student_id, course, year, semester, section)` | grade, credits |
+| program_courses | `(program_code, course_no+rev)` | curriculum membership — validates the backfilled `ProgramCourse` join vs CB's authoritative curriculum |
+
+- Output: per-entity bucket counts plus detailed field-level diffs. First delivery as a rake task / console
+  report; a web report page is optional later.
+- The `program_courses` row depends on the M:N re-model (this Project 1) existing — another reason it runs after.
+- **Read-only** — no inserts/updates/deletes. It informs the "Join reconciliation" and "Managed-vs-local"
+  questions below.
+
 ## Open questions for Project 2 (not this branch)
 
 - **Unmapped-program policy:** CB returns many programs (long 12-digit `program_id`s) with no CP
