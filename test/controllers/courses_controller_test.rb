@@ -46,4 +46,20 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to courses_path
   end
+
+  test "admin create assigns the program via program_ids (join row created)" do
+    post login_path, params: { username: users(:admin).username, password: "password123" }
+    assert_difference ["Course.count", "ProgramCourse.count"], 1 do
+      post courses_path, params: { course: { name: "Ctrl New", course_no: "2110998", revision_year: 2565, program_id: programs(:cp_bachelor).id } }
+    end
+    course = Course.find_by!(course_no: "2110998", revision_year: 2565)
+    assert_includes course.programs, programs(:cp_bachelor)
+  end
+
+  test "admin update replaces the course program via program_ids" do
+    post login_path, params: { username: users(:admin).username, password: "password123" }
+    course = courses(:intro_computing) # linked to cp_bachelor
+    patch course_path(course), params: { course: { name: course.name, program_id: programs(:cp_master).id } }
+    assert_equal [programs(:cp_master)], course.reload.programs.to_a
+  end
 end

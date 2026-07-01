@@ -25,4 +25,19 @@ class ProgramTest < ActiveSupport::TestCase
   test "placeholder?" do
     assert_not programs(:cp_bachelor).placeholder?
   end
+
+  test "courses through program_courses" do
+    assert_includes programs(:cp_bachelor).courses, courses(:intro_computing)
+  end
+
+  test "destroying a program destroys its join rows but keeps the courses" do
+    program = Program.create!(program_code: "8888", program_group: program_groups(:cp_group), year_started: 2560)
+    program.program_courses.create!(course: courses(:senior_project))
+    assert_difference "ProgramCourse.count", -1 do
+      assert_no_difference "Course.count" do
+        program.destroy!
+      end
+    end
+    assert Course.exists?(courses(:senior_project).id)
+  end
 end

@@ -82,4 +82,23 @@ class CourseTest < ActiveSupport::TestCase
     course = Course.new(name: "No Program", course_no: "0000006", revision_year: 2565)
     assert course.valid?
   end
+
+  # --- Many-to-many behavior ---
+
+  test "course can belong to multiple programs" do
+    course = courses(:intro_computing)
+    course.programs << programs(:cp_master)
+    assert_equal 2, course.reload.programs.count
+    assert_includes course.programs, programs(:cp_bachelor)
+    assert_includes course.programs, programs(:cp_master)
+  end
+
+  test "import_program links a program after save" do
+    course = Course.new(name: "Linked", course_no: "0000007", revision_year: 2565,
+                        import_program: programs(:cp_bachelor))
+    assert_difference "ProgramCourse.count", 1 do
+      course.save!
+    end
+    assert_includes course.programs, programs(:cp_bachelor)
+  end
 end

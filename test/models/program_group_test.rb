@@ -62,4 +62,9 @@ class ProgramGroupTest < ActiveSupport::TestCase
     assert program_groups(:other_group).placeholder?
     assert_not program_groups(:cp_group).placeholder?
   end
+
+  test "has many courses through programs" do
+    group = program_groups(:cp_group)
+    assert_includes group.courses, courses(:intro_computing)
+  end
 end
