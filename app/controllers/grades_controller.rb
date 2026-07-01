@@ -80,12 +80,12 @@ class GradesController < ApplicationController
 
   # Letter-grade counts grouped by subject + term, honoring the report filters.
   def grade_counts
-    base = @program_code ? Grade.joins(course: { program: :program_group }) : Grade.joins(:course)
+    base = @program_code ? Grade.joins(course: { programs: :program_group }) : Grade.joins(:course)
     base = base.where.not(grade: [nil, ""])
     base = base.where("courses.course_no LIKE ?", "#{@prefix}%") if @prefix.present?
     base = base.where(grades: { year: @start_year..@end_year })
     base = base.where(program_groups: { code: @program_code }) if @program_code
-    base.group("courses.course_no", "grades.year", "grades.semester", "grades.grade").count
+    base.group("courses.course_no", "grades.year", "grades.semester", "grades.grade").count("DISTINCT grades.id")
   end
 
   # course_no => most recent revision's name (later revisions overwrite earlier).
@@ -101,7 +101,7 @@ class GradesController < ApplicationController
   def matching_courses
     scope = Course.all
     scope = scope.where("course_no LIKE ?", "#{@prefix}%") if @prefix.present?
-    scope = scope.joins(program: :program_group).where(program_groups: { code: @program_code }) if @program_code
+    scope = scope.where(id: Course.joins(programs: :program_group).where(program_groups: { code: @program_code }).select(:id)) if @program_code
     scope
   end
 
