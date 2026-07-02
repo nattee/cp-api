@@ -53,4 +53,36 @@ class Chulabooster::ReconcilerTest < ActiveSupport::TestCase
     assert_match "programs", table
     assert_path_exists File.join(@dir, "summary.md")
   end
+
+  test "resume seeds counts from a prior checkpoint instead of restarting at zero (resume-summary bug regression)" do
+    p1 = programs(:cp_bachelor)
+    p2 = programs(:cp_master)
+
+    # Simulate that a prior (crashed) run already processed one row and left a checkpoint behind.
+    partial_counts = { entity: "programs", local: Program.count, cb: 1, matched: 1, identical: 1,
+                        changed: 0, cb_only: 0, local_only: 0 }
+    File.write(File.join(@dir, "checkpoint.json"),
+               JSON.generate(entity: "programs", next_cursor: "resume-here", counts: partial_counts, done: false))
+
+    # The "resumed" run only sees a second page (as if the real client resumed from the saved cursor).
+    row2 = { "program_id" => p2.program_code, "program_name" => "Changed", "program_name_alt" => p2.name_th,
+             "revision_year" => p2.year_started - 543, "program_code" => p2.alternative_program_code }
+    client = FakeClient.new([[[row2], nil]])
+
+    counts = Chulabooster::Reconciler.new(client: client, writer: @writer, run_dir: @dir)
+                                     .reconcile_entity(Chulabooster::Mappers::Programs.new, start_cursor: "resume-here")
+
+    # The pre-crash page's counts must still be reflected, not lost.
+    assert_equal 2, counts[:cb]          # 1 from before the crash + 1 from this resumed page
+    assert_equal 1, counts[:identical]   # carried over from before the crash
+    assert_equal 1, counts[:changed]     # from this resumed page (program_name mismatch)
+  end
+
+  test "ReportWriter persists and reloads per-entity counts (used by the rake task to preserve the summary across resume)" do
+    counts = { entity: "programs", local: 46, cb: 260, matched: 44, identical: 40, changed: 4, cb_only: 216, local_only: 2 }
+    @writer.write_counts("programs", counts)
+    reloaded = @writer.read_counts("programs")
+    assert_equal counts, reloaded
+    assert_nil @writer.read_counts("courses") # nothing written yet for this entity
+  end
 end

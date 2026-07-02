@@ -16,14 +16,14 @@ namespace :chulabooster do
       entity = mapper.entity
       if checkpoint[:completed].include?(entity)
         puts "= #{entity}: already complete, skipping"
+        counts << writer.read_counts(entity)
         next
       end
       start_cursor = (checkpoint[:in_progress] == entity) ? checkpoint[:next_cursor] : nil
       puts "→ #{entity}#{start_cursor ? " (resuming)" : ""}..."
       counts << reconciler.reconcile_entity(mapper, start_cursor: start_cursor)
-      checkpoint[:completed] << entity
     end
 
-    puts "\n#{writer.write_summary(counts)}\n\n→ files: #{run_dir}"
+    puts "\n#{writer.write_summary(counts.compact)}\n\n→ files: #{run_dir}"
   end
 end

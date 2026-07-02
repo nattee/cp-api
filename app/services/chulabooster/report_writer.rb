@@ -1,4 +1,5 @@
 require "csv"
+require "json"
 
 module Chulabooster
   class ReportWriter
@@ -35,6 +36,16 @@ module Chulabooster
       table
     end
 
+    def write_counts(entity, counts)
+      File.write(counts_path(entity), JSON.generate(counts))
+    end
+
+    def read_counts(entity)
+      path = counts_path(entity)
+      return nil unless File.exist?(path)
+      JSON.parse(File.read(path), symbolize_names: true)
+    end
+
     private
 
     def append_csv(name, header)
@@ -45,6 +56,8 @@ module Chulabooster
         yield csv
       end
     end
+
+    def counts_path(entity) = File.join(@run_dir, "#{entity}_counts.json")
 
     def summary_table(counts)
       head = %w[entity local cb matched identical changed cb-only local-only]

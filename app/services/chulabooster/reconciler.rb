@@ -12,7 +12,8 @@ module Chulabooster
       entity = mapper.entity
       local = mapper.local_scope.index_by { |rec| mapper.local_key(rec) }
       seen = load_seen(entity)
-      counts = { entity: entity, local: local.size, cb: 0, matched: 0, identical: 0, changed: 0, cb_only: 0, local_only: 0 }
+      counts = resumed_counts(entity) || { entity: entity, local: local.size, cb: 0, matched: 0, identical: 0, changed: 0, cb_only: 0, local_only: 0 }
+      counts[:local] = local.size
 
       @client.each_page(entity, start_cursor: start_cursor) do |rows, next_cursor|
         changed_rows = []
@@ -41,13 +42,14 @@ module Chulabooster
         @writer.append_cb_only(entity, cb_only_rows) if cb_only_rows.any?
         append_seen(entity, new_seen)
         new_seen.each { |k| seen << k }
-        write_checkpoint(entity, next_cursor)
+        write_checkpoint(entity, next_cursor, counts)
       end
 
       local_only = local.keys - seen.to_a
       counts[:local_only] = local_only.size
       @writer.append_local_only(entity, local_only)
-      write_checkpoint(entity, nil, done: true)
+      write_checkpoint(entity, nil, counts, done: true)
+      @writer.write_counts(entity, counts)
       counts
     end
 
@@ -55,8 +57,18 @@ module Chulabooster
 
     def checkpoint_path = File.join(@run_dir, "checkpoint.json")
 
-    def write_checkpoint(entity, next_cursor, done: false)
-      File.write(checkpoint_path, JSON.pretty_generate(entity: entity, next_cursor: next_cursor, done: done))
+    # If a prior (possibly crashed) invocation left an in-progress checkpoint for THIS entity,
+    # resume its counts instead of starting over — otherwise pre-crash pages would be lost from
+    # the tally (the resume-summary bug found in final review).
+    def resumed_counts(entity)
+      return nil unless File.exist?(checkpoint_path)
+      cp = JSON.parse(File.read(checkpoint_path), symbolize_names: true)
+      return nil unless cp[:entity] == entity && cp[:done] == false
+      cp[:counts]
+    end
+
+    def write_checkpoint(entity, next_cursor, counts, done: false)
+      File.write(checkpoint_path, JSON.pretty_generate(entity: entity, next_cursor: next_cursor, counts: counts, done: done))
     end
 
     def load_seen(entity)
