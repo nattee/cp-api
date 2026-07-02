@@ -31,5 +31,11 @@ module Chulabooster
       s = course_id.to_s
       [s[4..].to_s, ce_to_be(s[0, 4])]
     end
+
+    # CB semester_code is "s1"/"s2"/"s3" (String, "s"-prefixed); local Grade#semester is a plain
+    # Integer (1/2/3). Strip an optional leading s/S and coerce to Integer so both sides match.
+    def semester_number(value)
+      value.to_s.strip.sub(/\A[sS]/, "").to_i
+    end
   end
 end
