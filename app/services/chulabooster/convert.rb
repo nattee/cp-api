@@ -25,5 +25,11 @@ module Chulabooster
       return nil if value.nil? || value.to_s.strip.empty?
       value.to_i
     end
+
+    # CB course_id is "<4-digit CE year><course_no>", e.g. "20142110254" -> ["2110254", 2557].
+    def parse_course_id(course_id)
+      s = course_id.to_s
+      [s[4..].to_s, ce_to_be(s[0, 4])]
+    end
   end
 end
