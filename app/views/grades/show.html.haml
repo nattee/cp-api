@@ -6,7 +6,7 @@
   .d-flex.gap-2
     - if current_user.admin? && @grade.manual?
       = link_to "Edit", edit_grade_path(@grade), class: "btn btn-outline-secondary"
-    = link_to "Back", grades_path(year: @grade.year, semester: @grade.semester), class: "btn btn-outline-primary"
+    = link_to "Back", grades_path(year: @grade.year_ce, semester: @grade.semester), class: "btn btn-outline-primary"
 
 .card
   .card-body
@@ -34,8 +34,8 @@
     .detail-section
       %h6.section-title Term
       %dl.dl-fields.row.mb-0
-        %dt.col-sm-3 Year
-        %dd.col-sm-9= @grade.year
+        %dt.col-sm-3 Year (C.E.)
+        %dd.col-sm-9= @grade.year_ce
 
         %dt.col-sm-3 Semester
         %dd.col-sm-9= @grade.semester

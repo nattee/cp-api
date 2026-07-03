@@ -137,7 +137,7 @@ class DataImportsTest < ApplicationSystemTestCase
 
     # Program is required — set as fixed value via dropdown
     select2_pick_by_name "-- fixed value --", name: "mapping[program_name]"
-    find("[data-mapping-constant='program_name']").select programs(:cp_bachelor).name_en + " (#{programs(:cp_bachelor).year_started})"
+    find("[data-mapping-constant='program_name']").select programs(:cp_bachelor).name_en + " (#{programs(:cp_bachelor).year_started_be})"
 
     click_on "Run Import"
 
@@ -165,7 +165,7 @@ class DataImportsTest < ApplicationSystemTestCase
 
     # Program is required — set as fixed value via dropdown
     select2_pick_by_name "-- fixed value --", name: "mapping[program_name]"
-    find("[data-mapping-constant='program_name']").select programs(:cp_bachelor).name_en + " (#{programs(:cp_bachelor).year_started})"
+    find("[data-mapping-constant='program_name']").select programs(:cp_bachelor).name_en + " (#{programs(:cp_bachelor).year_started_be})"
 
     click_on "Run Import"
 

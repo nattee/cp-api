@@ -26,7 +26,7 @@ module Importers
       [
         { attribute: :course_no,      label: "Course No",      required: true,
           aliases: %w[course_no courseno course_code รหัสวิชา] },
-        { attribute: :revision_year,  label: "Revision Year",  required: false,
+        { attribute: :revision_year_be, label: "Revision Year",  required: false,
           aliases: %w[revision_year rev_year ปีหลักสูตร],
           help: "If blank, uses the latest revision of the course." },
         { attribute: :section_number, label: "Section",        required: true,
@@ -156,7 +156,7 @@ module Importers
       return { status: :error, errors: ["Invalid end_time: #{attrs[:end_time]}"] } unless end_time
 
       # 3. Find course
-      course = find_course(attrs[:course_no], attrs[:revision_year])
+      course = find_course(attrs[:course_no], attrs[:revision_year_be])
       return { status: :error, errors: ["Course not found: #{attrs[:course_no]}"] } unless course
 
       # 4. Find semester
@@ -258,10 +258,10 @@ module Importers
       if revision_year.present?
         year = revision_year.to_s.gsub(/\.0\z/, "").to_i
         year += 543 if year > 0 && year < 2400
-        Course.find_by(course_no: no, revision_year: year)
+        Course.find_by(course_no: no, revision_year_be: year)
       else
         # Latest revision
-        Course.where(course_no: no).order(revision_year: :desc).first
+        Course.where(course_no: no).order(revision_year_be: :desc).first
       end
     end
 

@@ -13,7 +13,7 @@
     .row
       .col-md-6.mb-3
         = f.label :course_id, "Course", class: "form-label"
-        = f.select :course_id, options_for_select(Course.order(:course_no).map { |c| ["#{c.course_no} — #{c.name} (#{c.revision_year})", c.id] }, course_offering.course_id), { include_blank: "Select a course" }, class: "form-select #{'is-invalid' if course_offering.errors[:course_id].any?}", data: { controller: "select2" }
+        = f.select :course_id, options_for_select(Course.order(:course_no).map { |c| ["#{c.course_no} — #{c.name} (#{c.revision_year_be})", c.id] }, course_offering.course_id), { include_blank: "Select a course" }, class: "form-select #{'is-invalid' if course_offering.errors[:course_id].any?}", data: { controller: "select2" }
         - if course_offering.errors[:course_id].any?
           .invalid-feedback= course_offering.errors[:course_id].first
       .col-md-6.mb-3

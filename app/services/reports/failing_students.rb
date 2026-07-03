@@ -10,12 +10,12 @@ module Reports
 
     def run
       scope = Grade.graded.joins(:course, :student)
-                   .where(courses: { course_no: course_no }, grade: "F", year: year)
+                   .where(courses: { course_no: course_no }, grade: "F", year_ce: year)
       scope = scope.where(semester: term) if term.present?
 
       rows = scope.map do |g|
         { student_id: g.student.student_id, name: g.student.display_name,
-          term: "#{g.year}/#{g.semester}", grade: g.grade }
+          term: "#{g.year_ce}/#{g.semester}", grade: g.grade }
       end
 
       result(

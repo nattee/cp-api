@@ -20,8 +20,8 @@ class Course < ApplicationRecord
 
   validates :name, presence: true
   validates :course_no, presence: true
-  validates :revision_year, presence: true, numericality: { only_integer: true }
-  validates :course_no, uniqueness: { scope: :revision_year, message: "already exists for this revision year" }
+  validates :revision_year_be, presence: true, numericality: { only_integer: true }
+  validates :course_no, uniqueness: { scope: :revision_year_be, message: "already exists for this revision year" }
   validates :auto_generated, presence: true, inclusion: { in: AUTO_GENERATED_LEVELS }
   validates :credits, numericality: { only_integer: true, allow_nil: true }
   validates :l_credits, numericality: { only_integer: true, allow_nil: true }

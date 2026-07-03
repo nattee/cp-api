@@ -11,11 +11,11 @@ class CoursesController < ApplicationController
 
   def show
     @grades_count = @course.grades.count
-    @available_years = @course.grades.distinct.pluck(:year).sort.reverse
+    @available_years = @course.grades.distinct.pluck(:year_ce).sort.reverse
     if params[:year].present?
       @selected_year = params[:year].to_i
       @selected_semester = params[:semester].present? ? params[:semester].to_i : nil
-      scope = @course.grades.includes(:student).where(year: @selected_year)
+      scope = @course.grades.includes(:student).where(year_ce: @selected_year)
       scope = scope.where(semester: @selected_semester) if @selected_semester
       @course_grades = scope.order("students.student_id")
     end
@@ -70,7 +70,7 @@ class CoursesController < ApplicationController
   def prepare_grade_distribution_chart
     counts = @course.grades
                     .where.not(grade: [ nil, "" ])
-                    .group(:year, :semester, :grade)
+                    .group(:year_ce, :semester, :grade)
                     .count
 
     # Build sorted term labels (year/semester)
@@ -91,7 +91,7 @@ class CoursesController < ApplicationController
 
   def course_params
     params.require(:course).permit(
-      :name, :name_th, :name_abbr, :course_group, :course_no, :revision_year,
+      :name, :name_th, :name_abbr, :course_group, :course_no, :revision_year_be,
       :is_gened, :department_code, :credits,
       :l_credits, :nl_credits, :l_hours, :nl_hours, :s_hours, :is_thesis
     )

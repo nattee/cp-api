@@ -23,7 +23,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
 
   test "non-admin cannot create" do
     assert_no_difference "Course.count" do
-      post courses_path, params: { course: { name: "Test", course_no: "9999999", revision_year: 2565, program_id: programs(:cp_bachelor).id } }
+      post courses_path, params: { course: { name: "Test", course_no: "9999999", revision_year_be: 2565, program_id: programs(:cp_bachelor).id } }
     end
     assert_redirected_to courses_path
   end
@@ -50,9 +50,9 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
   test "admin create assigns the program via program_ids (join row created)" do
     post login_path, params: { username: users(:admin).username, password: "password123" }
     assert_difference ["Course.count", "ProgramCourse.count"], 1 do
-      post courses_path, params: { course: { name: "Ctrl New", course_no: "2110998", revision_year: 2565, program_id: programs(:cp_bachelor).id } }
+      post courses_path, params: { course: { name: "Ctrl New", course_no: "2110998", revision_year_be: 2565, program_id: programs(:cp_bachelor).id } }
     end
-    course = Course.find_by!(course_no: "2110998", revision_year: 2565)
+    course = Course.find_by!(course_no: "2110998", revision_year_be: 2565)
     assert_includes course.programs, programs(:cp_bachelor)
   end
 

@@ -21,7 +21,7 @@
 
       .col-md-6.mb-3
         = f.label :course_id, "Course", class: "form-label"
-        = f.select :course_id, options_for_select(Course.order(:course_no).map { |c| ["#{c.course_no} — #{c.name} (#{c.revision_year})", c.id] }, grade.course_id), { include_blank: "Select a course" }, class: "form-select #{'is-invalid' if grade.errors[:course_id].any? || grade.errors[:course].any?}", data: { controller: "select2" }
+        = f.select :course_id, options_for_select(Course.order(:course_no).map { |c| ["#{c.course_no} — #{c.name} (#{c.revision_year_be})", c.id] }, grade.course_id), { include_blank: "Select a course" }, class: "form-select #{'is-invalid' if grade.errors[:course_id].any? || grade.errors[:course].any?}", data: { controller: "select2" }
         - if grade.errors[:course_id].any?
           .invalid-feedback= grade.errors[:course_id].first
         - if grade.errors[:course].any?
@@ -31,13 +31,13 @@
     %legend Term
     .row
       .col-md-6.mb-3
-        = f.label :year, class: "form-label"
+        = f.label :year_ce, "Year (C.E.)", class: "form-label"
         .input-group
           %span.input-group-text
             %span.material-symbols calendar_month
-          = f.number_field :year, class: "form-control #{'is-invalid' if grade.errors[:year].any?}"
-          - if grade.errors[:year].any?
-            .invalid-feedback= grade.errors[:year].first
+          = f.number_field :year_ce, class: "form-control #{'is-invalid' if grade.errors[:year_ce].any?}"
+          - if grade.errors[:year_ce].any?
+            .invalid-feedback= grade.errors[:year_ce].first
       .col-md-6.mb-3
         = f.label :semester, class: "form-label"
         .input-group

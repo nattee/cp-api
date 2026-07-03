@@ -19,7 +19,7 @@ class Chulabooster::ReconcilerTest < ActiveSupport::TestCase
   test "buckets identical / changed / cb_only / local_only for programs" do
     p = programs(:cp_bachelor)
     identical = { "program_id" => p.program_code, "program_name" => p.name_en, "program_name_alt" => p.name_th,
-                  "revision_year" => p.year_started - 543, "program_code" => p.alternative_program_code }
+                  "revision_year" => p.year_started_be - 543, "program_code" => p.alternative_program_code }
     changed = { "program_id" => programs(:cp_master).program_code, "program_name" => "X",
                 "program_name_alt" => "Y", "revision_year" => 2000, "program_code" => "Z" }
     cb_only = { "program_id" => "999999999999", "program_name" => "Ghost" }
@@ -66,7 +66,7 @@ class Chulabooster::ReconcilerTest < ActiveSupport::TestCase
 
     # The "resumed" run only sees a second page (as if the real client resumed from the saved cursor).
     row2 = { "program_id" => p2.program_code, "program_name" => "Changed", "program_name_alt" => p2.name_th,
-             "revision_year" => p2.year_started - 543, "program_code" => p2.alternative_program_code }
+             "revision_year" => p2.year_started_be - 543, "program_code" => p2.alternative_program_code }
     client = FakeClient.new([[[row2], nil]])
 
     counts = Chulabooster::Reconciler.new(client: client, writer: @writer, run_dir: @dir)

@@ -46,11 +46,11 @@
         %dd.col-sm-9= @program.total_credit || "—"
 
         %dt.col-sm-3
-          Year Started
+          Year Started (B.E.)
           %button.help-popover-trigger{type: "button", tabindex: "0"}
             %span.material-symbols{style: "font-size: 16px"} help
             %span.help-popover-content Buddhist Era year (B.E.). To convert to CE, subtract 543.
-        %dd.col-sm-9= @program.year_started
+        %dd.col-sm-9= @program.year_started_be
 
         %dt.col-sm-3 Status
         %dd.col-sm-9
@@ -108,7 +108,7 @@
             %tr
               %th Student ID
               %th Name
-              %th Admission Year
+              %th Admission Year (B.E.)
               %th Status
               %th Actions
           %tbody

@@ -6,7 +6,7 @@ module Chulabooster
       def local_scope = ProgramCourse.includes(:program, :course)
 
       def local_key(pc)
-        [pc.program.program_code.to_s, pc.course.course_no.to_s, pc.course.revision_year]
+        [pc.program.program_code.to_s, pc.course.course_no.to_s, pc.course.revision_year_be]
       end
 
       def cb_key(row)

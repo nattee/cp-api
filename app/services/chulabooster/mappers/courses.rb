@@ -3,7 +3,7 @@ module Chulabooster
     class Courses < Base
       def entity = "courses"
       def local_scope = Course.all
-      def local_key(c) = [c.course_no.to_s, c.revision_year]
+      def local_key(c) = [c.course_no.to_s, c.revision_year_be]
       def cb_key(row) = [row["course_no"].to_s, Convert.ce_to_be(row["revision_year"])]
 
       def comparisons(c, row)

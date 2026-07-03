@@ -12,7 +12,7 @@ module Importers
         { attribute: :course_no,      label: "Course No",      required: false,
           aliases: %w[_coursecode course_no รหัสวิชา],
           help: "Plain course number. Used as fallback when Course Code is FOR_ELT." },
-        { attribute: :year,           label: "Year",           required: true,
+        { attribute: :year_ce,        label: "Year",           required: true,
           aliases: %w[academic_year year ปีการศึกษา] },
         { attribute: :semester,       label: "Semester",       required: true,
           aliases: %w[semester_code semester sem ภาคการศึกษา],
@@ -32,7 +32,7 @@ module Importers
       Grade.find_by(
         student_id: attrs[:student_id],
         course_id:  attrs[:course_id],
-        year:       attrs[:year],
+        year_ce:    attrs[:year_ce],
         semester:   attrs[:semester]
       )
     end
@@ -42,7 +42,7 @@ module Importers
     end
 
     def unique_key_fields
-      [:student_id, :course_id, :year, :semester]
+      [:student_id, :course_id, :year_ce, :semester]
     end
 
     def resolve_student(value)
@@ -51,16 +51,16 @@ module Importers
 
     # Look up course by course_no + revision_year (used for FOR_ELT entries)
     def resolve_course_by_no(course_no, revision_year)
-      exact = Course.find_by(course_no: course_no, revision_year: revision_year)
+      exact = Course.find_by(course_no: course_no, revision_year_be: revision_year)
       return exact if exact
 
       # Try closest existing revision year → copy
       closest = Course.where(course_no: course_no)
-                      .order(Arel.sql("ABS(revision_year - #{revision_year.to_i})"))
+                      .order(Arel.sql("ABS(revision_year_be - #{revision_year.to_i})"))
                       .first
       if closest
         return closest.dup.tap do |copy|
-          copy.revision_year = revision_year
+          copy.revision_year_be = revision_year
           copy.auto_generated = "copied"
           copy.save!
         end
@@ -69,7 +69,7 @@ module Importers
       # Totally unknown → placeholder
       Course.create!(
         course_no: course_no,
-        revision_year: revision_year,
+        revision_year_be: revision_year,
         name: course_no,
         program: Program.placeholder,
         auto_generated: "placeholder"
@@ -85,16 +85,16 @@ module Importers
       course_no = code_str[4..]
 
       # 1. Exact match
-      exact = Course.find_by(course_no: course_no, revision_year: revision_year)
+      exact = Course.find_by(course_no: course_no, revision_year_be: revision_year)
       return exact if exact
 
       # 2. Same course_no, closest revision year → copy with "copied" level
       closest = Course.where(course_no: course_no)
-                      .order(Arel.sql("ABS(revision_year - #{revision_year.to_i})"))
+                      .order(Arel.sql("ABS(revision_year_be - #{revision_year.to_i})"))
                       .first
       if closest
         return closest.dup.tap do |copy|
-          copy.revision_year = revision_year
+          copy.revision_year_be = revision_year
           copy.auto_generated = "copied"
           copy.save!
         end
@@ -103,7 +103,7 @@ module Importers
       # 3. Totally unknown → create minimal placeholder
       Course.create!(
         course_no: course_no,
-        revision_year: revision_year,
+        revision_year_be: revision_year,
         name: course_no,
         program: Program.placeholder,
         auto_generated: "placeholder"
@@ -128,7 +128,7 @@ module Importers
       end
 
       # Coerce numeric fields
-      attrs[:year] = attrs[:year].to_i if attrs[:year]
+      attrs[:year_ce] = attrs[:year_ce].to_i if attrs[:year_ce]
       attrs[:semester] = parse_semester(attrs[:semester]) if attrs[:semester]
       attrs[:credits_grant] = attrs[:credits_grant].to_i if attrs[:credits_grant].present?
 

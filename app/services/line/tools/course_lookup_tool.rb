@@ -2,7 +2,7 @@
 # Returns a JSON array of matching course records.
 #
 # Note: the same course (same course_no) can exist as multiple rows with different
-# revision_year values. Results are ordered newest revision first.
+# revision_year_be values. Results are ordered newest revision first.
 class Line::Tools::CourseLookupTool
   DEFINITION = {
     description: "Look up course information. Search by course number (e.g. '2110327'), name (Thai or English), " \
@@ -75,9 +75,9 @@ class Line::Tools::CourseLookupTool
     end
 
     scope = scope.where(program_groups: { code: program_code.upcase }) if program_code
-    scope = scope.where(revision_year: revision_year) if revision_year
+    scope = scope.where(revision_year_be: revision_year) if revision_year
 
-    scope.order(course_no: :asc, revision_year: :desc)
+    scope.order(course_no: :asc, revision_year_be: :desc)
   end
   private_class_method :build_scope
 
@@ -88,8 +88,8 @@ class Line::Tools::CourseLookupTool
       name_en: course.name,
       name_th: course.name_th,
       credits: course.credits,
-      revision_year: course.revision_year,
-      program: prog ? "#{prog.program_group.code} (#{prog.year_started})" : nil,
+      revision_year: course.revision_year_be,
+      program: prog ? "#{prog.program_group.code} (#{prog.year_started_be})" : nil,
       is_gened: course.is_gened,
       is_thesis: course.is_thesis
     }

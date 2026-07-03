@@ -5,7 +5,7 @@ class GradeTest < ActiveSupport::TestCase
     grade = Grade.new(
       student: students(:active_student),
       course: courses(:intro_computing),
-      year: 2025,
+      year_ce: 2025,
       semester: 1,
       grade: "A",
       grade_weight: 4.0,
@@ -28,11 +28,11 @@ class GradeTest < ActiveSupport::TestCase
     assert_includes grade.errors[:course], "must exist"
   end
 
-  test "requires year" do
+  test "requires year_ce" do
     grade = grades(:active_intro_computing).dup
-    grade.year = nil
+    grade.year_ce = nil
     assert_not grade.valid?
-    assert_includes grade.errors[:year], "can't be blank"
+    assert_includes grade.errors[:year_ce], "can't be blank"
   end
 
   test "requires semester" do
@@ -99,7 +99,7 @@ class GradeTest < ActiveSupport::TestCase
     grade = Grade.new(
       student: students(:on_leave_student),
       course: courses(:intro_computing),
-      year: 2025,
+      year_ce: 2025,
       semester: 1,
       grade: "W",
       grade_weight: nil,

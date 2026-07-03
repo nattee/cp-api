@@ -59,6 +59,6 @@ class ProgramsController < ApplicationController
 
   def program_params
     params.require(:program).permit(:program_group_id, :program_code, :alternative_program_code,
-                                    :short_name, :year_started, :active, :total_credit)
+                                    :short_name, :year_started_be, :active, :total_credit)
   end
 end

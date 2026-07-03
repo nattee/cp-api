@@ -21,8 +21,8 @@ class Chulabooster::CompositeMappersTest < ActiveSupport::TestCase
     g = Grade.includes(:student, :course).where.not(grade: [nil, ""]).first
     key = m.local_key(g)
     assert_equal 5, key.length
-    row = { "student_id" => g.student.student_id, "course_id" => "#{g.course.revision_year - 543}#{g.course.course_no}",
-            "academic_year" => g.year, "semester_code" => "s#{g.semester}",
+    row = { "student_id" => g.student.student_id, "course_id" => "#{g.course.revision_year_be - 543}#{g.course.course_no}",
+            "academic_year" => g.year_ce, "semester_code" => "s#{g.semester}",
             "grade" => "Z", "credits_grant" => g.credits_grant }
     assert_equal key, m.cb_key(row)
     assert_equal ["grade"], m.field_diffs(g, row).map { |d| d[:field] }
@@ -30,13 +30,13 @@ class Chulabooster::CompositeMappersTest < ActiveSupport::TestCase
 
   # Regression for a live-run bug: a real reconcile against ChulaBooster returned matched: 0 for
   # all 31,079 local / 49,502 CB student_courses rows. Root cause was two key-encoding mismatches
-  # (Grade#year is CE, not BE; CB's semester_code is "s1"/"s2"/"s3", not a plain integer). These
+  # (Grade#year_ce is CE, not BE; CB's semester_code is "s1"/"s2"/"s3", not a plain integer). These
   # tests use literal real-world-shaped values (not values mirrored from the mapper's own logic)
   # so they would have caught the bug.
-  test "student_courses cb_key does not convert academic_year to BE (Grade#year is CE, unlike course.revision_year)" do
+  test "student_courses cb_key does not convert academic_year to BE (Grade#year_ce is CE, unlike course.revision_year_be)" do
     m = Chulabooster::Mappers::StudentCourses.new
     row = { "student_id" => "123", "course_id" => "20142110254", "academic_year" => 2018, "semester_code" => "s2" }
-    assert_equal 2018, m.cb_key(row)[3] # NOT 2018 + 543 — real academic_year is already CE, matching Grade#year
+    assert_equal 2018, m.cb_key(row)[3] # NOT 2018 + 543 — real academic_year is already CE, matching Grade#year_ce
   end
 
   test "student_courses cb_key strips ChulaBooster's 's' prefix from semester_code" do

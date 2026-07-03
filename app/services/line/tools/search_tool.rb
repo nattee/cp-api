@@ -69,7 +69,7 @@ class Line::Tools::SearchTool
         student_id: s.student_id,
         name_th: s.full_name_th,
         name_en: s.full_name,
-        program: "#{s.program.program_group.code} (#{s.program.year_started})",
+        program: "#{s.program.program_group.code} (#{s.program.year_started_be})",
         status: s.status
       }
     end
@@ -125,7 +125,7 @@ class Line::Tools::SearchTool
     end
 
     # Deduplicate across revision years — show the latest revision only
-    scope = scope.order(revision_year: :desc)
+    scope = scope.order(revision_year_be: :desc)
     total_unique = scope.select("DISTINCT course_no").count
     results = []
     seen = Set.new
@@ -138,7 +138,7 @@ class Line::Tools::SearchTool
         course_no: c.course_no,
         name: c.name,
         credits: c.credits,
-        revision_year: c.revision_year
+        revision_year: c.revision_year_be
       }
     end
 

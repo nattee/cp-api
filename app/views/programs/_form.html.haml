@@ -56,16 +56,16 @@
           - if program.errors[:total_credit].any?
             .invalid-feedback= program.errors[:total_credit].first
       .col-md-6.mb-3
-        = f.label :year_started, "Year Started", class: "form-label"
+        = f.label :year_started_be, "Year Started (B.E.)", class: "form-label"
         %button.help-popover-trigger{type: "button", tabindex: "0"}
           %span.material-symbols{style: "font-size: 16px"} help
           %span.help-popover-content Buddhist Era year (e.g. 2540). To convert from CE, add 543.
         .input-group
           %span.input-group-text
             %span.material-symbols calendar_month
-          = f.number_field :year_started, class: "form-control #{'is-invalid' if program.errors[:year_started].any?}"
-          - if program.errors[:year_started].any?
-            .invalid-feedback= program.errors[:year_started].first
+          = f.number_field :year_started_be, class: "form-control #{'is-invalid' if program.errors[:year_started_be].any?}"
+          - if program.errors[:year_started_be].any?
+            .invalid-feedback= program.errors[:year_started_be].first
     .row
       .col-md-6.mb-3
         = f.label :active, class: "form-label d-block"

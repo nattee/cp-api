@@ -148,7 +148,7 @@ class Importers::ScheduleImporterTest < ActiveSupport::TestCase
     assert_equal courses(:intro_computing), course
   end
 
-  test "find_course finds by course_no with specific revision_year" do
+  test "find_course finds by course_no with specific revision_year_be" do
     importer = build_importer
     course = importer.send(:find_course, "2110101", "2565")
     assert_equal courses(:intro_computing), course

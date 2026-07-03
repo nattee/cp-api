@@ -28,7 +28,7 @@ module Exporters
         course = section.course_offering.course
         base = [
           course.course_no,
-          course.revision_year,
+          course.revision_year_be,
           section.section_number,
           DAY_ABBRS[ts.day_of_week],
           ts.start_time.strftime("%H:%M"),

@@ -55,7 +55,7 @@ class StudentsTest < ApplicationSystemTestCase
     fill_in "First name", with: "New"
     fill_in "Last name", with: "Student"
     select2_pick "Computer Engineering (Bachelor)", from: "Program"
-    fill_in "Admission year", with: 2567
+    fill_in "Admission Year (B.E.)", with: 2567
     click_on "Create Student"
 
     assert_text "Student was successfully created"
@@ -151,7 +151,7 @@ class StudentsTest < ApplicationSystemTestCase
     fill_in "First name", with: "Test"
     fill_in "Last name", with: "Integration"
     select2_pick "Computer Engineering (Bachelor)", from: "Program"
-    fill_in "Admission year", with: 2565
+    fill_in "Admission Year (B.E.)", with: 2565
 
     # Select "Graduated" via Select2
     select2_pick "Graduated", from: "Status"

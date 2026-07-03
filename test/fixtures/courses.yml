@@ -3,7 +3,7 @@ intro_computing:
   name_th: "วิทยาการคำนวณเบื้องต้น"
   name_abbr: INTRO COMP
   course_no: "2110101"
-  revision_year: 2565
+  revision_year_be: 2565
   is_gened: false
   department_code: "21"
   credits: 3
@@ -19,7 +19,7 @@ senior_project:
   name_th: "โครงงานวิศวกรรมคอมพิวเตอร์"
   name_abbr: SR PROJ
   course_no: "2110499"
-  revision_year: 2565
+  revision_year_be: 2565
   course_group: Project
   is_gened: false
   department_code: "21"
@@ -34,7 +34,7 @@ senior_project:
 gened_course:
   name: General Physics
   course_no: "2103106"
-  revision_year: 2560
+  revision_year_be: 2560
   is_gened: true
   credits: 3
   l_credits: 3

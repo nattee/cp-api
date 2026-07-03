@@ -18,16 +18,16 @@ class Grade < ApplicationRecord
     "manual"   => "edit_note"
   }.freeze
 
-  validates :year, presence: true, numericality: { only_integer: true }
+  validates :year_ce, presence: true, numericality: { only_integer: true }
   validates :semester, presence: true, inclusion: { in: SEMESTERS }
   validates :grade, inclusion: { in: GRADES }, allow_nil: true
   validates :source, presence: true, inclusion: { in: SOURCES }
   validates :credits_grant, numericality: { only_integer: true }, allow_nil: true
-  validates :student_id, uniqueness: { scope: [:course_id, :year, :semester],
+  validates :student_id, uniqueness: { scope: [:course_id, :year_ce, :semester],
                                        message: "is already enrolled in this course for this term" }
 
   scope :graded, -> { where.not(grade_weight: nil) }
-  scope :for_term, ->(year, semester) { where(year: year, semester: semester) }
+  scope :for_term, ->(year, semester) { where(year_ce: year, semester: semester) }
 
   def imported?
     source == "imported"

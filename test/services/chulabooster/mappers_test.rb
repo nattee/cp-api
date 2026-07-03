@@ -14,7 +14,7 @@ class Chulabooster::MappersTest < ActiveSupport::TestCase
     assert_equal "2101", m.cb_key({ "program_id" => "2101" })
 
     identical = { "program_id" => "2101", "program_name" => p.name_en, "program_name_alt" => p.name_th,
-                  "revision_year" => p.year_started - 543, "program_code" => p.alternative_program_code }
+                  "revision_year" => p.year_started_be - 543, "program_code" => p.alternative_program_code }
     assert_empty m.field_diffs(p, identical)
 
     changed = identical.merge("program_name" => "Different Name")
@@ -24,7 +24,7 @@ class Chulabooster::MappersTest < ActiveSupport::TestCase
 
   test "courses mapper key uses CE->BE revision and detects a changed field" do
     m = Chulabooster::Mappers::Courses.new
-    c = courses(:intro_computing)  # course_no "2110101", revision_year 2565
+    c = courses(:intro_computing)  # course_no "2110101", revision_year_be 2565
     assert_equal ["2110101", 2565], m.local_key(c)
     assert_equal ["2110101", 2565], m.cb_key({ "course_no" => "2110101", "revision_year" => 2022 }) # 2022+543
     row = { "course_name" => c.name, "course_name_alt" => c.name_th, "credits" => 99,

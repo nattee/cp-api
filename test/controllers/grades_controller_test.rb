@@ -19,7 +19,7 @@ class GradesControllerTest < ActionDispatch::IntegrationTest
     second_program = Program.create!(
       program_code: "8890",
       program_group: program_groups(:cp_group),
-      year_started: 2560
+      year_started_be: 2560
     )
     ProgramCourse.create!(program: second_program, course: courses(:intro_computing))
 

@@ -64,7 +64,7 @@ module Importers
           aliases: %w[coursecodeno program program_name program_id program_code majorcode major หลักสูตร สาขา],
           help: "From file: looks up by program code (4-digit) first, then alternative program code, " \
                 "then English name, then Thai name. If multiple programs share the same name, the latest one (by year started) is used.",
-          fixed_options: -> { Program.includes(:program_group).order(year_started: :desc).map { |p| [ "#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started})", p.id ] } },
+          fixed_options: -> { Program.includes(:program_group).order(year_started_be: :desc).map { |p| [ "#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started_be})", p.id ] } },
           group_options: -> { ProgramGroup.where.not(code: "OTHER").order(:id).map { |g| [ "#{g.code} — #{g.name_en}", g.id ] } } },
         { attribute: :old_program,       label: "Old Program",       required: false,
           aliases: %w[oldmajor old_program old_major หลักสูตรเดิม] },
@@ -115,8 +115,8 @@ module Importers
       #    Pick the latest program that started on or before the student's admission year.
       if code.match?(/\A\d+\z/)
         scope = Program.where(alternative_program_code: code)
-        scope = scope.where("year_started <= ?", admission_year_be) if admission_year_be
-        found = scope.order(year_started: :desc).first
+        scope = scope.where("year_started_be <= ?", admission_year_be) if admission_year_be
+        found = scope.order(year_started_be: :desc).first
         return found if found
       end
 
@@ -137,8 +137,8 @@ module Importers
     def resolve_program_by_group(group, admission_year_be)
       return nil unless group
       scope = group.programs
-      scope = scope.where("year_started <= ?", admission_year_be) if admission_year_be
-      scope.order(year_started: :desc).first
+      scope = scope.where("year_started_be <= ?", admission_year_be) if admission_year_be
+      scope.order(year_started_be: :desc).first
     end
 
     def transform_attributes(attrs)
@@ -203,7 +203,7 @@ module Importers
         degree_level = normalize_degree_level(degree_level.to_s.strip)
       end
 
-      # Look up program: try ID, then name_en, then name_th (latest by year_started wins)
+      # Look up program: try ID, then name_en, then name_th (latest by year_started_be wins)
       if attrs.key?(:program_name)
         program_value = attrs.delete(:program_name).to_s.strip
         if program_value.present?
@@ -217,8 +217,8 @@ module Importers
         group_id = attrs.delete(:_program_group_id).to_i
         if group_id > 0 && attrs[:admission_year_be].present?
           program = Program.where(program_group_id: group_id)
-                           .where("year_started <= ?", attrs[:admission_year_be])
-                           .order(year_started: :desc)
+                           .where("year_started_be <= ?", attrs[:admission_year_be])
+                           .order(year_started_be: :desc)
                            .first
           attrs[:program_id] = program&.id
         end

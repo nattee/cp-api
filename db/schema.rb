@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_01_103949) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_03_035138) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -92,10 +92,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_103949) do
     t.string "name_th"
     t.integer "nl_credits"
     t.integer "nl_hours"
-    t.integer "revision_year", null: false
+    t.integer "revision_year_be", null: false
     t.integer "s_hours"
     t.datetime "updated_at", null: false
-    t.index ["revision_year", "course_no"], name: "index_courses_on_revision_year_and_course_no", unique: true
+    t.index ["revision_year_be", "course_no"], name: "index_courses_on_revision_year_be_and_course_no", unique: true
   end
 
   create_table "data_imports", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -134,10 +134,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_103949) do
     t.string "source", default: "manual", null: false
     t.bigint "student_id", null: false
     t.datetime "updated_at", null: false
-    t.integer "year", null: false
+    t.integer "year_ce", null: false
     t.index ["course_id"], name: "index_grades_on_course_id"
     t.index ["section_id"], name: "index_grades_on_section_id"
-    t.index ["student_id", "course_id", "year", "semester"], name: "idx_enrollments_unique_student_course_term", unique: true
+    t.index ["student_id", "course_id", "year_ce", "semester"], name: "idx_enrollments_unique_student_course_term", unique: true
     t.index ["student_id"], name: "index_grades_on_student_id"
   end
 
@@ -188,7 +188,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_103949) do
     t.string "short_name"
     t.integer "total_credit"
     t.datetime "updated_at", null: false
-    t.integer "year_started", null: false
+    t.integer "year_started_be", null: false
     t.index ["program_code"], name: "index_programs_on_program_code", unique: true
     t.index ["program_group_id"], name: "index_programs_on_program_group_id"
   end

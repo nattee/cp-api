@@ -79,7 +79,7 @@
           %tr
             %th Code
             %th Short Name
-            %th Year Started
+            %th Year Started (B.E.)
             %th Credits
             %th Status
             %th Students
@@ -89,7 +89,7 @@
             %tr
               %td= program.program_code
               %td= program.short_name
-              %td= program.year_started
+              %td= program.year_started_be
               %td= program.total_credit || "—"
               %td
                 %span.badge{class: program.active? ? "badge-active" : "badge-inactive"}= program.active? ? "Active" : "Inactive"

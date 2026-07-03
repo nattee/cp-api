@@ -91,7 +91,7 @@ class Line::Tools::StudentLookupTool
       student_id: student.student_id,
       name_th: student.full_name_th,
       name_en: student.full_name,
-      program: "#{student.program.program_group.code} (#{student.program.year_started})",
+      program: "#{student.program.program_group.code} (#{student.program.year_started_be})",
       status: student.status,
       admission_year: student.admission_year_be,
       gpa: student.gpa,

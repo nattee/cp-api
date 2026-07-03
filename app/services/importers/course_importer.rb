@@ -4,7 +4,7 @@ module Importers
       [
         { attribute: :course_no,        label: "Course No",          required: true,
           aliases: %w[course_no course_id รหัสวิชา] },
-        { attribute: :revision_year,    label: "Revision Year (B.E.)", required: true,
+        { attribute: :revision_year_be, label: "Revision Year (B.E.)", required: true,
           aliases: %w[revision_year ปีหลักสูตร],
           help: "Buddhist Era year (e.g. 2566). CE years (e.g. 2023) are auto-converted by adding 543." },
         { attribute: :name,             label: "Name (EN)",          required: true,
@@ -19,7 +19,7 @@ module Importers
           aliases: %w[program_id program_name program หลักสูตร],
           help: "Looks up by ID first, then English name, then Thai name. " \
                 "If multiple programs share the same name, the latest one (by year started) is used.",
-          fixed_options: -> { Program.includes(:program_group).order(year_started: :desc).map { |p| ["#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started})", p.id] } } },
+          fixed_options: -> { Program.includes(:program_group).order(year_started_be: :desc).map { |p| ["#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started_be})", p.id] } } },
         { attribute: :is_gened,         label: "GenEd",              required: false,
           aliases: %w[gened is_gened วิชาศึกษาทั่วไป] },
         { attribute: :department_code,  label: "Department Code",    required: false,
@@ -44,7 +44,7 @@ module Importers
     private
 
     def find_existing_record(attrs)
-      Course.find_by(course_no: attrs[:course_no], revision_year: attrs[:revision_year])
+      Course.find_by(course_no: attrs[:course_no], revision_year_be: attrs[:revision_year_be])
     end
 
     def build_new_record(attrs)
@@ -52,7 +52,7 @@ module Importers
     end
 
     def unique_key_fields
-      [ :course_no, :revision_year ]
+      [ :course_no, :revision_year_be ]
     end
 
     def resolve_program(value)
@@ -67,12 +67,12 @@ module Importers
         return found if found
       end
 
-      # 2. Try by English name (latest by year_started)
-      found = Program.joins(:program_group).where(program_groups: { name_en: str }).order(year_started: :desc).first
+      # 2. Try by English name (latest by year_started_be)
+      found = Program.joins(:program_group).where(program_groups: { name_en: str }).order(year_started_be: :desc).first
       return found if found
 
-      # 3. Try by Thai name (latest by year_started)
-      Program.joins(:program_group).where(program_groups: { name_th: str }).order(year_started: :desc).first
+      # 3. Try by Thai name (latest by year_started_be)
+      Program.joins(:program_group).where(program_groups: { name_th: str }).order(year_started_be: :desc).first
     end
 
     def coerce_boolean(value)
@@ -95,14 +95,14 @@ module Importers
       attrs[:course_no] = attrs[:course_no].to_s.gsub(/\.0\z/, "").strip if attrs[:course_no]
 
       # Coerce integers
-      [:revision_year, :credits, :l_credits, :nl_credits, :l_hours, :nl_hours, :s_hours].each do |field|
+      [:revision_year_be, :credits, :l_credits, :nl_credits, :l_hours, :nl_hours, :s_hours].each do |field|
         attrs[field] = coerce_integer(attrs[field]) if attrs[field]
       end
 
       # Auto-detect CE vs BE for revision_year (same logic as admission_year_be).
       # BE years are >= 2400 (e.g. 2566), CE years are < 2400 (e.g. 2023).
-      if attrs[:revision_year]
-        attrs[:revision_year] += 543 if attrs[:revision_year] < 2400
+      if attrs[:revision_year_be]
+        attrs[:revision_year_be] += 543 if attrs[:revision_year_be] < 2400
       end
 
       # Coerce booleans
@@ -114,7 +114,7 @@ module Importers
         program_value = attrs.delete(:program_name)
         program = resolve_program(program_value) if program_value.present?
         if program
-          existing = Course.find_by(course_no: attrs[:course_no], revision_year: attrs[:revision_year])
+          existing = Course.find_by(course_no: attrs[:course_no], revision_year_be: attrs[:revision_year_be])
           if existing
             # Course already persisted (upsert/unchanged path): link immediately.
             ProgramCourse.find_or_create_by!(program: program, course: existing)

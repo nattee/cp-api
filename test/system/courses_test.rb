@@ -27,7 +27,7 @@ class CoursesTest < ApplicationSystemTestCase
 
     assert_text course.name
     assert_text course.course_no
-    assert_text course.revision_year.to_s
+    assert_text course.revision_year_be.to_s
     assert_text course.name_th
     assert_text course.credits.to_s
   end
@@ -42,7 +42,7 @@ class CoursesTest < ApplicationSystemTestCase
     visit new_course_path
 
     fill_in "Course No", with: "2110999"
-    fill_in "Revision year", with: 2565
+    fill_in "Revision Year (B.E.)", with: 2565
     fill_in "Name (EN)", with: "New Course"
     select2_pick "Computer Engineering (Bachelor)", from: "Program"
     fill_in "Total Credits", with: 3

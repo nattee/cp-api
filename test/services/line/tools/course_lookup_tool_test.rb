@@ -93,7 +93,7 @@ class Line::Tools::CourseLookupToolTest < ActiveSupport::TestCase
 
   test "orders same course_no by newest revision first" do
     c = Course.create!(course_no: "2110101", name: "Introduction to Computing",
-                       revision_year: 2566)
+                       revision_year_be: 2566)
     ProgramCourse.create!(program: programs(:cp_bachelor), course: c)
 
     result = call_tool(query: "2110101")

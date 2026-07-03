@@ -5,11 +5,11 @@ class Reports::ThesisCreditsTest < ActiveSupport::TestCase
   # the ones built here — isolated to this test's transaction.
   setup do
     @thesis = Course.create!(course_no: "9900020", name: "Thesis Research",
-                             revision_year: 2565, is_thesis: true)
+                             revision_year_be: 2565, is_thesis: true)
     ProgramCourse.create!(program: programs(:cp_master), course: @thesis)
     @with    = make_student("9900000020")
     @without = make_student("9900000021")
-    Grade.create!(student: @with, course: @thesis, year: 2022, semester: 2,
+    Grade.create!(student: @with, course: @thesis, year_ce: 2022, semester: 2,
                   grade: "A", grade_weight: 4.0, credits_grant: 12, source: "imported")
   end
 

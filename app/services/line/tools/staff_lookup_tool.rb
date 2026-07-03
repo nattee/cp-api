@@ -97,7 +97,7 @@ class Line::Tools::StaffLookupTool
       staff_type: staff_member.staff_type,
       status: staff_member.status,
       programs: staff_member.programs.includes(:program_group).map { |p|
-        "#{p.program_group.code} (#{p.year_started})"
+        "#{p.program_group.code} (#{p.year_started_be})"
       }
     }
   end

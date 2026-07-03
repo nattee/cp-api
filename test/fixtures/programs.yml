@@ -2,10 +2,10 @@ cp_bachelor:
   program_code: "2101"
   program_group: cp_group
   short_name: "วศ.บ. (CP)"
-  year_started: 2540
+  year_started_be: 2540
 
 cp_master:
   program_code: "2102"
   program_group: cm_group
   short_name: "วศ.ม. (CM)"
-  year_started: 2545
+  year_started_be: 2545

@@ -34,7 +34,7 @@
           %dd.col-sm-9= @student.old_program
 
         %dt.col-sm-3
-          Admission Year
+          Admission Year (B.E.)
           %button.help-popover-trigger{type: "button", tabindex: "0"}
             %span.material-symbols{style: "font-size: 16px"} help
             %span.help-popover-content Buddhist Era year (B.E.). To convert to CE, subtract 543.
@@ -45,7 +45,7 @@
           %span.badge{class: "badge-#{@student.status.dasherize}"}= @student.status.titleize
 
         - if @student.graduation_year_be.present?
-          %dt.col-sm-3 Graduation Year
+          %dt.col-sm-3 Graduation Year (B.E.)
           %dd.col-sm-9= @student.graduation_year_be
 
     - if [@student.email, @student.phone, @student.discord, @student.line_id, @student.address].any?(&:present?)
@@ -180,7 +180,7 @@
 
       -# Tab 1: By Course Group
       .tab-panel{"data-tabs-target" => "panel"}
-        - grouped = @grades.sort_by { |g| [g.course.course_group.to_s, g.year, g.semester] }.group_by { |g| g.course.course_group.presence || "Uncategorized" }
+        - grouped = @grades.sort_by { |g| [g.course.course_group.to_s, g.year_ce, g.semester] }.group_by { |g| g.course.course_group.presence || "Uncategorized" }
         .table-responsive
           %table.table.table-hover.mb-0
             %thead
@@ -203,7 +203,7 @@
                   %tr
                     %td= link_to g.course.course_no, g.course
                     %td= g.course.name
-                    %td= "#{g.year}/#{g.semester}"
+                    %td= "#{g.year_ce}/#{g.semester}"
                     %td.text-center= g.course.credits
                     %td.text-center
                       - if g.grade.present?
@@ -212,7 +212,7 @@
 
       -# Tab 2: By Semester
       .tab-panel.d-none{"data-tabs-target" => "panel"}
-        - by_term = @grades.sort_by { |g| [-g.year, -g.semester] }.group_by { |g| "#{g.year}/#{g.semester}" }
+        - by_term = @grades.sort_by { |g| [-g.year_ce, -g.semester] }.group_by { |g| "#{g.year_ce}/#{g.semester}" }
         .table-responsive
           %table.table.table-hover.mb-0
             %thead

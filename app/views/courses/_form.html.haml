@@ -20,13 +20,13 @@
           - if course.errors[:course_no].any?
             .invalid-feedback= course.errors[:course_no].first
       .col-md-6.mb-3
-        = f.label :revision_year, class: "form-label"
+        = f.label :revision_year_be, "Revision Year (B.E.)", class: "form-label"
         .input-group
           %span.input-group-text
             %span.material-symbols calendar_month
-          = f.number_field :revision_year, class: "form-control #{'is-invalid' if course.errors[:revision_year].any?}"
-          - if course.errors[:revision_year].any?
-            .invalid-feedback= course.errors[:revision_year].first
+          = f.number_field :revision_year_be, class: "form-control #{'is-invalid' if course.errors[:revision_year_be].any?}"
+          - if course.errors[:revision_year_be].any?
+            .invalid-feedback= course.errors[:revision_year_be].first
 
     .row
       .col-md-6.mb-3
@@ -57,7 +57,7 @@
     .row
       .col-md-6.mb-3
         = f.label :program_id, "Program", class: "form-label"
-        = select_tag "course[program_id]", options_for_select(Program.includes(:program_group).order(year_started: :desc).map { |p| ["#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started})", p.id] }, course.programs.first&.id), include_blank: "Select a program", class: "form-select", data: { controller: "select2" }
+        = select_tag "course[program_id]", options_for_select(Program.includes(:program_group).order(year_started_be: :desc).map { |p| ["#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started_be})", p.id] }, course.programs.first&.id), include_blank: "Select a program", class: "form-select", data: { controller: "select2" }
       .col-md-6.mb-3
         = f.label :course_group, class: "form-label"
         .input-group

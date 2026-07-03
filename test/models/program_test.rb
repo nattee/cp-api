@@ -7,7 +7,7 @@ class ProgramTest < ActiveSupport::TestCase
   end
 
   test "requires program_group" do
-    program = Program.new(program_code: "9999", year_started: 2540)
+    program = Program.new(program_code: "9999", year_started_be: 2540)
     assert_not program.valid?
     assert_includes program.errors[:program_group], "must exist"
   end
@@ -31,7 +31,7 @@ class ProgramTest < ActiveSupport::TestCase
   end
 
   test "destroying a program destroys its join rows but keeps the courses" do
-    program = Program.create!(program_code: "8888", program_group: program_groups(:cp_group), year_started: 2560)
+    program = Program.create!(program_code: "8888", program_group: program_groups(:cp_group), year_started_be: 2560)
     program.program_courses.create!(course: courses(:senior_project))
     assert_difference "ProgramCourse.count", -1 do
       assert_no_difference "Course.count" do

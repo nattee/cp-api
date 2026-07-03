@@ -4,18 +4,18 @@ class Reports::GroupCreditShortfallTest < ActiveSupport::TestCase
   # Unique course_group ("TestCore") so only the students built here carry credits
   # in it; isolated records keep the locked fixture counts untouched.
   setup do
-    @c1 = Course.create!(course_no: "9900010", name: "Core A", revision_year: 2565,
+    @c1 = Course.create!(course_no: "9900010", name: "Core A", revision_year_be: 2565,
                          course_group: "TestCore")
     ProgramCourse.create!(program: programs(:cp_bachelor), course: @c1)
-    @c2 = Course.create!(course_no: "9900011", name: "Core B", revision_year: 2565,
+    @c2 = Course.create!(course_no: "9900011", name: "Core B", revision_year_be: 2565,
                          course_group: "TestCore")
     ProgramCourse.create!(program: programs(:cp_bachelor), course: @c2)
     @below = make_student("9900000010", admission_year_be: 2566)
     @above = make_student("9900000011", admission_year_be: 2567)
     # @above earns 6 Core credits (two passing courses); @below earns none.
-    Grade.create!(student: @above, course: @c1, year: 2023, semester: 1,
+    Grade.create!(student: @above, course: @c1, year_ce: 2023, semester: 1,
                   grade: "A", grade_weight: 4.0, credits_grant: 3, source: "imported")
-    Grade.create!(student: @above, course: @c2, year: 2023, semester: 2,
+    Grade.create!(student: @above, course: @c2, year_ce: 2023, semester: 2,
                   grade: "A", grade_weight: 4.0, credits_grant: 3, source: "imported")
   end
 

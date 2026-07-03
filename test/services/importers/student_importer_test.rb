@@ -81,7 +81,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
 
   test "resolve_program finds by English name via program group" do
     # "Computer Engineering" matches CP group first, picks latest revision ≤ admission year
-    program = programs(:cp_bachelor) # CP group, year_started: 2540
+    program = programs(:cp_bachelor) # CP group, year_started_be: 2540
     importer = build_importer
 
     attrs = { program_name: "Computer Engineering", student_id: "1", admission_year_be: 2567, status: "active" }
@@ -92,7 +92,7 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
 
   test "resolve_program finds by Thai name via program group" do
     # "วิศวกรรมคอมพิวเตอร์" matches CP group first, picks latest revision ≤ admission year
-    program = programs(:cp_bachelor) # CP group, year_started: 2540
+    program = programs(:cp_bachelor) # CP group, year_started_be: 2540
     importer = build_importer
 
     attrs = { program_name: "วิศวกรรมคอมพิวเตอร์", student_id: "1", admission_year_be: 2567, status: "active" }
@@ -110,13 +110,13 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     assert_nil result[:program_id]
   end
 
-  test "resolve_program prefers latest year_started when names match" do
+  test "resolve_program prefers latest year_started_be when names match" do
     # Create a newer program in the same group
-    older = programs(:cp_bachelor) # year_started: 2540
+    older = programs(:cp_bachelor) # year_started_be: 2540
     newer = Program.create!(
       program_code: "9999",
       program_group: older.program_group,
-      year_started: 2560
+      year_started_be: 2560
     )
     importer = build_importer
 

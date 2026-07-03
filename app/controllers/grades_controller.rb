@@ -16,7 +16,7 @@ class GradesController < ApplicationController
     else
       @filtered = false
     end
-    @available_years = Grade.distinct.pluck(:year).sort.reverse
+    @available_years = Grade.distinct.pluck(:year_ce).sort.reverse
   end
 
   # Grade-distribution report: a set of subjects (course_no prefix) × term, with
@@ -29,7 +29,7 @@ class GradesController < ApplicationController
     @program_code = params[:program_code].presence
     @split = params[:split] != "0" # split rows by semester (default on)
 
-    @available_years = Grade.distinct.pluck(:year).compact.sort
+    @available_years = Grade.distinct.pluck(:year_ce).compact.sort
     @start_year = (params[:start_year].presence || @available_years.first).to_i
     @end_year   = (params[:end_year].presence   || @available_years.last).to_i
     @start_year, @end_year = @end_year, @start_year if @start_year > @end_year
@@ -72,7 +72,7 @@ class GradesController < ApplicationController
 
   def destroy
     @grade.destroy!
-    redirect_to grades_path(year: @grade.year, semester: @grade.semester),
+    redirect_to grades_path(year: @grade.year_ce, semester: @grade.semester),
                 notice: "Grade was successfully deleted."
   end
 
@@ -83,19 +83,19 @@ class GradesController < ApplicationController
     base = @program_code ? Grade.joins(course: { programs: :program_group }) : Grade.joins(:course)
     base = base.where.not(grade: [nil, ""])
     base = base.where("courses.course_no LIKE ?", "#{@prefix}%") if @prefix.present?
-    base = base.where(grades: { year: @start_year..@end_year })
+    base = base.where(grades: { year_ce: @start_year..@end_year })
     base = base.where(program_groups: { code: @program_code }) if @program_code
-    base.group("courses.course_no", "grades.year", "grades.semester", "grades.grade").count("DISTINCT grades.id")
+    base.group("courses.course_no", "grades.year_ce", "grades.semester", "grades.grade").count("DISTINCT grades.id")
   end
 
   # course_no => most recent revision's name (later revisions overwrite earlier).
   def course_titles
-    matching_courses.order(:revision_year).pluck(:course_no, :name).to_h
+    matching_courses.order(:revision_year_be).pluck(:course_no, :name).to_h
   end
 
   # course_no => id of its most recent revision (for linking to the course page).
   def course_latest_ids
-    matching_courses.order(:revision_year).pluck(:course_no, :id).to_h
+    matching_courses.order(:revision_year_be).pluck(:course_no, :id).to_h
   end
 
   def matching_courses
@@ -188,7 +188,7 @@ class GradesController < ApplicationController
 
   def grade_params
     params.require(:grade).permit(
-      :student_id, :course_id, :year, :semester, :grade, :grade_weight, :credits_grant
+      :student_id, :course_id, :year_ce, :semester, :grade, :grade_weight, :credits_grant
     )
   end
 end

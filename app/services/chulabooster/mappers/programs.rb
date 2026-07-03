@@ -10,7 +10,7 @@ module Chulabooster
         [
           [:name_en, p.name_en, row["program_name"], true],
           [:name_th, p.name_th, row["program_name_alt"], true],
-          [:year_started, p.year_started, Convert.ce_to_be(row["revision_year"]), true],
+          [:year_started_be, p.year_started_be, Convert.ce_to_be(row["revision_year"]), true],
           [:alternative_program_code, p.alternative_program_code, row["program_code"], true]
         ]
       end

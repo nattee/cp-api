@@ -16,7 +16,7 @@
             %th Name
             %th Degree Level
             %th Field of Study
-            %th Year Started
+            %th Year Started (B.E.)
             %th Actions
         %tbody
           - @programs.each do |program|
@@ -28,7 +28,7 @@
               %td
                 %span.badge{class: "badge-#{program.degree_level}"}= program.degree_level.titleize
               %td= program.field_of_study
-              %td= program.year_started
+              %td= program.year_started_be
               %td
                 = link_to program, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
                   %span.material-symbols{style: "font-size: 18px"} visibility

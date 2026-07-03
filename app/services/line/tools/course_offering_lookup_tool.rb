@@ -88,7 +88,7 @@ class Line::Tools::CourseOfferingLookupTool
       course_no: course.course_no,
       name_en: course.name,
       name_th: course.name_th,
-      revision_year: course.revision_year,
+      revision_year: course.revision_year_be,
       status: offering.status,
       sections: offering.sections.sort_by(&:section_number).map { |section| serialize_section(section) }
     }

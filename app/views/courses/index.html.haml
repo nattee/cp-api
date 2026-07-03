@@ -12,7 +12,7 @@
           %tr
             %th Course No
             %th Name
-            %th Revision Year
+            %th Revision Year (B.E.)
             %th Program
             %th Credits
             %th GenEd
@@ -27,7 +27,7 @@
                 - elsif course.auto_generated == "placeholder"
                   %span.badge.badge-auto-placeholder.ms-1 Placeholder
               %td= course.name
-              %td= course.revision_year
+              %td= course.revision_year_be
               %td= course.programs.map { |p| p.short_name.presence || p.name_en }.join(", ")
               %td= course.credits
               %td

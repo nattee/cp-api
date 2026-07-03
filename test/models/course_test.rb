@@ -4,7 +4,7 @@ class CourseTest < ActiveSupport::TestCase
   # --- Validations ---
 
   test "valid course" do
-    course = Course.new(name: "Test Course", course_no: "9999999", revision_year: 2565)
+    course = Course.new(name: "Test Course", course_no: "9999999", revision_year_be: 2565)
     assert course.valid?
   end
 
@@ -23,37 +23,37 @@ class CourseTest < ActiveSupport::TestCase
     assert_includes course.errors[:course_no], "can't be blank"
   end
 
-  test "requires revision_year" do
+  test "requires revision_year_be" do
     course = courses(:intro_computing).dup
     course.course_no = "0000002"
-    course.revision_year = nil
+    course.revision_year_be = nil
     assert_not course.valid?
-    assert_includes course.errors[:revision_year], "can't be blank"
+    assert_includes course.errors[:revision_year_be], "can't be blank"
   end
 
-  test "revision_year must be integer" do
+  test "revision_year_be must be integer" do
     course = courses(:intro_computing).dup
     course.course_no = "0000003"
-    course.revision_year = 25.5
+    course.revision_year_be = 25.5
     assert_not course.valid?
-    assert_includes course.errors[:revision_year], "must be an integer"
+    assert_includes course.errors[:revision_year_be], "must be an integer"
   end
 
-  test "course_no must be unique within revision_year" do
+  test "course_no must be unique within revision_year_be" do
     course = Course.new(
       name: "Duplicate",
       course_no: courses(:intro_computing).course_no,
-      revision_year: courses(:intro_computing).revision_year
+      revision_year_be: courses(:intro_computing).revision_year_be
     )
     assert_not course.valid?
     assert_includes course.errors[:course_no], "already exists for this revision year"
   end
 
-  test "same course_no allowed with different revision_year" do
+  test "same course_no allowed with different revision_year_be" do
     course = Course.new(
       name: "Same No Different Year",
       course_no: courses(:intro_computing).course_no,
-      revision_year: courses(:intro_computing).revision_year + 5
+      revision_year_be: courses(:intro_computing).revision_year_be + 5
     )
     assert course.valid?
   end
@@ -67,7 +67,7 @@ class CourseTest < ActiveSupport::TestCase
   end
 
   test "credits allows nil" do
-    course = Course.new(name: "No Credits", course_no: "0000005", revision_year: 2565, credits: nil)
+    course = Course.new(name: "No Credits", course_no: "0000005", revision_year_be: 2565, credits: nil)
     assert course.valid?
   end
 
@@ -79,7 +79,7 @@ class CourseTest < ActiveSupport::TestCase
   end
 
   test "valid without any program" do
-    course = Course.new(name: "No Program", course_no: "0000006", revision_year: 2565)
+    course = Course.new(name: "No Program", course_no: "0000006", revision_year_be: 2565)
     assert course.valid?
   end
 
@@ -94,7 +94,7 @@ class CourseTest < ActiveSupport::TestCase
   end
 
   test "import_program links a program after save" do
-    course = Course.new(name: "Linked", course_no: "0000007", revision_year: 2565,
+    course = Course.new(name: "Linked", course_no: "0000007", revision_year_be: 2565,
                         import_program: programs(:cp_bachelor))
     assert_difference "ProgramCourse.count", 1 do
       course.save!

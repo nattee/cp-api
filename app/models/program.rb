@@ -17,14 +17,14 @@ class Program < ApplicationRecord
            :field_of_study, to: :program_group
 
   validates :program_code, presence: true, uniqueness: true
-  validates :year_started, presence: true, numericality: { only_integer: true }
+  validates :year_started_be, presence: true, numericality: { only_integer: true }
   validates :total_credit, numericality: { only_integer: true }, allow_nil: true
 
   def self.placeholder
     other_group = ProgramGroup.find_by!(code: "OTHER")
     find_or_create_by!(program_code: "0000") do |p|
       p.program_group = other_group
-      p.year_started = 0
+      p.year_started_be = 0
     end
   end
 

@@ -6,13 +6,13 @@ class Reports::FailingStudentsTest < ActiveSupport::TestCase
   # only inside this test's transaction.
   setup do
     @course = Course.create!(course_no: "9900001", name: "Test Course",
-                             revision_year: 2565)
+                             revision_year_be: 2565)
     ProgramCourse.create!(program: programs(:cp_bachelor), course: @course)
     @failed = make_student("9900000001")
     @passed = make_student("9900000002")
-    Grade.create!(student: @failed, course: @course, year: 2023, semester: 1,
+    Grade.create!(student: @failed, course: @course, year_ce: 2023, semester: 1,
                   grade: "F", grade_weight: 0.0, credits_grant: 0, source: "imported")
-    Grade.create!(student: @passed, course: @course, year: 2023, semester: 1,
+    Grade.create!(student: @passed, course: @course, year_ce: 2023, semester: 1,
                   grade: "A", grade_weight: 4.0, credits_grant: 3, source: "imported")
   end
 
