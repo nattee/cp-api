@@ -9,8 +9,10 @@ module Reports
     param    :term,      :term                            # optional 1/2/3
 
     def run
+      # `year` is entered in Buddhist Era; grades store the academic year in
+      # Gregorian/C.E. (Grade#year_ce), so convert before filtering.
       scope = Grade.graded.joins(:course, :student)
-                   .where(courses: { course_no: course_no }, grade: "F", year_ce: year)
+                   .where(courses: { course_no: course_no }, grade: "F", year_ce: year.to_i - 543)
       scope = scope.where(semester: term) if term.present?
 
       rows = scope.map do |g|

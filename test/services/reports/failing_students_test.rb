@@ -16,13 +16,23 @@ class Reports::FailingStudentsTest < ActiveSupport::TestCase
                   grade: "A", grade_weight: 4.0, credits_grant: 3, source: "imported")
   end
 
-  test "returns students with grade F for the given course and year" do
-    result = Reports::FailingStudents.new("course_no" => "9900001", "year" => 2023).run
+  test "returns students with grade F for the given course and year (B.E. input)" do
+    # grade is stored in C.E. (year_ce: 2023); the report takes Buddhist Era input,
+    # so 2566 (= 2023 + 543) is the year that must match it.
+    result = Reports::FailingStudents.new("course_no" => "9900001", "year" => 2566).run
 
     ids = result.rows.map { |r| r[:student_id] }
     assert_includes ids, @failed.student_id      # failed (F)
     assert_not_includes ids, @passed.student_id   # passed (A)
     assert_equal "Student ID", result.columns.first[:label]
+  end
+
+  test "treats the year param as Buddhist Era, not C.E." do
+    # Entering the raw C.E. year (2023) must NOT match the C.E.-2023 grade —
+    # the report contract is that the input is B.E. (regression: previously the
+    # query compared the B.E. input directly against the C.E. column and never matched).
+    result = Reports::FailingStudents.new("course_no" => "9900001", "year" => 2023).run
+    assert_empty result.rows
   end
 
   test "empty result is not an error" do

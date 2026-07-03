@@ -143,7 +143,7 @@ class StudentsController < ApplicationController
                              @schedule_semesters.first
                            end
 
-      term_grades = @grades.where(year_ce: @schedule_semester.year_be, semester: @schedule_semester.semester_number)
+      term_grades = @grades.where(year_ce: @schedule_semester.year_ce, semester: @schedule_semester.semester_number)
       @schedule_entries = term_grades.map do |grade|
         offering = CourseOffering.find_by(course: grade.course, semester: @schedule_semester)
         section = if grade.section_id

@@ -15,4 +15,10 @@ class Semester < ApplicationRecord
   def display_name
     "#{year_be}/#{semester_number}"
   end
+
+  # Academic year in Gregorian/C.E. (year_be is Buddhist Era). Grades store their
+  # academic year in C.E. (Grade#year_ce), so use this when matching a semester to grades.
+  def year_ce
+    year_be - 543
+  end
 end

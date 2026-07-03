@@ -179,7 +179,7 @@ class SchedulesController < ApplicationController
       @semester = Semester.find(params[:semester_id])
       @student = Student.find(params[:student_id])
 
-      grades = Grade.where(student: @student, year_ce: @semester.year_be, semester: @semester.semester_number)
+      grades = Grade.where(student: @student, year_ce: @semester.year_ce, semester: @semester.semester_number)
                     .includes(:course)
 
       @schedule_entries = []
