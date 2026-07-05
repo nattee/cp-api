@@ -82,11 +82,20 @@ programs = {
   ],
 }
 
+# ChulaBooster major_code per program group (see docs/chulabooster-program-crosswalk.md).
+# CP/CM/CD share 21100 — CB's major_code does not distinguish degree level.
+CB_MAJOR_CODES = {
+  "CP" => "21100", "CM" => "21100", "CD" => "21100",
+  "CS" => "21101", "SE" => "21102", "CEDT" => "21104",
+  "OTHER" => nil
+}.freeze
+
 programs.each do |group_code, revisions|
   group = groups[group_code]
   revisions.each do |attrs|
     attrs[:active] = attrs[:year_started_be] > 2560
     attrs[:program_group] = group
+    attrs[:alternative_program_code] = CB_MAJOR_CODES[group_code]
 
     program = Program.find_or_initialize_by(program_code: attrs[:program_code])
     program.update!(attrs)
