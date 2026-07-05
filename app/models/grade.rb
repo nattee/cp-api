@@ -11,11 +11,12 @@ class Grade < ApplicationRecord
   }.freeze
 
   SEMESTERS = [1, 2, 3].freeze
-  SOURCES = %w[imported manual].freeze
+  SOURCES = %w[imported manual chulabooster].freeze
 
   SOURCE_ICONS = {
-    "imported" => "cloud_download",
-    "manual"   => "edit_note"
+    "imported"     => "cloud_download",
+    "manual"       => "edit_note",
+    "chulabooster" => "sync"
   }.freeze
 
   validates :year_ce, presence: true, numericality: { only_integer: true }

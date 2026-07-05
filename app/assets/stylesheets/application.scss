@@ -211,6 +211,7 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
 // Enrollment source badges
 .badge-imported { background-color: rgba($primary, 0.2);              color: $primary; border: 1px solid rgba($primary, 0.4); }
 .badge-manual   { background-color: rgba($grade-muted, 0.18);         color: rgba(210, 210, 210, 0.8);              border: 1px solid rgba($grade-muted, 0.35); }
+.badge-chulabooster { background-color: rgba($info, 0.18);             color: $info;    border: 1px solid rgba($info, 0.4); }
 
 // Auto-generated course badges — courses created automatically during grade import.
 // "Copied" = another revision year existed and was duplicated (mild warning).
