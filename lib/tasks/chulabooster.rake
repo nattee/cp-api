@@ -51,4 +51,30 @@ namespace :chulabooster do
 
     puts "\n#{writer.write_summary(counts.compact)}\n\n→ files: #{run_dir}"
   end
+
+  desc "Create local Students for CB-only students + report discrepancies. DRY-RUN by default; " \
+       "COMMIT=1 to write. SNAPSHOT_DIR=tmp/chulabooster_snapshot/<ts> to run offline."
+  task sync_students: :environment do
+    $stdout.sync = true
+
+    run_dir = Rails.root.join("tmp", "chulabooster_sync", Time.zone.now.strftime("%Y%m%d-%H%M%S")).to_s
+    client  = ENV["SNAPSHOT_DIR"] ? Chulabooster::SnapshotClient.new(ENV["SNAPSHOT_DIR"]) : Chulabooster::Client.new
+    commit  = ENV["COMMIT"] == "1"
+
+    puts commit ? "MODE: COMMIT — new students WILL be created" : "MODE: dry-run — no database writes"
+    counts = Chulabooster::StudentSync.new(client: client, run_dir: run_dir, commit: commit).call
+
+    puts
+    puts "matched:                #{counts[:matched]}"
+    puts "cb_only:                #{counts[:cb_only]}"
+    puts "#{commit ? 'created:               ' : 'creatable:             '} #{counts[commit ? :created : :creatable]}"
+    puts "  heuristic-flagged:    #{counts[:heuristic_flagged]}"
+    puts "  twin-flagged:         #{counts[:twin_flagged]}"
+    puts "unresolved (skipped):   #{counts[:unresolved]}"
+    puts "row errors:             #{counts[:errors]}"
+    puts "unknown status codes:   #{counts[:unknown_status]}"
+    puts "program discrepancies:  #{counts[:program_discrepancies]}   <- review students_program_discrepancies.csv"
+    puts "status discrepancies:   #{counts[:status_discrepancies]} (#{counts[:stale_active]} locally-active look stale)"
+    puts "\n→ reports: #{run_dir}"
+  end
 end
