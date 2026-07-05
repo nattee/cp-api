@@ -113,11 +113,16 @@ module Importers
       # 2. Try by alternative_program_code (e.g. 5-digit MAJORCODE from reg system).
       #    Multiple programs may share the same alternative code (curriculum revisions).
       #    Pick the latest program that started on or before the student's admission year.
+      #    BUT: if the code spans multiple program GROUPS (21100 is shared by CP/CM/CD —
+      #    see docs/chulabooster-program-crosswalk.md), it cannot disambiguate degree
+      #    level; skip and fall through to the degree-level-aware matching below.
       if code.match?(/\A\d+\z/)
         scope = Program.where(alternative_program_code: code)
-        scope = scope.where("year_started_be <= ?", admission_year_be) if admission_year_be
-        found = scope.order(year_started_be: :desc).first
-        return found if found
+        if scope.distinct.count(:program_group_id) == 1
+          scope = scope.where("year_started_be <= ?", admission_year_be) if admission_year_be
+          found = scope.order(year_started_be: :desc).first
+          return found if found
+        end
       end
 
       # 3. Try by program group code (e.g. "CP", "CEDT", "SE")

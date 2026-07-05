@@ -49,13 +49,15 @@ module Chulabooster
     def create_missing(row, resolver, counts, rows)
       counts[:cb_only] += 1
       sid = row["student_id"].to_s
-      admission_year_be = row["start_academic_year"].to_i + 543
 
       if row["start_academic_year"].to_s.strip.empty?
         counts[:unresolved] += 1
         rows[:unresolved] << [sid, row["major_code"], nil, "missing start_academic_year"]
         return
       end
+      # ce_to_be, not a blind +543: only converts when the value looks like C.E.,
+      # so an already-B.E. year from CB can't silently double-convert (review finding).
+      admission_year_be = Convert.ce_to_be(row["start_academic_year"])
 
       result = resolver.resolve(major_code: row["major_code"], student_id: sid,
                                 admission_year_be: admission_year_be)
@@ -85,7 +87,9 @@ module Chulabooster
         cb_status_code: row["student_status"].to_s
       )
       if result.flags.any?
-        student.remark = "ChulaBooster sync #{Date.current}: #{result.flags.join('; ')}"
+        # remark is VARCHAR(255); a heuristic + fallback + wide twin tie can exceed it,
+        # and under MySQL strict mode an oversized save raises mid-run (review finding).
+        student.remark = "ChulaBooster sync #{Date.current}: #{result.flags.join('; ')}".truncate(255)
       end
 
       ok = @commit ? student.save : student.valid?
@@ -107,14 +111,18 @@ module Chulabooster
       counts[:matched] += 1
 
       # Program identity: group-level comparison, report-only (local is authoritative).
-      admission_year_be = row["start_academic_year"].to_i + 543
-      result = resolver.resolve(major_code: row["major_code"], student_id: local.student_id.to_s,
-                                admission_year_be: admission_year_be)
-      local_group = local.program&.program_group&.code
-      implied_group = result.failure ? nil : result.group
-      if implied_group && local_group && implied_group != local_group
-        counts[:program_discrepancies] += 1
-        rows[:prog_disc] << [local.student_id, local_group, implied_group, result.flags.join("; ")]
+      # ce_to_be returns nil on a blank year — skip the program check rather than
+      # comparing against a garbage year (review finding).
+      admission_year_be = Convert.ce_to_be(row["start_academic_year"])
+      if admission_year_be
+        result = resolver.resolve(major_code: row["major_code"], student_id: local.student_id.to_s,
+                                  admission_year_be: admission_year_be)
+        local_group = local.program&.program_group&.code
+        implied_group = result.failure ? nil : result.group
+        if implied_group && local_group && implied_group != local_group
+          counts[:program_discrepancies] += 1
+          rows[:prog_disc] << [local.student_id, local_group, implied_group, result.flags.join("; ")]
+        end
       end
 
       # Status: CB is the more reliable source here, but still report-only.
