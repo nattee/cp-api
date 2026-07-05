@@ -170,8 +170,8 @@ system — the dry-run precursor to a future authoritative write-back sync. See
   (`app/services/chulabooster/snapshotter.rb`); `SnapshotClient` lets `reconcile` (or any other
   analysis) run offline against the cache via `SNAPSHOT_DIR=`. Prefer this over repeated live
   reconciliation runs — the full pull (mainly `student_courses`, ~49k rows) takes tens of minutes.
-- **CB's program identifiers are coarser than ours**, and the crosswalk to local `Program` is not
-  yet automatable (`Program.alternative_program_code` is unpopulated). See
+- **CB's program identifiers are coarser than ours**. `Program.alternative_program_code` holds
+  each program's CB `major_code` (seeded; CP/CM/CD share `21100` by CB's design). See
   `docs/chulabooster-program-crosswalk.md` for the verified mapping and the sync policy this
   implies: **local program/student data is authoritative; CB is additive-only** (bring in students
   CB has that we don't) and must never overwrite existing local program assignments.
@@ -181,3 +181,9 @@ system — the dry-run precursor to a future authoritative write-back sync. See
   `retired`, which — unlike `active` — require an active human decision to set). See
   `docs/chulabooster-student-status-crosswalk.md`. Same non-destructive rule applies: even where
   CB is more likely right, discrepancies are reported for human review, never auto-corrected.
+- **Student sync (Phase 2a)**: `bin/rails chulabooster:sync_students` — dry-run by default,
+  `COMMIT=1` to create CB-only students, `SNAPSHOT_DIR=` to run offline. Resolution logic:
+  `Chulabooster::ProgramResolver` (major_code + student_id heuristic + majority-enrollment twin
+  default, every assumption flagged in `remark`); status via `Chulabooster::StatusCodes`; raw CB
+  code mirrored to `students.cb_status_code`. Report-only discrepancy CSVs for existing students.
+  Admin pointer page at `/chulabooster`.
