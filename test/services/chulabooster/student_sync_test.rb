@@ -36,8 +36,8 @@ class Chulabooster::StudentSyncTest < ActiveSupport::TestCase
       { "student_id" => "6570000221", "start_academic_year" => 2022, "major_code" => "21101",
         "firstname" => "Wichai", "lastname" => "Meedee", "firstname_alt" => "วิชัย",
         "lastname_alt" => "มีดี", "gender" => "M", "student_status" => "77" },
-      # new but unresolvable (major 21103 has no local group)
-      { "student_id" => "4931802021", "start_academic_year" => 2006, "major_code" => "21103",
+      # new but unresolvable (unmapped major code)
+      { "student_id" => "4931802021", "start_academic_year" => 2006, "major_code" => "99999",
         "firstname" => "Lost", "lastname" => "Track", "firstname_alt" => "ล",
         "lastname_alt" => "ท", "gender" => "M", "student_status" => "13" },
       # new but invalid (blank lastname) -> row error

@@ -43,9 +43,18 @@ class Chulabooster::ProgramResolverTest < ActiveSupport::TestCase
   end
 
   test "unmapped major code fails cleanly" do
-    r = @resolver.resolve(major_code: "21103", student_id: "4931802021", admission_year_be: 2549)
+    r = @resolver.resolve(major_code: "99999", student_id: "4931802021", admission_year_be: 2549)
     assert_match(/unmapped major_code/, r.failure)
     assert_nil r.program
+  end
+
+  test "major 21103 resolves to its synthetic group" do
+    track = make_group("21103", "Former 2006 Track", "bachelor")
+    prog = make_program(track, "21103X", 2549)
+    r = Chulabooster::ProgramResolver.new.resolve(major_code: "21103", student_id: "4931802021",
+                                                  admission_year_be: 2549)
+    assert_equal prog, r.program
+    assert_equal "21103", r.group
   end
 
   test "direct major with no old-enough program fails cleanly (no fallback for direct majors)" do

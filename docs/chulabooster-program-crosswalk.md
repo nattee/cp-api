@@ -53,7 +53,7 @@ large majority of it.
 | `21100` | shared: **CP** (bachelor), **CM** (master), **CD** (doctoral) | high, but ambiguous by itself — see below |
 | `21101` | **CS** | exact, 1,024/1,024 matched students |
 | `21102` | **SE** | exact, 673/673 matched students |
-| `21103` | *(no local match — 9 CB students, none imported locally)* | coverage gap, not a mismatch |
+| `21103` | **`21103`** (synthetic group, created 2026-07-05 so the 9 CB students can import; real track identity unknown — rename in `db/seeds/programs.rb` when identified) | placeholder |
 | `21104` | **CEDT** | exact, 874/874 matched students |
 
 `21100` needs `degree_code` (only present on CB's *programs* export, not the *students* export) to

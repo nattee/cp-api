@@ -6,7 +6,7 @@ module Chulabooster
   # default on twin ties). Loads all programs + enrollment counts once — build
   # one instance per sync run.
   class ProgramResolver
-    MAJOR_TO_GROUP = { "21101" => "CS", "21102" => "SE", "21104" => "CEDT" }.freeze
+    MAJOR_TO_GROUP = { "21101" => "CS", "21102" => "SE", "21104" => "CEDT", "21103" => "21103" }.freeze
     CM_SEGMENTS = %w[70 72].freeze
     CD_SEGMENTS = %w[71 73].freeze
     # Year-existence fallback order: a graduate-range segment falls back to the

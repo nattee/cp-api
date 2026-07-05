@@ -10,6 +10,9 @@ group_data = {
   "SE"    => { name_en: "Software Engineering",                        name_th: "วิศวกรรมซอฟต์แวร์",                              degree_level: "master",   degree_name: "Master of Science",       degree_name_th: "วิทยาศาสตรมหาบัณฑิต",      field_of_study: "Computer Engineering" },
   "CD"    => { name_en: "Computer Engineering",                        name_th: "วิศวกรรมคอมพิวเตอร์",                            degree_level: "doctoral", degree_name: "Doctor of Philosophy",    degree_name_th: "วิศวกรรมศาสตรดุษฎีบัณฑิต", field_of_study: "Computer Engineering" },
   "OTHER" => { name_en: "Unknown Program",                             name_th: nil,                                               degree_level: "bachelor", degree_name: "Unknown",                degree_name_th: nil,                         field_of_study: "Unknown" },
+  # Discontinued 2006 track known only from ChulaBooster (major_code 21103, 9 students,
+  # blank names in CB's export). Synthetic code; rename here once the real track is identified.
+  "21103" => { name_en: "Former 2006 Track (CB 21103)",                name_th: nil,                                               degree_level: "bachelor", degree_name: "Unknown",                degree_name_th: nil,                         field_of_study: "Computer Engineering" },
 }
 
 groups = {}
@@ -80,6 +83,11 @@ programs = {
   "CEDT" => [
     { program_code: "4853", total_credit: 124, short_name: "วศ.บ. (CEDT)", year_started_be: 2566 },
   ],
+  "21103" => [
+    # Synthetic program_code (= CB major_code; real 4-digit code unknown). CB's programs
+    # export dates this track's one revision to 2006 CE.
+    { program_code: "21103", total_credit: nil, short_name: "21103", year_started_be: 2006 + 543 },
+  ],
 }
 
 # ChulaBooster major_code per program group (see docs/chulabooster-program-crosswalk.md).
@@ -87,6 +95,7 @@ programs = {
 CB_MAJOR_CODES = {
   "CP" => "21100", "CM" => "21100", "CD" => "21100",
   "CS" => "21101", "SE" => "21102", "CEDT" => "21104",
+  "21103" => "21103",
   "OTHER" => nil
 }.freeze
 
