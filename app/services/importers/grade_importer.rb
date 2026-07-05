@@ -67,11 +67,12 @@ module Importers
       end
 
       # Totally unknown → placeholder
+      # Program-less: Course lost program= in the M:N remodel; placeholder courses
+      # carry no program links until a human (or a future sync) assigns them.
       Course.create!(
         course_no: course_no,
         revision_year_be: revision_year,
         name: course_no,
-        program: Program.placeholder,
         auto_generated: "placeholder"
       )
     end
@@ -101,11 +102,12 @@ module Importers
       end
 
       # 3. Totally unknown → create minimal placeholder
+      # Program-less: Course lost program= in the M:N remodel; placeholder courses
+      # carry no program links until a human (or a future sync) assigns them.
       Course.create!(
         course_no: course_no,
         revision_year_be: revision_year,
         name: course_no,
-        program: Program.placeholder,
         auto_generated: "placeholder"
       )
     end
