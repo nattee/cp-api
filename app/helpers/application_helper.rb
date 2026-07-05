@@ -20,6 +20,7 @@ module ApplicationHelper
     "scrapes"          => "cloud_sync",
     "schedules"        => "date_range",
     "dev"              => "palette",
+    "chulabooster"     => "sync",
   }.freeze
 
   def resource_icon(resource = controller_name)
