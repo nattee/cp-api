@@ -1,12 +1,37 @@
 namespace :chulabooster do
-  desc "Read-only reconciliation of ChulaBooster exports vs local DB. RESUME=tmp/reconciliation/<ts> to resume."
+  desc "Snapshot raw ChulaBooster export data to disk (JSONL per entity) so reconciliation " \
+       "and analysis can run offline without re-hitting CB. RESUME=tmp/chulabooster_snapshot/<ts> to resume."
+  task snapshot: :environment do
+    $stdout.sync = true
+
+    resume_dir = ENV["RESUME"]
+    dir = resume_dir || Rails.root.join("tmp", "chulabooster_snapshot", Time.zone.now.strftime("%Y%m%d-%H%M%S")).to_s
+    client = Chulabooster::Client.new
+    snapshotter = Chulabooster::Snapshotter.new(client: client, dir: dir)
+
+    Chulabooster::Client::EXPORT_ENTITIES.each do |entity|
+      if snapshotter.done?(entity)
+        puts "= #{entity}: already complete, skipping"
+        next
+      end
+      cursor = snapshotter.resume_cursor(entity)
+      puts "→ #{entity}#{cursor ? " (resuming)" : ""}..."
+      count = snapshotter.dump_entity(entity, start_cursor: cursor)
+      puts "  #{entity}: #{count} rows"
+    end
+
+    puts "\n→ snapshot dir: #{dir}"
+  end
+
+  desc "Read-only reconciliation of ChulaBooster exports vs local DB. RESUME=tmp/reconciliation/<ts> to resume. " \
+       "SNAPSHOT_DIR=tmp/chulabooster_snapshot/<ts> to reconcile against a cached snapshot instead of live CB."
   task reconcile: :environment do
     $stdout.sync = true
 
     resume_dir = ENV["RESUME"]
     run_dir = resume_dir || Rails.root.join("tmp", "reconciliation", Time.zone.now.strftime("%Y%m%d-%H%M%S")).to_s
     writer  = Chulabooster::ReportWriter.new(run_dir)
-    client  = Chulabooster::Client.new
+    client  = ENV["SNAPSHOT_DIR"] ? Chulabooster::SnapshotClient.new(ENV["SNAPSHOT_DIR"]) : Chulabooster::Client.new
     reconciler = Chulabooster::Reconciler.new(client: client, writer: writer, run_dir: run_dir)
 
     checkpoint = Chulabooster.load_checkpoint(run_dir)

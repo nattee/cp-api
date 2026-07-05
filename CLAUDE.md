@@ -114,7 +114,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
   - Sidebar "Programs" links to `/program_groups`. The flat all-revisions list is at `/programs`.
 - **Program `program_code`**: A unique 4-digit string (e.g. `"0018"`, `"4784"`) from the university's official system. This is the **business key** — use it for all external lookups (imports, seeds, APIs). Rails auto-increment `id` is only for internal associations/foreign keys. Seeds use `find_or_initialize_by(program_code:)`.
 - **Course `course_no` as cross-revision key**: The same course (e.g. Algorithm Design) exists as multiple rows with different `revision_year` values. `course_no` is stable across revisions and serves as the implicit grouping key — no parent model needed. Cross-revision queries: `Grade.joins(:course).where(courses: { course_no: "2110327" })`.
-- **Year fields are Buddhist Era (B.E.)**: `admission_year_be` (Student), `year_started` (Program), `revision_year` (Course) all store B.E. years (e.g. 2567 = 2024 CE). Importers auto-convert CE→BE by adding 543 when the value is < 2400.
+- **Year fields are Buddhist Era (B.E.)**: `admission_year_be` (Student), `year_started_be` (Program), `revision_year_be` (Course) all store B.E. years (e.g. 2567 = 2024 CE). Importers auto-convert CE→BE by adding 543 when the value is < 2400. **Exception**: `Grade#year_ce` stores Gregorian/C.E., not B.E. — named `_ce` deliberately so this doesn't get misread as another B.E. field.
 - **Student name display**: Use `Student#display_name` (prefers `full_name_th`, falls back to `full_name`) in all index pages, tables, and list contexts. Reserve `full_name` / `full_name_th` for show-page detail fields where both languages are displayed explicitly.
 - **Staff name display**: Use `Staff#display_name_th` (prefers Thai, falls back to English) in all dropdowns, tables, and display contexts. Reserve `display_name` (English) for export/import matching where column data is in English.
 
@@ -155,3 +155,29 @@ Multi-step flow: upload (`create`) → column mapping (`mapping`) → execute (`
 - **Adding a new importer**: Create `app/services/importers/foo_importer.rb` extending `Base`, implement `self.attribute_definitions` + private methods (`find_existing_record`, `build_new_record`, `transform_attributes`, `unique_key_fields`), add an entry to `DataImport::IMPORTERS`.
 - **Column mapping storage**: `column_mapping` JSON maps attribute names to file column headers. `default_values` JSON maps attribute names to constant values. An attribute is in one or the other, never both.
 - **Roo float coercion**: Roo reads numeric Excel cells as floats (e.g. `0018` → `18.0`). For string-like numeric fields (program codes, student IDs), strip `.0` with `.to_s.gsub(/\.0\z/, "")`. For program_code lookups, also zero-pad to 4 digits with `.to_i.to_s.rjust(4, "0")`.
+
+## ChulaBooster Integration
+
+Read-only reconciliation between local data and ChulaBooster (CB), the university's registrar
+system — the dry-run precursor to a future authoritative write-back sync. See
+`docs/superpowers/specs/2026-07-01-chulabooster-reconciliation-design.md` (dry-run design) and
+`docs/chulabooster-program-crosswalk.md` (program-matching findings + sync policy).
+
+- **Read-only client + reconciler**: `app/services/chulabooster/client.rb` (GET-only, paginated),
+  `reconciler.rb` + `mappers/*.rb` (per-entity comparison), `report_writer.rb` (console + CSV
+  reports). Run via `bin/rails chulabooster:reconcile`.
+- **Snapshot cache**: `bin/rails chulabooster:snapshot` dumps all 5 CB entities to disk once
+  (`app/services/chulabooster/snapshotter.rb`); `SnapshotClient` lets `reconcile` (or any other
+  analysis) run offline against the cache via `SNAPSHOT_DIR=`. Prefer this over repeated live
+  reconciliation runs — the full pull (mainly `student_courses`, ~49k rows) takes tens of minutes.
+- **CB's program identifiers are coarser than ours**, and the crosswalk to local `Program` is not
+  yet automatable (`Program.alternative_program_code` is unpopulated). See
+  `docs/chulabooster-program-crosswalk.md` for the verified mapping and the sync policy this
+  implies: **local program/student data is authoritative; CB is additive-only** (bring in students
+  CB has that we don't) and must never overwrite existing local program assignments.
+- **Authority is per-field, not global — `Student#status` is the opposite of program identity.**
+  Local `status` defaults to `"active"` at import and is never re-confirmed, so it drifts stale;
+  CB's status code is the more reliable signal here (~99% validated against local `graduated`/
+  `retired`, which — unlike `active` — require an active human decision to set). See
+  `docs/chulabooster-student-status-crosswalk.md`. Same non-destructive rule applies: even where
+  CB is more likely right, discrepancies are reported for human review, never auto-corrected.
