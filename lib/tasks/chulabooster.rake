@@ -99,4 +99,34 @@ namespace :chulabooster do
     puts "row errors:             #{counts[:errors]}"
     puts "\n→ reports: #{run_dir}"
   end
+
+  desc "Create CB-only Grades + correct stale non-manual grade values from CB (registrar of " \
+       "record). Run sync_courses first. DRY-RUN by default; COMMIT=1 to write. " \
+       "SNAPSHOT_DIR=tmp/chulabooster_snapshot/<ts> to run offline."
+  task sync_grades: :environment do
+    $stdout.sync = true
+
+    run_dir = Rails.root.join("tmp", "chulabooster_sync_grades", Time.zone.now.strftime("%Y%m%d-%H%M%S")).to_s
+    client  = ENV["SNAPSHOT_DIR"] ? Chulabooster::SnapshotClient.new(ENV["SNAPSHOT_DIR"]) : Chulabooster::Client.new
+    commit  = ENV["COMMIT"] == "1"
+
+    puts commit ? "MODE: COMMIT — grades WILL be created/corrected" : "MODE: dry-run — no database writes"
+    counts = Chulabooster::GradeSync.new(client: client, run_dir: run_dir, commit: commit).call
+
+    puts
+    puts "cb rows:                #{counts[:cb_rows]}"
+    puts "sentinel course_id:     #{counts[:sentinel]}"
+    puts "unknown students:       #{counts[:unknown_student]}   <- skipped_unknown_students.csv"
+    puts "matched:                #{counts[:matched]}"
+    puts "  identical:            #{counts[:identical]}"
+    puts "#{commit ? '  corrected:           ' : '  correctable:         '} #{counts[commit ? :corrected : :correctable]}   <- grade_corrections.csv"
+    puts "  manual diffs:         #{counts[:manual_diff]}   <- grade_discrepancies.csv"
+    puts "  value->nil diffs:     #{counts[:value_to_nil]}   <- grade_discrepancies.csv"
+    puts "#{commit ? 'created:               ' : 'creatable:             '} #{counts[commit ? :created : :creatable]}"
+    puts "  ladder copied:        #{counts[:ladder_copied]}   <- ladder_courses.csv"
+    puts "  ladder placeholder:   #{counts[:ladder_placeholder]}"
+    puts "duplicate CB rows:      #{counts[:duplicate_cb]}"
+    puts "row errors:             #{counts[:errors]}"
+    puts "\n→ reports: #{run_dir}"
+  end
 end
