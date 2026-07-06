@@ -23,13 +23,16 @@ $danger:    #e7000b;    // destructive   — oklch(0.577 0.245 27.325)
 $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
 // Font color (Bootstrap dark mode text)
-$body-color-dark: #ffffff;                   // pure white — oklch(1 0 0)
+// Softened from palette's pure #ffffff (oklch(1 0 0)): max contrast on every
+// word is glarey over long sessions and leaves no headroom for emphasis.
+// #e6edf3 is GitHub dark's body text. Deliberate deviation from --foreground.
+$body-color-dark: #e6edf3;
 
 // Surface colors
 $popover-bg:           #101828;                      // popover — oklch(0.21 0.034 264.665), opaque; for dropdowns, popovers, calendars
 $body-bg-dark:         $dark;                        // page canvas in dark mode (Bootstrap uses this, not $body-bg)
 $body-bg:              $dark;                        // page canvas (light mode fallback)
-$card-bg:              rgba(#101828, 0.6);            // card — oklch(0.21 0.034 264.665 / 0.6), semi-transparent
+$card-bg:              #101828;                       // card — oklch(0.21 0.034 264.665), alpha DROPPED: at /0.6 over $dark the card composited to rgb(11,16,31), ~13 RGB pts above the canvas — all surfaces melted together (2026-07-06 spec)
 $input-bg:             lighten($dark, 2%);            // form controls (recessed into card)
 $input-group-addon-bg: lighten($dark, 1%);            // input group text (deeper recess)
 $table-bg:             transparent;                   // inherit card background, no extra layer

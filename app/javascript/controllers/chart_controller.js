@@ -37,7 +37,7 @@ const LINE_COLORS = [
 ]
 
 const GRID_COLOR = "rgba(255, 255, 255, 0.08)"
-const TICK_COLOR = "#ffffff"
+const TICK_COLOR = "#e6edf3" // tracks $body-color-dark (see docs/shadcn-color-mapping.md)
 
 export default class extends Controller {
   static targets = ["canvas", "filter"]
