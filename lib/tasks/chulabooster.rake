@@ -77,4 +77,26 @@ namespace :chulabooster do
     puts "status discrepancies:   #{counts[:status_discrepancies]} (#{counts[:stale_active]} locally-active look stale)"
     puts "\n→ reports: #{run_dir}"
   end
+
+  desc "Create CB-only Courses + backfill local auto-generated shells from CB metadata. " \
+       "DRY-RUN by default; COMMIT=1 to write. SNAPSHOT_DIR=tmp/chulabooster_snapshot/<ts> to run offline."
+  task sync_courses: :environment do
+    $stdout.sync = true
+
+    run_dir = Rails.root.join("tmp", "chulabooster_sync_courses", Time.zone.now.strftime("%Y%m%d-%H%M%S")).to_s
+    client  = ENV["SNAPSHOT_DIR"] ? Chulabooster::SnapshotClient.new(ENV["SNAPSHOT_DIR"]) : Chulabooster::Client.new
+    commit  = ENV["COMMIT"] == "1"
+
+    puts commit ? "MODE: COMMIT — courses WILL be created/backfilled" : "MODE: dry-run — no database writes"
+    counts = Chulabooster::CourseSync.new(client: client, run_dir: run_dir, commit: commit).call
+
+    puts
+    puts "cb rows:                #{counts[:cb_rows]}"
+    puts "matched (real):         #{counts[:matched_real]}"
+    puts "#{commit ? 'created:               ' : 'creatable:             '} #{counts[commit ? :created : :creatable]}"
+    puts "#{commit ? 'backfilled:            ' : 'backfillable:          '} #{counts[commit ? :backfilled : :backfillable]}"
+    puts "discrepancies (real):   #{counts[:discrepancies]}   <- review course_discrepancies.csv"
+    puts "row errors:             #{counts[:errors]}"
+    puts "\n→ reports: #{run_dir}"
+  end
 end
