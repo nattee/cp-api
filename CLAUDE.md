@@ -189,9 +189,10 @@ system — the dry-run precursor to a future authoritative write-back sync. See
   Admin pointer page at `/chulabooster`.
 - **Course + grade sync (Phase 2b)**: `bin/rails chulabooster:sync_courses` then
   `chulabooster:sync_grades` — same dry-run-default / `COMMIT=1` / `SNAPSHOT_DIR=` contract.
-  Additive creates plus two audited correction classes: course placeholder-shell backfill and
-  non-manual grade-value corrections (CB is registrar of record for grades; `manual` rows and
-  CB-blank-vs-local-value are report-only). Grade identity is revision-insensitive
+  Additive creates plus two audited correction classes: auto-generated course-row backfill
+  (placeholder stubs AND "copied" clones — both are machine guesses, promoted to `"none"` after
+  backfill) and non-manual grade-value corrections (CB is registrar of record for grades;
+  `manual` rows and CB-blank-vs-local-value are report-only). Grade identity is revision-insensitive
   (`student, course_no, year_ce, semester`) — full-key matching would duplicate
   revision-shadowed enrollments. New grades get `source: "chulabooster"`. Missing courses at
   grade time: exact → closest-revision copy → placeholder ladder. Design:
