@@ -97,19 +97,34 @@ $input-icon-color: darken($light, 5%);
 .card .table > thead > tr > * { border-bottom-color: $table-head-border-color; border-bottom-width: $table-head-border-width; }
 
 // Group header rows within a single table — used to separate sections (e.g. course
-// groups, semesters) while keeping all columns aligned. Styled as a subtle label row
-// with a stronger top border to visually separate groups.
+// groups, semesters) while keeping all columns aligned. Styled as an accent band:
+// visible tint, cyan bar on the left edge, label in $light and LARGER than the data
+// rows. The old 3% tint at 0.85rem made headers recede below the data they label —
+// 15+ semester groups blurred into one stream (2026-07-06 spec).
 .table-group-header td {
-  background-color: rgba(white, 0.03);
+  background-color: rgba(white, 0.05);          // was 0.03 — now a visible band
   border-top: 1px solid $table-head-border-color;
-  padding-top: 0.6rem;
-  padding-bottom: 0.4rem;
-  font-size: 0.85rem;
+  box-shadow: inset 3px 0 0 $primary;           // accent bar; inset shadow, not border, so column widths don't shift
+  padding-top: 0.65rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.95rem;                           // was 0.85rem — header now outranks data rows
 }
+.table-group-header strong { color: $light; letter-spacing: 0.02em; }
 // First group header should not have a top border (thead border is enough)
 .card .table > tbody > tr.table-group-header:first-child td {
   border-top: 0;
 }
+// Spacer rows: a gap of card background between groups, so each group reads as its
+// own block. Views emit one before each group header except the first.
+.table-group-spacer td {
+  padding: 0.7rem 0;
+  border: 0;
+  background: transparent;
+}
+// Suppress .table-hover highlight on spacers — an empty row must not light up.
+// Must match Bootstrap's `.table-hover > tbody > tr:hover > *` specificity;
+// a bare `.table-group-spacer td { box-shadow: none }` loses that fight.
+.table-hover > tbody > tr.table-group-spacer:hover > td { box-shadow: none; }
 
 // Column headers as muted labels — recede visually so data rows are the focus.
 // Uppercase + small size + letter-spacing = quiet "label" feel (Linear/Stripe pattern).
