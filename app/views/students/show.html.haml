@@ -195,7 +195,7 @@
               - grouped.each_with_index do |(group_name, group_grades), group_idx|
                 - group_credits = group_grades.select { |g| g.grade_weight }.sum { |g| g.course.credits.to_i }
                 - if group_idx.positive?
-                  %tr.table-group-spacer
+                  %tr.table-group-spacer{"aria-hidden" => "true"}
                     %td{colspan: 6}
                 %tr.table-group-header
                   %td{colspan: 6}
@@ -229,7 +229,7 @@
             %tbody
               - by_term.each_with_index do |(term_label, term_grades), term_idx|
                 - if term_idx.positive?
-                  %tr.table-group-spacer
+                  %tr.table-group-spacer{"aria-hidden" => "true"}
                     %td{colspan: 6}
                 - term_graded = term_grades.select { |g| g.grade_weight }
                 - term_weighted = term_graded.sum { |g| g.grade_weight.to_f * g.course.credits.to_i }

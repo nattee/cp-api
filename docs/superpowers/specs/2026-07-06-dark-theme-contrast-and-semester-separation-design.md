@@ -107,7 +107,7 @@ The existing first-child rule (no top border on the first group header) stays.
 - Light/dark toggle (rejected above).
 - Palette changes beyond the three variables listed.
 - Muted-text contrast (user explicitly did not report it as a pain).
-- Group-header hover behavior (unchanged from today).
+- Group-header hover styling. (Implementation note: the accent-bar box-shadow replaces Bootstrap's hover shadow, so header rows no longer highlight on hover — accepted, band labels aren't data rows.)
 
 ## Verification
 

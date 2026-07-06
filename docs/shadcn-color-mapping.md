@@ -6,7 +6,7 @@ Color palette is generated with [shadcn themes](https://shadcnthemes.app/generat
 
 1. Export the `.dark { ... }` block from the shadcn generator
 2. Convert oklch values to hex using the Ruby script at the bottom of this doc
-3. Update the Sass variables in `application.scss` (lines 1-40). Pay attention to:
+3. Update the Sass variables in `application.scss` (the variable block above `@import "scss/bootstrap"`). Pay attention to:
    - **`$dark`** and **`$body-bg-dark`**: both must be set to the `--background` value. Bootstrap uses `$body-bg-dark` (not `$body-bg`) in dark mode — without it, the page background falls back to Bootstrap's default `#212529`.
    - **`$card-bg`**: always use the opaque hex from `--card` and **drop any alpha** (e.g. `/ 0.6`). Deliberate deviation: translucent cards composite to within ~13 RGB points of the canvas and all surfaces melt together (see 2026-07-06 contrast spec). Do not override `$card-border-color` either — the dark-mode default rgba(255,255,255,0.15) border is stronger than the rgba(white,0.08) that was once proposed and measured dimmer.
    - **`$popover-bg`**: always the opaque hex from `--popover` (same base color as card, no alpha).

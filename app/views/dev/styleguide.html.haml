@@ -32,7 +32,7 @@
     %h5.card-title.mb-3 Derived Colors
     %p.text-muted.small Auto-derived from base colors. Change the base and watch these update. Check Override to set independently.
     .row.g-3.align-items-end#surface-colors
-      - [["body-bg", "$body-bg", "= $dark"], ["card-bg", "$card-bg", "palette (0.6\u03B1)"], ["popover-bg", "$popover-bg", "palette (opaque)"], ["input-bg", "$input-bg", "lighten($dark, 2%)"], ["input-group-addon-bg", "$input-group-addon-bg", "lighten($dark, 1%)"], ["input-icon-color", "$input-icon-color", "darken($light, 5%)"]].each do |key, label, formula|
+      - [["body-bg", "$body-bg", "= $dark"], ["card-bg", "$card-bg", "palette (opaque)"], ["popover-bg", "$popover-bg", "palette (opaque)"], ["input-bg", "$input-bg", "lighten($dark, 2%)"], ["input-group-addon-bg", "$input-group-addon-bg", "lighten($dark, 1%)"], ["input-icon-color", "$input-icon-color", "darken($light, 5%)"]].each do |key, label, formula|
         .col-auto{style: "min-width: 120px"}
           %label.form-label.small.mb-1
             %code= label
@@ -382,7 +382,8 @@
       "input-icon-color": cssVarToHex("--sass-input-icon-color")
     };
 
-    // Track alpha for surfaces that use rgba (e.g. card-bg: 0.6)
+    // Track alpha for rgba surfaces (none currently — surfaces are opaque since
+    // 2026-07; kept for the live color-picker preview)
     var surfaceAlphas = {
       "card-bg": cssVarAlpha("--sass-card-bg")
     };

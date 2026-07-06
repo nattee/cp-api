@@ -104,7 +104,7 @@ $input-icon-color: darken($light, 5%);
 .table-group-header td {
   background-color: rgba(white, 0.05);          // was 0.03 — now a visible band
   border-top: 1px solid $table-head-border-color;
-  box-shadow: inset 3px 0 0 $primary;           // accent bar; inset shadow, not border, so column widths don't shift
+  box-shadow: inset 3px 0 0 $primary;           // accent bar; inset shadow, not border, so column widths don't shift. Side effect (accepted): replaces Bootstrap's hover box-shadow, so header rows no longer highlight on hover — band labels aren't data rows
   padding-top: 0.65rem;
   padding-bottom: 0.5rem;
   font-size: 0.95rem;                           // was 0.85rem — header now outranks data rows
@@ -122,8 +122,9 @@ $input-icon-color: darken($light, 5%);
   background: transparent;
 }
 // Suppress .table-hover highlight on spacers — an empty row must not light up.
-// Must match Bootstrap's `.table-hover > tbody > tr:hover > *` specificity;
-// a bare `.table-group-spacer td { box-shadow: none }` loses that fight.
+// Bootstrap paints hover via an inset-9999px box-shadow declared on
+// `.table > :not(caption) > * > *`; our selector matches the hover rule's
+// shape so this stays correct regardless of source order.
 .table-hover > tbody > tr.table-group-spacer:hover > td { box-shadow: none; }
 
 // Column headers as muted labels — recede visually so data rows are the focus.
