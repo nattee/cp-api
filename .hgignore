@@ -22,3 +22,6 @@ config/llm.yml
 # AI, artifact
 .claude/
 .ruby-lsp/
+
+# Claude SDD session scratch (task briefs/reports/ledgers)
+.superpowers/**
