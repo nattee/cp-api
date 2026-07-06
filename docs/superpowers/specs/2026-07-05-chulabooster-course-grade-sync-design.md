@@ -1,7 +1,13 @@
 # ChulaBooster Course + Grade Sync (Project 2, Phase 2b) — Design
 
 **Date:** 2026-07-05
-**Status:** Design approved (2026-07-05).
+**Status:** Implemented (2026-07-06, revs 160–169) and **production run completed 2026-07-06**
+against a fresh snapshot (`tmp/chulabooster_snapshot/20260706-041925`, row-identical to Jul-3):
++180 courses created, 79 backfilled, +30,201 grades created (3,325 in-progress nil-grade),
+22 corrected, 3,876 non-dept rows skipped, 0 errors; convergence re-run 45,625/45,625
+identical. Audit CSVs: `tmp/chulabooster_sync_courses/20260706-050559`,
+`tmp/chulabooster_sync_grades/20260706-050741`. DB backup:
+`~/db_backups/cp_api_development-pre-phase2b-import-20260706-111917.sql.gz`.
 **Depends on:** Phase 2a (`Chulabooster::StudentSync`, `docs/superpowers/specs/2026-07-05-chulabooster-student-sync-design.md`) — students must be synced first; grade rows reference them. Program/status policy background: `docs/chulabooster-program-crosswalk.md`, `docs/chulabooster-student-status-crosswalk.md`. Unlike Phase 2a, the crosswalk evidence for courses and grades is small enough to live in this spec (see "Crosswalk evidence" below) rather than in standalone docs.
 
 ## Why

@@ -84,7 +84,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 
 ## UI Component Conventions
 
-- **Badges**: Every badge must use a named semantic `.badge-*` class — never raw Bootstrap `bg-*` classes. When introducing a new badge, add a new `.badge-<concept>` class in `application.scss` following the frosted style (semi-transparent tinted background, subtle border) rather than reusing an existing class with a different meaning. Existing classes: `.badge-admin`, `.badge-editor`, `.badge-viewer`, `.badge-active`, `.badge-inactive`, `.badge-graduated`, `.badge-on-leave`, `.badge-retired`, `.badge-bachelor`, `.badge-master`, `.badge-doctoral`, `.badge-planned`, `.badge-confirmed`, `.badge-cancelled`, `.badge-pending`, `.badge-running`, `.badge-completed`, `.badge-failed`, `.badge-create-only`, `.badge-upsert`. Two classes may share similar colors if they represent different domain concepts. **Render badges data-driven** — derive the class from the value (e.g. `"badge-#{status.dasherize}"`) instead of if/elsif chains. This way adding a new value only requires a model constant + SCSS class, no view changes.
+- **Badges**: Every badge must use a named semantic `.badge-*` class — never raw Bootstrap `bg-*` classes. When introducing a new badge, add a new `.badge-<concept>` class in `application.scss` following the frosted style (semi-transparent tinted background, subtle border) rather than reusing an existing class with a different meaning. Existing classes: `.badge-admin`, `.badge-editor`, `.badge-viewer`, `.badge-active`, `.badge-inactive`, `.badge-graduated`, `.badge-on-leave`, `.badge-retired`, `.badge-bachelor`, `.badge-master`, `.badge-doctoral`, `.badge-planned`, `.badge-confirmed`, `.badge-cancelled`, `.badge-pending`, `.badge-running`, `.badge-completed`, `.badge-failed`, `.badge-create-only`, `.badge-upsert`, `.badge-imported`, `.badge-manual`, `.badge-chulabooster`. Two classes may share similar colors if they represent different domain concepts. **Render badges data-driven** — derive the class from the value (e.g. `"badge-#{status.dasherize}"`) instead of if/elsif chains. This way adding a new value only requires a model constant + SCSS class, no view changes.
 - **Icon action buttons**: Use ghost button classes (`.btn-ghost .btn-ghost-*`) for icon-only action links in tables. These extend Bootstrap's `btn-link` with no underline, custom color per variant, and a subtle tinted background on hover. Variants: `-primary` (view/show), `-secondary` (edit), `-danger` (delete). Do not use `btn-outline-*` for icon-only actions.
 - **Icons**: Use Material Symbols (`%span.material-symbols`) for action icons, typically at `font-size: 18px` in tables. When placing icons inline with text, add `vertical-align: middle` — see `docs/material-symbols-vertical-align.md`.
 - **Input group icons**: Styled with `$input-icon-color` (defined post-import in `application.scss`). Currently `darken($light, 5%)` — a dimmed version of the `$light` theme color.
@@ -158,10 +158,13 @@ Multi-step flow: upload (`create`) → column mapping (`mapping`) → execute (`
 
 ## ChulaBooster Integration
 
-Read-only reconciliation between local data and ChulaBooster (CB), the university's registrar
-system — the dry-run precursor to a future authoritative write-back sync. See
-`docs/superpowers/specs/2026-07-01-chulabooster-reconciliation-design.md` (dry-run design) and
-`docs/chulabooster-program-crosswalk.md` (program-matching findings + sync policy).
+Integration with ChulaBooster (CB), the university's registrar system: a read-only client +
+reconciler, a snapshot cache, and authoritative sync write paths (students, courses, grades —
+dry-run by default, `COMMIT=1` to write). Production syncs ran 2026-07-05/06; local and CB are
+converged (re-run the snapshot + syncs after CB's next ETL refresh to pick up newly posted
+grades). See `docs/superpowers/specs/2026-07-01-chulabooster-reconciliation-design.md`
+(reconciliation design), `docs/chulabooster-program-crosswalk.md` (program-matching findings +
+sync policy), and `docs/chulabooster-client-guide.md` (CB's API contract).
 
 - **Read-only client + reconciler**: `app/services/chulabooster/client.rb` (GET-only, paginated),
   `reconciler.rb` + `mappers/*.rb` (per-entity comparison), `report_writer.rb` (console + CSV
