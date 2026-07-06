@@ -381,14 +381,18 @@ Expected (must match the spec's landscape exactly):
 
 ```
 cb rows:                262
-matched (real):         65
+matched (real):         3
 creatable:              180
-backfillable:           17
+backfillable:           79
 discrepancies (real):   0
 row errors:             0
 ```
 
-Then confirm the dry run wrote nothing: `bin/rails runner 'puts Course.count'` must print the same value before and after (capture it before the run). Inspect `backfilled_courses.csv` — 17 courses' worth of field rows, old values are shell data (name = course_no, nils).
+(Numbers corrected 2026-07-06: the 82 matched courses split 3 real / 63 "copied" clones / 16
+placeholders; the user decided clones are backfilled like placeholders. An earlier draft said
+65/17 by wrongly equating field-identical with real.)
+
+Then confirm the dry run wrote nothing: `bin/rails runner 'puts Course.count'` must print the same value before and after (capture it before the run). Inspect `backfilled_courses.csv` — 79 courses' worth of field rows; old values are placeholder stubs (name = course_no, nils) or clone guesses. Confirm it contains a `2110471,2539,name,COMPUTER NETWORKS I,COMPUTER ARCHITECTURE` row — the known wrong clone being fixed.
 
 If any number differs, STOP and report the discrepancy — do not "fix" the expectation.
 
@@ -396,20 +400,24 @@ If any number differs, STOP and report the discrepancy — do not "fix" the expe
 
 ```bash
 hg add app/services/chulabooster/course_sync.rb
-hg commit app/services/chulabooster/course_sync.rb lib/tasks/chulabooster.rake docs/superpowers/specs/2026-07-05-chulabooster-course-grade-sync-design.md -m "Add CourseSync: mirror CB course export, backfill local placeholder shells
+hg commit app/services/chulabooster/course_sync.rb lib/tasks/chulabooster.rake -m "Add CourseSync: mirror CB course export, backfill auto-generated course rows
 
 The Jul-3 crosswalk showed the course gap is one-sided: CB has 180 courses we lack (full
-registrar metadata), and all 17 matched-changed rows are our own auto-generated placeholder
-shells (name = course_no, all else nil) — real local courses agree with CB 100%. So the sync
-is additive plus one audited correction class: shells are backfilled from CB and promoted to
-auto_generated \"none\"; real-row diffs stay report-only.
+registrar metadata), and every matched-changed row is machine-invented — 16 placeholder
+stubs plus a \"copied\" clone whose guessed name is provably wrong (2110471 rev 2539:
+course-number reuse). The 3 real local courses agree with CB 100%. So the sync is additive
+plus one audited correction class: all auto-generated rows (63 clones + 16 placeholders)
+are backfilled from CB and promoted to auto_generated \"none\"; real-row diffs stay
+report-only.
 
 - Chulabooster::CourseSync (create / backfill / report buckets, per-run CSV reports)
 - chulabooster:sync_courses rake task (dry-run default, COMMIT=1, SNAPSHOT_DIR=)
-- spec amendment: name_abbr joins the synced field set (excluded from diff comparison)
-- verified against the Jul-3 snapshot: 262 rows -> 65 matched / 180 creatable / 17
+- verified against the Jul-3 snapshot: 262 rows -> 3 matched-real / 180 creatable / 79
   backfillable / 0 discrepancies"
 ```
+
+(The spec amendments — name_abbr field-set addition and the corrected crosswalk evidence —
+are committed separately by the controller; this commit is code only.)
 
 ---
 
@@ -749,6 +757,11 @@ class Chulabooster::CourseSyncTest < ActiveSupport::TestCase
     # A local auto-generated shell, as the CSV GradeImporter ladder creates them.
     @shell = Course.create!(course_no: "2110502", revision_year_be: 2557,
                             name: "2110502", auto_generated: "placeholder")
+    # A "copied" clone whose guessed name is wrong (the 2110471 course-number-reuse case) —
+    # user decision 2026-07-06: clones are backfilled like placeholders.
+    @clone = Course.create!(course_no: "2110471", revision_year_be: 2539,
+                            name: "COMPUTER NETWORKS I", credits: 3, l_credits: 3,
+                            auto_generated: "copied")
     @real = courses(:intro_computing)
   end
   teardown { FileUtils.remove_entry(@dir) if @dir && Dir.exist?(@dir) }
@@ -779,6 +792,8 @@ class Chulabooster::CourseSyncTest < ActiveSupport::TestCase
                  "course_name_abbr" => "FORMAL VER",
                  "credits" => 3.0, "l_credits" => 3.0, "l_hours" => 3.0,
                  "nl_hours" => 0.0, "s_hours" => 0.0),          # shell -> backfill
+      cb_row_for(@clone, "course_name" => "COMPUTER ARCHITECTURE",
+                 "course_name_alt" => "สถาปัตยกรรมคอมพิวเตอร์"), # divergent clone -> backfill fixes name
       { "course_no" => "2110999", "revision_year" => 2023,
         "course_name" => "NEW COURSE", "course_name_alt" => "วิชาใหม่",
         "course_name_abbr" => "NEW C", "credits" => 3.0, "l_credits" => 3.0,
@@ -793,17 +808,20 @@ class Chulabooster::CourseSyncTest < ActiveSupport::TestCase
       counts = Chulabooster::CourseSync.new(client: FakeClient.new(cb_rows), run_dir: @dir).call
     end
 
-    assert_equal 4, counts[:cb_rows]
+    assert_equal 5, counts[:cb_rows]
     assert_equal 2, counts[:matched_real] # identical row + the credits-diff row
     assert_equal 1, counts[:creatable]
     assert_equal 0, counts[:created]
-    assert_equal 1, counts[:backfillable]
+    assert_equal 2, counts[:backfillable] # shell + divergent clone
     assert_equal 1, counts[:discrepancies]
     assert_equal 0, counts[:errors]
 
     @shell.reload
     assert_equal "2110502", @shell.name, "dry-run must not backfill"
     assert_equal "placeholder", @shell.auto_generated
+    @clone.reload
+    assert_equal "COMPUTER NETWORKS I", @clone.name, "dry-run must not backfill clones"
+    assert_equal "copied", @clone.auto_generated
     assert_equal 3, @real.reload.credits, "real rows are never written"
 
     disc = CSV.read(File.join(@dir, "course_discrepancies.csv"))[1..]
@@ -817,7 +835,7 @@ class Chulabooster::CourseSyncTest < ActiveSupport::TestCase
                                             commit: true).call
     end
     assert_equal 1, counts[:created]
-    assert_equal 1, counts[:backfilled]
+    assert_equal 2, counts[:backfilled]
 
     created = Course.find_by!(course_no: "2110999", revision_year_be: 2566) # 2023 CE -> BE
     assert_equal "NEW COURSE", created.name
@@ -833,6 +851,10 @@ class Chulabooster::CourseSyncTest < ActiveSupport::TestCase
     assert_equal 3, @shell.credits
     assert_equal "none", @shell.auto_generated, "backfilled shell is promoted"
 
+    @clone.reload
+    assert_equal "COMPUTER ARCHITECTURE", @clone.name, "registrar data replaces the clone guess"
+    assert_equal "none", @clone.auto_generated, "backfilled clone is promoted"
+
     assert_equal 3, @real.reload.credits, "real-row diff is report-only even in commit"
   end
 
@@ -846,8 +868,8 @@ class Chulabooster::CourseSyncTest < ActiveSupport::TestCase
                                               commit: true).call
       end
       assert_equal 0, counts[:created]
-      assert_equal 0, counts[:backfilled], "backfilled shell is now a real row"
-      assert_equal 4, counts[:matched_real] # identical + diff-row + ex-shell + created
+      assert_equal 0, counts[:backfilled], "backfilled rows are now real rows"
+      assert_equal 5, counts[:matched_real] # identical + diff-row + ex-shell + ex-clone + created
     ensure
       FileUtils.remove_entry(dir2)
     end

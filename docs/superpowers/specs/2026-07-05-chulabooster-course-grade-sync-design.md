@@ -39,7 +39,8 @@ Disjoint buckets (sum = 49,502):
 local grade links to a *different course revision* — naive full-key matching would have imported
 those as duplicate enrollments.
 
-CB `courses`: 262 rows. 82 match locally (65 real + 17 local placeholder shells), 180 CB-only.
+CB `courses`: 262 rows. 82 match locally (3 real + 63 auto-generated "copied" clones + 16
+placeholder stubs — see the corrected crosswalk below), 180 CB-only.
 471 local courses are unknown to CB (untouched — additive-only). The 1,712 unknown-course grade
 rows reference 145 distinct courses, almost all outside the department (5500 = language institute,
 0295/0299 gen-ed, 2102 EE, …). Local practice already tracks outside courses (45% of existing
@@ -53,11 +54,19 @@ rows have a **blank grade** — in-progress enrollments, almost all academic yea
 
 Method identical to the program/status crosswalks: match by business key, compare field-by-field.
 
-**Courses** — matched on `(course_no, revision_year_be)`, 82 matches:
-- Local real rows (`auto_generated: "none"`): **65/65 identical to CB on every compared field**
-  (name, name_th, credits, l_credits, l_hours, nl_hours, s_hours, is_thesis, is_gened).
-- The 17 "changed" rows are all local `auto_generated: "placeholder"` shells (name = course_no,
-  every other field nil) vs CB's full registrar metadata. Missing data on our side, not divergence.
+**Courses** — matched on `(course_no, revision_year_be)`, 82 matches. Field comparison: 65
+identical, 17 changed. By provenance (**corrected 2026-07-06** — an earlier draft wrongly equated
+"identical" with "real"; the Task-3 verification gate caught it):
+- Only **3** matched rows are real (`auto_generated: "none"`) — all 3 identical to CB on every
+  compared field (name, name_th, credits, l_credits, l_hours, nl_hours, s_hours, is_thesis,
+  is_gened). Zero real-row divergence.
+- **63** are `"copied"` clones (auto-created by the CSV GradeImporter's ladder on 2026-04-12:
+  nearest revision duplicated, year changed). 62 agree with CB byte-for-byte; **1 diverges** —
+  `2110471` rev 2539, where the clone stamped the modern name ("COMPUTER NETWORKS I") onto the
+  1996 revision that CB says was "COMPUTER ARCHITECTURE". Course numbers get reused across
+  decades, which is precisely when the clone guess fails.
+- **16** are `"placeholder"` stubs (name = course_no, all else nil). These plus the divergent
+  clone are the 17 field-changed rows.
 
 **Grades** — matched on `(student_id, course_no, year_ce, semester)`, 15,424 matches:
 - **15,402 identical (99.86%)**, including all 2,181 revision-shadowed matches.
@@ -74,7 +83,10 @@ Method identical to the program/status crosswalks: match by business key, compar
 
 1. **Local is authoritative; CB is additive — except where local data is known-stale.** The two
    known-stale classes, both corrected under `COMMIT=1` with audit CSVs:
-   - **Auto-generated course shells** (`auto_generated` ≠ `"none"`): backfilled from CB metadata.
+   - **Auto-generated course rows** (`auto_generated` ≠ `"none"`) — both `"placeholder"` stubs
+     AND `"copied"` clones (user decision 2026-07-06): clones are system guesses, and the
+     course-number-reuse case (`2110471` rev 2539) proves the guess fails exactly where it
+     matters. Backfilled from CB metadata, promoted to `"none"`.
    - **Non-`manual` grade values** on matched enrollments: corrected to CB's value (CB is the
      registrar of record; evidence above).
 2. **`manual` rows are never modified** — human-authored data wins; diffs are report-only.
@@ -92,16 +104,19 @@ A pure mirror of CB's `courses` export (262 rows). Runs **before** GradeSync. Fo
 match local `Course` on `(course_no, Convert.ce_to_be(revision_year))`:
 
 - **CB-only → create** with full metadata: `name` ← `course_name`, `name_th` ← `course_name_alt`,
+  `name_abbr` ← `course_name_abbr` (exported by CB, column exists locally; not compared for
+  discrepancies),
   `credits`/`l_credits`/`l_hours`/`nl_hours`/`s_hours` ← `Convert.int_or_nil` (CB sends floats),
   `is_thesis`/`is_gened` ← `Convert.bool` (`is_thesis`, `gened`), `auto_generated: "none"`
   (complete registrar metadata — not a shell), no program links (CB program identity is too
   coarse to map through the twin pairs; the M:N model permits program-less courses).
   `nl_credits` and `description` stay nil (CB doesn't export the former; the latter is null
   throughout the export).
-- **Matched + local shell (`auto_generated` ≠ `"none"`) → backfill**: write the same field set,
-  flip `auto_generated` to `"none"`. Audit CSV records old→new per field. (17 rows today; also
-  the self-healing half of the loop — placeholders created by GradeSync's ladder get enriched by
-  the next CourseSync run once CB exports the course.)
+- **Matched + local auto-generated row (`auto_generated` ≠ `"none"`) → backfill**: write the
+  same field set, flip `auto_generated` to `"none"`. Audit CSV records old→new per field.
+  (79 rows today: 63 copied clones + 16 placeholders; also the self-healing half of the loop —
+  placeholders and copies created by GradeSync's ladder get enriched by the next CourseSync run
+  once CB exports the course.)
 - **Matched + local real row, any compared field differs → report-only** (`course_discrepancies.csv`,
   expected empty today).
 - Idempotent: re-run after COMMIT matches everything, writes nothing.
@@ -176,7 +191,7 @@ Verify, fix to create program-less courses (as GradeSync does), regression-test.
 | File | Task | Contents |
 |---|---|---|
 | `created_courses.csv` | courses | 180 CB-only courses created |
-| `backfilled_courses.csv` | courses | shell backfills, old→new per field (17) |
+| `backfilled_courses.csv` | courses | auto-generated-row backfills, old→new per field (79) |
 | `course_discrepancies.csv` | courses | real-vs-real diffs, report-only (expected 0) |
 | `created_grades.csv` | grades | ~30k created grades |
 | `grade_corrections.csv` | grades | value corrections + nil-fills, old→new (22 today) |
@@ -194,8 +209,9 @@ re-run converges).
 
 ## Expected production outcome (vs. 2026-07-03 snapshot)
 
-+180 courses (full metadata) + 145 placeholder + 20 copied courses via the ladder; 17 shells
-backfilled; 30,201 grades created (less any row errors); 22 grades corrected; 3,876 rows skipped
++180 courses (full metadata) + 145 placeholder + 20 copied courses via the ladder; 79
+auto-generated rows backfilled (63 clones + 16 placeholders, incl. the wrong-name `2110471`
+rev 2539); 30,201 grades created (less any row errors); 22 grades corrected; 3,876 rows skipped
 to CSV; 15,655 local-only grades and 471 local-only courses untouched.
 Run order: fresh snapshot → `sync_students` (keeps students current) → `sync_courses` →
 `sync_grades`, dry-run review before each `COMMIT=1`.
