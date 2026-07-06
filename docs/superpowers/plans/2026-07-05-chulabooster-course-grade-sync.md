@@ -693,11 +693,17 @@ matched:                15424
   manual diffs:         0
   value->nil diffs:     0
 creatable:              30201
-  ladder copied:        20
-  ladder placeholder:   145
+  ladder copied:        25
+  ladder placeholder:   208
 duplicate CB rows:      0
 row errors:             0
 ```
+
+(Ladder numbers corrected 2026-07-06: this dry-run necessarily runs BEFORE CourseSync has
+committed anything, so the ladder also absorbs 68 distinct courses that `sync_courses
+COMMIT=1` will create with full metadata (5 as copied + 63 as placeholder here). The
+production sequence — sync_courses committed first — yields the spec's 20 copied + 145
+placeholder; 233 − 68 = 165 = 20 + 145.)
 
 Then confirm nothing was written: `bin/rails runner 'puts [Grade.count, Course.count].inspect'` unchanged from before the run. Spot-check `grade_corrections.csv`: 22 rows, old grades mostly `M`/`I`/`X`/`S`, new grades letter finals.
 
@@ -722,7 +728,8 @@ audited in grade_corrections.csv; manual rows and CB-blank-vs-local-value stay r
   exact -> copied -> placeholder, per-run CSV reports)
 - chulabooster:sync_grades rake task (dry-run default, COMMIT=1, SNAPSHOT_DIR=)
 - verified against the Jul-3 snapshot: 49,502 rows -> 15,424 matched (22 correctable),
-  30,201 creatable (20 copied + 145 placeholder ladder courses), 3,876 skipped, 0 errors"
+  30,201 creatable, 3,876 skipped, 0 errors; 233 distinct ladder courses in the
+  pre-CourseSync dry-run (165 unknown to both sides + 68 that sync_courses will create)"
 ```
 
 ---
