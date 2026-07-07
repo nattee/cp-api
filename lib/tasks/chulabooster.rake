@@ -129,4 +129,28 @@ namespace :chulabooster do
     puts "row errors:             #{counts[:errors]}"
     puts "\n→ reports: #{run_dir}"
   end
+
+  desc "Link CB-only program<->course pairings + fill blank course_group_code tags from CB. " \
+       "Run sync_courses first. DRY-RUN by default; COMMIT=1 to write. " \
+       "SNAPSHOT_DIR=tmp/chulabooster_snapshot/<ts> to run offline."
+  task sync_program_courses: :environment do
+    $stdout.sync = true
+
+    run_dir = Rails.root.join("tmp", "chulabooster_sync_program_courses", Time.zone.now.strftime("%Y%m%d-%H%M%S")).to_s
+    client  = ENV["SNAPSHOT_DIR"] ? Chulabooster::SnapshotClient.new(ENV["SNAPSHOT_DIR"]) : Chulabooster::Client.new
+    commit  = ENV["COMMIT"] == "1"
+
+    puts commit ? "MODE: COMMIT — pairings WILL be created/tagged" : "MODE: dry-run — no database writes"
+    counts = Chulabooster::ProgramCourseSync.new(client: client, run_dir: run_dir, commit: commit).call
+
+    puts
+    puts "cb rows:                #{counts[:cb_rows]}"
+    puts "unresolved (skipped):   #{counts[:unresolved]}   <- skipped_rows.csv"
+    puts "identical:              #{counts[:identical]}"
+    puts "#{commit ? 'created:               ' : 'creatable:             '} #{counts[commit ? :created : :creatable]}"
+    puts "#{commit ? 'tags filled:           ' : 'tags fillable:         '} #{counts[commit ? :filled : :fillable]}"
+    puts "tag discrepancies:      #{counts[:tag_discrepancies]}   <- review tag_discrepancies.csv"
+    puts "row errors:             #{counts[:errors]}"
+    puts "\n→ reports: #{run_dir}"
+  end
 end
