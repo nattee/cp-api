@@ -99,6 +99,6 @@ class CoursesController < ApplicationController
   end
 
   def program_ids_param
-    Array(params.dig(:course, :program_id).presence)
+    Array(params.dig(:course, :program_ids)).compact_blank
   end
 end

@@ -56,8 +56,8 @@
     %legend Academic
     .row
       .col-md-6.mb-3
-        = f.label :program_id, "Program", class: "form-label"
-        = select_tag "course[program_id]", options_for_select(Program.includes(:program_group).order(year_started_be: :desc).map { |p| ["#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started_be})", p.id] }, course.programs.first&.id), include_blank: "Select a program", class: "form-select", data: { controller: "select2" }
+        = f.label :program_ids, "Programs", class: "form-label"
+        = select_tag "course[program_ids][]", options_for_select(Program.includes(:program_group).order(year_started_be: :desc).map { |p| ["#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started_be})", p.id] }, course.program_ids), multiple: true, class: "form-select", data: { controller: "select2" }
       .col-md-6.mb-3
         = f.label :course_group, class: "form-label"
         .input-group
