@@ -10,6 +10,7 @@ class CoursesController < ApplicationController
   GRADE_STACK_ORDER = %w[M F U W P V S D D+ C C+ B B+ A].freeze
 
   def show
+    @program_pairings = @course.program_courses.includes(program: :program_group)
     @grades_count = @course.grades.count
     @available_years = @course.grades.distinct.pluck(:year_ce).sort.reverse
     if params[:year].present?

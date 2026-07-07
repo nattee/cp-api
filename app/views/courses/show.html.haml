@@ -30,20 +30,18 @@
 
             %dt.col-sm-4 Program
             %dd.col-sm-8
-              - if @course.programs.any?
-                - @course.programs.each do |program|
-                  = link_to program.name_en, program
-                  %br
+              - if @program_pairings.any?
+                - @program_pairings.each do |pc|
+                  .mb-1
+                    = link_to pc.program.name_en, pc.program
+                    - if pc.course_group_code.present?
+                      %span.badge.badge-course-group.ms-2{title: pc.course_group_code}= pc.group_label
               - else
                 .text-muted Not assigned
 
       .col-lg-6
         .detail-section
           %dl.dl-fields.row.mb-0
-            - if @course.course_group.present?
-              %dt.col-sm-4 Course Group
-              %dd.col-sm-8= @course.course_group
-
             - if @course.department_code.present?
               %dt.col-sm-4 Dept. Code
               %dd.col-sm-8= @course.department_code
