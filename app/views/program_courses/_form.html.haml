@@ -1,0 +1,29 @@
+= form_with(model: [program, program_course], data: { turbo_frame: "_top" }) do |f|
+  - if program_course.errors.any?
+    .alert.alert-danger.py-2.px-3.mb-2
+      %ul.mb-0.small
+        - program_course.errors.full_messages.each do |message|
+          %li= message
+
+  .row.g-2.align-items-end
+    .col-md-6
+      = f.label :course_id, "Course", class: "form-label small text-muted mb-0"
+      - if program_course.persisted?
+        %input.form-control.form-control-sm{type: "text", disabled: true,
+          value: "#{program_course.course.course_no} — #{program_course.course.name} (#{program_course.course.revision_year_be})"}
+      - else
+        = f.select :course_id,
+          options_for_select(available_courses(program).map { |c| ["#{c.course_no} — #{c.name} (#{c.revision_year_be})", c.id] }, program_course.course_id),
+          { include_blank: "Select a course" },
+          class: "form-select form-select-sm", data: { controller: "select2" }
+    .col-md-3
+      = f.label :course_group_code, "Group Code", class: "form-label small text-muted mb-0"
+      = f.text_field :course_group_code, class: "form-control form-control-sm",
+        list: "course-group-codes", placeholder: "e.g. #{program.program_code}-C"
+      %datalist#course-group-codes
+        - group_code_suggestions(program).each do |code|
+          %option{value: code}
+    .col-md-3
+      .d-flex.gap-2
+        = f.submit (program_course.persisted? ? "Save" : "Add Course"), class: "btn btn-primary btn-sm"
+        = link_to "Cancel", program_path(program), class: "btn btn-outline-secondary btn-sm"

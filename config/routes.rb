@@ -41,7 +41,9 @@ Rails.application.routes.draw do
   end
 
   resources :program_groups, only: [:index, :show]
-  resources :programs
+  resources :programs do
+    resources :program_courses, only: %i[new create edit update destroy]
+  end
   resources :courses
   resources :staffs
   resources :students do

@@ -72,6 +72,12 @@
         Curriculum
         %span.text-muted.ms-2.fw-normal
           (#{@curriculum.values.sum(&:size)})
+      - if current_user.admin?
+        = link_to new_program_program_course_path(@program), class: "btn btn-primary btn-sm", data: { turbo_frame: "program_course_form" } do
+          %span.material-symbols.me-1{style: "font-size: 16px; vertical-align: middle"} add
+          Add Course
+
+    = turbo_frame_tag "program_course_form"
 
     - if @curriculum.any?
       .table-responsive
@@ -100,8 +106,13 @@
                   %td= pc.course.name
                   %td.text-center= pc.course.credits
                   %td
-                    = link_to pc.course, class: "btn-ghost btn-ghost-primary", title: "Show" do
+                    = link_to pc.course, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
                       %span.material-symbols{style: "font-size: 18px"} visibility
+                    - if current_user.admin?
+                      = link_to edit_program_program_course_path(@program, pc), class: "btn-ghost btn-ghost-secondary me-1", title: "Edit", data: { turbo_frame: "program_course_form" } do
+                        %span.material-symbols{style: "font-size: 18px"} edit
+                      = link_to program_program_course_path(@program, pc), data: { turbo_method: :delete, turbo_confirm: "Remove #{pc.course.course_no} from this program?" }, class: "btn-ghost btn-ghost-danger", title: "Remove" do
+                        %span.material-symbols{style: "font-size: 18px"} delete
     - else
       %p.text-muted.mb-0 No courses linked to this program.
 
