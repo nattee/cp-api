@@ -114,6 +114,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
   - Sidebar "Programs" links to `/program_groups`. The flat all-revisions list is at `/programs`.
 - **Program `program_code`**: A unique 4-digit string (e.g. `"0018"`, `"4784"`) from the university's official system. This is the **business key** — use it for all external lookups (imports, seeds, APIs). Rails auto-increment `id` is only for internal associations/foreign keys. Seeds use `find_or_initialize_by(program_code:)`.
 - **Course `course_no` as cross-revision key**: The same course (e.g. Algorithm Design) exists as multiple rows with different `revision_year` values. `course_no` is stable across revisions and serves as the implicit grouping key — no parent model needed. Cross-revision queries: `Grade.joins(:course).where(courses: { course_no: "2110327" })`.
+- **Course groups are per-pairing**: `program_courses.course_group_code` (raw university code, e.g. `"4784-C"` = `<program_code>-<suffix>`) tags each program↔course pairing with its curriculum group. Labels + display order come from `ProgramCourse::COURSE_GROUP_LABELS` (frozen, full-code keys; unknown codes render as their raw suffix). Populated by `chulabooster:sync_program_courses` (fill-blank-only, conflicts report-only) + one-time `program_courses:backfill_legacy_groups`. `courses.course_group` is **deprecated** (still read by students/show Course History; drop both together later). Managed in the UI from the program page's Curriculum card.
 - **Year fields are Buddhist Era (B.E.)**: `admission_year_be` (Student), `year_started_be` (Program), `revision_year_be` (Course) all store B.E. years (e.g. 2567 = 2024 CE). Importers auto-convert CE→BE by adding 543 when the value is < 2400. **Exception**: `Grade#year_ce` stores Gregorian/C.E., not B.E. — named `_ce` deliberately so this doesn't get misread as another B.E. field.
 - **Student name display**: Use `Student#display_name` (prefers `full_name_th`, falls back to `full_name`) in all index pages, tables, and list contexts. Reserve `full_name` / `full_name_th` for show-page detail fields where both languages are displayed explicitly.
 - **Staff name display**: Use `Staff#display_name_th` (prefers Thai, falls back to English) in all dropdowns, tables, and display contexts. Reserve `display_name` (English) for export/import matching where column data is in English.
@@ -200,3 +201,7 @@ sync policy), and `docs/chulabooster-client-guide.md` (CB's API contract).
   revision-shadowed enrollments. New grades get `source: "chulabooster"`. Missing courses at
   grade time: exact → closest-revision copy → placeholder ladder. Design:
   `docs/superpowers/specs/2026-07-05-chulabooster-course-grade-sync-design.md`.
+- **Program-course sync**: `bin/rails chulabooster:sync_program_courses` — links CB-only
+  pairings and fills blank `course_group_code` tags (same dry-run/`COMMIT=1`/`SNAPSHOT_DIR=`
+  contract; differing tags report-only). Run `program_courses:backfill_legacy_groups` after
+  it, once, to fill what CB doesn't cover.
