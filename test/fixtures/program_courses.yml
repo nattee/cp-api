@@ -1,10 +1,12 @@
 intro_cp:
   program: cp_bachelor
   course: intro_computing
+  course_group_code: 2101-C
 
 senior_cp:
   program: cp_bachelor
   course: senior_project
+  course_group_code: 2101-ELEC
 
 gened_cp:
   program: cp_bachelor

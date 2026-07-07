@@ -84,6 +84,22 @@ class CoursesTest < ApplicationSystemTestCase
     assert_no_text course.course_no
   end
 
+  test "editing a course linked to two programs keeps both links and their tags" do
+    course = courses(:intro_computing) # linked to cp_bachelor with tag 2101-C
+    ProgramCourse.create!(program: programs(:cp_master), course: course,
+                          course_group_code: "2102-ELEC")
+
+    visit edit_course_path(course)
+    fill_in "Abbreviation", with: "INTRO2"
+    click_on "Update Course"
+
+    assert_text "Course was successfully updated"
+    assert_equal 2, course.reload.programs.count
+    tags = course.program_courses.order(:id).pluck(:course_group_code)
+    assert_includes tags, "2101-C"
+    assert_includes tags, "2102-ELEC"
+  end
+
   test "Select2 renders for program field on new course" do
     visit new_course_path
 

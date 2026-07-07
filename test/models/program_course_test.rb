@@ -21,4 +21,23 @@ class ProgramCourseTest < ActiveSupport::TestCase
     pc = ProgramCourse.new(program: programs(:cp_master), course: courses(:intro_computing))
     assert pc.valid?
   end
+
+  test "group_label maps known codes via the constant" do
+    assert_equal "Compulsory", ProgramCourse.group_label("4784-C")
+  end
+
+  test "group_label falls back to the raw suffix for unknown codes" do
+    assert_equal "NEWGRP", ProgramCourse.group_label("9999-NEWGRP")
+  end
+
+  test "group_label handles blank" do
+    assert_equal ProgramCourse::UNGROUPED_LABEL, ProgramCourse.group_label(nil)
+    assert_equal ProgramCourse::UNGROUPED_LABEL, ProgramCourse.group_label("")
+  end
+
+  test "group_sort_key orders: constant order, unknown alphabetical, blank last" do
+    codes = [nil, "9999-B", "4784-ELEC", "9999-A", "4784-C"]
+    sorted = codes.sort_by { |c| ProgramCourse.group_sort_key(c) }
+    assert_equal ["4784-C", "4784-ELEC", "9999-A", "9999-B", nil], sorted
+  end
 end
