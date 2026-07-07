@@ -11,7 +11,7 @@ class ProgramsController < ApplicationController
   def show
     @students = @program.students.order(admission_year_be: :desc, student_id: :asc)
     @curriculum = @program.program_courses.includes(:course)
-                          .sort_by { |pc| [ProgramCourse.group_sort_key(pc.course_group_code), pc.course.course_no] }
+                          .sort_by { |pc| [ProgramCourse.group_sort_key(pc.course_group_code), pc.course.course_no, pc.course.revision_year_be] }
                           .group_by(&:course_group_code)
     prepare_admission_chart_data(@students)
     prepare_gpa_chart_data([@program.id])

@@ -22,4 +22,29 @@ namespace :program_courses do
     puts "row errors:             #{counts[:errors]}"
     puts "\n→ reports: #{run_dir}"
   end
+
+  desc "Report-only: CSV of course_nos linked to the same program at more than one revision " \
+       "(legacy CSV link vs ChulaBooster link). Never modifies data."
+  task report_duplicate_revisions: :environment do
+    require "csv"
+    path = Rails.root.join("tmp", "duplicate_revision_links-#{Time.zone.now.strftime('%Y%m%d-%H%M%S')}.csv")
+    count = 0
+    CSV.open(path, "w") do |csv|
+      csv << %w[program_code course_no revision_year_be course_group_code link_created_at]
+      Program.find_each do |program|
+        program.program_courses.includes(:course)
+               .group_by { |pc| pc.course.course_no }
+               .select { |_, links| links.size > 1 }
+               .sort.each do |course_no, links|
+          count += 1
+          links.sort_by { |pc| pc.course.revision_year_be }.each do |pc|
+            csv << [program.program_code, course_no, pc.course.revision_year_be,
+                    pc.course_group_code, pc.created_at]
+          end
+        end
+      end
+    end
+    puts "duplicated course_nos: #{count}"
+    puts "→ #{path}"
+  end
 end

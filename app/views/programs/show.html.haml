@@ -86,15 +86,16 @@
             %tr
               %th Course No
               %th Name
+              %th.text-center Rev. Year
               %th.text-center Credits
               %th Actions
           %tbody
             - @curriculum.each_with_index do |(code, pairings), idx|
               - if idx.positive?
                 %tr.table-group-spacer{"aria-hidden" => "true"}
-                  %td{colspan: 4}
+                  %td{colspan: 5}
               %tr.table-group-header
-                %td{colspan: 4}
+                %td{colspan: 5}
                   %strong= ProgramCourse.group_label(code)
                   - if code.present?
                     %span.text-muted.ms-2.fw-normal= code
@@ -104,6 +105,7 @@
                 %tr
                   %td= link_to pc.course.course_no, pc.course
                   %td= pc.course.name
+                  %td.text-center= pc.course.revision_year_be
                   %td.text-center= pc.course.credits
                   %td
                     = link_to pc.course, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
