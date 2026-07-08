@@ -47,4 +47,10 @@ Rails.application.config.to_prepare do
     definition: Line::Tools::GradeDistributionTool::DEFINITION,
     handler: Line::Tools::GradeDistributionTool
   )
+
+  Line::ToolRegistry.register(
+    "cohort_gpa",
+    definition: Line::Tools::CohortGpaTool::DEFINITION,
+    handler: Line::Tools::CohortGpaTool
+  )
 end
