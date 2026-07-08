@@ -14,6 +14,7 @@ module Reports
       Reports::CourseTeachers,
       Reports::FailingStudents,
       Reports::SemesterGradeDistribution,
+      Reports::CohortGpa,
       Reports::GroupCreditShortfall,
       Reports::ThesisCredits,
       Reports::StaffCoursesByYear

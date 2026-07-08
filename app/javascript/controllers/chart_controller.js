@@ -186,17 +186,32 @@ export default class extends Controller {
   // data = { labels: [terms], datasets: [{ label: course_no, data: [gpa|null] }] }
   gpaTrendConfig() {
     const d = this.dataValue
-    const datasets = d.datasets.map((ds, i) => ({
-      label: ds.label,
-      data: ds.data,
-      borderColor: LINE_COLORS[i % LINE_COLORS.length],
-      backgroundColor: LINE_COLORS[i % LINE_COLORS.length],
-      spanGaps: true, // connect across terms a subject wasn't offered
-      tension: 0.3,
-      borderWidth: 2,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-    }))
+    const datasets = d.datasets.map((ds, i) => {
+      const base = {
+        label: ds.label,
+        data: ds.data,
+        borderColor: LINE_COLORS[i % LINE_COLORS.length],
+        backgroundColor: LINE_COLORS[i % LINE_COLORS.length],
+        spanGaps: true, // connect across terms a subject wasn't offered
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+      }
+      // ±2SD band: an invisible upper line, then a lower line filling up to
+      // it ("-1" = previous dataset). Band datasets must be adjacent and
+      // upper-first; they are hidden from the legend and tooltip.
+      if (ds.role === "band-upper") {
+        Object.assign(base, { borderWidth: 0, pointRadius: 0, pointHoverRadius: 0, isBand: true })
+      } else if (ds.role === "band-lower") {
+        Object.assign(base, {
+          borderWidth: 0, pointRadius: 0, pointHoverRadius: 0, isBand: true,
+          fill: "-1", backgroundColor: "rgba(116, 212, 255, 0.15)", // $primary tint
+        })
+      }
+      if (ds.dashed) base.borderDash = [6, 4]
+      return base
+    })
 
     return {
       type: "line",
@@ -211,8 +226,13 @@ export default class extends Controller {
           y: { min: 0, max: 4, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR, stepSize: 1 } },
         },
         plugins: {
-          legend: { labels: { color: TICK_COLOR, boxWidth: 14 } },
-          tooltip: { mode: "index", intersect: false },
+          legend: {
+            labels: {
+              color: TICK_COLOR, boxWidth: 14,
+              filter: (item, chartData) => !chartData.datasets[item.datasetIndex].isBand,
+            },
+          },
+          tooltip: { mode: "index", intersect: false, filter: (item) => !item.dataset.isBand },
         },
       },
     }
