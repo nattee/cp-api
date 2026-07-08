@@ -41,4 +41,10 @@ Rails.application.config.to_prepare do
     definition: Line::Tools::SearchTool::DEFINITION,
     handler: Line::Tools::SearchTool
   )
+
+  Line::ToolRegistry.register(
+    "grade_distribution",
+    definition: Line::Tools::GradeDistributionTool::DEFINITION,
+    handler: Line::Tools::GradeDistributionTool
+  )
 end
