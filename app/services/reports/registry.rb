@@ -13,6 +13,7 @@ module Reports
     REPORTS = [
       Reports::CourseTeachers,
       Reports::FailingStudents,
+      Reports::SemesterGradeDistribution,
       Reports::GroupCreditShortfall,
       Reports::ThesisCredits,
       Reports::StaffCoursesByYear

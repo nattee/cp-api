@@ -96,10 +96,14 @@ export default class extends Controller {
 
   horizontalStackedBarConfig() {
     const d = this.dataValue
+    // colorBy: "grade" — segments are letter grades, so use the fixed
+    // GRADE_COLORS map instead of positional STACK_COLORS.
     const datasets = d.datasets.map((ds, i) => ({
       label: ds.code,
       data: ds.data,
-      backgroundColor: STACK_COLORS[i % STACK_COLORS.length],
+      backgroundColor: d.colorBy === "grade"
+        ? (GRADE_COLORS[ds.code] || "rgba(150, 150, 150, 0.4)")
+        : STACK_COLORS[i % STACK_COLORS.length],
       borderWidth: 0,
     }))
 
