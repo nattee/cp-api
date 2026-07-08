@@ -8,4 +8,6 @@
     = render "form"
 
 - if @result
+  - if @result.chart
+    = render "chart"
   = render "result_table"
