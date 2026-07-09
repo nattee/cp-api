@@ -17,6 +17,11 @@
         -# readable). Staff without initials are excluded — they cannot be looked up,
         -# and no teaching staff lacks initials. Select2 makes the long list searchable.
         = select_tag p[:name], options_for_select(Staff.where.not(initials: [nil, ""]).sort_by(&:display_name_th).map { |s| ["#{s.display_name_th} (#{s.initials})", s.initials] }, params[p[:name]]), include_blank: true, class: "form-select", data: { controller: "select2" }
+      - when :teaching_year
+        -# Offering years only — distinct year_be from semesters on record, newest
+        -# first, latest preselected. Any year outside the data would just return
+        -# an empty report, so the list is data-driven rather than a fixed window.
+        = select_tag p[:name], options_for_select(Semester.order(year_be: :desc).distinct.pluck(:year_be), params[p[:name]] || Semester.maximum(:year_be)), class: "form-select"
       - when :academic_year, :integer
         = number_field_tag p[:name], params[p[:name]], class: "form-control"
       - else

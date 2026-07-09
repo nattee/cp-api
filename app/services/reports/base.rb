@@ -21,7 +21,7 @@ module Reports
     end
 
     # Declares a parameter. Feeds the web form AND defines an instance reader.
-    # type ∈ :course, :staff, :course_group, :academic_year, :integer, :term, :semester_record, :program_group
+    # type ∈ :course, :staff, :course_group, :academic_year, :teaching_year, :integer, :term, :semester_record, :program_group
     # label: optional form-label override (default: humanized name)
     def self.param(name, type, required: false, label: nil)
       params_spec << { name: name, type: type, required: required, label: label }

@@ -5,18 +5,27 @@ module Reports
     section  :courses
     programs :all
     param    :staff, :staff,         required: true   # initials (e.g. NNN) or name
-    param    :year,  :academic_year, required: true, label: "Year (B.E.)"   # B.E. year of the offering's term
+    param    :year,  :teaching_year, required: true, label: "Year (B.E.)"   # dropdown of years present in semesters
 
     def run
       person = find_staff
       cols = [ { key: :course_no, label: "Course No" }, { key: :name, label: "Course" },
-               { key: :term, label: "Term" }, { key: :sections, label: "Sections" } ]
+               { key: :term, label: "Term" }, { key: :sections, label: "Sections" },
+               { key: :seats, label: "Enrolled / Max" },
+               { key: :other_lecturers, label: "Other Lecturers" } ]
       return result(columns: cols, rows: [], summary: "No staff matched '#{staff}'") unless person
 
       teachings = Teaching.where(staff_id: person.id)
                           .joins(section: { course_offering: [ :course, :semester ] })
                           .where(semesters: { year_be: year })
                           .includes(section: { course_offering: [ :course, :semester ] })
+
+      # Everyone else teaching the same offerings, fetched once up front (no
+      # per-row queries). Keyed by offering so each row unions its co-lecturers.
+      co_by_offering = Teaching.joins(:section).includes(:staff, :section)
+                               .where(sections: { course_offering_id: teachings.map { |t| t.section.course_offering_id }.uniq })
+                               .where.not(staff_id: person.id)
+                               .group_by { |t| t.section.course_offering_id }
 
       # One row per course + term: a staff member typically teaches many sections
       # of the same course, which as individual rows would drown the answer.
@@ -28,10 +37,17 @@ module Reports
 
       rows = grouped.sort_by { |(course_no, sem), _| [ course_no, sem.semester_number ] }
                     .map do |(course_no, sem), ts|
+        sections = ts.map(&:section).uniq
+        enrolled = sections.filter_map(&:enrollment_current)
+        capacity = sections.filter_map(&:enrollment_max)
+        others   = ts.flat_map { |t| co_by_offering[t.section.course_offering_id] || [] }
+                     .map(&:staff).uniq
         { course_no: course_no,
           name: ts.first.section.course_offering.course.name,
           term: sem.display_name,
-          sections: ts.map { |t| t.section.section_number }.uniq.sort.join(", ") }
+          sections: sections.map(&:section_number).uniq.sort.join(", "),
+          seats: (enrolled.any? || capacity.any?) ? "#{enrolled.sum} / #{capacity.sum}" : "",
+          other_lecturers: others.map { |s| s.initials.presence || s.display_name }.sort.join(", ") }
       end
 
       section_count = teachings.map(&:section_id).uniq.size
