@@ -13,7 +13,7 @@ class Line::Tools::CohortGpaToolTest < ActiveSupport::TestCase
                   grade: "B+", grade_weight: 3.5, source: "imported")
   end
 
-  test "returns per-term GPS/GPAX; B.E. and C.E. admission years are equivalent" do
+  test "returns per-term GPA/GPAX; B.E. and C.E. admission years are equivalent" do
     be = JSON.parse(Line::Tools::CohortGpaTool.call(
       "program_code" => "CP", "admission_year" => 2599))
     ce = JSON.parse(Line::Tools::CohortGpaTool.call(
@@ -24,7 +24,7 @@ class Line::Tools::CohortGpaToolTest < ActiveSupport::TestCase
     assert_equal 2599, be["admission_year_be"]
     term = be["terms"].first
     assert_equal "2565/1", term["term"]
-    assert_in_delta 3.5, term["gps"]["avg"], 0.001
+    assert_in_delta 3.5, term["gpa"]["avg"], 0.001
     assert_in_delta 3.5, term["gpax"]["avg"], 0.001
   end
 

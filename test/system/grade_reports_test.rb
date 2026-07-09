@@ -34,9 +34,9 @@ class GradeReportsTest < ApplicationSystemTestCase
     # Table headers render inside .card, where a global rule
     # (`.card .table > thead > tr > th { text-transform: uppercase; }` in
     # application.scss) visually uppercases them. Selenium's rendered text
-    # reflects that CSS transform ("GPS AVG"), so match case-insensitively —
-    # the underlying column label is still "GPS avg" (Reports::CohortGpa).
-    assert_text(/GPS avg/i)
+    # reflects that CSS transform ("GPA AVG"), so match case-insensitively —
+    # the underlying column label is still "GPA avg" (Reports::CohortGpa).
+    assert_text(/GPA avg/i)
     assert_selector "canvas"              # the GPA trend chart
   end
 

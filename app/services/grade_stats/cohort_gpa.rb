@@ -1,8 +1,10 @@
 module GradeStats
-  # Per-term GPS (term GPA) and GPAX (cumulative GPA) aggregates for one
-  # admission cohort of a program group. Computed in Ruby from a single pluck:
-  # a cohort is a few hundred students, and per-term cumulative GPA is trivial
-  # here but painful in MySQL.
+  # Per-term GPA (that semester's grade point average) and GPAX (cumulative
+  # GPA) aggregates for one admission cohort of a program group. Computed in
+  # Ruby from a single pluck: a cohort is a few hundred students, and
+  # per-term cumulative GPA is trivial here but painful in MySQL.
+  # Naming follows the Chula transcript convention: GPA = semester,
+  # GPAX = cumulative (trailing X = cumulative).
   class CohortGpa
     def self.call(program_group:, admission_year_be:)
       student_ids = Student.joins(program: :program_group)
@@ -22,7 +24,7 @@ module GradeStats
       terms = by_term.keys.sort.map do |year_ce, semester|
         per_student = by_term[[ year_ce, semester ]].group_by(&:first)
 
-        gps_values = per_student.filter_map do |_, grades|
+        gpa_values = per_student.filter_map do |_, grades|
           gpa_of(points(grades), credits(grades))
         end
 
@@ -34,7 +36,7 @@ module GradeStats
         gpax_values = cumulative.values.filter_map { |t| gpa_of(t[:points], t[:credits]) }
 
         { year_ce: year_ce, semester: semester,
-          gps: Stats.aggregate(gps_values), gpax: Stats.aggregate(gpax_values) }
+          gpa: Stats.aggregate(gpa_values), gpax: Stats.aggregate(gpax_values) }
       end
 
       { terms: terms }

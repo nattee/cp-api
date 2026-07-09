@@ -12,21 +12,21 @@ class Reports::CohortGpaTest < ActiveSupport::TestCase
                   grade: "B", grade_weight: 3.0, source: "imported")
   end
 
-  test "one row per term with GPS and GPAX stats, term labels in B.E." do
+  test "one row per term with GPA and GPAX stats, term labels in B.E." do
     result = Reports::CohortGpa.new(
       "program_group" => "CP", "admission_year" => "2599"
     ).run
 
     labels = result.columns.map { |c| c[:label] }
     assert_equal "Term", labels.first
-    assert_includes labels, "GPS avg"
+    assert_includes labels, "GPA avg"
     assert_includes labels, "GPAX +2SD"
     assert_equal 14, labels.size
 
     row = result.rows.first
     assert_equal "2565/1", row[:term]   # year_ce 2022 + 543
     assert_equal 2, row[:n]
-    assert_in_delta 3.5, row[:gps_avg], 0.001
+    assert_in_delta 3.5, row[:gpa_avg], 0.001
     assert_in_delta 3.5, row[:gpax_avg], 0.001
   end
 

@@ -1,11 +1,14 @@
 # Per-semester GPA statistics for one admission cohort (class year) of a
-# program group. GPS = that term's GPA, GPAX = cumulative GPA through the term.
+# program group. GPA = that semester's grade point average, GPAX = cumulative
+# GPA through the term. Naming follows Chula transcripts (GPA = semester,
+# GPAX = cumulative).
 class Line::Tools::CohortGpaTool
   DEFINITION = {
     description: "Get per-semester GPA statistics for one admission cohort (class year) of a program. " \
-                 "For each semester, returns GPS (that term's GPA) and GPAX (cumulative GPA) " \
-                 "aggregated over the cohort: n, avg, sd, min, max, avg-2sd (minus2sd), avg+2sd (plus2sd). " \
-                 "Term labels are Buddhist Era, e.g. '2565/1'.",
+                 "For each semester, returns gpa (that semester's grade point average) and gpax " \
+                 "(cumulative GPA through that semester), each aggregated over the cohort: n, avg, sd, " \
+                 "min, max, avg-2sd (minus2sd), avg+2sd (plus2sd). Terminology follows Chula transcripts " \
+                 "(GPA = semester, GPAX = cumulative). Term labels are Buddhist Era, e.g. '2565/1'.",
     parameters: {
       type: "object",
       properties: {
@@ -44,7 +47,7 @@ class Line::Tools::CohortGpaTool
       terms: data[:terms].map do |t|
         { term: "#{t[:year_ce] + 543}/#{t[:semester]}",
           year_ce: t[:year_ce], semester: t[:semester],
-          gps: t[:gps], gpax: t[:gpax] }
+          gpa: t[:gpa], gpax: t[:gpax] }
       end
     }.to_json
   end

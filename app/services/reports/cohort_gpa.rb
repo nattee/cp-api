@@ -1,5 +1,5 @@
 module Reports
-  # "How did this class year do each semester?" — per-term GPS and GPAX
+  # "How did this class year do each semester?" — per-term GPA and GPAX
   # aggregates for one admission cohort of a program group.
   class CohortGpa < Base
     title    "Cohort GPA by semester"
@@ -19,9 +19,9 @@ module Reports
                                         admission_year_be: admission_year.to_i)
 
       rows = data[:terms].map do |t|
-        row = { term: term_label(t), n: t[:gps][:n] }
+        row = { term: term_label(t), n: t[:gpa][:n] }
         STATS.each do |key, _|
-          row[:"gps_#{key}"]  = t[:gps][key]
+          row[:"gpa_#{key}"]  = t[:gpa][key]
           row[:"gpax_#{key}"] = t[:gpax][key]
         end
         row
@@ -39,7 +39,7 @@ module Reports
 
     def columns
       [ { key: :term, label: "Term" }, { key: :n, label: "N" } ] +
-        STATS.map { |key, sub| { key: :"gps_#{key}", label: "GPS #{sub}" } } +
+        STATS.map { |key, sub| { key: :"gpa_#{key}", label: "GPA #{sub}" } } +
         STATS.map { |key, sub| { key: :"gpax_#{key}", label: "GPAX #{sub}" } }
     end
 
@@ -53,14 +53,14 @@ module Reports
       {
         type: "gpa-trend",
         height: 320,
-        caption: "GPS = GPA earned in that semester alone. GPAX = cumulative GPA through that semester. " \
-                 "Shaded band = GPS average ± 2 SD (covers roughly 95% of the cohort).",
+        caption: "GPA = that semester's grade point average. GPAX = cumulative GPA through that semester. " \
+                 "Shaded band = GPA average ± 2 SD (covers roughly 95% of the cohort).",
         data: {
           labels: data[:terms].map { |t| term_label(t) },
           datasets: [
-            { label: "GPS +2SD", data: data[:terms].map { |t| t[:gps][:plus2sd] },  role: "band-upper" },
-            { label: "GPS −2SD", data: data[:terms].map { |t| t[:gps][:minus2sd] }, role: "band-lower" },
-            { label: "GPS avg",  data: data[:terms].map { |t| t[:gps][:avg] } },
+            { label: "GPA +2SD", data: data[:terms].map { |t| t[:gpa][:plus2sd] },  role: "band-upper" },
+            { label: "GPA −2SD", data: data[:terms].map { |t| t[:gpa][:minus2sd] }, role: "band-lower" },
+            { label: "GPA avg",  data: data[:terms].map { |t| t[:gpa][:avg] } },
             { label: "GPAX avg", data: data[:terms].map { |t| t[:gpax][:avg] }, dashed: true }
           ]
         }
