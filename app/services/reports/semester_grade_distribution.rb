@@ -6,7 +6,7 @@ module Reports
     section  :courses
     programs :all
     param    :program_group, :program_group, required: true
-    param    :year,          :academic_year, required: true   # B.E. year of the grades
+    param    :year,          :academic_year, required: true, label: "Year (B.E.)"   # B.E. year of the grades
     param    :term,          :term,          required: true
 
     def run

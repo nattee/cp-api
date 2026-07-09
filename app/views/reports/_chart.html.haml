@@ -7,3 +7,5 @@
          "data-chart-data-value" => @result.chart[:data].to_json,
          style: "position: relative; height: #{@result.chart[:height] || 320}px;"}
       %canvas{"data-chart-target" => "canvas"}
+    - if @result.chart[:caption]
+      %p.text-body-secondary.small.mb-0.mt-2= @result.chart[:caption]

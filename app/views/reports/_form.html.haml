@@ -4,7 +4,7 @@
   = hidden_field_tag :run, 1
   - @report.params_spec.each do |p|
     .col-md-3
-      = label_tag p[:name], p[:name].to_s.humanize, class: "form-label small text-muted"
+      = label_tag p[:name], (p[:label] || p[:name].to_s.humanize), class: "form-label small text-muted"
       - case p[:type]
       - when :term
         = select_tag p[:name], options_for_select([["First", 1], ["Second", 2], ["Summer", 3]], params[p[:name]]), include_blank: true, class: "form-select"

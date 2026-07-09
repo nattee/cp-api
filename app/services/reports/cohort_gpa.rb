@@ -6,7 +6,7 @@ module Reports
     section  :students
     programs :all
     param    :program_group,  :program_group, required: true
-    param    :admission_year, :academic_year, required: true  # B.E.
+    param    :admission_year, :academic_year, required: true, label: "Admission year (B.E.)"  # B.E.
 
     STATS = [ [ :avg, "avg" ], [ :sd, "SD" ], [ :min, "min" ], [ :max, "max" ],
               [ :minus2sd, "−2SD" ], [ :plus2sd, "+2SD" ] ].freeze
@@ -53,6 +53,8 @@ module Reports
       {
         type: "gpa-trend",
         height: 320,
+        caption: "GPS = GPA earned in that semester alone. GPAX = cumulative GPA through that semester. " \
+                 "Shaded band = GPS average ± 2 SD (covers roughly 95% of the cohort).",
         data: {
           labels: data[:terms].map { |t| term_label(t) },
           datasets: [
