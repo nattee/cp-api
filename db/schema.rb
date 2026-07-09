@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_05_061551) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_033012) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -169,6 +169,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_061551) do
   create_table "program_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
+    t.string "degree_abbr"
     t.string "degree_level", null: false
     t.string "degree_name", null: false
     t.string "degree_name_th"

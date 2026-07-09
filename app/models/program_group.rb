@@ -26,6 +26,11 @@ class ProgramGroup < ApplicationRecord
     "#{name_en} (#{code})"
   end
 
+  # Compact picker/label form ("CP — B.Eng."); code alone when no abbr (OTHER).
+  def short_label
+    degree_abbr.present? ? "#{code} — #{degree_abbr}" : code
+  end
+
   def placeholder?
     code == "OTHER"
   end

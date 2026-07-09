@@ -58,6 +58,16 @@ class ProgramGroupTest < ActiveSupport::TestCase
     assert_equal "Computer Engineering (CP)", group.display_name
   end
 
+  test "short_label with degree_abbr" do
+    group = program_groups(:cp_group)
+    assert_equal "CP — B.Eng.", group.short_label
+  end
+
+  test "short_label without degree_abbr falls back to bare code" do
+    group = program_groups(:other_group)
+    assert_equal "OTHER", group.short_label
+  end
+
   test "placeholder?" do
     assert program_groups(:other_group).placeholder?
     assert_not program_groups(:cp_group).placeholder?

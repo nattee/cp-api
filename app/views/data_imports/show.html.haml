@@ -131,7 +131,7 @@
                       %td= labels[:program_name] || "Program"
                       %td
                         %span.badge.badge-pending from group
-                        = ProgramGroup.find_by(id: group_id)&.display_name
+                        = ProgramGroup.find_by(id: group_id)&.short_label
     - elsif @data_import.column_mapping.present? || @data_import.default_values.present?
       -# Single-sheet column mapping (legacy or single sheet)
       .detail-section
@@ -157,7 +157,7 @@
                 %td= labels[:program_name] || "Program"
                 %td
                   %span.badge.badge-pending from group
-                  = ProgramGroup.find_by(id: group_id)&.display_name
+                  = ProgramGroup.find_by(id: group_id)&.short_label
 
 - if @data_import.error_message.present?
   .alert.alert-danger

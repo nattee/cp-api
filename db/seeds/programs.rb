@@ -3,16 +3,16 @@
 
 # --- Program Groups ---
 group_data = {
-  "CP"    => { name_en: "Computer Engineering",                        name_th: "วิศวกรรมคอมพิวเตอร์",                            degree_level: "bachelor", degree_name: "Bachelor of Engineering",  degree_name_th: "วิศวกรรมศาสตรบัณฑิต",      field_of_study: "Computer Engineering" },
-  "CEDT"  => { name_en: "Computer Engineering and Digital Technology", name_th: "วิศวกรรมคอมพิวเตอร์และเทคโนโลยีดิจิทัล",         degree_level: "bachelor", degree_name: "Bachelor of Engineering",  degree_name_th: "วิศวกรรมศาสตรบัณฑิต",      field_of_study: "Computer Engineering" },
-  "CM"    => { name_en: "Computer Engineering",                        name_th: "วิศวกรรมคอมพิวเตอร์",                            degree_level: "master",   degree_name: "Master of Engineering",   degree_name_th: "วิศวกรรมศาสตรมหาบัณฑิต",   field_of_study: "Computer Engineering" },
-  "CS"    => { name_en: "Computer Science",                            name_th: "วิทยาศาสตร์คอมพิวเตอร์",                         degree_level: "master",   degree_name: "Master of Science",       degree_name_th: "วิทยาศาสตรมหาบัณฑิต",      field_of_study: "Computer Engineering" },
-  "SE"    => { name_en: "Software Engineering",                        name_th: "วิศวกรรมซอฟต์แวร์",                              degree_level: "master",   degree_name: "Master of Science",       degree_name_th: "วิทยาศาสตรมหาบัณฑิต",      field_of_study: "Computer Engineering" },
-  "CD"    => { name_en: "Computer Engineering",                        name_th: "วิศวกรรมคอมพิวเตอร์",                            degree_level: "doctoral", degree_name: "Doctor of Philosophy",    degree_name_th: "วิศวกรรมศาสตรดุษฎีบัณฑิต", field_of_study: "Computer Engineering" },
-  "OTHER" => { name_en: "Unknown Program",                             name_th: nil,                                               degree_level: "bachelor", degree_name: "Unknown",                degree_name_th: nil,                         field_of_study: "Unknown" },
+  "CP"    => { name_en: "Computer Engineering",                        name_th: "วิศวกรรมคอมพิวเตอร์",                            degree_level: "bachelor", degree_name: "Bachelor of Engineering",  degree_name_th: "วิศวกรรมศาสตรบัณฑิต",      field_of_study: "Computer Engineering", degree_abbr: "B.Eng." },
+  "CEDT"  => { name_en: "Computer Engineering and Digital Technology", name_th: "วิศวกรรมคอมพิวเตอร์และเทคโนโลยีดิจิทัล",         degree_level: "bachelor", degree_name: "Bachelor of Engineering",  degree_name_th: "วิศวกรรมศาสตรบัณฑิต",      field_of_study: "Computer Engineering", degree_abbr: "B.Eng." },
+  "CM"    => { name_en: "Computer Engineering",                        name_th: "วิศวกรรมคอมพิวเตอร์",                            degree_level: "master",   degree_name: "Master of Engineering",   degree_name_th: "วิศวกรรมศาสตรมหาบัณฑิต",   field_of_study: "Computer Engineering", degree_abbr: "M.Eng." },
+  "CS"    => { name_en: "Computer Science",                            name_th: "วิทยาศาสตร์คอมพิวเตอร์",                         degree_level: "master",   degree_name: "Master of Science",       degree_name_th: "วิทยาศาสตรมหาบัณฑิต",      field_of_study: "Computer Engineering", degree_abbr: "M.Sc." },
+  "SE"    => { name_en: "Software Engineering",                        name_th: "วิศวกรรมซอฟต์แวร์",                              degree_level: "master",   degree_name: "Master of Science",       degree_name_th: "วิทยาศาสตรมหาบัณฑิต",      field_of_study: "Computer Engineering", degree_abbr: "M.Sc." },
+  "CD"    => { name_en: "Computer Engineering",                        name_th: "วิศวกรรมคอมพิวเตอร์",                            degree_level: "doctoral", degree_name: "Doctor of Philosophy",    degree_name_th: "วิศวกรรมศาสตรดุษฎีบัณฑิต", field_of_study: "Computer Engineering", degree_abbr: "Ph.D." },
+  "OTHER" => { name_en: "Unknown Program",                             name_th: nil,                                               degree_level: "bachelor", degree_name: "Unknown",                degree_name_th: nil,                         field_of_study: "Unknown",              degree_abbr: nil },
   # Discontinued 2006 track known only from ChulaBooster (major_code 21103, 9 students,
   # blank names in CB's export). Synthetic code; rename here once the real track is identified.
-  "21103" => { name_en: "Former 2006 Track (CB 21103)",                name_th: nil,                                               degree_level: "bachelor", degree_name: "Unknown",                degree_name_th: nil,                         field_of_study: "Computer Engineering" },
+  "21103" => { name_en: "Former 2006 Track (CB 21103)",                name_th: nil,                                               degree_level: "bachelor", degree_name: "Unknown",                degree_name_th: nil,                         field_of_study: "Computer Engineering", degree_abbr: nil },
 }
 
 groups = {}

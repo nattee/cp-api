@@ -12,7 +12,7 @@ class GradeReportsTest < ApplicationSystemTestCase
     sign_in users(:admin)
     visit report_path("semester_grade_distribution")
 
-    select "CP", from: "program_group"
+    select "CP — B.Eng.", from: "program_group"
     fill_in "year", with: "2567"          # B.E. of the 2024 fixture grades
     select "First", from: "term"
     click_on "Run report"
@@ -26,7 +26,7 @@ class GradeReportsTest < ApplicationSystemTestCase
     sign_in users(:admin)
     visit report_path("cohort_gpa")
 
-    select "CP", from: "program_group"
+    select "CP — B.Eng.", from: "program_group"
     fill_in "admission_year", with: "2567" # active_student's cohort
     click_on "Run report"
 

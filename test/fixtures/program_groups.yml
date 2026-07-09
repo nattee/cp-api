@@ -5,6 +5,7 @@ cp_group:
   degree_level: bachelor
   degree_name: Bachelor of Engineering
   field_of_study: Computer Engineering
+  degree_abbr: B.Eng.
 
 cm_group:
   code: CM
@@ -13,6 +14,7 @@ cm_group:
   degree_level: master
   degree_name: Master of Engineering
   field_of_study: Computer Engineering
+  degree_abbr: M.Eng.
 
 other_group:
   code: OTHER
