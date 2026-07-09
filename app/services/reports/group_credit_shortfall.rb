@@ -7,7 +7,7 @@ module Reports
     programs :all
     param    :course_group,     :course_group,  required: true
     param    :required_credits, :integer,       required: true
-    param    :admission_year,   :academic_year                 # optional cohort filter
+    param    :admission_year,   :academic_year, label: "Admission year (B.E.)"  # optional cohort filter
 
     def run
       threshold = required_credits.to_i

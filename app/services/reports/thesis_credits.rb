@@ -4,7 +4,7 @@ module Reports
     title    "Thesis credits per student"
     section  :thesis
     programs [ :CM, :CS, :SE ]                       # master groups only
-    param    :admission_year, :academic_year         # optional cohort filter
+    param    :admission_year, :academic_year, label: "Admission year (B.E.)"  # optional cohort filter
 
     def run
       thesis_credits = Grade.graded.joins(:course)
