@@ -4,6 +4,13 @@ Backend for the Department of Computer Engineering, Chulalongkorn University.
 Read-only API for student information (info, classes, scores) with a frontend for viewing data.
 Data is imported via CSV/Excel and fetched from external data providers.
 
+## Backlog
+
+`docs/backlog.md` holds recurring items with explicit triggers. **Whenever you add or
+change a report or an entity show page, open it and check the triggered items**
+(entity→report cross-links, report↔entity overlap review) — apply, extend, or
+consciously skip them; never ignore silently.
+
 ## Tech Stack
 
 - Ruby 3.4.8, Rails 8.1
