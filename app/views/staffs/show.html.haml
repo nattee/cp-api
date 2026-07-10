@@ -120,3 +120,29 @@
                   %td.text-center= teaching.load_ratio
       - else
         %p.text-muted.mb-0 No teaching assignments for this semester.
+
+- if @teaching_history
+  .card.mt-3
+    .card-body.p-3
+      %h5.card-title.fw-semibold.d-flex.align-items-center.mb-3
+        %span.material-symbols.resource-icon.me-2 history_edu
+        Teaching History
+      .table-responsive
+        %table.table.table-hover.mb-0.teaching-history-table
+          %thead
+            %tr
+              %th Term
+              - @teaching_history.courses.each do |c|
+                %th.th-rotated
+                  = link_to c[:course_no], c[:course], title: c[:name]
+          %tbody
+            - @teaching_history.semesters.each do |sem|
+              %tr
+                %th{scope: "row"}= sem.display_name
+                - @teaching_history.courses.each do |c|
+                  - secs = @teaching_history.cells[[ sem.id, c[:course_no] ]]
+                  %td.text-center{title: secs && "Section#{"s" if secs.size > 1} #{secs.join(", ")}"}= secs&.size
+      - if @teaching_history.capped
+        %p.text-muted.small.mt-2.mb-0
+          Showing the last 20 years —
+          = link_to "Show all", staff_path(@staff, history: "all")

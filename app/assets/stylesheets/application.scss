@@ -156,6 +156,28 @@ $input-icon-color: darken($light, 5%);
 .wl-cell-link { color: inherit; text-decoration: none; }
 .wl-cell-link:hover { text-decoration: underline; }
 
+// Teaching History matrix (staff show page). One column per course the staff
+// member has ever taught — easily 20+ over a career — so horizontal course-no
+// headers would blow out the card width; they rotate to vertical instead,
+// reading bottom-to-top and ending at the data row. The rotation lives on the
+// inner link, NOT the th: as an inline-block the rotated label is a narrow
+// vertical box the th centers with plain text-align, keeping every header
+// exactly over its (centered) column of section counts.
+.teaching-history-table thead th { vertical-align: bottom; text-align: center; }
+.teaching-history-table thead th:first-child { text-align: left; }  // "Term" stays a normal left-aligned label
+.teaching-history-table th.th-rotated a {
+  writing-mode: vertical-rl;   // vertical text (inline axis runs top→bottom)
+  transform: rotate(180deg);   // flip to read bottom→top
+  display: inline-block;       // narrow vertical box, centered by the th's text-align
+  line-height: 1.2;            // column width ≈ one line of the 0.7rem header type
+  color: inherit;              // keep the quiet-label header look — link blue on
+  text-decoration: none;       // 20+ headers would out-shout the data
+}
+.teaching-history-table th.th-rotated a:hover { text-decoration: underline; }
+// Vertical separators so a column of counts can be traced up to its rotated
+// header across many rows; same subtle strength as the row separators.
+.teaching-history-table tr > * + * { border-left: 1px solid $table-row-border-color; }
+
 // Outlined / frosted badges (neon-bright text, tinted glow bg)
 .badge-admin    { background-color: rgba($danger, 0.2);    color: $danger;                    border: 1px solid rgba($danger, 0.4); }
 .badge-editor   { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }

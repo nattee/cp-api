@@ -7,6 +7,8 @@ class StaffsController < ApplicationController
   end
 
   def show
+    @teaching_history = @staff.teaching_history(max_years: params[:history] == "all" ? nil : 20)
+
     @teaching_semesters = Semester.joins(course_offerings: { sections: :teachings })
                                   .where(teachings: { staff_id: @staff.id })
                                   .distinct.ordered

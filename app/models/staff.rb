@@ -86,7 +86,7 @@ class Staff < ApplicationRecord
   #   semesters — [Semester] newest first, only terms with at least one teaching
   #   courses   — [{ course_no:, name:, course: }] by terms-taught desc, then
   #               course_no; :course is the latest revision taught (for linking)
-  #   cells     — { [semester_id, course_no] => "1, 33" }
+  #   cells     — { [semester_id, course_no] => [ 1, 33 ] } sorted section numbers
   #   capped    — true when older semesters were cut off by max_years
   #
   # Returns nil when the staff has never taught. max_years: nil = no cap.
@@ -116,7 +116,7 @@ class Staff < ApplicationRecord
 
     cells = visible.group_by { |t| [ t.section.course_offering.semester_id,
                                      t.section.course_offering.course.course_no ] }
-                   .transform_values { |ts| ts.map { |t| t.section.section_number }.uniq.sort.join(", ") }
+                   .transform_values { |ts| ts.map { |t| t.section.section_number }.uniq.sort }
 
     TeachingHistory.new(semesters: semesters, courses: courses, cells: cells,
                         capped: semesters.size < semesters_all.size)
