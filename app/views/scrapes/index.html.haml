@@ -19,7 +19,7 @@
                 = f.select "scrape[study_program]", options_for_select([["ทวิภาค (S)", "S"], ["นานาชาติ (I)", "I"], ["ไตรภาค (T)", "T"]]), {}, class: "form-select form-select-sm"
               .col-md-3
                 = f.label "scrape[source]", "Source", class: "form-label small text-muted mb-0"
-                = f.select "scrape[source]", options_for_select([["CuGetReg (recommended)", "cugetreg"], ["CAS Reg Chula", "cas_reg"]]), {}, class: "form-select form-select-sm"
+                = f.select "scrape[source]", options_for_select([["CuGetReg (recommended)", "cugetreg"], ["CAS Reg Chula (verify only — drops multi-day slots)", "cas_reg"]]), {}, class: "form-select form-select-sm"
               .col-md-2
                 = f.submit "Start Scrape", class: "btn btn-primary btn-sm"
 
