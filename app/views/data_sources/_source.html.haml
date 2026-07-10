@@ -1,5 +1,7 @@
-- wrapper_class = last ? "mb-0" : "mb-4 pb-4 border-bottom"
-%div{class: wrapper_class}
+-# Rail colour is derived from the badge value, so a new operating mode needs one
+-# DataSource entry + one .source-panel-* class, never a change here.
+- spacing = last ? "mb-0" : "mb-4"
+%div{class: "source-panel source-panel-#{src[:badge].dasherize} #{spacing}"}
   %h6.d-flex.align-items-center.mb-2
     %span.material-symbols.me-2{style: "font-size: 20px; vertical-align: middle"}= src[:icon]
     = src[:name]
@@ -9,12 +11,16 @@
 
   .row.g-3
     .col-md-6
-      .small.text-uppercase.text-body-secondary.fw-semibold.mb-1 Provides
+      .small.text-uppercase.text-body-secondary.fw-semibold.mb-1.d-flex.align-items-center
+        %span.material-symbols.me-1.text-success{style: "font-size: 16px; vertical-align: middle"} check_circle
+        Provides
       %ul.small.mb-0
         - src[:provides].each do |item|
           %li= item
     .col-md-6
-      .small.text-uppercase.text-body-secondary.fw-semibold.mb-1 Does not provide
+      .small.text-uppercase.text-body-secondary.fw-semibold.mb-1.d-flex.align-items-center
+        %span.material-symbols.me-1.text-danger{style: "font-size: 16px; vertical-align: middle"} block
+        Does not provide
       %ul.small.mb-0
         - src[:not_provides].each do |item|
           %li= item
@@ -29,11 +35,15 @@
       = link_to src[:action][:label], send(src[:action][:path]), class: "btn btn-primary btn-sm"
 
   - if src[:commands].any?
-    .small.text-uppercase.text-body-secondary.fw-semibold.mt-3.mb-1 Commands
+    .small.text-uppercase.text-body-secondary.fw-semibold.mt-3.mb-1.d-flex.align-items-center
+      %span.material-symbols.me-1{style: "font-size: 16px; vertical-align: middle"} terminal
+      Commands
     %pre.p-3.rounded.border.small.mb-0= src[:commands].join("\n")
 
   - if src[:docs].any?
-    .small.text-uppercase.text-body-secondary.fw-semibold.mt-3.mb-1 Background reading
+    .small.text-uppercase.text-body-secondary.fw-semibold.mt-3.mb-1.d-flex.align-items-center
+      %span.material-symbols.me-1{style: "font-size: 16px; vertical-align: middle"} menu_book
+      Background reading
     %ul.small.mb-0
       - src[:docs].each do |doc|
         %li

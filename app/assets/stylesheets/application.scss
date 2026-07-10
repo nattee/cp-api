@@ -265,6 +265,24 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
 .badge-recommended   { background-color: rgba($success, 0.2);       color: $success;   border: 1px solid rgba($success, 0.4); }
 .badge-verify-only   { background-color: rgba($warning, 0.2);       color: $warning;   border: 1px solid rgba($warning, 0.4); }
 
+// Data-source panels (/data_sources). A hairline rule between sources was too weak to
+// break four dense blocks apart, so each source sits on its own tinted surface with a
+// 3px rail. The rail is coloured by operating mode, mirroring the badge, so the page is
+// scannable down its left edge — reg.chula reads as caution before a word is read.
+//
+// The rail is an inset box-shadow rather than border-left (the same trick
+// .table-group-header uses): the panel's inner width then stays identical across modes,
+// so text never shifts by the border's 3px from one source to the next.
+.source-panel {
+  background-color: rgba(white, 0.035);
+  border-radius: 0.5rem;
+  padding: 1rem 1rem 1rem 1.25rem;
+}
+.source-panel-manual-upload { box-shadow: inset 3px 0 0 rgba(150, 150, 150, 0.55); }
+.source-panel-console-only  { box-shadow: inset 3px 0 0 $secondary; }
+.source-panel-recommended   { box-shadow: inset 3px 0 0 $success; }
+.source-panel-verify-only   { box-shadow: inset 3px 0 0 $warning; }
+
 // Auto-generated course badges — courses created automatically during grade import.
 // "Copied" = another revision year existed and was duplicated (mild warning).
 // "Placeholder" = no matching course_no at all, minimal stub created (stronger warning).
