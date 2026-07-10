@@ -22,6 +22,13 @@
 - **Material Symbols inline with text need `vertical-align: middle`** (see `docs/material-symbols-vertical-align.md`).
 - **Turbo Drive is on globally.** Never use `DOMContentLoaded`. (This plan adds no JS.)
 - **After changing SCSS, run `bin/rails dartsass:build`** — Propshaft does no compilation.
+- **Verification servers:** the tasks below say port `3001`, but that port was occupied on
+  the dev machine, and a real dev server on `:3000` owns Puma's default pidfile. Start
+  throwaway servers with a free port *and* their own pidfile, and avoid `kill %1` (bash job
+  control is unreliable non-interactively):
+  `nohup env AUTO_LOGIN=1 bin/rails server -p 3007 -P tmp/pids/verify.pid > /tmp/v.log 2>&1 &`
+  then `SRV=$!`, `sleep 9`, run checks, `kill $SRV; rm -f tmp/pids/verify.pid`.
+  `AUTO_LOGIN=1` resolves to user id 1 (`root`, an admin), so the admin gate passes.
 - `docs/backlog.md` standing items trigger on *reports* and *entity show pages*. `/data_sources` is neither. **Consciously skipped**, per the spec's Out of Scope section.
 
 ## File Structure
@@ -269,10 +276,17 @@ Insert immediately **after** it:
 Run:
 
 ```bash
-bin/rails dartsass:build && grep -c "badge-verify-only\|badge-recommended\|badge-console-only\|badge-manual-upload" app/assets/builds/application.css
+bin/rails dartsass:build
+for c in badge-manual-upload badge-console-only badge-recommended badge-verify-only; do
+  echo "$c -> $(grep -o "\.$c" app/assets/builds/application.css | wc -l)"
+done
 ```
 
-Expected: compiles without error, and `grep -c` prints `4`.
+Expected: compiles without error, and each class prints `1`.
+
+Do **not** use `grep -c` here: the compiled CSS is minified onto ~5 lines, so all four
+classes land on one line and `grep -c` (which counts matching *lines*) reports `1` no
+matter how many classes are present. Count occurrences with `grep -o` instead.
 
 - [ ] **Step 3: Commit**
 
@@ -532,13 +546,16 @@ Note: Rails infers a named helper from the path string, so `chulabooster_path` *
 ```bash
 grep -rn "chulabooster_path" app/ && echo "STALE REFERENCE FOUND — fix before continuing" || echo "no stale chulabooster_path references"
 
-AUTO_LOGIN=1 bin/rails server -p 3001 &
-sleep 6
-curl -s http://localhost:3001/ | grep -o 'Data Sources\|>Imports<' | sort -u
-kill %1
+grep -n "Data Sources" app/views/layouts/application.html.haml
+grep -n "^ *Imports$"  app/views/layouts/application.html.haml
 ```
 
-Expected: `no stale chulabooster_path references`, and the sidebar contains both `Data Sources` and `Imports`.
+Expected: `no stale chulabooster_path references`, and the `Data Sources` line number is
+**lower** than the `Imports` line number.
+
+Match on the nav source, not on rendered HTML: HAML emits the icon `<span>` and the link
+text as separate lines, so a rendered-output check like `grep -o '>Imports<'` never
+matches and silently reports a false negative.
 
 - [ ] **Step 4: Commit**
 
@@ -552,7 +569,10 @@ above the specific tool, so a reader meets the map before the territory.
 
 - ChulaBooster nav item becomes Data Sources, placed above Imports
 - RESOURCE_ICONS: chulabooster/sync -> data_sources/database
-- chulabooster_path is gone; leaving the old item would NameError on every admin page"
+- the old item is removed deliberately, not to avoid a crash: Rails infers a named
+  helper from the redirect route's path, so chulabooster_path still resolves. A
+  leftover would have silently 301'd admins to this very page under a label naming
+  one of its four sources — no error would have caught it"
 ```
 
 ---
