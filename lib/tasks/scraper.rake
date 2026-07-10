@@ -39,6 +39,7 @@ namespace :scraper do
     not_found = 0
     errors = 0
     all_unresolved = []
+    all_cross_faculty = []
     error_log = []
 
     courses.find_each.with_index(1) do |course, idx|
@@ -56,6 +57,7 @@ namespace :scraper do
           else
             found += 1
             all_unresolved.concat(summary[:unresolved_teachers])
+            all_cross_faculty.concat(summary[:cross_faculty_matches])
             puts "  [#{idx}/#{total}]  #{course.course_no}  ✓ #{summary[:sections]} sections, #{summary[:time_slots]} time slots"
           end
         end
@@ -75,12 +77,17 @@ namespace :scraper do
       sections_count: 0,
       time_slots_count: 0,
       unresolved_teachers: all_unresolved.uniq.presence,
+      cross_faculty_matches: all_cross_faculty.uniq.presence,
       error_log: error_log.presence
     )
 
     puts "Done. #{found} found, #{not_found} not offered, #{errors} errors."
     if all_unresolved.uniq.any?
       puts "Unresolved teachers: #{all_unresolved.uniq.join(', ')}"
+    end
+    if all_cross_faculty.uniq.any?
+      puts "Cross-faculty matches (NOT imported — see Scrapers::Base::CROSS_FACULTY_TEACHING_ALLOWLIST):"
+      all_cross_faculty.uniq.each { |m| puts "  #{m[:course_no]} #{m[:initials]}" }
     end
   end
 end

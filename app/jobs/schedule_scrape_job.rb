@@ -17,6 +17,7 @@ class ScheduleScrapeJob < ApplicationJob
     sections_count = 0
     time_slots_count = 0
     unresolved_teachers = []
+    cross_faculty_matches = []
     error_log = []
 
     courses.find_each do |course|
@@ -34,6 +35,7 @@ class ScheduleScrapeJob < ApplicationJob
             sections_count += summary[:sections]
             time_slots_count += summary[:time_slots]
             unresolved_teachers.concat(summary[:unresolved_teachers])
+            cross_faculty_matches.concat(summary[:cross_faculty_matches])
           end
         end
       rescue Scrapers::ScraperError => e
@@ -59,6 +61,7 @@ class ScheduleScrapeJob < ApplicationJob
     scrape.update!(
       state: "completed",
       unresolved_teachers: unresolved_teachers.uniq,
+      cross_faculty_matches: cross_faculty_matches.uniq.presence,
       error_log: error_log.presence
     )
   rescue => e

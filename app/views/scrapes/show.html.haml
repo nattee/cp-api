@@ -59,6 +59,27 @@
         - @scrape.unresolved_teachers.each do |initials|
           %span.badge.bg-secondary.me-1= initials
 
+    - if @scrape.cross_faculty_matches.present?
+      .detail-section
+        %h6.section-title Cross-Faculty Matches (not imported)
+        %p.small.text-muted
+          These initials match our staff but appear on another faculty's course — teacher codes are
+          only unique within a faculty, so this is usually a different person. If one is a real outside
+          teaching assignment, add it to the allowlist in
+          %code Scrapers::Base::CROSS_FACULTY_TEACHING_ALLOWLIST
+          and re-scrape.
+        .table-responsive
+          %table.table.table-sm.mb-0
+            %thead
+              %tr
+                %th Course No
+                %th Initials
+            %tbody
+              - @scrape.cross_faculty_matches.each do |entry|
+                %tr
+                  %td= entry["course_no"]
+                  %td= entry["initials"]
+
     - if @scrape.error_log.present?
       .detail-section
         %h6.section-title Errors

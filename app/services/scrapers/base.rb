@@ -1,5 +1,18 @@
 module Scrapers
   class Base
+    # Teacher initials in the registration system are only unique WITHIN a
+    # faculty (course_no prefix "21" = Engineering, "55" = CULI, ...). Our
+    # Staff table holds Engineering people, so initials may only be resolved
+    # against courses owned by faculty 21 — CULI's "NNN" is a different person
+    # from Engineering's "NNN". Verified 2026-07: schedule self-conflicts plus
+    # per-faculty rosters proved every historical cross-faculty match false.
+    LOCAL_FACULTY_PREFIX = "21".freeze
+
+    # Genuine outside-faculty teaching assignments go here, as
+    # course_no => [initials]. Candidates show up on the scrape page under
+    # "Cross-Faculty Matches" — verify with the staff member, then add.
+    CROSS_FACULTY_TEACHING_ALLOWLIST = {}.freeze
+
     attr_reader :semester, :study_program
 
     def initialize(semester:, study_program: "S")
@@ -28,7 +41,7 @@ module Scrapers
         co.status = "planned"
       end
 
-      summary = { sections: 0, time_slots: 0, teachings: 0, unresolved_teachers: [] }
+      summary = { sections: 0, time_slots: 0, teachings: 0, unresolved_teachers: [], cross_faculty_matches: [] }
 
       data[:sections].each do |sec_data|
         section = Section.find_or_create_by!(course_offering: offering, section_number: sec_data[:section_no].to_i)
@@ -60,6 +73,18 @@ module Scrapers
 
           (cls[:teachers] || []).each do |initials|
             next if initials.blank?
+
+            unless resolvable_teacher?(data[:course_no], initials)
+              # Foreign-faculty course: a local-staff hit here is (almost
+              # always) an initials collision with someone from that faculty.
+              # Surface it for review instead of creating a Teaching; codes
+              # with no local match are foreign lecturers — not our problem.
+              if Staff.exists?(initials: initials)
+                summary[:cross_faculty_matches] << { course_no: data[:course_no], initials: initials }
+              end
+              next
+            end
+
             staff = Staff.find_by(initials: initials)
             if staff
               Teaching.find_or_create_by!(section: section, staff: staff) do |t|
@@ -74,10 +99,16 @@ module Scrapers
       end
 
       summary[:unresolved_teachers].uniq!
+      summary[:cross_faculty_matches].uniq!
       summary
     end
 
     private
+
+    def resolvable_teacher?(course_no, initials)
+      course_no.to_s.start_with?(LOCAL_FACULTY_PREFIX) ||
+        CROSS_FACULTY_TEACHING_ALLOWLIST.fetch(course_no, []).include?(initials)
+    end
 
     def config
       @config ||= Rails.application.config_for(:scraper)

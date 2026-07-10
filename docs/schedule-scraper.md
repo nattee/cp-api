@@ -136,7 +136,9 @@ The normalized data feeds into the same find-or-create logic as `ScheduleImporte
 3. **Section**: find-or-create by offering + section_number. Update `enrollment_current`, `enrollment_max`, `remark`.
 4. **TimeSlot**: find-or-create by section + day + start_time + end_time, attach room
 5. **Room**: find-or-create by building + room_number
-6. **Teaching**: find-or-create by section + staff (if initials can be resolved via `Staff#initials`)
+6. **Teaching**: find-or-create by section + staff (if initials can be resolved via `Staff#initials`).
+   **Initials are only resolved for courses owned by our faculty** (`course_no` prefix `21`) —
+   see "Teacher initials are faculty-scoped" below.
 
 Courses not in our database are **skipped** (logged but not created) — we only import schedule data for courses we already track.
 
@@ -290,10 +292,32 @@ validates :initials, uniqueness: true, allow_nil: true
 
 Admin sets initials on the Staff edit form (one-time setup per staff member). Could auto-suggest from name initials as a starting guess.
 
+### Teacher initials are faculty-scoped
+
+The 3-letter codes are only unique **within the owning faculty** of the course
+(`course_no` prefix: `21` = Engineering, `23` = Science, `55` = CULI, ...). The same
+code denotes different people in different faculties — verified 2026-07-09: "NNN" is
+Nattee Niparnan on `21xxxxx` courses, a CULI lecturer on `5500111`/`5500112`, and
+(almost certainly) Nattaya Ngamrojanavanich (Chemistry) on `2302163`. The false
+matches produced impossible self-conflicting schedules and recurred across semesters
+(same sections year over year), and all 116 historical cross-faculty Teachings were
+confirmed false and deleted.
+
+Since our Staff table holds Engineering people, initials resolution is restricted to
+our faculty's namespace.
+
 ### Lookup during import
 
-1. `Staff.find_by(initials: teacher_initials)` — exact match
-2. If no match → log as unresolved, skip Teaching record (don't fail the import)
+1. Course owned by faculty 21 (`course_no` starts with `Scrapers::Base::LOCAL_FACULTY_PREFIX`),
+   or `(course_no, initials)` listed in `Scrapers::Base::CROSS_FACULTY_TEACHING_ALLOWLIST`
+   (for genuine outside teaching assignments — currently empty):
+   - `Staff.find_by(initials: teacher_initials)` — exact match → create Teaching
+   - No match → log as unresolved, skip Teaching record (don't fail the import)
+2. Any other course:
+   - Initials matching local staff → reported in `Scrape#cross_faculty_matches`
+     (shown on the scrape page as "Cross-Faculty Matches (not imported)"); review and
+     extend the allowlist if one is real
+   - No local match → ignored (a foreign lecturer on a foreign course)
 
 ## UI
 

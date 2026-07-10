@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_09_033012) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_154901) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -208,6 +208,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_033012) do
     t.integer "courses_found", default: 0
     t.integer "courses_not_found", default: 0
     t.datetime "created_at", null: false
+    t.json "cross_faculty_matches"
     t.json "error_log"
     t.text "error_message"
     t.integer "sections_count", default: 0

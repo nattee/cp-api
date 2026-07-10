@@ -151,6 +151,10 @@ Fetches schedule data from external university websites. See `docs/schedule-scra
 - **Console helpers**: `Scrapers::CuGetReg.scrape("2110327", 2568, 2)` (fetch only), `scrape!` (fetch + import)
 - **Rake task**: `bin/rails scraper:run SOURCE=cugetreg YEAR=2568 SEMESTER=2`
 - **Web UI**: `/scrapes` — admin triggers scrape job, monitors progress, views history
+- **Teacher initials are faculty-scoped**: the registrar's 3-letter codes are only unique within
+  the course-owning faculty (CULI's "NNN" ≠ Engineering's "NNN"). Teachings are only auto-created
+  for `21xxxxx` courses (+ `Scrapers::Base::CROSS_FACULTY_TEACHING_ALLOWLIST` exceptions); other
+  local-staff hits are report-only via `Scrape#cross_faculty_matches`.
 
 ## Import System
 
