@@ -1,6 +1,6 @@
 # Data Sources hub page
 
-**Status**: design approved, not yet implemented
+**Status**: implemented 2026-07-10, revs 221–228 (plan: `docs/superpowers/plans/2026-07-10-data-sources-hub-page.md`). Tests (plan Task 6) deferred by the user.
 **Date**: 2026-07-10
 
 ## Why

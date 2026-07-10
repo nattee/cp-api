@@ -201,7 +201,9 @@ sync policy), and `docs/chulabooster-client-guide.md` (CB's API contract).
   `Chulabooster::ProgramResolver` (major_code + student_id heuristic + majority-enrollment twin
   default, every assumption flagged in `remark`); status via `Chulabooster::StatusCodes`; raw CB
   code mirrored to `students.cb_status_code`. Report-only discrepancy CSVs for existing students.
-  Admin pointer page at `/chulabooster`.
+  Documented on the admin **Data Sources** page at `/data_sources` (`/chulabooster` redirects
+  there), alongside the CSV/Excel, CuGetReg, and reg.chula ingestion paths. Content lives in the
+  `DataSource::SOURCES` constant — every source must state what it does *not* provide.
 - **Course + grade sync (Phase 2b)**: `bin/rails chulabooster:sync_courses` then
   `chulabooster:sync_grades` — same dry-run-default / `COMMIT=1` / `SNAPSHOT_DIR=` contract.
   Additive creates plus two audited correction classes: auto-generated course-row backfill
