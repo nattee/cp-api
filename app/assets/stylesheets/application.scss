@@ -256,6 +256,15 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
 // Curriculum group tag on a program<->course pairing (Compulsory/Elective/...).
 .badge-course-group { background-color: rgba($info, 0.12);             color: $info;    border: 1px solid rgba($info, 0.3); }
 
+// Data-source operating-mode badges (/data_sources).
+// These describe HOW you run a source, not what it contains.
+// Deliberately NOT reusing .badge-manual — that means Grade#source == "manual"
+// (hand-entered vs imported), a different domain concept.
+.badge-manual-upload { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
+.badge-console-only  { background-color: rgba($secondary, 0.2);     color: $secondary; border: 1px solid rgba($secondary, 0.4); }
+.badge-recommended   { background-color: rgba($success, 0.2);       color: $success;   border: 1px solid rgba($success, 0.4); }
+.badge-verify-only   { background-color: rgba($warning, 0.2);       color: $warning;   border: 1px solid rgba($warning, 0.4); }
+
 // Auto-generated course badges — courses created automatically during grade import.
 // "Copied" = another revision year existed and was duplicated (mild warning).
 // "Placeholder" = no matching course_no at all, minimal stub created (stronger warning).
