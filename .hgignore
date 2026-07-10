@@ -2,6 +2,7 @@ syntax: glob
 
 # usual suspect
 log/*.log
+log/*.log.*
 log/develop*
 tmp/**
 storage/**
