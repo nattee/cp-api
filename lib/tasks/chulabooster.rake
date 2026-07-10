@@ -130,6 +130,25 @@ namespace :chulabooster do
     puts "\n→ reports: #{run_dir}"
   end
 
+  desc "Apply CB's implied status to existing students whose local status disagrees " \
+       "with the mirrored cb_status_code. Report-only until explicitly run: this is a " \
+       "one-off human-authorized correction, not part of the routine sync_students. " \
+       "Run sync_students first so cb_status_code is current. DRY-RUN by default; COMMIT=1 to write."
+  task correct_student_statuses: :environment do
+    $stdout.sync = true
+
+    run_dir = Rails.root.join("tmp", "chulabooster_status_correction", Time.zone.now.strftime("%Y%m%d-%H%M%S")).to_s
+    commit  = ENV["COMMIT"] == "1"
+
+    puts commit ? "MODE: COMMIT — statuses WILL be corrected" : "MODE: dry-run — no database writes"
+    counts = Chulabooster::StatusCorrection.new(run_dir: run_dir, commit: commit).call
+
+    puts
+    puts "students checked:       #{counts[:checked]}"
+    puts "#{commit ? 'corrected:             ' : 'correctable:           '} #{counts[commit ? :corrected : :correctable]}   <- status_corrections.csv"
+    puts "\n→ reports: #{run_dir}"
+  end
+
   desc "Link CB-only program<->course pairings + fill blank course_group_code tags from CB. " \
        "Run sync_courses first. DRY-RUN by default; COMMIT=1 to write. " \
        "SNAPSHOT_DIR=tmp/chulabooster_snapshot/<ts> to run offline."
