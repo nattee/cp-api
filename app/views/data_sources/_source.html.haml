@@ -1,0 +1,40 @@
+- wrapper_class = last ? "mb-0" : "mb-4 pb-4 border-bottom"
+%div{class: wrapper_class}
+  %h6.d-flex.align-items-center.mb-2
+    %span.material-symbols.me-2{style: "font-size: 20px; vertical-align: middle"}= src[:icon]
+    = src[:name]
+    %span.badge.ms-2{class: "badge-#{src[:badge].dasherize}"}= src[:badge].humanize
+
+  %p.text-body-secondary.small= src[:blurb]
+
+  .row.g-3
+    .col-md-6
+      .small.text-uppercase.text-body-secondary.fw-semibold.mb-1 Provides
+      %ul.small.mb-0
+        - src[:provides].each do |item|
+          %li= item
+    .col-md-6
+      .small.text-uppercase.text-body-secondary.fw-semibold.mb-1 Does not provide
+      %ul.small.mb-0
+        - src[:not_provides].each do |item|
+          %li= item
+
+  - if src[:caution].present?
+    .alert.alert-warning.d-flex.align-items-start.mt-3.mb-0.py-2.px-3.small
+      %span.material-symbols.me-2{style: "font-size: 18px; vertical-align: middle"} warning
+      %div= src[:caution]
+
+  - if src[:action].present?
+    .mt-3
+      = link_to src[:action][:label], send(src[:action][:path]), class: "btn btn-primary btn-sm"
+
+  - if src[:commands].any?
+    .small.text-uppercase.text-body-secondary.fw-semibold.mt-3.mb-1 Commands
+    %pre.p-3.rounded.border.small.mb-0= src[:commands].join("\n")
+
+  - if src[:docs].any?
+    .small.text-uppercase.text-body-secondary.fw-semibold.mt-3.mb-1 Background reading
+    %ul.small.mb-0
+      - src[:docs].each do |doc|
+        %li
+          %code= doc

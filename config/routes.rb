@@ -28,7 +28,8 @@ Rails.application.routes.draw do
   resources :course_offerings, only: [:show, :edit, :update, :destroy]
   resources :rooms
   resources :scrapes, only: [:index, :create, :show]
-  get "chulabooster", to: "chulabooster#index"
+  get "data_sources", to: "data_sources#index"
+  get "chulabooster", to: redirect("/data_sources")
 
   controller :schedules do
     get "schedules", action: :index
