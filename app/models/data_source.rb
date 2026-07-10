@@ -96,7 +96,7 @@ class DataSource
       ],
       caution: "Do not import from this source. It collapses a twice-weekly class into a single " \
                'row with day: "TU TH". Scrapers::Base#parse_day looks that up in DAY_MAP, gets nil, ' \
-               "and `next if day.nil?` silently skips the slot — the meeting is lost. It also " \
+               'and its "next if day.nil?" guard silently skips the slot — the meeting is lost. It also ' \
                "overwrites Section enrollment last-writer-wins. Use Scrapers::CasReg.scrape " \
                "(read-only) to verify CuGetReg — never scrape!",
       action: nil,
