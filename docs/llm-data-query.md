@@ -15,7 +15,7 @@ Users want to get department reports by chatting with the LLM in LINE (e.g. "Wha
 
 **Concern — code duplication**: The web app already has report pages (SchedulesController with 6 reports). Naively adding LLM tools would duplicate the query logic.
 
-**Concern — model reliability**: Three Chinese open-source models (Qwen 2.5 32B, GLM-4.7, Kimi) are available. These are unreliable with many distinct tools — they confuse similar tools, mis-extract Thai parameters into JSON, and derail on multi-round chains. The more tools registered, the worse selection accuracy gets.
+**Concern — model reliability**: Four open-weight models (Qwen3.5-397B default, GLM-5.2, Kimi K2.6, Gemma-4-31B) are available — see llm-api.md for the swap-slot availability semantics. These are unreliable with many distinct tools — they confuse similar tools, mis-extract Thai parameters into JSON, and derail on multi-round chains. The more tools registered, the worse selection accuracy gets.
 
 ## Approach: Single Meta-Tool with Enum Dispatch
 
@@ -247,4 +247,4 @@ All handlers receive the `user` object from `ToolExecutor`. Authorization failur
 3. `course_info` handler — also no student linking
 4. `my_schedule` + `my_grades` — requires admin to link a user to a student first
 5. Tests after each handler
-6. Manual E2E testing across all 3 models (Qwen, GLM, Kimi)
+6. Manual E2E testing across the available models (Qwen3.5 default; GLM-5.2/Kimi-K2.6 when swapped in; Gemma)

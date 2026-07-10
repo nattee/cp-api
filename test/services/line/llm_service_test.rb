@@ -108,6 +108,45 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     end
   end
 
+  # --- Graceful degradation when a swapped-out resident is offline ---
+
+  test "falls back to the default model when the selected resident is unreachable" do
+    viewer = users(:viewer)
+    viewer.llm_model = "glm" # a swap resident, usually offline
+    service = Line::LlmService.new("Hi", line_user_id: @line_user_id, user: viewer)
+
+    # First call (the chosen glm on :8001) refuses; the retry against the default
+    # (qwen) answers.
+    calls = 0
+    service.define_singleton_method(:chat_completion) do |_messages, tools: []|
+      calls += 1
+      raise Line::LlmService::LlmConnectionError, "connection refused" if calls == 1
+
+      { "choices" => [{ "message" => { "role" => "assistant", "content" => "Hello from the default" } }] }
+    end
+
+    result = service.call
+    assert_equal 2, calls, "should retry exactly once against the default model"
+    assert_includes result.reply, "Hello from the default"
+    assert_match(/ไม่พร้อมใช้งาน/, result.reply, "should prepend an offline notice naming the situation")
+
+    # The saved assistant message is the real answer, without the transient notice.
+    last = ChatMessage.where(line_user_id: @line_user_id, role: "assistant").order(:created_at).last
+    assert_equal "Hello from the default", last.content
+  end
+
+  test "a connection error on the default model surfaces (nothing to fall back to)" do
+    viewer = users(:viewer)
+    viewer.llm_model = nil # default resident (qwen)
+    service = Line::LlmService.new("Hi", line_user_id: @line_user_id, user: viewer)
+
+    service.define_singleton_method(:chat_completion) do |_messages, tools: []|
+      raise Line::LlmService::LlmConnectionError, "connection refused"
+    end
+
+    assert_raises(Line::LlmService::LlmConnectionError) { service.call }
+  end
+
   private
 
   def text_response(content)

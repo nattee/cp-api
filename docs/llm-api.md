@@ -1,116 +1,116 @@
 # Backend LLM API — Calling Guide
 
-How to call the department's self-hosted LLM backends directly. The servers run
-**vLLM** and expose the standard **OpenAI-compatible Chat Completions API**, so
-any OpenAI client library (or plain HTTP) works.
+How to call the department's self-hosted LLM backends directly. All endpoints
+expose the standard **OpenAI-compatible Chat Completions API**, so any OpenAI
+client library (or plain HTTP) works. The DGX runs **SGLang**; the A100 box
+runs **vLLM** — the API is the same either way.
+
+Canonical provider-side contract: `~/dgx-b200/docs/llm-service-contract.md`
+(this doc is the cp-api-side summary).
 
 ## Endpoints
 
-| Backend | Base URL | `model` value to send |
-|---|---|---|
-| Qwen 2.5 Coder 32B (default) | `http://10.0.5.25:8000` | `/data/models/qwen2.5-coder-32b` |
-| GLM-4.7 | `http://161.200.93.200:8000` | `glm-5` |
-| Kimi | `http://161.200.93.200:8001` | `kimi` |
+| Backend | Base URL | `model` to send | Availability |
+|---|---|---|---|
+| Qwen3.5 397B (default) | `http://161.200.93.200:8000` | `qwen3.5` | **default resident** — up unless an alternate was swapped in; auto-returns after reboot |
+| GLM-5.2 | `http://161.200.93.200:8001` | `glm-5.2` | swap resident — **usually OFF** |
+| Kimi K2.6 | `http://161.200.93.200:8002` | `kimi-k2.6` | swap resident — **usually OFF** |
+| Gemma 4 31B | `http://10.0.5.25:8000` | `gemma-4-31b` | always-on side model |
 
 - Chat endpoint: `POST <base_url>/v1/chat/completions`
 - List served models: `GET <base_url>/v1/models`
 - Liveness check: `GET <base_url>/health`
 
+### The swap slot (read this once)
+
+DGX ports 8000–8002 share the same 4 GPUs: **exactly one is alive at any
+moment**. The other two refuse TCP connections — that is *normal operation*,
+not an outage. Probe `/health` to discover the live resident. Build against
+`:8000` (Qwen); treat `:8001`/`:8002` as occasionally-available experiments,
+never as fallbacks.
+
 ## Access
 
 - **No API key / no auth header.** Send `Content-Type: application/json` only.
-- Servers are **intranet-only** — you must be on the university/department
-  network (or VPN). They are not reachable from the public internet.
+- Servers are **intranet-only** — university/department network (or VPN).
 
 ## Basic request
 
-The request body is identical for all three backends — only the base URL and
-the `model` value change.
-
-**Qwen 2.5 Coder 32B:**
-
-```bash
-curl -s http://10.0.5.25:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "/data/models/qwen2.5-coder-32b",
-    "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Hello, who are you?"}
-    ],
-    "temperature": 0.7,
-    "max_tokens": 4096,
-    "repetition_penalty": 1.1
-  }'
-```
-
-**GLM-4.7:**
+Identical body for all backends — only base URL and `model` change:
 
 ```bash
 curl -s http://161.200.93.200:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "glm-5",
+    "model": "qwen3.5",
     "messages": [
       {"role": "system", "content": "You are a helpful assistant."},
       {"role": "user", "content": "Hello, who are you?"}
     ],
     "temperature": 0.7,
-    "max_tokens": 4096,
-    "repetition_penalty": 1.1
-  }'
-```
-
-**Kimi:**
-
-```bash
-curl -s http://161.200.93.200:8001/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "kimi",
-    "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Hello, who are you?"}
-    ],
-    "temperature": 0.7,
-    "max_tokens": 4096,
-    "repetition_penalty": 1.1
+    "max_tokens": 4096
   }'
 ```
 
 Notes on parameters:
 
-- `model` is **required** and must match the table above exactly (for Qwen it
-  is a filesystem path — that is correct, not a mistake).
-- `max_tokens` — we use 4096; the server may reject larger values depending on
-  context length.
-- `repetition_penalty` is a vLLM extension (not in the OpenAI spec); 1.1 works
-  well with these models. OpenAI client libraries pass it via
-  `extra_body={"repetition_penalty": 1.1}`.
-- Thai and English input both work; the models reply in the user's language.
+- `model` — see the table. On the DGX the value is echoed, not validated (a
+  wrong name still answers — the *port* selects the model). On `10.0.5.25`
+  vLLM **validates**: wrong names get an error.
+- `max_tokens` — use **at least 512, we standardize on 4096**. The DGX models
+  are reasoning models: they think before answering, and the thinking counts
+  against `max_tokens`. Small budgets can be consumed entirely by reasoning,
+  yielding an **empty `content`** — that is the classic symptom.
+- `repetition_penalty` is no longer recommended (it was tuned for the retired
+  qwen2.5-coder; on reasoning models it degrades the thinking trace). The
+  server defaults are correct.
+- Thai and English both work; Qwen3.5 has the strongest Thai of the set.
 
-The response is a standard OpenAI-format object — the reply text is at
-`choices[0].message.content`, token usage in `usage`.
+The response is a standard OpenAI-format object — reply text at
+`choices[0].message.content`, usage in `usage`.
 
-Two non-standard things to expect in responses:
+Non-standard things to expect:
 
-- **GLM and Kimi** additionally return the model's chain-of-thought in
-  `choices[0].message.reasoning_content`. Read `content` for the answer and
-  ignore `reasoning_content`; note its tokens count toward `completion_tokens`.
-- **Self-reported identity is unreliable** — these open-weight models may claim
-  to be from OpenAI or Anthropic when asked who they are. This is a training
-  artifact, not a deployment error. Pin the assistant's identity in your
-  system prompt if it matters for your use case.
+- All three DGX models return chain-of-thought in
+  `choices[0].message.reasoning_content`. Read `content`; ignore
+  `reasoning_content` (its tokens count toward `completion_tokens`).
+- **Self-reported identity is unreliable** — open-weight models may claim to
+  be from OpenAI or Anthropic. Training artifact, not a deployment error.
+  Pin identity in your system prompt if it matters.
+
+## Vision (image input) — NEW
+
+`qwen3.5`, `kimi-k2.6`, and `gemma-4-31b` accept images (`glm-5.2` is
+text-only). Send a content array with `image_url` parts (data: URIs or
+intranet-reachable URLs):
+
+```bash
+curl -s http://161.200.93.200:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen3.5",
+    "max_tokens": 4096,
+    "messages": [{"role": "user", "content": [
+      {"type": "text", "text": "อ่านตารางเรียนในรูปนี้ให้หน่อย"},
+      {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,<...>"}}
+    ]}]
+  }'
+```
+
+(Relevant for the LINE bot: user-sent photos can now be forwarded to the
+model instead of being ignored.)
 
 ## Tool calling (function calling)
 
-Pass tool definitions in the standard OpenAI `tools` format:
+Standard OpenAI `tools` format, tested end-to-end on all DGX residents
+(best-effort on Gemma):
 
 ```bash
-curl -s http://10.0.5.25:8000/v1/chat/completions \
+curl -s http://161.200.93.200:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "/data/models/qwen2.5-coder-32b",
+    "model": "qwen3.5",
+    "max_tokens": 4096,
     "messages": [{"role": "user", "content": "What is the weather in Bangkok?"}],
     "tools": [{
       "type": "function",
@@ -129,47 +129,45 @@ curl -s http://10.0.5.25:8000/v1/chat/completions \
   }'
 ```
 
-When the model decides to call a tool, the response contains
-`choices[0].message.tool_calls` instead of text content. Execute the tool
-yourself, then send a follow-up request appending (1) the assistant message
-with the `tool_calls`, and (2) one `{"role": "tool", "tool_call_id": ...,
-"content": "<result>"}` message per call, to get the final text answer.
+Tool-call responses populate `choices[0].message.tool_calls`; execute the
+tool, then send a follow-up appending the assistant message and one
+`{"role": "tool", "tool_call_id": ..., "content": "<result>"}` per call.
 
 ### Known model quirks
 
-These are open-weight models and tool calling is less reliable than commercial
-APIs. Observed in production:
-
-- **Qwen** sometimes refuses tool calls citing privacy, or emits the call as
-  `<tool_call>{...}</tool_call>` text inside `content` instead of the
-  structured `tool_calls` array. Be prepared to parse content as a fallback.
-- **GLM** uses inconsistent tool-call output formats (sometimes
-  ` ```action ` code blocks, sometimes `<arg_key>/<arg_value>` XML).
-- Keep the number of tools small (well under 8–10) — selection accuracy
-  degrades quickly on these model sizes.
+- The old generation's habit of emitting tool calls as text inside `content`
+  is largely fixed by server-side parsers, but keep the content-parsing
+  fallback in `LlmService` — cheap insurance.
+- Keep the number of tools small (well under 8–10); selection accuracy still
+  degrades with large tool sets.
 
 ## Using OpenAI client libraries
-
-Any OpenAI SDK works by overriding the base URL:
 
 ```python
 from openai import OpenAI
 
-client = OpenAI(base_url="http://10.0.5.25:8000/v1", api_key="none")  # key is ignored but required by the SDK
+client = OpenAI(base_url="http://161.200.93.200:8000/v1", api_key="none")
 resp = client.chat.completions.create(
-    model="/data/models/qwen2.5-coder-32b",
+    model="qwen3.5",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=4096,
-    extra_body={"repetition_penalty": 1.1},
 )
 print(resp.choices[0].message.content)
 ```
 
 ## Errors & limits
 
-- Non-2xx responses return a JSON error body from vLLM — the message usually
-  pinpoints the problem (e.g. invalid JSON, context length exceeded).
-- Typical timeouts to use as a client: connect ~10 s, read ~60 s (long
-  generations can take tens of seconds).
-- There is no rate limiting, but these are shared single-GPU servers — please
-  avoid sustained parallel load.
+- Non-2xx responses return a JSON error body naming the problem (invalid
+  JSON, context length exceeded, unknown model on the vLLM box).
+- Connection refused on a DGX port = that resident isn't live (see swap
+  slot); connection refused on ALL DGX ports = actual outage.
+- Client timeouts: connect ~10 s, read ~120 s (reasoning models take longer
+  than the old generation before first output).
+- No rate limiting; sized for ≤30 concurrent sessions. Sustained heavy
+  parallel load will queue, not error.
+
+## History
+
+- 2026-07: upgraded from GLM-5/Kimi-K2.5/qwen2.5-coder-32b to the lineup
+  above. The old endpoints and model names are **gone** (qwen2.5 on
+  10.0.5.25 was retired when Gemma took that box).

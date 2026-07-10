@@ -5,7 +5,7 @@ module ApiEventsHelper
   # and response_body are JSON-encoded strings stored inside the outer JSON.
   # A plain JSON.pretty_generate shows these as escaped one-liners:
   #
-  #   "request_body": "{\"model\":\"glm-5\",\"messages\":[...]}"
+  #   "request_body": "{\"model\":\"qwen3.5\",\"messages\":[...]}"
   #
   # This helper detects JSON string values and renders them as collapsible
   # sections with properly formatted JSON inside, making it easy to inspect

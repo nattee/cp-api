@@ -10,6 +10,11 @@
 # Callers that only need the text can use .reply directly.
 class Line::LlmService
   class LlmError < StandardError; end
+  # Raised when the chosen resident can't be reached at all (connection refused,
+  # host unreachable, timeout). Distinct from LlmError so #call can fall back to
+  # the default model — but still a subclass, so existing `rescue LlmError`
+  # callers (ChatJob, ChatsController) keep catching it unchanged.
+  class LlmConnectionError < LlmError; end
   Result = Struct.new(:reply, :tool_rounds, keyword_init: true)
 
   def initialize(user_message, line_user_id:, user: nil)
@@ -29,15 +34,43 @@ class Line::LlmService
     messages = build_initial_messages
     tools = Line::ToolRegistry.definitions
 
+    begin
+      run_rounds(messages, tools)
+    rescue LlmConnectionError => e
+      # DGX ports 8000-8002 are a swap slot: only ONE of qwen/glm/kimi is alive
+      # at a time, so a user who selected an offline alternate would otherwise
+      # fail on every single message with no way to recover. Fall back to the
+      # always-on default once and tell them we did. If the default itself is
+      # unreachable there is nothing to fall back to — a real outage — so let it
+      # surface to the caller (ChatJob turns it into a "sorry" reply).
+      raise unless fallback_to_default_available?
+
+      offline_label = @model_config[:label]
+      Rails.logger.warn("[vLLM] #{@model_config[:model]} unreachable (#{e.message}); " \
+                        "falling back to #{default_model_config[:model]}")
+      @model_config = default_model_config
+      result = run_rounds(messages, tools)
+      Result.new(reply: "#{fallback_notice(offline_label)}\n\n#{result.reply}",
+                 tool_rounds: result.tool_rounds)
+    end
+  end
+
+  private
+
+  # Runs the tool-calling loop against the current @model_config until the model
+  # returns plain text or @max_rounds is reached. Raises LlmConnectionError if the
+  # resident can't be reached; #call handles that by falling back to the default.
+  def run_rounds(messages, tools)
     @max_rounds.times do |round|
       response = chat_completion(messages, tools: tools)
       assistant_message = response.dig("choices", 0, "message")
 
       tool_calls = assistant_message["tool_calls"]
 
-      # Fallback: some models (e.g. qwen2.5-coder) output tool calls as
-      # <tools> or <tool_call> tags in content instead of the structured
-      # tool_calls array. Parse them client-side when vLLM's parser misses.
+      # Fallback: some models output tool calls as <tools> or <tool_call> tags
+      # (or ```action``` blocks) in content instead of the structured tool_calls
+      # array. Parse them client-side when the server-side parser misses. Server
+      # parsers have improved, but this is cheap insurance (see docs/llm-api.md).
       if tool_calls.blank?
         parsed = parse_tool_calls_from_content(assistant_message["content"].to_s)
         if parsed.present?
@@ -82,12 +115,30 @@ class Line::LlmService
 
     # Safety net: max rounds exhausted, extract whatever content we have.
     Rails.logger.warn("LLM reached max rounds (#{@max_rounds}) without final text reply")
-    fallback = messages.last&.dig("content").to_s.strip.presence || "I'm sorry, I couldn't complete that request."
+    fallback = messages.last&.dig("content").to_s.strip.presence ||
+               "ขออภัยค่ะ ระบบไม่สามารถประมวลผลคำขอให้เสร็จได้ กรุณาลองใหม่อีกครั้ง"
     save_message(role: "assistant", content: fallback)
     Result.new(reply: fallback, tool_rounds: @tool_rounds)
   end
 
-  private
+  # The always-on default resident (qwen), used as the fallback target.
+  def default_model_config
+    LLM_CONFIG[:models][LLM_CONFIG[:default_model].to_sym]
+  end
+
+  # True only when the user picked a NON-default resident. If they're already on
+  # the default, its being unreachable is a real outage with nowhere to fall back.
+  # (resolve_model_config returns the same hash object for the default, so an
+  # identity comparison distinguishes "user chose an alternate" cleanly.)
+  def fallback_to_default_available?
+    default_model_config.present? && @model_config != default_model_config
+  end
+
+  # Prepended to the reply when we transparently fell back. Thai to match the
+  # bot's voice; the label carries the (English) model name.
+  def fallback_notice(offline_label)
+    "⚠️ #{offline_label} ไม่พร้อมใช้งานขณะนี้ ตอบด้วยโมเดลหลักแทน"
+  end
 
   # Assembles the message array: system prompt + recent history + current user message.
   # Sanitizes the sequence so the LLM always receives a valid conversation:
@@ -187,15 +238,21 @@ class Line::LlmService
       model: @model_config[:model],
       messages: messages,
       temperature: 0.7,
-      max_tokens: @model_config[:max_tokens] || 2048,
-      repetition_penalty: @model_config[:repetition_penalty] || 1.0
+      # Reasoning models spend tokens thinking before answering; a small budget
+      # gets consumed by the thinking trace, leaving content empty. Standardize
+      # on 4096 (see docs/llm-api.md). repetition_penalty is deliberately NOT
+      # sent — it degrades the thinking trace on reasoning models; server
+      # defaults are correct.
+      max_tokens: @model_config[:max_tokens] || 4096
     }
     body[:tools] = tools if tools.present?
 
     request_json = body.to_json
     started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
-    response = Net::HTTP.start(uri.hostname, uri.port, open_timeout: 10, read_timeout: 60) do |http|
+    # read_timeout is generous: reasoning models think before emitting the first
+    # token and are markedly slower than the old generation (see docs/llm-api.md).
+    response = Net::HTTP.start(uri.hostname, uri.port, open_timeout: 10, read_timeout: 120) do |http|
       http.post(uri, request_json, "Content-Type" => "application/json")
     end
 
@@ -228,7 +285,9 @@ class Line::LlmService
     ApiEvent.log(service: "llm", action: "chat_completion", message: msg,
                  details: build_error_log(uri, nil, request_json),
                  response_time_ms: elapsed_ms)
-    raise LlmError, msg
+    # LlmConnectionError (not plain LlmError) so #call can fall back to the
+    # default resident when a swapped-out alternate refuses the connection.
+    raise LlmConnectionError, msg
   rescue JSON::ParserError => e
     msg = "vLLM returned invalid JSON: #{e.message}"
     Rails.logger.error("[vLLM] #{msg}")
