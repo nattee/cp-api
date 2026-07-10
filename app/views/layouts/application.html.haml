@@ -108,13 +108,13 @@
                 - if contact_count > 0
                   %span.badge.badge-pending.ms-auto= contact_count
             %li.nav-item
+              = link_to data_sources_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'data_sources'}" do
+                = resource_icon("data_sources")
+                Data Sources
+            %li.nav-item
               = link_to data_imports_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'data_imports'}" do
                 = resource_icon("data_imports")
                 Imports
-            %li.nav-item
-              = link_to chulabooster_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'chulabooster'}" do
-                = resource_icon("chulabooster")
-                ChulaBooster
             %li.nav-item
               = link_to api_events_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'api_events'}" do
                 = resource_icon("api_events")
