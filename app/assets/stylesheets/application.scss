@@ -305,9 +305,14 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
   padding: 0.375rem 0.625rem;
   background-color: $popover-bg;
   color: $body-color-dark;
-  border: 1px solid lighten($dark, 18%);
+  // $popover-bg is the same hex as $card-bg, so the surface alone can't
+  // separate the tooltip from the card it floats over. A $primary border
+  // + soft glow provides the separation instead (picked over a lighter
+  // surface / inverted scheme, 2026-07-16) — same cyan accent language as
+  // the .table-group-header inset bar.
+  border: 1px solid $primary;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 10px rgba($primary, 0.25);
   font-size: 0.8125rem;    // the readability fix — native OS tooltips are smaller
   line-height: 1.4;
   white-space: pre-line;   // cohort breakdowns join lines with \n
