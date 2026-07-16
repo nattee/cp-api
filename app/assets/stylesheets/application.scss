@@ -285,9 +285,6 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
 // Cells that carry a hover breakdown (report column title_key:, teaching
 // history) — tooltips are invisible affordances, so mark the cell with a
 // dotted underline + help cursor to make the hover discoverable.
-// td[title] is transitional and is removed when the last title: view
-// converts to data-tooltip.
-.table > tbody > tr > td[title],
 .table > tbody > tr > td[data-tooltip],
 .table > thead > tr > th[data-tooltip] {
   cursor: help;

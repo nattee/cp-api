@@ -36,10 +36,12 @@
                 -#              left-aligns any column containing "—") can't
                 -#              produce mixed-aligned columns
                 -#   class_key: row key holding a flag class ("report-cell-missing")
-                -#   title_key: row key holding hover text (native tooltip)
+                -#   title_key: row key holding hover text (styled tooltip —
+                -#              tooltip_controller.js; \n in the text renders
+                -#              as line breaks via white-space: pre-line)
                 -# CSV export ignores all of them (ReportExporter reads only col[:key]).
                 -# The attr hash is .compact-ed because Haml renders nil dynamic
-                -# attributes as empty strings (title="") — which would give EVERY
-                -# cell the td[title] hover affordance, not just breakdown cells.
-                - td_attrs = { class: [col[:align], (row[col[:class_key]] if col[:class_key])].compact.presence, title: (row[col[:title_key]] if col[:title_key]) }.compact
+                -# attributes as empty strings (data-tooltip="") — which would give
+                -# EVERY cell the hover affordance, not just breakdown cells.
+                - td_attrs = { class: [col[:align], (row[col[:class_key]] if col[:class_key])].compact.presence, "data-tooltip": (row[col[:title_key]] if col[:title_key]) }.compact
                 %td{td_attrs}= row[col[:key]]
