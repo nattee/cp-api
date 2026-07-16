@@ -32,7 +32,7 @@
               %th Staff
               - @columns.each do |c|
                 %th.th-rotated
-                  = link_to c[:course_no], c[:course], title: c[:name]
+                  = link_to c[:course_no], c[:course], data: { tooltip: c[:name] }
               %th.text-center Σ
           %tbody
             - @staffs.each do |staff|
@@ -40,7 +40,7 @@
                 %td= link_to staff.display_name_th, staff_path(staff)
                 - @columns.each do |c|
                   - cell = @cells[[staff.id, c[:course_no]]]
-                  %td.text-center{title: cell && cell[:tooltip]}= cell && cell[:count]
+                  %td.text-center{"data-tooltip" => cell && cell[:tooltip]}= cell && cell[:count]
                 %td.text-center
                   %strong= @totals[staff.id]
 - else

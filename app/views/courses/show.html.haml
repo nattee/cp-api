@@ -35,7 +35,7 @@
                   .mb-1
                     = link_to pc.program.name_en, pc.program
                     - if pc.course_group_code.present?
-                      %span.badge.badge-course-group.ms-2{title: pc.course_group_code}= pc.group_label
+                      %span.badge.badge-course-group.ms-2{"data-tooltip" => pc.course_group_code}= pc.group_label
               - else
                 .text-muted Not assigned
 

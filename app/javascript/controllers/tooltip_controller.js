@@ -23,7 +23,11 @@ export default class extends Controller {
     this.element.addEventListener("keydown", this.onKeydown)
     // capture — scroll events don't bubble out of .table-responsive, and a
     // fixed-position tooltip goes stale the moment anything scrolls
+    // Known accepted limitation: if the table re-renders (DataTables search/
+    // sort) while the pointer is parked on a cell, no mouseout fires and the
+    // tooltip lingers until the next scroll, Escape, or hover.
     window.addEventListener("scroll", this.hideNow, { capture: true, passive: true })
+    window.addEventListener("resize", this.hideNow)
     document.addEventListener("turbo:before-cache", this.teardown)
   }
 
@@ -35,6 +39,7 @@ export default class extends Controller {
     this.element.removeEventListener("focusout", this.hide)
     this.element.removeEventListener("keydown", this.onKeydown)
     window.removeEventListener("scroll", this.hideNow, { capture: true })
+    window.removeEventListener("resize", this.hideNow)
     document.removeEventListener("turbo:before-cache", this.teardown)
   }
 
@@ -61,6 +66,7 @@ export default class extends Controller {
   hideNow = () => {
     clearTimeout(this.timer)
     this.timer = null
+    this.trigger?.removeAttribute("aria-describedby")
     this.trigger = null
     if (this.tip) this.tip.style.display = "none"
   }
@@ -80,6 +86,7 @@ export default class extends Controller {
     tip.textContent = text
     tip.style.display = "block"
     tip.style.visibility = "hidden" // measure first, place before revealing
+    tip.style.left = "0px" // reset before measuring — a leftover right-edge `left` shrinks the measured width
     const r = trigger.getBoundingClientRect()
     const t = tip.getBoundingClientRect()
     let left = r.left + r.width / 2 - t.width / 2
@@ -89,6 +96,7 @@ export default class extends Controller {
     tip.style.left = `${Math.round(left)}px`
     tip.style.top = `${Math.round(top)}px`
     tip.style.visibility = "visible"
+    trigger.setAttribute("aria-describedby", "app-tooltip")
   }
 
   tipElement() {
@@ -96,6 +104,7 @@ export default class extends Controller {
       this.tip = document.createElement("div")
       this.tip.className = "app-tooltip"
       this.tip.setAttribute("role", "tooltip")
+      this.tip.id = "app-tooltip"
       document.body.appendChild(this.tip)
     }
     return this.tip
