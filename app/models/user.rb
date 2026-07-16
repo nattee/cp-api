@@ -16,6 +16,9 @@ class User < ApplicationRecord
   validates :name, presence: true
   validates :role, presence: true, inclusion: { in: ROLES }
   validates :uid, uniqueness: { scope: :provider }, allow_nil: true
+  # The form's "Default" option submits "" — normalize to nil so the
+  # allow_nil inclusion below treats "no preference" consistently.
+  normalizes :llm_model, with: ->(model) { model.presence }
   validates :llm_model, inclusion: { in: LLM_CONFIG[:models].keys.map(&:to_s) }, allow_nil: true
 
   scope :active, -> { where(active: true) }

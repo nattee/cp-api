@@ -18,6 +18,15 @@ class UserTest < ActiveSupport::TestCase
     assert user.valid?
   end
 
+  test "blank llm_model from the form's Default option normalizes to nil and saves" do
+    # The user form's "Default" select option submits "", but the inclusion
+    # validation only allows nil — editing any user without a model preference
+    # failed with "is not included in the list" (found on production 2026-07-16).
+    user = User.new(valid_attributes.merge(llm_model: ""))
+    assert user.valid?, user.errors.full_messages.join(", ")
+    assert_nil user.llm_model
+  end
+
   test "requires username" do
     user = User.new(valid_attributes.merge(username: nil))
     assert_not user.valid?
