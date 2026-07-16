@@ -197,7 +197,10 @@ class SchedulesController < ApplicationController
       @cells[[staff_id, course_no]] = { count: sections.size, tooltip: tooltip }
     end
 
-    @staffs = Staff.where(id: teachings.map(&:staff_id).uniq).sort_by(&:display_name_th)
+    # Sort by given name, not display_name_th: that string leads with the
+    # academic title, which would cluster rows by rank instead of by name.
+    @staffs = Staff.where(id: teachings.map(&:staff_id).uniq)
+                   .sort_by { |s| [(s.first_name_th.presence || s.first_name).to_s, (s.last_name_th.presence || s.last_name).to_s] }
   end
 
   def conflicts
