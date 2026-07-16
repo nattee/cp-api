@@ -29,6 +29,9 @@ Seed list (2026-07-09):
   the latter.
 - **program_groups/show** → `semester_grade_distribution` and `cohort_gpa`
   (program_group pre-filled).
+- **data_sources/index** → `data_coverage`: the source docs answer "how does
+  data get in"; the report answers "did it actually arrive for each term"
+  (per-term counts with gaps flagged). Link added 2026-07-16.
 
 ## 2. Report ↔ entity page overlap review (recurring)
 
@@ -53,6 +56,8 @@ Status as of 2026-07-09:
 - `semester_grade_distribution`, `cohort_gpa`, `group_credit_shortfall`,
   `thesis_credits` — genuine set/aggregate reports, no entity anchor. Keep
   regardless.
+- `data_coverage` — set/aggregate report (terms × datasets), no single-entity
+  anchor. Keep regardless.
 
 ## How to add an item
 

@@ -9,5 +9,10 @@
       How data enters cp-api. Each source lists what it provides and, just as importantly,
       what it does not — check the second column before assuming a source can answer your question.
 
+    %p.text-body-secondary
+      To check whether any term's data actually arrived, see the
+      #{link_to "Data Coverage report", report_path("data_coverage")} —
+      per-term counts for grades, schedule, and new students, with gaps flagged.
+
     - @sources.each_with_index do |src, index|
       = render "source", src: src, last: (index == @sources.size - 1)
