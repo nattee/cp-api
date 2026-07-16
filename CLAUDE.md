@@ -140,7 +140,7 @@ Course offering, section, time slot, and teaching assignment tracking. See `docs
 - **CSV import**: `Importers::ScheduleImporter` — flat format, one row per time slot, find-or-create nested records
 - **CSV export**: `Exporters::ScheduleExporter` — reverse of import, same format. Available via `GET /semesters/:id/export`
 - **Nested forms**: `accepts_nested_attributes_for` chain (CourseOffering → Sections → TimeSlots + Teachings). `nested_fields_controller.js` handles dynamic add/remove with configurable `placeholder` value for multi-level nesting (`NEW_RECORD` for sections, `NEW_TIME_SLOT` / `NEW_TEACHING` for sub-levels). Select2 auto-connects on dynamically inserted elements via Stimulus MutationObserver. No `reject_if: :all_blank` — blank nested records show validation errors instead of being silently dropped.
-- **Schedule reports**: `SchedulesController` with 6 read-only reports (room, staff, workload, curriculum, student, conflicts). Shared `_week_calendar.html.haml` partial accepts `entries` array of hashes. See `docs/schedule-reports.md`.
+- **Schedule reports**: `SchedulesController` with 7 read-only reports (room, staff, workload, curriculum, student, conflicts, teaching matrix). Shared `_week_calendar.html.haml` partial accepts `entries` array of hashes. See `docs/schedule-reports.md`.
 
 ## Schedule Scraper
 

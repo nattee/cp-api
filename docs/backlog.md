@@ -24,14 +24,15 @@ Seed list (2026-07-09):
   pre-filled with the staff's initials + the selected semester's year:
   adds class sizes (Enrolled / Max), co-lecturers, and CSV export that the
   card doesn't show.
-- **courses/show** → `failing_students` (course_no pre-filled) and
-  `course_teachers` (course_no + semester) — see also item 2 before adding
-  the latter.
+- **courses/show** → `failing_students` (course_no pre-filled).
 - **program_groups/show** → `semester_grade_distribution` and `cohort_gpa`
   (program_group pre-filled).
 - **data_sources/index** → `data_coverage`: the source docs answer "how does
   data get in"; the report answers "did it actually arrive for each term"
   (per-term counts with gaps flagged). Link added 2026-07-16.
+- **staffs/show** (per-semester Teaching card) → `/schedules/teaching_matrix`
+  pre-filled with the selected semester: the department-wide view of the same
+  term. Link added 2026-07-16.
 
 ## 2. Report ↔ entity page overlap review (recurring)
 
@@ -44,10 +45,9 @@ shared `GradeStats::` services — so retiring a web report doesn't break the bo
 
 Status as of 2026-07-09:
 
-- `course_teachers` — mostly absorbed by courses/show; the gap is that the
-  Offerings table shows section counts but not teachers (they're one click away
-  on the offering page). Adding a Teachers column there would fully absorb it →
-  then retire.
+- `course_teachers` — **retired 2026-07-16**: courses/show Offerings gained a
+  Teachers column and the teaching-matrix schedules report covers the
+  cross-course view.
 - `staff_courses_by_year` — largely absorbed by staffs/show (per-semester card
   + teaching-history matrix), but uniquely offers Enrolled/Max, Other
   Lecturers, and CSV. Keep for now; revisit if those move onto the staff page.
@@ -58,6 +58,8 @@ Status as of 2026-07-09:
   regardless.
 - `data_coverage` — set/aggregate report (terms × datasets), no single-entity
   anchor. Keep regardless.
+- `teaching_matrix` (at `/schedules`, not the registry) — set/aggregate report
+  (staff × course per term/year), no single-entity anchor. Keep regardless.
 
 ## How to add an item
 

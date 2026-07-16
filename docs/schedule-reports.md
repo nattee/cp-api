@@ -19,6 +19,7 @@ Cross-cutting queries and visualizations for the teaching schedule data. This is
 | 4 | **Curriculum Calendar** | course set / program+year, semester | week calendar | admin |
 | 5 | **Student Timetable** | student, semester | week calendar + grades | student, advisor |
 | 6 | **Conflict Detection** | semester | conflict list | admin |
+| 7 | **Teaching Matrix** | year, semester (optional), course scope | staff × course matrix | admin |
 
 ## Shared Component: Week Calendar
 
@@ -280,6 +281,29 @@ Teaching.joins(section: [:time_slots, :course_offering])
 
 ---
 
+## Report 7: Teaching Matrix
+
+**Question:** "Who taught what across the department in a term or year?"
+
+Added 2026-07-16 (spec:
+`docs/superpowers/specs/2026-07-16-teaching-matrix-report-design.md`). Absorbed
+the retired `Reports::CourseTeachers` web report — one matrix column is that
+entire report for a term.
+
+- **Filters**: `year` (B.E., defaults to the latest year with teachings),
+  `semester_number` (blank = whole academic year), `course_scope`
+  (`dept` = `course_no LIKE '2110%'`, default; `all`)
+- **Display**: staff rows × `course_no` columns (rotated headers, reusing the
+  staffs/show `.teaching-history-table` styling), cells = distinct section
+  count with section numbers in the tooltip (term-qualified for whole-year
+  scope), Σ total column. Plain table — no DataTables; ranking/sorting is the
+  Staff Workload report's job.
+- **Query**: one `Teaching` join through section → course_offering →
+  course/semester, pivoted in Ruby; columns keyed by cross-revision
+  `course_no`.
+
+---
+
 ## Routes
 
 ```ruby
@@ -290,6 +314,7 @@ namespace :schedules do
   get :curriculum
   get :student
   get :conflicts
+  get "schedules/teaching_matrix", action: :teaching_matrix
 end
 ```
 

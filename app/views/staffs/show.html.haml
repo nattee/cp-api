@@ -121,6 +121,9 @@
       - else
         %p.text-muted.mb-0 No teaching assignments for this semester.
 
+      %p.text-muted.small.mt-2.mb-0
+        = link_to "Department-wide teaching matrix for #{@selected_semester.display_name} →", schedules_teaching_matrix_path(year: @selected_semester.year_be, semester_number: @selected_semester.semester_number)
+
 - if @teaching_history
   .card.mt-3
     .card-body.p-3
