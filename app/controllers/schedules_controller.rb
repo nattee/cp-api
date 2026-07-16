@@ -169,7 +169,7 @@ class SchedulesController < ApplicationController
                     .where(semesters: { year_be: @year })
     scope = scope.where(semesters: { semester_number: @semester_number }) if @semester_number
     scope = scope.where("courses.course_no LIKE ?", "2110%") if @course_scope == "dept"
-    teachings = scope.includes(:staff, section: { course_offering: [:course, :semester] }).to_a
+    teachings = scope.includes(section: { course_offering: [:course, :semester] }).to_a
 
     # Columns: one per course_no (cross-revision key), labeled by the latest
     # revision — same merge rule as Staff#teaching_history.

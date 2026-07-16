@@ -314,7 +314,7 @@ namespace :schedules do
   get :curriculum
   get :student
   get :conflicts
-  get "schedules/teaching_matrix", action: :teaching_matrix
+  get :teaching_matrix
 end
 ```
 
