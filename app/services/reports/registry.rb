@@ -6,7 +6,8 @@ module Reports
       courses:    "Courses",
       students:   "Students",
       curriculum: "Curriculum",
-      thesis:     "Thesis"
+      thesis:     "Thesis",
+      admin:      "Data"
     }.freeze
 
     # Add a new report here (one line) after creating its class file.
@@ -17,7 +18,8 @@ module Reports
       Reports::CohortGpa,
       Reports::GroupCreditShortfall,
       Reports::ThesisCredits,
-      Reports::StaffCoursesByYear
+      Reports::StaffCoursesByYear,
+      Reports::DataCoverage
     ].freeze
 
     def self.all
