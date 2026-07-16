@@ -26,7 +26,8 @@ module Reports
       counts = build_counts
       rows   = terms.map { |t| build_row(t, counts) }
       apply_flags!(rows, terms)
-      result(columns: columns_spec, rows: rows, summary: summary_text(rows))
+      # newest term first — the whole point is checking the recent terms
+      result(columns: columns_spec, rows: rows, summary: summary_text(rows), table_order: "0:desc")
     end
 
     private
