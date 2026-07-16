@@ -38,6 +38,7 @@ Rails.application.routes.draw do
     get "schedules/curriculum", action: :curriculum
     get "schedules/student", action: :student
     get "schedules/workload", action: :workload
+    get "schedules/teaching_matrix", action: :teaching_matrix
     get "schedules/conflicts", action: :conflicts
   end
 

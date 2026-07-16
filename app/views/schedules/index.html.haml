@@ -40,6 +40,13 @@
           %h6 Staff Workload
           %p Load summary across semesters
   .col-md-4
+    = link_to schedules_teaching_matrix_path, class: "text-decoration-none" do
+      .card.schedule-report-card
+        .card-body
+          %span.material-symbols.schedule-report-icon grid_on
+          %h6 Teaching Matrix
+          %p Sections taught per lecturer per course
+  .col-md-4
     = link_to schedules_conflicts_path, class: "text-decoration-none" do
       .card.schedule-report-card
         .card-body

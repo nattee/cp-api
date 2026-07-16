@@ -153,6 +153,53 @@ class SchedulesController < ApplicationController
     @staff_ids = @workload.keys.sort_by { |id| -@totals[id]["credits"] }
   end
 
+  # Staff × course section-count matrix for one term or a whole academic year:
+  # the department-wide "who taught what". A column slice is a course's
+  # teachers (this absorbed the retired CourseTeachers report); a row slice is
+  # one staff member's courses. Ranking and sorting stay workload's job, so
+  # this renders as a plain table.
+  def teaching_matrix
+    default_year = Semester.joins(course_offerings: { sections: :teachings }).maximum(:year_be)
+    @year = (params[:year].presence || default_year).to_i
+    @semester_number = params[:semester_number].presence&.to_i
+    @semester_number = nil unless Semester::SEMESTER_NUMBERS.include?(@semester_number)
+    @course_scope = params[:course_scope] == "all" ? "all" : "dept"
+
+    scope = Teaching.joins(section: { course_offering: [:course, :semester] })
+                    .where(semesters: { year_be: @year })
+    scope = scope.where(semesters: { semester_number: @semester_number }) if @semester_number
+    scope = scope.where("courses.course_no LIKE ?", "2110%") if @course_scope == "dept"
+    teachings = scope.includes(:staff, section: { course_offering: [:course, :semester] }).to_a
+
+    # Columns: one per course_no (cross-revision key), labeled by the latest
+    # revision — same merge rule as Staff#teaching_history.
+    @columns = teachings.group_by { |t| t.section.course_offering.course.course_no }
+                        .map do |course_no, ts|
+                          latest = ts.map { |t| t.section.course_offering.course }.max_by(&:revision_year_be)
+                          { course_no: course_no, name: latest.name, course: latest }
+                        end
+                        .sort_by { |c| c[:course_no] }
+
+    # Cells: distinct sections per (staff, course_no). Tooltip lists section
+    # numbers, term-qualified when the scope is a whole year.
+    @cells = {}
+    @totals = Hash.new(0)
+    teachings.group_by { |t| [t.staff_id, t.section.course_offering.course.course_no] }
+             .each do |(staff_id, course_no), ts|
+      sections = ts.map(&:section).uniq
+      @totals[staff_id] += sections.size
+      tooltip = sections.group_by { |s| s.course_offering.semester }
+                        .sort_by { |sem, _| sem.semester_number }
+                        .map do |sem, secs|
+                          nums = secs.map(&:section_number).sort.join(", ")
+                          @semester_number ? "Section#{"s" if secs.size > 1} #{nums}" : "#{sem.display_name}: sec #{nums}"
+                        end.join(" · ")
+      @cells[[staff_id, course_no]] = { count: sections.size, tooltip: tooltip }
+    end
+
+    @staffs = Staff.where(id: teachings.map(&:staff_id).uniq).sort_by(&:display_name_th)
+  end
+
   def conflicts
     @semesters = Semester.ordered
     @conflict_type = params[:conflict_type].presence || "both"
