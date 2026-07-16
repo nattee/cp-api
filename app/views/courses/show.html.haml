@@ -89,6 +89,7 @@
             %tr
               %th Semester
               %th Sections
+              %th Teachers
               %th Status
               %th Actions
           %tbody
@@ -96,6 +97,7 @@
               %tr
                 %td= "#{offering.semester.display_name} — #{Semester::SEMESTER_LABELS[offering.semester.semester_number]}"
                 %td= offering.sections.size
+                %td= safe_join(offering.sections.flat_map { |s| s.teachings.map(&:staff) }.uniq.map { |st| link_to(st.initials.presence || st.display_name_th, staff_path(st)) }, ", ")
                 %td
                   %span.badge{class: "badge-#{offering.status.dasherize}"}= offering.status.titleize
                 %td
