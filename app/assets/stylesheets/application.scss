@@ -264,8 +264,13 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
 // area, so lower alpha than the badge 0.2 — and an inset box-shadow instead
 // of a border, because td borders are managed by the table border rules
 // (post-import $table-row-border-color) and a real border would fight them.
-.report-cell-missing { background-color: rgba($danger, 0.14);  box-shadow: inset 0 0 0 1px rgba($danger, 0.35); }
-.report-cell-low     { background-color: rgba($warning, 0.12); box-shadow: inset 0 0 0 1px rgba($warning, 0.30); }
+// The selector must out-specify Bootstrap's `.table > :not(caption) > * > *`
+// (0,1,2), which paints EVERY cell's background-color AND an inset 9999px
+// box-shadow — a bare `.report-cell-*` class (0,1,0) silently loses to it.
+.table > tbody > tr > td {
+  &.report-cell-missing { background-color: rgba($danger, 0.14);  box-shadow: inset 0 0 0 1px rgba($danger, 0.35); }
+  &.report-cell-low     { background-color: rgba($warning, 0.12); box-shadow: inset 0 0 0 1px rgba($warning, 0.30); }
+}
 
 // Data-source operating-mode badges (/data_sources).
 // These describe HOW you run a source, not what it contains.
