@@ -256,6 +256,17 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
 // Curriculum group tag on a program<->course pairing (Compulsory/Elective/...).
 .badge-course-group { background-color: rgba($info, 0.12);             color: $info;    border: 1px solid rgba($info, 0.3); }
 
+// Report cell flags — generic per-cell highlighting for Reports:: results
+// (a column declares class_key:, the row carries one of these classes; see
+// reports/_result_table). First user: Reports::DataCoverage (red = a term's
+// dataset is missing, yellow = suspiciously low vs. same-semester median).
+// Frosted tints like the badges above, but subtler: a whole <td> is a lot of
+// area, so lower alpha than the badge 0.2 — and an inset box-shadow instead
+// of a border, because td borders are managed by the table border rules
+// (post-import $table-row-border-color) and a real border would fight them.
+.report-cell-missing { background-color: rgba($danger, 0.14);  box-shadow: inset 0 0 0 1px rgba($danger, 0.35); }
+.report-cell-low     { background-color: rgba($warning, 0.12); box-shadow: inset 0 0 0 1px rgba($warning, 0.30); }
+
 // Data-source operating-mode badges (/data_sources).
 // These describe HOW you run a source, not what it contains.
 // Deliberately NOT reusing .badge-manual — that means Grade#source == "manual"

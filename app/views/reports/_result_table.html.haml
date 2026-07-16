@@ -23,4 +23,7 @@
           - @result.rows.each do |row|
             %tr
               - @result.columns.each do |col|
-                %td= row[col[:key]]
+                -# Optional per-cell flag: a column may declare class_key:; the row
+                -# then carries that key with a CSS class ("report-cell-missing").
+                -# CSV export ignores it (ReportExporter reads only col[:key]).
+                %td{class: (row[col[:class_key]] if col[:class_key])}= row[col[:key]]

@@ -22,6 +22,12 @@
         -# first, latest preselected. Any year outside the data would just return
         -# an empty report, so the list is data-driven rather than a fixed window.
         = select_tag p[:name], options_for_select(Semester.order(year_be: :desc).distinct.pluck(:year_be), params[p[:name]] || Semester.maximum(:year_be)), class: "form-select"
+      - when :boolean
+        -# Checkbox params submit "1" when checked and are simply absent when not.
+        -# The generic label_tag above targets this input's id, so clicking the
+        -# label toggles the box.
+        .form-check.mb-1
+          = check_box_tag p[:name], "1", params[p[:name]] == "1", class: "form-check-input"
       - when :academic_year, :integer
         = number_field_tag p[:name], params[p[:name]], class: "form-control"
       - else
