@@ -62,4 +62,13 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     patch course_path(course), params: { course: { name: course.name, program_ids: [programs(:cp_master).id] } }
     assert_equal [programs(:cp_master)], course.reload.programs.to_a
   end
+
+  test "show lists each offering's teachers as staff links" do
+    get course_path(courses(:intro_computing))
+    assert_response :success
+    assert_select "th", text: "Teachers"
+    # intro_computing 2568/1: smith (JS) teaches sec 1+2, jones (JJ) co-teaches sec 2.
+    assert_select "td a", text: "JS"
+    assert_select "td a", text: "JJ"
+  end
 end

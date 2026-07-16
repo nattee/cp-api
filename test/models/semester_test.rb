@@ -2,7 +2,7 @@ require "test_helper"
 
 class SemesterTest < ActiveSupport::TestCase
   test "valid with year_be and semester_number" do
-    semester = Semester.new(year_be: 2567, semester_number: 1)
+    semester = Semester.new(year_be: 2560, semester_number: 1)
     assert semester.valid?
   end
 

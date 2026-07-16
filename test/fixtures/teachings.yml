@@ -12,3 +12,23 @@ smith_intro_sec2:
   section: intro_sec_2
   staff: lecturer_smith
   load_ratio: 0.5
+
+smith_2567_intro1:
+  section: intro_2567_sec1
+  staff: lecturer_smith
+  load_ratio: 1.0
+
+smith_2567_intro33:
+  section: intro_2567_sec33
+  staff: lecturer_smith
+  load_ratio: 1.0
+
+smith_2567_2_intro2:
+  section: intro_2567_2_sec2
+  staff: lecturer_smith
+  load_ratio: 1.0
+
+jones_2567_gened:
+  section: gened_2567_sec1
+  staff: lecturer_jones
+  load_ratio: 1.0

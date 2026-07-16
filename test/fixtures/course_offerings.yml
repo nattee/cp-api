@@ -7,3 +7,18 @@ senior_project_2568_1:
   course: senior_project
   semester: sem_2568_1
   status: planned
+
+intro_computing_2567_1:
+  course: intro_computing
+  semester: sem_2567_1
+  status: confirmed
+
+gened_2567_1:
+  course: gened_course
+  semester: sem_2567_1
+  status: confirmed
+
+intro_computing_2567_2:
+  course: intro_computing
+  semester: sem_2567_2
+  status: confirmed

@@ -9,3 +9,19 @@ intro_sec_2:
 senior_sec_1:
   course_offering: senior_project_2568_1
   section_number: 1
+
+intro_2567_sec1:
+  course_offering: intro_computing_2567_1
+  section_number: 1
+
+intro_2567_sec33:
+  course_offering: intro_computing_2567_1
+  section_number: 33
+
+gened_2567_sec1:
+  course_offering: gened_2567_1
+  section_number: 1
+
+intro_2567_2_sec2:
+  course_offering: intro_computing_2567_2
+  section_number: 2

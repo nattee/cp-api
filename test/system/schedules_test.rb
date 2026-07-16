@@ -16,6 +16,7 @@ class SchedulesTest < ApplicationSystemTestCase
     assert_text "Curriculum Calendar"
     assert_text "Student Timetable"
     assert_text "Staff Workload"
+    assert_text "Teaching Matrix"
     assert_text "Conflict Detection"
   end
 
