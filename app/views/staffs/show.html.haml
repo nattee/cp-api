@@ -137,14 +137,14 @@
               %th Term
               - @teaching_history.courses.each do |c|
                 %th.th-rotated
-                  = link_to c[:course_no], c[:course], title: c[:name]
+                  = link_to c[:course_no], c[:course], data: { tooltip: c[:name] }
           %tbody
             - @teaching_history.semesters.each do |sem|
               %tr
                 %th{scope: "row"}= sem.display_name
                 - @teaching_history.courses.each do |c|
                   - secs = @teaching_history.cells[[ sem.id, c[:course_no] ]]
-                  %td.text-center{title: secs && "Section#{"s" if secs.size > 1} #{secs.join(", ")}"}= secs&.size
+                  %td.text-center{"data-tooltip" => secs && "Section#{"s" if secs.size > 1} #{secs.join(", ")}"}= secs&.size
       - if @teaching_history.capped
         %p.text-muted.small.mt-2.mb-0
           Showing the last 20 years —

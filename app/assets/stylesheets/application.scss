@@ -282,13 +282,40 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
   .report-warning-items { margin-top: 0.25rem; }
 }
 
-// Report cells that carry a hover breakdown (column title_key:) — native
-// title tooltips are invisible affordances, so mark the cell with a dotted
-// underline + help cursor to make the hover discoverable.
-.table > tbody > tr > td[title] {
+// Cells that carry a hover breakdown (report column title_key:, teaching
+// history) — tooltips are invisible affordances, so mark the cell with a
+// dotted underline + help cursor to make the hover discoverable.
+// td[title] is transitional and is removed when the last title: view
+// converts to data-tooltip.
+.table > tbody > tr > td[title],
+.table > tbody > tr > td[data-tooltip],
+.table > thead > tr > th[data-tooltip] {
   cursor: help;
   text-decoration: underline dotted;
   text-underline-offset: 3px;
+}
+
+// Styled tooltip (tooltip_controller.js) — replaces native title tooltips
+// on informational hover text: native titles have a fixed ~1s hover delay
+// and a tiny unstylable OS font, and Bootstrap Tooltip needs Bootstrap JS
+// (UMD, unusable via importmap — see CLAUDE.md Asset Pipeline). The
+// controller sets position:fixed coordinates so .table-responsive's
+// overflow-x:auto cannot clip the tooltip on top rows.
+.app-tooltip {
+  position: fixed;
+  display: none;
+  max-width: 320px;
+  padding: 0.375rem 0.625rem;
+  background-color: $popover-bg;
+  color: $body-color-dark;
+  border: 1px solid lighten($dark, 18%);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  font-size: 0.8125rem;    // the readability fix — native OS tooltips are smaller
+  line-height: 1.4;
+  white-space: pre-line;   // cohort breakdowns join lines with \n
+  z-index: 1080;           // above the offcanvas sidebar (z-index 1050)
+  pointer-events: none;    // never steal hover from the page
 }
 
 // Data-source operating-mode badges (/data_sources).

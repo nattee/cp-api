@@ -25,7 +25,7 @@
     = javascript_include_tag "select2.min", "data-turbo-track": "reload"
     = javascript_importmap_tags
 
-  %body
+  %body{"data-controller" => "tooltip"}
     .d-flex
       -# Sidebar - offcanvas on small screens, fixed on large
       %nav#sidebar.offcanvas-lg.offcanvas-start.d-flex.flex-column.flex-shrink-0.p-3.bg-body-tertiary{style: "width: 250px; min-height: 100vh;"}
