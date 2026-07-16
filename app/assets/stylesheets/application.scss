@@ -272,6 +272,25 @@ $grade-muted:  rgb(150, 150, 150); // I, W, Au — neutral/special
   &.report-cell-low     { background-color: rgba($warning, 0.12); box-shadow: inset 0 0 0 1px rgba($warning, 0.30); }
 }
 
+// Collapsible warning under a report summary (Result#warning). Native
+// <details>/<summary> — CSS-only, because Bootstrap JS is unusable here
+// (UMD, no exports; see Asset Pipeline notes). Folded by default so a
+// 40-entry diagnostic doesn't dominate the page.
+.report-warning {
+  margin-bottom: 1rem;
+  > summary { cursor: pointer; color: $warning; }
+  .report-warning-items { margin-top: 0.25rem; }
+}
+
+// Report cells that carry a hover breakdown (column title_key:) — native
+// title tooltips are invisible affordances, so mark the cell with a dotted
+// underline + help cursor to make the hover discoverable.
+.table > tbody > tr > td[title] {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
 // Data-source operating-mode badges (/data_sources).
 // These describe HOW you run a source, not what it contains.
 // Deliberately NOT reusing .badge-manual — that means Grade#source == "manual"

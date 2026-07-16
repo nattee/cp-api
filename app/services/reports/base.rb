@@ -50,8 +50,9 @@ module Reports
 
     # Builds the structured result. Columns must be declared by the caller for
     # clean headers (we do not infer, to keep labels precise for staff).
-    def result(columns:, rows:, summary: nil, chart: nil, table_order: nil)
-      Reports::Result.new(columns: columns, rows: rows, summary: summary, chart: chart, table_order: table_order)
+    def result(columns:, rows:, summary: nil, chart: nil, table_order: nil, warning: nil)
+      Reports::Result.new(columns: columns, rows: rows, summary: summary, chart: chart,
+                          table_order: table_order, warning: warning)
     end
 
     # Resolves a :semester_record param (a Semester id) to a Semester, defaulting

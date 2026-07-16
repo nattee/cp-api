@@ -27,7 +27,8 @@ module Reports
       rows   = terms.map { |t| build_row(t, counts) }
       apply_flags!(rows, terms)
       # newest term first — the whole point is checking the recent terms
-      result(columns: columns_spec, rows: rows, summary: summary_text(rows), table_order: "0:desc")
+      result(columns: columns_spec, rows: rows, summary: summary_text(rows),
+             warning: warning_block, table_order: "0:desc")
     end
 
     private
@@ -35,12 +36,13 @@ module Reports
     def columns_spec
       [
         { key: :term,         label: "Term" },
-        { key: :new_students, label: "New Students", class_key: :new_students_class },
-        { key: :grades,       label: "Grades",       class_key: :grades_class },
-        { key: :ungraded,     label: "Ungraded" },
-        { key: :offerings,    label: "Offerings",    class_key: :offerings_class },
-        { key: :sections,     label: "Sections",     class_key: :sections_class },
-        { key: :time_slots,   label: "Time Slots",   class_key: :time_slots_class }
+        { key: :new_students, label: "New Students", class_key: :new_students_class,
+          title_key: :new_students_title, align: "text-end" },
+        { key: :grades,       label: "Grades",       class_key: :grades_class,     align: "text-end" },
+        { key: :ungraded,     label: "Ungraded",                                   align: "text-end" },
+        { key: :offerings,    label: "Offerings",    class_key: :offerings_class,  align: "text-end" },
+        { key: :sections,     label: "Sections",     class_key: :sections_class,   align: "text-end" },
+        { key: :time_slots,   label: "Time Slots",   class_key: :time_slots_class, align: "text-end" }
       ]
     end
 
@@ -74,6 +76,8 @@ module Reports
       sem_group = ["semesters.year_be", "semesters.semester_number"]
       {
         new_students: Student.group(:admission_year_be).count,
+        new_students_by_group: Student.joins(program: :program_group)
+                                      .group(:admission_year_be, "program_groups.code").count,
         grades:       to_be.(grades.group(:year_ce, :semester).count),
         ungraded:     to_be.(grades.where(grade: nil).group(:year_ce, :semester).count),
         offerings:    offerings.group(*sem_group).count,
@@ -88,12 +92,22 @@ module Reports
         term:         "#{year_be}/#{sem}",
         # cohorts arrive in semester 1; other semesters are not applicable
         new_students: sem == 1 ? counts[:new_students].fetch(year_be, 0) : BLANK,
+        new_students_title: sem == 1 ? cohort_breakdown(year_be, counts) : nil,
         grades:       counts[:grades].fetch(term, 0),
         ungraded:     counts[:ungraded].fetch(term, 0),
         offerings:    counts[:offerings].fetch(term, 0),
         sections:     counts[:sections].fetch(term, 0),
         time_slots:   counts[:time_slots].fetch(term, 0)
       }
+    end
+
+    # Hover breakdown for a semester-1 cohort cell: per-program-group counts,
+    # largest first, one per line ("CP: 450\nCEDT: 120") — native title
+    # tooltips render \n as line breaks.
+    def cohort_breakdown(year_be, counts)
+      groups = counts[:new_students_by_group].select { |(year, _), _| year == year_be }
+      return nil if groups.empty?
+      groups.sort_by { |_, n| -n }.map { |(_, code), n| "#{code}: #{n}" }.join("\n")
     end
 
     # Era rule + flags, in place. A dataset's era starts at its earliest
@@ -138,20 +152,23 @@ module Reports
       sorted.length.odd? ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2.0
     end
 
-    # Legend sentence + the curriculum diagnostic: a program revision with no
-    # program_courses rows means a curriculum arrived but its courses were
-    # never imported/linked. The "0000" placeholder program is exempt.
+    # Legend sentence only — the curriculum diagnostic renders separately as a
+    # collapsible warning (Result#warning), because it can list 40+ programs.
     def summary_text(rows)
-      parts = ["Coverage for #{rows.size} term(s). " \
-               "Red = missing, yellow = low vs. same-semester median, — = predates the dataset."]
+      "Coverage for #{rows.size} term(s). " \
+        "Red = missing, yellow = low vs. same-semester median, — = predates the dataset."
+    end
+
+    # A program revision with no program_courses rows means a curriculum
+    # arrived but its courses were never imported/linked. The "0000"
+    # placeholder program is exempt.
+    def warning_block
       unlinked = Program.where.missing(:program_courses).includes(:program_group)
                         .reject(&:placeholder?)
                         .sort_by { |p| [-p.year_started_be, p.program_code] }
-      if unlinked.any?
-        labels = unlinked.map { |p| "#{p.program_group.code} #{p.year_started_be} (#{p.program_code})" }
-        parts << "⚠ Programs with no courses linked: #{labels.join(', ')}."
-      end
-      parts.join(" ")
+      return nil if unlinked.empty?
+      { label: "Programs with no courses linked",
+        items: unlinked.map { |p| "#{p.program_group.code} #{p.year_started_be} (#{p.program_code})" } }
     end
   end
 end

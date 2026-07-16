@@ -128,15 +128,26 @@ class Reports::DataCoverageTest < ActiveSupport::TestCase
     assert_equal 1, row(filtered_rows, "2566/1")[:sections]
   end
 
-  test "summary flags program revisions with no linked courses, never the placeholder" do
+  test "warning lists program revisions with no linked courses, never the placeholder" do
     make_grades(1, 2566, 1)
     Program.create!(program_code: "9999", year_started_be: 2571,
                     program_group: program_groups(:cp_group))
     Program.placeholder  # ensure the 0000 placeholder exists
 
-    summary = Reports::DataCoverage.new({}).run.summary
-    assert_includes summary, "CP 2571 (9999)"
-    assert_not_includes summary, "(0000)"
+    warning = Reports::DataCoverage.new({}).run.warning
+    assert_equal "Programs with no courses linked", warning[:label]
+    assert_includes warning[:items], "CP 2571 (9999)"
+    assert warning[:items].none? { |item| item.include?("(0000)") }
+  end
+
+  test "new-students cell carries a per-program-group hover breakdown" do
+    3.times { |i| make_student("66000000#{i}", 2566) }
+    make_grades(1, 2566, 1)
+    make_grades(1, 2566, 2)
+
+    rows = run_rows
+    assert_equal "CP: 3", row(rows, "2566/1")[:new_students_title]
+    assert_nil row(rows, "2566/2")[:new_students_title], "breakdown only on semester-1 rows"
   end
 
   private

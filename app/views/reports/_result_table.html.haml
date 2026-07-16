@@ -1,6 +1,13 @@
 -# app/views/reports/_result_table.html.haml
 - if @result.summary
   %p.text-body-secondary= @result.summary
+- if @result.warning
+  -# Native <details> — collapsible without Bootstrap JS (which is unusable
+  -# here, see CLAUDE.md Asset Pipeline). Item lists can be long (40+ program
+  -# revisions), so they stay folded until asked for.
+  %details.report-warning
+    %summary ⚠ #{@result.warning[:label]} (#{@result.warning[:items].size})
+    .report-warning-items.text-body-secondary= @result.warning[:items].join(", ")
 
 .card{"data-controller" => "datatable", "data-datatable-order-value" => @result.table_order}
   .card-body.p-3
@@ -18,12 +25,18 @@
         %thead
           %tr
             - @result.columns.each do |col|
-              %th= col[:label]
+              %th{class: col[:align]}= col[:label]
         %tbody
           - @result.rows.each do |row|
             %tr
               - @result.columns.each do |col|
-                -# Optional per-cell flag: a column may declare class_key:; the row
-                -# then carries that key with a CSS class ("report-cell-missing").
-                -# CSV export ignores it (ReportExporter reads only col[:key]).
-                %td{class: (row[col[:class_key]] if col[:class_key])}= row[col[:key]]
+                -# Optional per-cell hooks, all declared on the column spec:
+                -#   align:     CSS class for th+td (e.g. "text-end") — explicit
+                -#              alignment so DataTables' type sniffing (which
+                -#              left-aligns any column containing "—") can't
+                -#              produce mixed-aligned columns
+                -#   class_key: row key holding a flag class ("report-cell-missing")
+                -#   title_key: row key holding hover text (native tooltip)
+                -# CSV export ignores all of them (ReportExporter reads only col[:key]).
+                %td{class: [col[:align], (row[col[:class_key]] if col[:class_key])].compact.presence,
+                    title: (row[col[:title_key]] if col[:title_key])}= row[col[:key]]
