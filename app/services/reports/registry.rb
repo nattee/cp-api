@@ -12,7 +12,6 @@ module Reports
 
     # Add a new report here (one line) after creating its class file.
     REPORTS = [
-      Reports::CourseTeachers,
       Reports::FailingStudents,
       Reports::SemesterGradeDistribution,
       Reports::CohortGpa,

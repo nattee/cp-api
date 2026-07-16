@@ -21,6 +21,6 @@ class Reports::RegistryTest < ActiveSupport::TestCase
   test "grouped buckets reports by section in SECTIONS order" do
     keys = Reports::Registry.grouped.keys
     assert_equal keys.sort_by { |k| Reports::Registry::SECTIONS.keys.index(k) }, keys
-    assert_includes Reports::Registry.grouped[:courses].map(&:key), "course_teachers"
+    assert_includes Reports::Registry.grouped[:courses].map(&:key), "failing_students"
   end
 end
