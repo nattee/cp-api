@@ -67,4 +67,28 @@ class SemestersTest < ApplicationSystemTestCase
     assert_text courses(:intro_computing).course_no
     assert_text courses(:intro_computing).name
   end
+
+  test "semester page shows per-section detail with exports and report links" do
+    visit semester_path(semesters(:sem_2568_1))
+
+    assert_text "Sec 1"
+    assert_text "JS"
+    assert_text "Mon/Wed 09:00-10:30 ENG4-303"
+    assert_link "Export Schedule"
+    assert_link "Export Sections"
+    assert_link "Department-wide teaching matrix for 2568/1 →"
+    assert_link "Room & staff double-bookings →"
+  end
+
+  test "course scope toggle hides and shows non-department courses" do
+    visit semester_path(semesters(:sem_2567_1))
+    assert_text "2110101"
+    assert_no_text "2103106" # default scope is dept
+
+    within(".course-scope-toggle") { click_on "All" }
+    assert_text "2103106"
+
+    within(".course-scope-toggle") { click_on "Dept (2110)" }
+    assert_no_text "2103106"
+  end
 end
