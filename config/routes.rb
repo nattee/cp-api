@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   resources :semesters do
     member do
       get :export
+      get :export_sections
     end
     resources :course_offerings, only: [:index, :new, :create], shallow: true
   end

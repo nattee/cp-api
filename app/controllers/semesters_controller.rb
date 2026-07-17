@@ -1,5 +1,5 @@
 class SemestersController < ApplicationController
-  before_action :set_semester, only: %i[show edit update destroy export]
+  before_action :set_semester, only: %i[show edit update destroy export export_sections]
   before_action :require_admin, only: %i[new create edit update destroy]
 
   def index
@@ -45,10 +45,21 @@ class SemestersController < ApplicationController
     send_data exporter.to_csv, filename: exporter.filename, type: "text/csv", disposition: "attachment"
   end
 
+  def export_sections
+    exporter = Exporters::SemesterSectionsExporter.new(@semester, course_scope: course_scope_param)
+    send_data exporter.to_csv, filename: exporter.filename, type: "text/csv", disposition: "attachment"
+  end
+
   private
 
   def set_semester
     @semester = Semester.find(params[:id])
+  end
+
+  # Same parse rule as SchedulesController#teaching_matrix: anything but an
+  # explicit "all" means the department default.
+  def course_scope_param
+    params[:course_scope] == "all" ? "all" : "dept"
   end
 
   def require_admin
