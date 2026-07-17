@@ -7,7 +7,10 @@ class SemestersController < ApplicationController
   end
 
   def show
-    @course_offerings = @semester.course_offerings.includes(:course, :sections)
+    @course_scope = course_scope_param
+    offerings = @semester.course_offerings
+    offerings = offerings.joins(:course).where("courses.course_no LIKE ?", "2110%") if @course_scope == "dept"
+    @course_offerings = offerings.includes(:course, sections: [{ teachings: :staff }, { time_slots: :room }])
   end
 
   def new

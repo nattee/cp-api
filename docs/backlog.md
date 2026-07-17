@@ -33,6 +33,10 @@ Seed list (2026-07-09):
 - **staffs/show** (per-semester Teaching card) → `/schedules/teaching_matrix`
   pre-filled with the selected semester: the department-wide view of the same
   term. Link added 2026-07-16.
+- **semesters/show** → `/schedules/teaching_matrix` (year + semester_number
+  pre-filled) and `/schedules/conflicts` (semester_id pre-filled): the
+  dept-wide who-teaches-what and double-booking views for the term shown on
+  the page. Links added 2026-07-17.
 
 ## 2. Report ↔ entity page overlap review (recurring)
 

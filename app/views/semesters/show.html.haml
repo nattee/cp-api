@@ -3,9 +3,12 @@
     = @semester.display_name
     %small.text-muted= "— #{Semester::SEMESTER_LABELS[@semester.semester_number]} Semester"
   .d-flex.gap-2
-    = link_to export_semester_path(@semester), class: "btn btn-outline-secondary" do
+    = link_to export_semester_path(@semester, course_scope: @course_scope), class: "btn btn-outline-secondary" do
       %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} download
-      Export CSV
+      Export Schedule
+    = link_to export_sections_semester_path(@semester, course_scope: @course_scope), class: "btn btn-outline-secondary" do
+      %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} download
+      Export Sections
     - if current_user.admin?
       = link_to "Edit", edit_semester_path(@semester), class: "btn btn-outline-secondary"
     = link_to "Back", semesters_path, class: "btn btn-outline-primary"
@@ -18,8 +21,16 @@
         Course Offerings
         %span.text-muted.ms-2.fw-normal
           (#{@course_offerings.size})
-      - if current_user.admin?
-        = link_to "Add Course Offering", new_semester_course_offering_path(@semester), class: "btn btn-primary btn-sm"
+      .d-flex.gap-2.align-items-center
+        .btn-group.course-scope-toggle
+          = link_to "Dept (2110)", semester_path(@semester, course_scope: "dept"), class: "btn btn-sm btn-outline-secondary #{'active' if @course_scope == 'dept'}"
+          = link_to "All", semester_path(@semester, course_scope: "all"), class: "btn btn-sm btn-outline-secondary #{'active' if @course_scope == 'all'}"
+        - if current_user.admin?
+          = link_to "Add Course Offering", new_semester_course_offering_path(@semester), class: "btn btn-primary btn-sm"
+    %p.text-muted.small.mb-2
+      = link_to "Department-wide teaching matrix for #{@semester.display_name} →", schedules_teaching_matrix_path(year: @semester.year_be, semester_number: @semester.semester_number)
+      %span.mx-1 ·
+      = link_to "Room & staff double-bookings →", schedules_conflicts_path(semester_id: @semester.id)
     .table-responsive
       %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
         %thead
@@ -34,7 +45,22 @@
             %tr
               %td= offering.course.course_no
               %td= offering.course.name
-              %td= offering.sections.size
+              %td
+                - if offering.sections.any?
+                  - offering.sections.sort_by(&:section_number).each do |section|
+                    %div
+                      = "Sec #{section.section_number}"
+                      - if section.teachings.any?
+                        %span.text-muted ·
+                        = safe_join(section.teachings.map { |t| link_to(staff_short_name(t.staff), staff_path(t.staff)) }, ", ")
+                      - if (schedule = section_schedule_summary(section))
+                        %span.text-muted ·
+                        = schedule
+                      - if (enrollment = section_enrollment_summary(section))
+                        %span.text-muted ·
+                        = enrollment
+                - else
+                  %span.text-muted No sections
               %td
                 %span.badge{class: "badge-#{offering.status.dasherize}"}= offering.status.titleize
               %td
