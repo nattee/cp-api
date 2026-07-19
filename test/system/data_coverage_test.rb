@@ -30,11 +30,16 @@ class DataCoverageTest < ApplicationSystemTestCase
     assert_text "2567/1"
   end
 
-  test "appears on the reports index under Data" do
+  test "does not appear on the reports hub but is linked from Data Sources" do
+    # Data Coverage is an admin operational check (Reports::Catalog section
+    # :system), not lecturer analytics, so the catalog excludes it from the
+    # hub (CatalogEntry#hub?). It stays reachable via its own route, linked
+    # from the Data Sources page.
     sign_in users(:admin)
     visit reports_path
+    assert_no_text "Which terms are missing data"
 
-    assert_text "Data"
-    assert_text "Which terms are missing data"
+    visit data_sources_path
+    assert_link "Data Coverage report", href: report_path("data_coverage")
   end
 end

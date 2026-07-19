@@ -13,15 +13,15 @@
               class: "form-select form-select-sm"
         = submit_tag "Apply", class: "btn btn-outline-secondary btn-sm"
 
-    - if @reports_by_section.empty?
+    - if @entries_by_section.empty?
       %p.text-body-secondary.mb-0 No reports for this program.
-    - @reports_by_section.each do |section_key, reports|
+    - @entries_by_section.each do |section_key, entries|
       .mb-4
-        %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2= Reports::Registry::SECTIONS[section_key]
+        %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2= Reports::Catalog::SECTIONS[section_key]
         .row.g-3
-          - reports.each do |report|
+          - entries.each do |entry|
             .col-md-4
-              = link_to report_path(report.key), class: "card h-100 text-decoration-none" do
+              = link_to catalog_report_path(entry), class: "card h-100 text-decoration-none" do
                 .card-body
-                  %h6.card-title.mb-1= report.title
-                  %p.small.text-body-secondary.mb-0= report.key.humanize
+                  %h6.card-title.mb-1= entry.title
+                  %p.small.text-body-secondary.mb-0= entry.description
