@@ -49,6 +49,13 @@ shared `GradeStats::` services — so retiring a web report doesn't break the bo
 
 Status as of 2026-07-09:
 
+- **2026-07-19 — two report hubs merged into one.** The admin-only `/reports`
+  hub and the all-users `/schedules` hub are now a single lecturer-facing hub at
+  `/reports`, driven by `Reports::Catalog`, gated per-report (only
+  `data_coverage` is admin, and it renders outside the hub — linked from Data
+  Sources). Report routes did not move, so entity→report cross-links (item 1)
+  are unaffected. The "across a set" reports now all sit behind one door.
+
 - `course_teachers` — **retired 2026-07-16**: courses/show Offerings gained a
   Teachers column and the teaching-matrix schedules report covers the
   cross-course view.

@@ -340,38 +340,12 @@ Authorization: all users can view reports. If needed later, restrict certain rep
 
 ## Sidebar Navigation
 
-Add under the "Teaching" section header (after Semesters and Rooms):
-
-```haml
-%li.nav-item
-  = link_to schedules_room_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'schedules'}" do
-    = resource_icon("schedules")
-    Schedules
-```
-
-One sidebar entry "Schedules" that leads to a landing page with cards linking to each report. This avoids adding 6 items to the sidebar.
-
-Add to `ApplicationHelper::RESOURCE_ICONS`:
-```ruby
-"schedules" => "date_range",
-```
-
-### Schedules landing page
-
-```
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│ 🏫 Room Schedule │  │ 👤 Staff Schedule│  │ 📊 Staff Workload│
-│                  │  │                  │  │                  │
-│ View room usage  │  │ Weekly timetable │  │ Load summary     │
-│ by semester      │  │ for a staff      │  │ across semesters │
-└──────────────────┘  └──────────────────┘  └──────────────────┘
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│ 📅 Curriculum    │  │ 🎓 Student       │  │ ⚠️ Conflicts     │
-│    Calendar      │  │    Timetable     │  │                  │
-│ Plan course sets │  │ Student weekly   │  │ Room & staff     │
-│ for a semester   │  │ schedule + grades│  │ double bookings  │
-└──────────────────┘  └──────────────────┘  └──────────────────┘
-```
+As of 2026-07-19, schedule reports are surfaced through the unified report hub
+(`/reports`, `Reports::Catalog`): the calendar reports (Room, Staff, Student,
+Curriculum) plus Conflicts form the hub's **Schedules** section, and Workload +
+Teaching Matrix form the **Teaching** section. There is no longer a separate
+"Schedules" sidebar item or `/schedules` landing page — `schedules_path`
+redirects to the hub. Each report keeps its own route and controller action.
 
 ## Implementation Order
 
