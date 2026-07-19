@@ -8,16 +8,11 @@ class SchedulesTest < ApplicationSystemTestCase
     click_on "Sign In"
   end
 
-  test "landing page shows report cards" do
+  test "the schedules path redirects to the reports hub" do
     visit schedules_path
-    assert_text "Schedules"
-    assert_text "Room Schedule"
-    assert_text "Staff Schedule"
-    assert_text "Curriculum Calendar"
-    assert_text "Student Timetable"
-    assert_text "Staff Workload"
-    assert_text "Teaching Matrix"
-    assert_text "Conflict Detection"
+    assert_current_path reports_path
+    assert_text /schedules/i        # now a hub section header (uppercase via CSS)
+    assert_link "Room Schedule"
   end
 
   test "room schedule shows calendar for room and semester" do

@@ -5,9 +5,9 @@ class SchedulesControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { username: users(:viewer).username, password: "password123" }
   end
 
-  test "index is accessible" do
+  test "index redirects to the reports hub" do
     get schedules_path
-    assert_response :success
+    assert_redirected_to reports_path
   end
 
   test "room report is accessible" do

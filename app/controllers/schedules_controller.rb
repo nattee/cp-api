@@ -7,6 +7,7 @@ class SchedulesController < ApplicationController
   ].freeze
 
   def index
+    redirect_to reports_path
   end
 
   def room
