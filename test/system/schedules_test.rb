@@ -11,7 +11,7 @@ class SchedulesTest < ApplicationSystemTestCase
   test "the schedules path redirects to the reports hub" do
     visit schedules_path
     assert_current_path reports_path
-    assert_text /schedules/i        # now a hub section header (uppercase via CSS)
+    assert_selector "h6", text: /\ASchedules\z/i  # the Schedules hub section header (uppercase via CSS)
     assert_link "Room Schedule"
   end
 

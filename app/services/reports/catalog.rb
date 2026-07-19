@@ -54,7 +54,7 @@ module Reports
     # Groups by section in SECTIONS order; only sections present appear.
     def grouped(list = hub_entries)
       list.group_by(&:section)
-          .sort_by { |section, _| SECTIONS.keys.index(section) }
+          .sort_by { |section, _| SECTIONS.keys.index(section) || Float::INFINITY }
           .to_h
     end
 
@@ -69,5 +69,9 @@ module Reports
                        section: section, access: access, path_helper: nil,
                        report_class: klass)
     end
+
+    # entries/hub_entries/find/grouped are the public API; external/registry are
+    # just internal builders for the entries list.
+    private_class_method :external, :registry
   end
 end

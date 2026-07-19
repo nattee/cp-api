@@ -35,6 +35,12 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to reports_path
   end
 
+  test "an external report key redirects to that report's own page" do
+    login users(:viewer)
+    get report_path("schedules_room")
+    assert_redirected_to schedules_room_path
+  end
+
   test "the program filter narrows the hub to applicable reports" do
     login users(:viewer)
     get reports_path, params: { program_group: "CP" }

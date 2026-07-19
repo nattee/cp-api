@@ -15,7 +15,9 @@ class ReportsController < ApplicationController
   # One framework report: render its param form, and (when run) its result / CSV.
   def show
     entry = Reports::Catalog.find(params[:id])
-    return redirect_to(reports_path, alert: "Unknown report.") unless entry&.registry?
+    return redirect_to(reports_path, alert: "Unknown report.") unless entry
+    # External reports render in their own controller — send the user to the real page.
+    return redirect_to(public_send(entry.path_helper)) unless entry.registry?
     if entry.access == :admin && !current_user.admin?
       return redirect_to(root_path, alert: "Only admins can view that report.")
     end
