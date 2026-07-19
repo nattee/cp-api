@@ -18,7 +18,6 @@ module ApplicationHelper
     "course_offerings" => "event_note",
     "rooms"            => "meeting_room",
     "scrapes"          => "cloud_sync",
-    "schedules"        => "date_range",
     "dev"              => "palette",
     "data_sources"     => "database",
   }.freeze

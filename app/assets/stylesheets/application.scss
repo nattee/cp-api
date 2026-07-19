@@ -915,20 +915,6 @@ table.dataTable tbody td.dt-empty {
   }
 }
 
-// Schedule report cards on landing page
-.schedule-report-card {
-  transition: border-color 0.15s;
-  &:hover { border-color: rgba($primary, 0.5); }
-  .card-body { padding: 1rem; }
-  .schedule-report-icon {
-    font-size: 2rem;
-    opacity: 0.5;
-    margin-bottom: 0.5rem;
-  }
-  h6 { margin-bottom: 0.25rem; }
-  p { font-size: 0.85rem; color: var(--bs-secondary-color); margin-bottom: 0; }
-}
-
 // Print styles for week calendar
 @media print {
   .week-calendar {
