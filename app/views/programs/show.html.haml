@@ -64,16 +64,20 @@
         %dt.col-sm-3 Updated at
         %dd.col-sm-9= @program.updated_at.strftime("%B %d, %Y %H:%M")
 
-.card.mt-3
+.card.mt-3{"data-controller" => "course-filter", "data-course-filter-mode-value" => "rows", "data-course-filter-fixed-program-value" => @program.program_code}
   .card-body.p-3
-    .d-flex.justify-content-between.align-items-center.mb-3
+    .d-flex.align-items-center.mb-3.gap-3.flex-wrap
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
         = resource_icon("courses")
         Curriculum
         %span.text-muted.ms-2.fw-normal
           (#{@curriculum.values.sum(&:size)})
+      - if @curriculum.any?
+        -# Default to All here: a program's curriculum legitimately spans gen-ed,
+        -# math and language courses outside the 2110 department prefix.
+        = render "shared/course_filters", fixed_program: @program.program_code, scope_default: ""
       - if current_user.admin?
-        = link_to new_program_program_course_path(@program), class: "btn btn-primary btn-sm", data: { turbo_frame: "program_course_form" } do
+        = link_to new_program_program_course_path(@program), class: "btn btn-primary btn-sm ms-auto", data: { turbo_frame: "program_course_form" } do
           %span.material-symbols.me-1{style: "font-size: 16px; vertical-align: middle"} add
           Add Course
 
@@ -92,9 +96,9 @@
           %tbody
             - @curriculum.each_with_index do |(code, pairings), idx|
               - if idx.positive?
-                %tr.table-group-spacer{"aria-hidden" => "true"}
+                %tr.table-group-spacer{"aria-hidden" => "true", "data-course-filter-target" => "groupRow", "data-course-group" => code.to_s}
                   %td{colspan: 5}
-              %tr.table-group-header
+              %tr.table-group-header{"data-course-filter-target" => "groupRow", "data-course-group" => code.to_s}
                 %td{colspan: 5}
                   %strong= ProgramCourse.group_label(code)
                   - if code.present?
@@ -102,7 +106,7 @@
                   %span.text-muted.ms-2.fw-normal
                     (#{pairings.size})
               - pairings.each do |pc|
-                %tr
+                %tr{"data-course-filter-target" => "row", "data-course-no" => pc.course.course_no, "data-course-tokens" => "#{@program.program_code}-#{ProgramCourse.filter_type(pc.course_group_code)}", "data-course-group" => code.to_s}
                   %td= link_to pc.course.course_no, pc.course
                   %td= pc.course.name
                   %td.text-center= pc.course.revision_year_be

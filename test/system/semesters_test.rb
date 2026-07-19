@@ -83,12 +83,12 @@ class SemestersTest < ApplicationSystemTestCase
   test "course scope toggle hides and shows non-department courses" do
     visit semester_path(semesters(:sem_2567_1))
     assert_text "2110101"
-    assert_no_text "2103106" # default scope is dept
+    assert_no_text "2103106" # default scope is 2110xxx
 
-    within(".course-scope-toggle") { click_on "All" }
+    find("label[for='course-scope-1']").click # All
     assert_text "2103106"
 
-    within(".course-scope-toggle") { click_on "Dept (2110)" }
+    find("label[for='course-scope-0']").click # 2110xxx
     assert_no_text "2103106"
   end
 end

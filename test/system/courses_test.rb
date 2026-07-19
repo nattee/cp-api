@@ -8,16 +8,22 @@ class CoursesTest < ApplicationSystemTestCase
     click_on "Sign In"
   end
 
-  test "index page shows all courses" do
+  test "index defaults to department (2110) courses; All reveals the rest" do
     visit courses_path
     assert_text "Courses"
-    assert_text courses(:intro_computing).course_no
-    assert_text courses(:senior_project).name
-    assert_text courses(:gened_course).name
+    assert_text courses(:intro_computing).course_no  # 2110101 — department, shown
+    assert_text courses(:senior_project).name        # 2110499 — department, shown
+    assert_no_text courses(:gened_course).name       # 2103106 — hidden by default scope
+
+    # Toggle the Scope filter to "All" (label #1; #0 is the 2110xxx default).
+    find("label[for='course-scope-1']").click
+    assert_text courses(:gened_course).name          # now visible
   end
 
-  test "index shows GenEd badge" do
+  test "index shows GenEd badge (under All scope)" do
     visit courses_path
+    # The only GenEd fixture course (2103106) is outside the 2110 default scope.
+    find("label[for='course-scope-1']").click
     assert_selector ".badge-active", text: "GenEd"
   end
 

@@ -65,6 +65,52 @@ Status as of 2026-07-09:
 - `teaching_matrix` (at `/schedules`, not the registry) — set/aggregate report
   (staff × course per term/year), no single-entity anchor. Keep regardless.
 
+## 3. Course lists → shared course filter (recurring)
+
+**Trigger: any new/changed page that lists courses** (an index, a curriculum
+card, a semester's offerings, a transcript — anywhere multiple courses appear in
+a table).
+
+Course lists should offer the consistent filter bar so users can narrow to the
+department (`2110xxx`) and, where a program is in play, to its compulsory/elective
+courses. Don't hand-roll a `LIKE '2110%'` toggle — reuse the shared pieces:
+
+- **Render** `shared/_course_filters` in the card's title row. Locals: `programs:`
+  (`[[label, program_code], …]`) shows the Program dropdown; `fixed_program:`
+  (a `program_code`) shows the Type toggle without a dropdown; `scope_default:`
+  (`"2110"` default, or `""` for All). Scope always renders; Type renders when a
+  program can be in play.
+- **Controller** `course-filter` goes on the card. For a DataTables-backed table,
+  stack it: `data-controller="datatable course-filter"` and set
+  `data-course-filter-course-col-value` (Course No column index) plus
+  `data-course-filter-token-col-value` (a hidden token column's index; omit for
+  Scope-only). For a grouped, non-DataTable table set
+  `data-course-filter-mode-value="rows"` (+ `fixed-program-value` if the program
+  is fixed) and tag rows: course `%tr` get `row` target + `data-course-no` +
+  `data-course-tokens`; group header/spacer `%tr` get `groupRow` target +
+  `data-course-group` (so emptied groups hide).
+- **Tokens**: one `"<program_code>-<TYPE>"` per pairing via the `course_filter_tokens`
+  helper (needs `program_courses: :program` eager-loaded). Compulsory/elective is a
+  property of the *pairing*, not the course — `ProgramCourse.filter_type` keys off
+  the code's SUFFIX (`-C`→C, `-ELEC*`→ELEC, else OTHER), never the prefix.
+- **Per-page scope default**: catalogs/grades/offerings default to `2110xxx`; a
+  program's own curriculum and a student's transcript default to **All** — they
+  legitimately include gen-ed/math/language courses, and defaulting to `2110xxx`
+  there hides real content (it broke a curriculum test — see the deviation note).
+
+Status as of 2026-07-19 (has the bar): `courses/index` (Scope+Program+Type),
+`grades/index` (Scope), `programs/show` Curriculum (Scope+Type, program fixed),
+`students/show` Course History (Scope), `semesters/show` Offerings (Scope).
+
+Deliberately NOT on the client-side bar — full migration would regress
+correctness, and each already defaults to `2110` server-side:
+- `schedules/teaching_matrix` — courses are COLUMNS and `course_scope` drives the
+  server-computed Σ totals; client-side column hiding can't recompute them.
+- `grades/distribution` — its free-text `prefix` (default `2110`) drives the
+  server aggregation AND the GPA-trend chart; a binary toggle would lose both.
+- `schedules/student` — a single student's ~6 courses for one term; too small to
+  warrant a filter.
+
 ## How to add an item
 
 One `## N. Title (recurring|one-shot)` section, a bold **Trigger:** line, then

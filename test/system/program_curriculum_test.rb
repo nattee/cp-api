@@ -23,6 +23,31 @@ class ProgramCurriculumTest < ApplicationSystemTestCase
     assert_text "2110101" # intro_computing under C
   end
 
+  test "curriculum Type filter narrows to compulsory courses" do
+    sign_in users(:admin)
+    visit program_path(programs(:cp_bachelor))
+    # Default (All type): C, ELEC, Ungrouped groups all present.
+    assert_equal 3, all("tr.table-group-header").size
+
+    find("label[for='course-type-1']").click # Compulsory
+    assert_equal 1, all("tr.table-group-header").size # only the compulsory (C) group
+    assert_text "2110101"          # intro_computing (compulsory) stays
+    assert_no_text "Senior Project" # elective, hidden
+    assert_no_text "General Physics" # ungrouped gen-ed, hidden
+  end
+
+  test "curriculum Scope filter hides non-department courses" do
+    sign_in users(:admin)
+    visit program_path(programs(:cp_bachelor))
+    assert_text "General Physics" # 2103106 shown by default (curriculum defaults to All)
+
+    find("label[for='course-scope-0']").click # 2110xxx
+    assert_no_text "General Physics"           # 2103106 filtered out
+    assert_text "2110101"                       # 2110 courses remain
+    assert_text "Senior Project"
+    assert_equal 2, all("tr.table-group-header").size # Ungrouped group emptied and hidden
+  end
+
   test "admin adds a course with a group tag inline" do
     course = Course.create!(course_no: "2110888", revision_year_be: 2565, name: "Addable")
     sign_in users(:admin)

@@ -53,4 +53,16 @@ class ProgramCourse < ApplicationRecord
   def group_label
     self.class.group_label(course_group_code)
   end
+
+  # Coarse Type bucket for the shared course filter (see course_filter_controller.js).
+  # Keys off the code's SUFFIX only — the prefix is not reliably the program_code
+  # (e.g. fixtures use "2101-C" for a program whose code isn't 2101), so we must
+  # not parse the prefix. "-C" => "C" (compulsory), "-ELEC"/"-ELEC2" => "ELEC"
+  # (elective), everything else => "OTHER".
+  def self.filter_type(code)
+    suffix = code.to_s.split("-").last.to_s.upcase
+    return "C" if suffix == "C"
+    return "ELEC" if suffix.start_with?("ELEC")
+    "OTHER"
+  end
 end

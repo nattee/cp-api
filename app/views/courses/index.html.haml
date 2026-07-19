@@ -1,11 +1,12 @@
-.card{"data-controller" => "datatable"}
+.card{"data-controller" => "datatable course-filter", "data-course-filter-token-col-value" => "6"}
   .card-body.p-3
-    .d-flex.justify-content-between.align-items-center.mb-3
+    .d-flex.align-items-center.mb-3.gap-3.flex-wrap
       %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
         = resource_icon
         Courses
+      = render "shared/course_filters", programs: @course_programs
       - if current_user.admin?
-        = link_to "New Course", new_course_path, class: "btn btn-primary btn-sm"
+        = link_to "New Course", new_course_path, class: "btn btn-primary btn-sm ms-auto"
     .table-responsive
       %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
         %thead
@@ -16,6 +17,7 @@
             %th Program
             %th Credits
             %th GenEd
+            %th.d-none Filter tokens
             %th Actions
         %tbody
           - @courses.each do |course|
@@ -33,6 +35,7 @@
               %td
                 - if course.is_gened?
                   %span.badge.badge-active GenEd
+              %td.d-none= course_filter_tokens(course)
               %td
                 = link_to course, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
                   %span.material-symbols{style: "font-size: 18px"} visibility

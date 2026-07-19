@@ -40,4 +40,17 @@ class ProgramCourseTest < ActiveSupport::TestCase
     sorted = codes.sort_by { |c| ProgramCourse.group_sort_key(c) }
     assert_equal ["4784-C", "4784-ELEC", "9999-A", "9999-B", nil], sorted
   end
+
+  test "filter_type classifies by suffix, independent of the prefix" do
+    # "-C" => compulsory, regardless of whether the prefix is the program_code.
+    assert_equal "C", ProgramCourse.filter_type("4784-C")
+    assert_equal "C", ProgramCourse.filter_type("2101-C")
+    # "-ELEC" and "-ELEC2" both collapse to ELEC.
+    assert_equal "ELEC", ProgramCourse.filter_type("4784-ELEC")
+    assert_equal "ELEC", ProgramCourse.filter_type("3736-ELEC2")
+    # Any other suffix, and blank, are OTHER.
+    assert_equal "OTHER", ProgramCourse.filter_type("4784-MS")
+    assert_equal "OTHER", ProgramCourse.filter_type(nil)
+    assert_equal "OTHER", ProgramCourse.filter_type("")
+  end
 end

@@ -3,7 +3,17 @@ class CoursesController < ApplicationController
   before_action :require_admin, only: %i[new create edit update destroy]
 
   def index
-    @courses = Course.includes(:programs)
+    @courses = Course.includes(:programs, program_courses: :program)
+    # Program dropdown for the shared course filter — only programs that actually
+    # have courses linked (others would filter to an empty table). Labelled
+    # "<short name> — <curriculum year B.E.>" so different revisions of the same
+    # program (e.g. CP 2561 vs 2566, both "วศ.บ. (CP)") are distinguishable;
+    # value = program_code (matches the filter tokens).
+    @course_programs = Program.where(id: ProgramCourse.select(:program_id))
+                              .includes(:program_group)
+                              .order(:program_code)
+                              .reject(&:placeholder?) # the "Unknown Program" catch-all isn't a real filter target
+                              .map { |p| [ "#{p.short_name.presence || p.name_en} — #{p.year_started_be}", p.program_code ] }
   end
 
   # Grade stack order: bottom (worst) to top (best)

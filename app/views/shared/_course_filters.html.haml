@@ -1,0 +1,40 @@
+-# Consistent course-list filter bar. Drop inside a card that carries the
+-# `course-filter` Stimulus controller (see course_filter_controller.js).
+-#
+-# Locals (all optional):
+-#   scope_default: "2110" (default) or "" — which Scope radio is preselected
+-#   programs:      [[label, program_code], ...] — renders the Program dropdown
+-#   fixed_program: program_code — the page already fixes a program; renders the
+-#                  Type toggle (enabled) without a Program dropdown
+-#
+-# Scope always shows. Program shows when `programs` is given. Type shows when a
+-# program can be in play (either `programs` or `fixed_program`). Column indices
+-# and mode are set as data-course-filter-*-value on the card element, not here.
+- scope_default = local_assigns.fetch(:scope_default, Course::DEPARTMENT_PREFIX)
+- programs = local_assigns[:programs]
+- fixed_program = local_assigns[:fixed_program]
+- show_type = programs.present? || fixed_program.present?
+.d-flex.align-items-center.gap-4.flex-wrap
+  .d-flex.align-items-center.gap-2
+    %span.form-label.mb-0.small.text-muted Scope
+    .btn-group.btn-group-sm
+      - [["2110xxx", Course::DEPARTMENT_PREFIX], ["All", ""]].each_with_index do |(label, value), i|
+        %input.btn-check{type: "radio", name: "course-scope", id: "course-scope-#{i}", value: value, checked: value == scope_default, "data-course-filter-target" => "scope", "data-action" => "change->course-filter#apply"}
+        %label.btn.btn-outline-secondary{for: "course-scope-#{i}"}= label
+  - if programs.present?
+    .d-flex.align-items-center.gap-2
+      %span.form-label.mb-0.small.text-muted Program
+      = select_tag "course-program",
+        options_for_select([["All programs", ""]] + programs),
+        "data-course-filter-target" => "program",
+        "data-action" => "change->course-filter#apply",
+        "data-controller" => "select2",
+        class: "form-select form-select-sm",
+        style: "min-width: 170px"
+  - if show_type
+    .d-flex.align-items-center.gap-2{"data-course-filter-target" => "typeWrapper"}
+      %span.form-label.mb-0.small.text-muted Type
+      .btn-group.btn-group-sm
+        - [["All", ""], ["Compulsory", "compulsory"], ["Elective", "elective"]].each_with_index do |(label, value), i|
+          %input.btn-check{type: "radio", name: "course-type", id: "course-type-#{i}", value: value, checked: i.zero?, "data-course-filter-target" => "type", "data-action" => "change->course-filter#apply"}
+          %label.btn.btn-outline-secondary{for: "course-type-#{i}"}= label

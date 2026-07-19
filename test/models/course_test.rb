@@ -101,4 +101,12 @@ class CourseTest < ActiveSupport::TestCase
     end
     assert_includes course.programs, programs(:cp_bachelor)
   end
+
+  # --- Scopes ---
+
+  test "department scope returns only DEPARTMENT_PREFIX courses" do
+    assert_includes Course.department, courses(:intro_computing)   # 2110101
+    assert_includes Course.department, courses(:senior_project)    # 2110499
+    assert_not_includes Course.department, courses(:gened_course)  # 2103106
+  end
 end

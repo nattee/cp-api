@@ -7,10 +7,10 @@ class SemestersController < ApplicationController
   end
 
   def show
-    @course_scope = course_scope_param
-    offerings = @semester.course_offerings
-    offerings = offerings.joins(:course).where("courses.course_no LIKE ?", "2110%") if @course_scope == "dept"
-    @course_offerings = offerings.includes(:course, sections: [{ teachings: :staff }, { time_slots: :room }])
+    # Offerings load unscoped; the shared course filter narrows to the 2110
+    # department client-side (its default). The Export Sections link carries the
+    # department default explicitly for the server-side exporter.
+    @course_offerings = @semester.course_offerings.includes(:course, sections: [{ teachings: :staff }, { time_slots: :room }])
   end
 
   def new

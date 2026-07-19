@@ -10,6 +10,12 @@ class Course < ApplicationRecord
 
   after_save :link_import_program, if: -> { import_program.present? }
 
+  # The Computer Engineering department's course_no prefix. Used by the shared
+  # course-list filter (client-side) and available server-side for the pages
+  # that still scope with a raw LIKE. Single source of truth for "2110".
+  DEPARTMENT_PREFIX = "2110".freeze
+  scope :department, -> { where("course_no LIKE ?", "#{DEPARTMENT_PREFIX}%") }
+
   AUTO_GENERATED_LEVELS = %w[none copied placeholder].freeze
 
   AUTO_GENERATED_ICONS = {
