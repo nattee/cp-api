@@ -40,4 +40,13 @@ class ReportsHubTest < ApplicationSystemTestCase
     click_on "Room Schedule"
     assert_current_path schedules_room_path
   end
+
+  test "sidebar shows one Reports item and no separate Schedules item for a lecturer" do
+    sign_in users(:viewer)
+    visit reports_path
+    within "#sidebar" do
+      assert_link "Reports"
+      assert_no_link "Schedules"
+    end
+  end
 end
