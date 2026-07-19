@@ -117,7 +117,7 @@ class SchedulesControllerTest < ActionDispatch::IntegrationTest
     assert smith_row, "smith row missing"
     # 2 sections in 2567/1 + 1 in 2567/2 = 3, and 3 total.
     assert_equal ["3", "3"], smith_row.css("td")[1..].map { |td| td.text.strip }
-    tooltip = smith_row.css("td[title]").first["title"]
+    tooltip = smith_row.css("td[data-tooltip]").first["data-tooltip"]
     assert_includes tooltip, "2567/1: sec 1, 33"
     assert_includes tooltip, "2567/2: sec 2"
   end
