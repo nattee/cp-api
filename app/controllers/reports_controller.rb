@@ -1,18 +1,25 @@
 class ReportsController < ApplicationController
-  before_action :require_admin
+  # Access is per-report (see Reports::Catalog), not a blanket controller gate:
+  # every hub report is open to any logged-in lecturer; only :admin reports
+  # (Data Coverage) are restricted.
 
-  # Dashboard: per-program menu of reports, grouped by section.
+  # Hub: lecturer-facing reports grouped by section, optional program filter.
   def index
     @program_groups = ProgramGroup.order(:code)
     @selected_group = @program_groups.find_by(code: params[:program_group]) if params[:program_group].present?
-    reports = @selected_group ? Reports::Registry.for_program(@selected_group) : Reports::Registry.all
-    @reports_by_section = Reports::Registry.grouped(reports)
+    entries = Reports::Catalog.hub_entries
+    entries = entries.select { |e| e.applicable_to?(@selected_group) } if @selected_group
+    @entries_by_section = Reports::Catalog.grouped(entries)
   end
 
-  # One report: render its param form, and (when run) its result table / CSV.
+  # One framework report: render its param form, and (when run) its result / CSV.
   def show
-    @report = Reports::Registry.find(params[:id])
-    return redirect_to(reports_path, alert: "Unknown report.") unless @report
+    entry = Reports::Catalog.find(params[:id])
+    return redirect_to(reports_path, alert: "Unknown report.") unless entry&.registry?
+    if entry.access == :admin && !current_user.admin?
+      return redirect_to(root_path, alert: "Only admins can view that report.")
+    end
+    @report = entry.report_class
 
     if params[:run].present?
       missing = @report.params_spec.select { |p| p[:required] && params[p[:name]].blank? }
@@ -38,9 +45,5 @@ class ReportsController < ApplicationController
   # Whitelist: only the report's declared params, by name.
   def report_params
     @report.params_spec.each_with_object({}) { |p, h| h[p[:name].to_s] = params[p[:name]] }
-  end
-
-  def require_admin
-    redirect_to root_path, alert: "Only admins can view reports." unless current_user.admin?
   end
 end
