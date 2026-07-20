@@ -1,0 +1,18 @@
+-# One band of area cards on the home launchpad. Locals: title, group.
+-#
+-# This used to be a Proc defined inline (`- areas_band = ->(title, group) do
+-# ... end`) called three times via `= areas_band.call(...)`. Haml compiles a
+-# block containing markup by capturing its rendered output; invoking the same
+-# compiled block more than once accumulates rather than resets that capture,
+-# so each subsequent `.call` re-emitted every earlier band's cards as well
+-# (Records ended up rendered 8x on the admin view). A partial does not share
+-# that captured-buffer state across renders, so each band renders exactly
+-# once regardless of how many bands precede it.
+- areas = Navigation.visible_to(Navigation.for_group(group), admin: current_user.admin?)
+- if areas.any?
+  .mb-4
+    %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2= title
+    .row.g-3
+      - areas.each do |area|
+        = render "area_card", path: navigation_area_path(area), icon_key: area[:key],
+                              label: area[:label], description: area[:description]

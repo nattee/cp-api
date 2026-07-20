@@ -2,21 +2,15 @@
 -# Reports::Catalog - never hardcode either list here.
 -# Reports render as link lists, not cards: with 14 of them, card treatment
 -# swamps the entity bands and makes this page a near-copy of the hub.
-
-- areas_band = ->(title, group) do
-  - areas = Navigation.visible_to(Navigation.for_group(group), admin: current_user.admin?)
-  - next if areas.empty?
-  .mb-4
-    %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2= title
-    .row.g-3
-      - areas.each do |area|
-        = render "area_card", path: navigation_area_path(area), icon_key: area[:key],
-                              label: area[:label], description: area[:description]
+-#
+-# Each band is the "_area_band" partial, not an inline Proc - see that
+-# partial's header comment for why (a Proc-with-markup called more than once
+-# duplicated earlier bands' output).
 
 .card
   .card-body.p-3
-    = areas_band.call("Records", :records)
-    = areas_band.call("Teaching setup", :teaching_setup)
+    = render "area_band", title: "Records", group: :records
+    = render "area_band", title: "Teaching setup", group: :teaching_setup
 
     .mb-4
       %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2
@@ -30,7 +24,7 @@
               = link_to entry.title, catalog_report_path(entry), class: "small text-decoration-none"
 
     -# Profile shares this band with LINE Account but comes from outside the
-    -# constant, so this band is written out rather than using areas_band.
+    -# constant, so this band is written out rather than using the partial.
     .mb-4
       %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2 Your account
       .row.g-3
@@ -41,4 +35,4 @@
           = render "area_card", path: navigation_area_path(area), icon_key: area[:key],
                                 label: area[:label], description: area[:description]
 
-    = areas_band.call("Administration", :admin)
+    = render "area_band", title: "Administration", group: :admin
