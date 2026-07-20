@@ -151,4 +151,11 @@ class SchedulesControllerTest < ActionDispatch::IntegrationTest
     get schedules_teaching_matrix_path, params: { year: 2568 }
     assert_select "input#year[value=?]", "2568"
   end
+
+  test "teaching matrix defaults year AND semester from the context on a pure landing" do
+    patch term_context_path, params: { year_be: 2567, semester: 1 }
+    get schedules_teaching_matrix_path
+    assert_select "input#year[value=?]", "2567"
+    assert_select "select#semester_number option[selected][value=?]", "1"
+  end
 end
