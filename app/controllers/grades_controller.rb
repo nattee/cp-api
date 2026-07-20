@@ -38,12 +38,14 @@ class GradesController < ApplicationController
 
     counts = grade_counts # { [course_no, year, semester, grade] => n }
     @titles = course_titles
-    @course_ids = course_latest_ids
 
     build_distribution_rows(counts)
 
     respond_to do |format|
-      format.html { build_gpa_trend(counts) }
+      format.html do
+        @course_ids = course_latest_ids
+        build_gpa_trend(counts)
+      end
       format.csv do
         exporter = Exporters::GradeDistributionExporter.new(rows: @rows, split: @split)
         send_data exporter.to_csv, filename: exporter.filename,

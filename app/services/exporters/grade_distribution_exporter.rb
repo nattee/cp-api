@@ -11,10 +11,15 @@ module Exporters
     end
 
     def to_csv
-      CSV.generate do |csv|
-        csv << header
-        @rows.each { |row| csv << row_values(row) }
+      csv = CSV.generate do |out|
+        out << header
+        @rows.each { |row| out << row_values(row) }
       end
+      # The header's "% ≥ C" column contains U+2265 (≥). Without a BOM, Excel
+      # on a non-UTF-8 locale (Thai-locale Windows, common in this department)
+      # reads the file as the legacy locale encoding and mangles that header
+      # cell into mojibake. The BOM makes Excel read the file as UTF-8 instead.
+      Exporters::Base::BOM + csv
     end
 
     def filename
