@@ -243,6 +243,13 @@ Create `test/services/exporters/grade_distribution_exporter_test.rb`:
 require "test_helper"
 
 class Exporters::GradeDistributionExporterTest < ActiveSupport::TestCase
+  # Exports start with a UTF-8 BOM (the "% ≥ C" header would otherwise mangle
+  # in Excel on a non-UTF-8 locale). Strip it before parsing or the first
+  # header cell reads "﻿Course".
+  def parse(csv_string)
+    CSV.parse(csv_string.delete_prefix(Exporters::Base::BOM))
+  end
+
   def sample_row(overrides = {})
     {
       course_no: "2110101",
@@ -258,8 +265,13 @@ class Exporters::GradeDistributionExporterTest < ActiveSupport::TestCase
     }.merge(overrides)
   end
 
+  test "export starts with a UTF-8 BOM so Excel reads the ≥ header correctly" do
+    csv = Exporters::GradeDistributionExporter.new(rows: [sample_row], split: true).to_csv
+    assert csv.start_with?(Exporters::Base::BOM), "CSV must lead with the UTF-8 BOM"
+  end
+
   test "split export mirrors the table's column order" do
-    csv = CSV.parse(Exporters::GradeDistributionExporter.new(rows: [sample_row], split: true).to_csv)
+    csv = parse(Exporters::GradeDistributionExporter.new(rows: [sample_row], split: true).to_csv)
     assert_equal ["Course", "Title", "Term", "A", "B+", "B", "C+", "C", "D+", "D", "F",
                   "W", "Other", "N", "GPA", "% ≥ C"], csv[0]
     assert_equal ["2110101", "Introduction to Computing", "2024/1",
@@ -270,17 +282,30 @@ class Exporters::GradeDistributionExporterTest < ActiveSupport::TestCase
     exporter = Exporters::GradeDistributionExporter.new(
       rows: [sample_row(term: nil, term_key: nil)], split: false
     )
-    csv = CSV.parse(exporter.to_csv)
+    csv = parse(exporter.to_csv)
     assert_equal ["Course", "Title", "A", "B+", "B", "C+", "C", "D+", "D", "F",
                   "W", "Other", "N", "GPA", "% ≥ C"], csv[0]
     assert_equal "5", csv[1][2], "A-count should directly follow Title when unsplit"
+  end
+
+  test "titles containing commas and quotes are CSV-escaped" do
+    exporter = Exporters::GradeDistributionExporter.new(
+      rows: [sample_row(title: 'Intro, to "Computing"')], split: true
+    )
+    assert_equal 'Intro, to "Computing"', parse(exporter.to_csv)[1][1]
+  end
+
+  test "an empty result set still produces a header-only CSV" do
+    csv = parse(Exporters::GradeDistributionExporter.new(rows: [], split: true).to_csv)
+    assert_equal 1, csv.size
+    assert_equal "Course", csv[0][0]
   end
 
   test "nil GPA and pass rate export as blank cells, not em-dashes" do
     exporter = Exporters::GradeDistributionExporter.new(
       rows: [sample_row(gpa: nil, pass_rate: nil)], split: true
     )
-    csv = CSV.parse(exporter.to_csv)
+    csv = parse(exporter.to_csv)
     assert_nil csv[1][-2]
     assert_nil csv[1][-1]
   end
@@ -295,18 +320,23 @@ end
 - [ ] **Step 2: Run the exporter test**
 
 Run: `bin/rails test test/services/exporters/grade_distribution_exporter_test.rb`
-Expected: `4 runs, 9 assertions, 0 failures, 0 errors`
+Expected: `7 runs, 0 failures, 0 errors`
 
 - [ ] **Step 3: Write the controller CSV tests**
 
 Append inside `test/controllers/grades_controller_test.rb` (before the final `end`; the existing `setup` block already logs in as `users(:viewer)`):
 
 ```ruby
+  # Exports lead with a UTF-8 BOM (see the exporter); strip it before parsing.
+  def parse_csv(body)
+    CSV.parse(body.delete_prefix(Exporters::Base::BOM))
+  end
+
   test "distribution CSV export returns the full filtered result set" do
     get distribution_grades_path(format: :csv), params: { prefix: "2110", split: "1" }
     assert_response :success
     assert_equal "text/csv", response.media_type
-    csv = CSV.parse(response.body)
+    csv = parse_csv(response.body)
     assert_equal ["Course", "Title", "Term", "A", "B+", "B", "C+", "C", "D+", "D", "F",
                   "W", "Other", "N", "GPA", "% ≥ C"], csv[0]
     # Fixtures with a 2110 prefix: 2110101 gets an A in 2022/1 and 2024/1,
@@ -320,17 +350,26 @@ Append inside `test/controllers/grades_controller_test.rb` (before the final `en
   test "distribution CSV without split aggregates terms and omits the Term column" do
     get distribution_grades_path(format: :csv), params: { prefix: "2110", split: "0" }
     assert_response :success
-    csv = CSV.parse(response.body)
+    csv = parse_csv(response.body)
     assert_equal "A", csv[0][2], "A-count should directly follow Title when unsplit"
     assert_equal ["2110101", "Introduction to Computing",
                   "2", "0", "0", "0", "0", "0", "0", "0", "0", "0", "2", "4.0", "100"], csv[1]
   end
+
+  # The CSV path must not become an unauthenticated back door to grade data.
+  test "distribution CSV requires login" do
+    delete logout_path
+    get distribution_grades_path(format: :csv), params: { prefix: "2110" }
+    assert_redirected_to login_path
+  end
 ```
+
+(`config/routes.rb:12-14` defines `get/post "login"` and `delete "logout"`, so `delete logout_path` and `login_path` are both correct as written.)
 
 - [ ] **Step 4: Run the controller tests**
 
 Run: `bin/rails test test/controllers/grades_controller_test.rb`
-Expected: `4 runs` (2 existing + 2 new), `0 failures, 0 errors`
+Expected: `5 runs` (2 existing + 3 new), `0 failures, 0 errors`
 
 - [ ] **Step 5: Commit**
 
