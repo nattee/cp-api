@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
 
   before_action :require_login
 
-  helper_method :current_user, :logged_in?
+  helper_method :current_user, :logged_in?, :current_term_context
 
   private
 
@@ -21,6 +21,10 @@ class ApplicationController < ActionController::Base
 
   def logged_in?
     current_user.present?
+  end
+
+  def current_term_context
+    @current_term_context ||= TermContext.from_session(session)
   end
 
   def require_login

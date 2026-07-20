@@ -31,6 +31,7 @@ Rails.application.routes.draw do
   resources :scrapes, only: [:index, :create, :show]
   get "data_sources", to: "data_sources#index"
   get "chulabooster", to: redirect("/data_sources")
+  resource :term_context, only: :update
 
   controller :schedules do
     get "schedules", action: :index
