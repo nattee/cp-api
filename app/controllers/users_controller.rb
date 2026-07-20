@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
   before_action :set_user, only: %i[show edit update destroy generate_line_code unlink_line]
-  before_action :require_admin, only: %i[new create edit update destroy generate_line_code unlink_line]
+  before_action :require_admin, only: %i[index new create edit update destroy generate_line_code unlink_line]
+  before_action :require_admin_or_self, only: %i[show]
 
   def index
     @users = User.all
@@ -59,9 +60,19 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
   end
 
+  # Redirects to root_path, not users_path: index is admin-gated, so pointing a
+  # denied non-admin back at /users would loop.
   def require_admin
     unless current_user.admin?
-      redirect_to users_path, alert: "Only admins can perform this action."
+      redirect_to root_path, alert: "Only admins can perform this action."
+    end
+  end
+
+  # A lecturer reaches their own record via the sidebar's Profile link, but has
+  # no reason to enumerate colleagues' roles and LLM settings.
+  def require_admin_or_self
+    unless current_user.admin? || current_user == @user
+      redirect_to root_path, alert: "Only admins can perform this action."
     end
   end
 

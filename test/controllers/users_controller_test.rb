@@ -5,19 +5,32 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { username: users(:viewer).username, password: "password123" }
   end
 
-  test "non-admin can view index" do
+  test "non-admin cannot view index" do
     get users_path
+    assert_redirected_to root_path
+    assert_equal "Only admins can perform this action.", flash[:alert]
+  end
+
+  test "non-admin can view their own profile" do
+    get user_path(users(:viewer))
     assert_response :success
   end
 
-  test "non-admin can view show" do
+  test "non-admin cannot view another user's profile" do
     get user_path(users(:admin))
+    assert_redirected_to root_path
+    assert_equal "Only admins can perform this action.", flash[:alert]
+  end
+
+  test "admin can view any profile" do
+    post login_path, params: { username: users(:admin).username, password: "password123" }
+    get user_path(users(:viewer))
     assert_response :success
   end
 
   test "non-admin cannot access new" do
     get new_user_path
-    assert_redirected_to users_path
+    assert_redirected_to root_path
     assert_equal "Only admins can perform this action.", flash[:alert]
   end
 
@@ -25,18 +38,18 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference "User.count" do
       post users_path, params: { user: { username: "newuser", email: "new@example.com", name: "New", password: "password123", role: "viewer" } }
     end
-    assert_redirected_to users_path
+    assert_redirected_to root_path
   end
 
   test "non-admin cannot access edit" do
     get edit_user_path(users(:admin))
-    assert_redirected_to users_path
+    assert_redirected_to root_path
   end
 
   test "non-admin cannot update" do
     user = users(:admin)
     patch user_path(user), params: { user: { name: "Hacked" } }
-    assert_redirected_to users_path
+    assert_redirected_to root_path
     assert_equal "Admin User", user.reload.name
   end
 
@@ -44,7 +57,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference "User.count" do
       delete user_path(users(:admin))
     end
-    assert_redirected_to users_path
+    assert_redirected_to root_path
   end
 
   # --- LINE code generation (admin-only) ---
@@ -52,7 +65,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "non-admin cannot generate line code" do
     user = users(:editor)
     post generate_line_code_user_path(user)
-    assert_redirected_to users_path
+    assert_redirected_to root_path
     assert_equal "Only admins can perform this action.", flash[:alert]
     assert_nil user.reload.line_link_token
   end
@@ -61,7 +74,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     user = users(:editor)
     user.update!(provider: "line", uid: "U1234")
     delete unlink_line_user_path(user)
-    assert_redirected_to users_path
+    assert_redirected_to root_path
     assert_equal "line", user.reload.provider
   end
 
