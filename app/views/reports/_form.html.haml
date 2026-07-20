@@ -3,25 +3,26 @@
 = form_with url: report_path(@report.key), method: :get, class: "row g-3 align-items-end" do
   = hidden_field_tag :run, 1
   - @report.params_spec.each do |p|
+    - val = params[p[:name]].presence || context_default_for(p)
     .col-md-3
       = label_tag p[:name], (p[:label] || p[:name].to_s.humanize), class: "form-label small text-muted"
       - case p[:type]
       - when :term
-        = select_tag p[:name], options_for_select([["First", 1], ["Second", 2], ["Summer", 3]], params[p[:name]]), include_blank: true, class: "form-select"
+        = select_tag p[:name], options_for_select([["First", 1], ["Second", 2], ["Summer", 3]], val), include_blank: true, class: "form-select"
       - when :semester_record
-        = select_tag p[:name], options_for_select(Semester.ordered.map { |s| [s.display_name, s.id] }, params[p[:name]]), include_blank: true, class: "form-select"
+        = select_tag p[:name], options_for_select(Semester.ordered.map { |s| [s.display_name, s.id] }, val), include_blank: true, class: "form-select"
       - when :program_group
-        = select_tag p[:name], options_for_select(ProgramGroup.order(:code).map { |g| [g.short_label, g.code] }, params[p[:name]]), include_blank: true, class: "form-select"
+        = select_tag p[:name], options_for_select(ProgramGroup.order(:code).map { |g| [g.short_label, g.code] }, val), include_blank: true, class: "form-select"
       - when :staff
         -# Value = initials (the report's find_staff already resolves them; URLs stay
         -# readable). Staff without initials are excluded — they cannot be looked up,
         -# and no teaching staff lacks initials. Select2 makes the long list searchable.
-        = select_tag p[:name], options_for_select(Staff.where.not(initials: [nil, ""]).sort_by(&:display_name_th).map { |s| ["#{s.display_name_th} (#{s.initials})", s.initials] }, params[p[:name]]), include_blank: true, class: "form-select", data: { controller: "select2" }
+        = select_tag p[:name], options_for_select(Staff.where.not(initials: [nil, ""]).sort_by(&:display_name_th).map { |s| ["#{s.display_name_th} (#{s.initials})", s.initials] }, val), include_blank: true, class: "form-select", data: { controller: "select2" }
       - when :teaching_year
         -# Offering years only — distinct year_be from semesters on record, newest
         -# first, latest preselected. Any year outside the data would just return
         -# an empty report, so the list is data-driven rather than a fixed window.
-        = select_tag p[:name], options_for_select(Semester.order(year_be: :desc).distinct.pluck(:year_be), params[p[:name]] || Semester.maximum(:year_be)), class: "form-select"
+        = select_tag p[:name], options_for_select(Semester.order(year_be: :desc).distinct.pluck(:year_be), val || Semester.maximum(:year_be)), class: "form-select"
       - when :boolean
         -# Checkbox params submit "1" when checked and are simply absent when not.
         -# The generic label_tag above targets this input's id, so clicking the
@@ -29,8 +30,8 @@
         .form-check.mb-1
           = check_box_tag p[:name], "1", params[p[:name]] == "1", class: "form-check-input"
       - when :academic_year, :integer
-        = number_field_tag p[:name], params[p[:name]], class: "form-control"
+        = number_field_tag p[:name], val, class: "form-control"
       - else
-        = text_field_tag p[:name], params[p[:name]], class: "form-control"
+        = text_field_tag p[:name], val, class: "form-control"
   .col-md-3
     = submit_tag "Run report", class: "btn btn-primary"

@@ -50,4 +50,27 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     # A program-agnostic schedules card is still present.
     assert_select "a.card .card-title", text: "Room Schedule"
   end
+
+  test "a viewing-year field pre-fills from the sticky term" do
+    login users(:viewer)
+    patch term_context_path, params: { year_be: 2567, semester: 1 }
+    get report_path("semester_grade_distribution")
+    assert_select "input#year[value=?]", "2567"
+    assert_select "select#term option[selected][value=?]", "1"
+  end
+
+  test "an explicit param overrides the sticky term" do
+    login users(:viewer)
+    patch term_context_path, params: { year_be: 2567, semester: 1 }
+    get report_path("semester_grade_distribution"), params: { year: 2568 }
+    assert_select "input#year[value=?]", "2568"
+  end
+
+  test "a cohort report's admission_year is never filled from the sticky term" do
+    login users(:viewer)
+    patch term_context_path, params: { year_be: 2567, semester: 1 }
+    get report_path("cohort_gpa")
+    # admission_year must NOT be pre-filled with the context year
+    assert_select "input#admission_year[value=?]", "2567", count: 0
+  end
 end

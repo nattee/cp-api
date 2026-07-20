@@ -5,8 +5,8 @@ module Reports
     section  :courses
     programs :all
     param    :course_no, :course,        required: true
-    param    :year,      :academic_year, required: true, label: "Year (B.E.)"   # B.E. year of the grade
-    param    :term,      :term                            # optional 1/2/3
+    param    :year,      :academic_year, required: true, label: "Year (B.E.)", context: :year   # B.E. year of the grade
+    param    :term,      :term,          context: :semester                    # optional 1/2/3
 
     def run
       # `year` is entered in Buddhist Era; grades store the academic year in

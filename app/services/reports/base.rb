@@ -23,8 +23,12 @@ module Reports
     # Declares a parameter. Feeds the web form AND defines an instance reader.
     # type ∈ :course, :staff, :course_group, :academic_year, :teaching_year, :integer, :term, :semester_record, :program_group, :boolean
     # label: optional form-label override (default: humanized name)
-    def self.param(name, type, required: false, label: nil)
-      params_spec << { name: name, type: type, required: required, label: label }
+    # context: optional opt-in to pre-fill from the sticky term (:year, :semester,
+    # :semester_record). Explicit per field, never inferred from type — :academic_year
+    # means a viewing year in some reports and an admission cohort in others, and only
+    # the former should ever draw from the sticky context.
+    def self.param(name, type, required: false, label: nil, context: nil)
+      params_spec << { name: name, type: type, required: required, label: label, context: context }
       define_method(name) { @params[name.to_s] }
     end
 

@@ -5,7 +5,7 @@ module Reports
     section  :courses
     programs :all
     param    :staff, :staff,         required: true   # initials (e.g. NNN) or name
-    param    :year,  :teaching_year, required: true, label: "Year (B.E.)"   # dropdown of years present in semesters
+    param    :year,  :teaching_year, required: true, label: "Year (B.E.)", context: :year   # dropdown of years present in semesters
 
     def run
       person = find_staff
