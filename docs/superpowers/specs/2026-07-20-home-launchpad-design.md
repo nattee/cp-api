@@ -125,13 +125,18 @@ Four bands, top to bottom:
 | **Records** | Programs, Courses, Staff, Students, Grades | Cards: icon, label, one-sentence description |
 | **Teaching setup** | Semesters, Rooms, Scraper | Cards, same shape |
 | **Reports** | The four `Reports::Catalog` sections, nested under one "Reports" heading | Sub-heading per section + plain link list |
-| **Administration** | Users, Imports, Data Sources, API Events, Chat Playground, Chat History, LINE Contacts, Style Guide | Cards; rendered only when `current_user.admin?` |
 | **Your account** | Profile, LINE Account | Cards; `access: :all` |
+| **Administration** | Users, Imports, Data Sources, API Events, Chat Playground, Chat History, LINE Contacts, Style Guide | Cards; rendered only when `current_user.admin?` |
 
 The fifth band exists because LINE Account fits none of the other four — it is a
 personal setting, not a domain area and not an admin tool. Pairing it with
 Profile (today reachable only from the sidebar's account dropdown) gives both a
 visible home and keeps the account-level concerns together. `group: :account`.
+
+Your account is placed fourth, ahead of Administration, so it sits in the same
+position on every view — a non-admin never sees it, but for an admin it would
+otherwise jump up by eight cards depending on role. That stability was judged
+worth diverging from strict "admin-tools-last" ordering.
 
 **Reports render as link lists, not cards.** Mocked both ways. With fourteen
 cards the Reports band takes roughly 70% of the page, pushes Records and Teaching

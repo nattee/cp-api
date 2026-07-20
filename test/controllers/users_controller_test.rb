@@ -14,6 +14,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "non-admin can view their own profile" do
     get user_path(users(:viewer))
     assert_response :success
+    assert_select "a[href=?]", users_path, count: 0
   end
 
   test "non-admin cannot view another user's profile" do
@@ -24,7 +25,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   test "admin can view any profile" do
     post login_path, params: { username: users(:admin).username, password: "password123" }
-    get user_path(users(:viewer))
+    get user_path(users(:editor))
     assert_response :success
   end
 

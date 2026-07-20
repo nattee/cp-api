@@ -15,10 +15,25 @@ class NavigationParityTest < ActionDispatch::IntegrationTest
     "#"   # the account dropdown toggle
   ].freeze
 
-  test "every sidebar destination also appears on the launchpad" do
+  test "every sidebar destination also appears on the launchpad for an admin" do
     # Must run as an admin: a viewer's sidebar omits the whole admin block, so a
-    # viewer session would never exercise the full nav and this would pass vacuously.
-    post login_path, params: { username: users(:admin).username, password: "password123" }
+    # viewer-only run would never exercise the admin nav and would pass vacuously.
+    assert_sidebar_parity(users(:admin))
+  end
+
+  test "every sidebar destination also appears on the launchpad for a viewer" do
+    # Complements the admin case above. The admin run alone can't catch access-level
+    # drift: give a main-nav AREAS entry a stray `access: :admin`, and the admin run
+    # still passes while a viewer's sidebar keeps a link with no home counterpart.
+    # A viewer's (smaller) sidebar is fully covered by their home page today, so
+    # this is expected to pass, not just a placeholder for a future gap.
+    assert_sidebar_parity(users(:viewer))
+  end
+
+  private
+
+  def assert_sidebar_parity(user)
+    post login_path, params: { username: user.username, password: "password123" }
     get root_path
     assert_response :success
 

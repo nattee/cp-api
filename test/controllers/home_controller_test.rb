@@ -9,7 +9,7 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     login users(:viewer)
     get root_path
     assert_response :success
-    assert_select "h6", text: /\ARecords\z/i
+    assert_select "h6", text: /\ARecords\z/i, count: 1
   end
 
   test "root requires login" do

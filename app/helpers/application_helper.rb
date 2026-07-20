@@ -20,6 +20,10 @@ module ApplicationHelper
     "scrapes"          => "cloud_sync",
     "dev"              => "palette",
     "data_sources"     => "database",
+    # "profile" is not a controller - it's the home launchpad's pseudo-resource
+    # key for the current user's own account, kept distinct from "users" so it
+    # doesn't share an icon with the Users admin card.
+    "profile"          => "account_circle",
   }.freeze
 
   def resource_icon(resource = controller_name)
