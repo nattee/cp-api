@@ -1,0 +1,16 @@
+-# Sets the user's working term (see TermContext). Renders on report pages only.
+-# Copy is neutral ("Working in") — it shows the current context, it does not claim
+-# to filter the page it sits on.
+.term-context-bar.d-flex.align-items-center.gap-2.mb-3
+  - if Semester.exists?
+    - ctx = current_term_context
+    %span.small.text-muted.text-uppercase.fw-semibold Working in
+    = form_with url: term_context_path, method: :patch, class: "d-flex gap-2 mb-0", data: { controller: "term-context" } do
+      = select_tag :year_be,
+          options_for_select(Semester.distinct.order(year_be: :desc).pluck(:year_be), ctx.academic_year_be),
+          class: "form-select form-select-sm w-auto", data: { action: "term-context#submit" }
+      = select_tag :semester,
+          options_for_select([["Whole year", ""], ["1", 1], ["2", 2], ["Summer", 3]], ctx.semester_number),
+          class: "form-select form-select-sm w-auto", data: { action: "term-context#submit" }
+  - else
+    %span.small.text-muted No terms yet

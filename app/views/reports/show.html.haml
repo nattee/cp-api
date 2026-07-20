@@ -3,6 +3,9 @@
   %h1.h4.mb-0= @report.title
   = link_to "Back", reports_path, class: "btn btn-outline-primary btn-sm"
 
+- if @report.params_spec.any? { |p| p[:context] }
+  = render "shared/term_context_bar"
+
 .card.mb-3
   .card-body
     = render "form"

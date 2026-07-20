@@ -4,6 +4,8 @@
     Conflict Detection
   = link_to "Back", schedules_path, class: "btn btn-outline-primary"
 
+= render "shared/term_context_bar"
+
 .card.mb-3
   .card-body.p-3
     = form_with(url: schedules_conflicts_path, method: :get, class: "row g-2 align-items-end") do |f|
