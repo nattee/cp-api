@@ -41,7 +41,15 @@ class GradesController < ApplicationController
     @course_ids = course_latest_ids
 
     build_distribution_rows(counts)
-    build_gpa_trend(counts)
+
+    respond_to do |format|
+      format.html { build_gpa_trend(counts) }
+      format.csv do
+        exporter = Exporters::GradeDistributionExporter.new(rows: @rows, split: @split)
+        send_data exporter.to_csv, filename: exporter.filename,
+                  type: "text/csv", disposition: "attachment"
+      end
+    end
   end
 
   def show; end
