@@ -1,0 +1,9 @@
+-# One launchpad card. Locals: path, icon_key, label, description.
+-# Used for Navigation::AREAS entries and for the Profile card.
+.col-md-4
+  = link_to path, class: "card h-100 text-decoration-none" do
+    .card-body
+      %h6.card-title.mb-1.d-flex.align-items-center
+        = resource_icon(icon_key)
+        = label
+      %p.small.text-body-secondary.mb-0= description

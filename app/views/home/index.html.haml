@@ -1,0 +1,44 @@
+-# The home launchpad. Areas come from Navigation::AREAS, reports from
+-# Reports::Catalog - never hardcode either list here.
+-# Reports render as link lists, not cards: with 14 of them, card treatment
+-# swamps the entity bands and makes this page a near-copy of the hub.
+
+- areas_band = ->(title, group) do
+  - areas = Navigation.visible_to(Navigation.for_group(group), admin: current_user.admin?)
+  - next if areas.empty?
+  .mb-4
+    %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2= title
+    .row.g-3
+      - areas.each do |area|
+        = render "area_card", path: navigation_area_path(area), icon_key: area[:key],
+                              label: area[:label], description: area[:description]
+
+.card
+  .card-body.p-3
+    = areas_band.call("Records", :records)
+    = areas_band.call("Teaching setup", :teaching_setup)
+
+    .mb-4
+      %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2
+        = link_to "Reports", reports_path, class: "text-decoration-none text-reset"
+      %p.small.text-body-secondary.mb-3 Read-only analyses across students, courses and teaching.
+      - @report_sections.each do |section_key, entries|
+        .mb-3
+          %p.small.fw-semibold.mb-1= Reports::Catalog::SECTIONS[section_key]
+          .d-flex.flex-wrap.column-gap-4.row-gap-1
+            - entries.each do |entry|
+              = link_to entry.title, catalog_report_path(entry), class: "small text-decoration-none"
+
+    -# Profile shares this band with LINE Account but comes from outside the
+    -# constant, so this band is written out rather than using areas_band.
+    .mb-4
+      %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2 Your account
+      .row.g-3
+        = render "area_card", path: user_path(current_user), icon_key: "users",
+                              label: "Profile",
+                              description: "Your own account details and LINE link status."
+        - Navigation.for_group(:account).each do |area|
+          = render "area_card", path: navigation_area_path(area), icon_key: area[:key],
+                                label: area[:label], description: area[:description]
+
+    = areas_band.call("Administration", :admin)

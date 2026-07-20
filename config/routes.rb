@@ -88,5 +88,5 @@ Rails.application.routes.draw do
 
   get "dev/styleguide", to: "dev#styleguide"
 
-  root "users#index"
+  root "home#index"
 end
