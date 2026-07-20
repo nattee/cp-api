@@ -158,4 +158,12 @@ class SchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_select "input#year[value=?]", "2567"
     assert_select "select#semester_number option[selected][value=?]", "1"
   end
+
+  test "teaching matrix does not borrow the context semester when the year is explicit" do
+    patch term_context_path, params: { year_be: 2568, semester: 2 }
+    # Explicit year, no semester_number: a deliberate whole-year request must NOT
+    # be narrowed to the context's semester.
+    get schedules_teaching_matrix_path, params: { year: 2568 }
+    assert_select "select#semester_number option[selected]", count: 0
+  end
 end

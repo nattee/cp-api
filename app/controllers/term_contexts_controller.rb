@@ -5,7 +5,9 @@ class TermContextsController < ApplicationController
   def update
     year = params[:year_be].presence
     if year && Semester.exists?(year_be: year)
-      session[:term_context] = { "year_be" => year.to_i, "semester" => params[:semester].presence&.to_i }
+      semester = params[:semester].presence&.to_i
+      semester = nil unless Semester::SEMESTER_NUMBERS.include?(semester)
+      session[:term_context] = { "year_be" => year.to_i, "semester" => semester }
     end
     redirect_back(fallback_location: root_path)
   end

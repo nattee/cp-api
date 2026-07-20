@@ -16,6 +16,12 @@ class TermContextsControllerTest < ActionDispatch::IntegrationTest
     assert_nil session[:term_context]["semester"]
   end
 
+  test "update ignores an out-of-range semester (stores whole-year)" do
+    patch term_context_path, params: { year_be: 2567, semester: 7 }
+    assert_equal 2567, session[:term_context]["year_be"]
+    assert_nil session[:term_context]["semester"]
+  end
+
   test "update ignores a year that is not in the data" do
     patch term_context_path, params: { year_be: 1999, semester: 1 }
     assert_nil session[:term_context]
