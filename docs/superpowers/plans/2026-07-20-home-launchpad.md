@@ -458,7 +458,7 @@ Changing `root` affects tests that assert on it. Run exactly these:
 
 ```
 bin/rails test test/controllers/users_controller_test.rb
-bin/rails test:system test/system/login_test.rb test/system/data_imports_test.rb test/system/data_sources_test.rb
+bin/rails test test/system/login_test.rb test/system/data_imports_test.rb test/system/data_sources_test.rb
 ```
 
 Expected: PASS. `login_test.rb` asserts `assert_current_path root_path` after sign-in (still true) and the others assert on `nav a`, which is the sidebar and unaffected. If any fail, **stop and report** rather than editing the assertions.
@@ -603,7 +603,7 @@ Run exactly these — the sidebar change can only affect tests that assert on na
 
 ```
 bin/rails test test/controllers/users_controller_test.rb test/controllers/home_controller_test.rb
-bin/rails test:system test/system/data_imports_test.rb test/system/data_sources_test.rb
+bin/rails test test/system/data_imports_test.rb test/system/data_sources_test.rb
 ```
 
 Expected: PASS. If a system test fails on a missing "Users" nav link for a non-admin, that test was asserting the old contract — report it rather than silently changing it.
@@ -751,9 +751,11 @@ class HomeTest < ApplicationSystemTestCase
 end
 ```
 
+**Use `bin/rails test <path>`, not `bin/rails test:system <path>`.** In Rails 8.1.3 `Rails::Command::TestCommand#system` is `perform("test/system", *args)`, so it always prepends the whole `test/system` glob and silently ignores the paths you pass — you get the entire 107-test system suite (which also hits driver port contention). The base `test` command honours explicit paths and still runs system tests correctly.
+
 - [ ] **Step 4: Run the system test**
 
-Run: `bin/rails test:system test/system/home_test.rb`
+Run: `bin/rails test test/system/home_test.rb`
 Expected: PASS — 5 runs, 0 failures, 0 errors
 
 **Note on `resource_icon`:** it renders the Material Symbols glyph name as element text (`<span class="material-symbols">school</span>`), so a card's `h6` reads as `"schoolStudents"`, not `"Students"`. Capybara's `assert_link`/`click_on` do substring matching, so the tests above work — but an exact-text assertion on a card title will not. Use substring or regex matching for card titles.
@@ -764,7 +766,7 @@ Run exactly these:
 
 ```
 bin/rails test test/services/navigation_test.rb test/controllers/home_controller_test.rb test/controllers/users_controller_test.rb test/integration/navigation_parity_test.rb
-bin/rails test:system test/system/home_test.rb
+bin/rails test test/system/home_test.rb
 ```
 
 Expected: PASS, 0 failures, 0 errors. Report the actual counts.
