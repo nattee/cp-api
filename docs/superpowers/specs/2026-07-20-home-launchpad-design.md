@@ -118,7 +118,7 @@ the abstraction.
 
 ### Page structure
 
-Four bands, top to bottom:
+Five bands, top to bottom:
 
 | Band | Contents | Treatment |
 |---|---|---|
