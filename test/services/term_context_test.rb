@@ -41,7 +41,8 @@ class TermContextTest < ActiveSupport::TestCase
     assert_equal 2568, ctx.academic_year_be   # year-level use still works
   end
 
-  test "present? is false only when there are no semesters at all" do
+  test "present? is true with a year and false without one" do
     assert TermContext.default.present?
+    refute TermContext.new(academic_year_be: nil, semester_number: nil).present?
   end
 end
