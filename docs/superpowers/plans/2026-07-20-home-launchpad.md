@@ -263,6 +263,7 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 **Files:**
 - Create: `app/controllers/home_controller.rb`
 - Create: `app/views/home/index.html.haml`
+- Create: `app/views/home/_area_card.html.haml`
 - Modify: `config/routes.rb:91`
 - Test: `test/controllers/home_controller_test.rb`
 
@@ -369,7 +370,27 @@ class HomeController < ApplicationController
 end
 ```
 
-- [ ] **Step 5: Write the view**
+- [ ] **Step 5: Write the card partial**
+
+Every band renders the same card. Extract it once so the Profile card (which
+cannot live in `Navigation::AREAS` — its path needs `current_user`, while every
+area uses a zero-argument helper) does not duplicate the markup.
+
+Create `app/views/home/_area_card.html.haml`:
+
+```haml
+-# One launchpad card. Locals: path, icon_key, label, description.
+-# Used for Navigation::AREAS entries and for the Profile card.
+.col-md-4
+  = link_to path, class: "card h-100 text-decoration-none" do
+    .card-body
+      %h6.card-title.mb-1.d-flex.align-items-center
+        = resource_icon(icon_key)
+        = label
+      %p.small.text-body-secondary.mb-0= description
+```
+
+- [ ] **Step 6: Write the view**
 
 Create `app/views/home/index.html.haml`:
 
@@ -386,13 +407,8 @@ Create `app/views/home/index.html.haml`:
     %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2= title
     .row.g-3
       - areas.each do |area|
-        .col-md-4
-          = link_to navigation_area_path(area), class: "card h-100 text-decoration-none" do
-            .card-body
-              %h6.card-title.mb-1.d-flex.align-items-center
-                = resource_icon(area[:key])
-                = area[:label]
-              %p.small.text-body-secondary.mb-0= area[:description]
+        = render "area_card", path: navigation_area_path(area), icon_key: area[:key],
+                              label: area[:label], description: area[:description]
 
 .card
   .card-body.p-3
@@ -410,39 +426,50 @@ Create `app/views/home/index.html.haml`:
             - entries.each do |entry|
               = link_to entry.title, catalog_report_path(entry), class: "small text-decoration-none"
 
-    = areas_band.call("Your account", :account)
-    -# Profile is not in Navigation::AREAS: its path needs current_user, and
-    -# every other area uses a zero-argument route helper. One special case
-    -# here beats a second way of expressing paths in the constant.
-    .row.g-3.mt-0
-      .col-md-4
-        = link_to user_path(current_user), class: "card h-100 text-decoration-none" do
-          .card-body
-            %h6.card-title.mb-1.d-flex.align-items-center
-              = resource_icon("users")
-              Profile
-            %p.small.text-body-secondary.mb-0 Your own account details and LINE link status.
+    -# Profile shares this band with LINE Account but comes from outside the
+    -# constant, so this band is written out rather than using areas_band.
+    .mb-4
+      %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2 Your account
+      .row.g-3
+        = render "area_card", path: user_path(current_user), icon_key: "users",
+                              label: "Profile",
+                              description: "Your own account details and LINE link status."
+        - Navigation.for_group(:account).each do |area|
+          = render "area_card", path: navigation_area_path(area), icon_key: area[:key],
+                                label: area[:label], description: area[:description]
 
     = areas_band.call("Administration", :admin)
 ```
 
 **Careful — HAML lambdas.** The `areas_band` lambda uses `- next if areas.empty?` to bail out; `return` would raise `LocalJumpError`. If the lambda form gives trouble, inline the three bands instead of abstracting — correctness beats DRY here, and the plan's tests are the contract, not the implementation shape.
 
-- [ ] **Step 6: Run test to verify it passes**
+The `:account` group is not passed through `Navigation.visible_to` because every
+entry in it is `access: :all`; the Task 1 test asserts that only the `:admin`
+group is admin-access, so this stays true.
+
+- [ ] **Step 7: Run test to verify it passes**
 
 Run: `bin/rails test test/controllers/home_controller_test.rb`
 Expected: PASS — 7 runs, 0 failures, 0 errors
 
-- [ ] **Step 7: Run the full suite to catch collateral damage**
+- [ ] **Step 8: Run the tests the root change could plausibly break**
 
-Run: `bin/rails test`
-Expected: PASS. The root change touches `test/system/login_test.rb` (asserts `assert_current_path root_path` after sign-in — still true) and the `visit root_path` calls in `data_imports_test.rb` / `data_sources_test.rb` (they assert on `nav a`, which is the sidebar, unaffected). If any of these fail, stop and report rather than editing the assertions.
+Changing `root` affects tests that assert on it. Run exactly these:
 
-- [ ] **Step 8: Commit**
+```
+bin/rails test test/controllers/users_controller_test.rb
+bin/rails test:system test/system/login_test.rb test/system/data_imports_test.rb test/system/data_sources_test.rb
+```
+
+Expected: PASS. `login_test.rb` asserts `assert_current_path root_path` after sign-in (still true) and the others assert on `nav a`, which is the sidebar and unaffected. If any fail, **stop and report** rather than editing the assertions.
+
+**Do not run the full `bin/rails test` suite.** Another session is committing to this repo concurrently in unrelated files (`grades_controller.rb`, `grade_distribution_exporter.rb`); a full-suite failure there is not yours to diagnose or fix. The controller runs the full suite at the end.
+
+- [ ] **Step 9: Commit**
 
 ```bash
-hg add app/controllers/home_controller.rb app/views/home/index.html.haml test/controllers/home_controller_test.rb
-hg commit app/controllers/home_controller.rb app/views/home/index.html.haml test/controllers/home_controller_test.rb config/routes.rb -m "Signing in landed you on a table of user accounts
+hg add app/controllers/home_controller.rb app/views/home/index.html.haml app/views/home/_area_card.html.haml test/controllers/home_controller_test.rb
+hg commit app/controllers/home_controller.rb app/views/home/index.html.haml app/views/home/_area_card.html.haml test/controllers/home_controller_test.rb config/routes.rb -m "Signing in landed you on a table of user accounts
 
 root pointed at users#index, so the first page after login was every account's
 username, email, role and LLM settings. It answers a question nobody asked, and
@@ -570,10 +597,18 @@ Add the same block inside the `- if current_user.admin?` section, as the first i
 
 Note the indentation increases by two spaces — it is now nested inside the admin conditional.
 
-- [ ] **Step 6: Run the full suite**
+- [ ] **Step 6: Run the affected tests**
 
-Run: `bin/rails test && bin/rails test:system`
+Run exactly these — the sidebar change can only affect tests that assert on nav links:
+
+```
+bin/rails test test/controllers/users_controller_test.rb test/controllers/home_controller_test.rb
+bin/rails test:system test/system/data_imports_test.rb test/system/data_sources_test.rb
+```
+
 Expected: PASS. If a system test fails on a missing "Users" nav link for a non-admin, that test was asserting the old contract — report it rather than silently changing it.
+
+**Do not run the full `bin/rails test` suite.** Another session is committing to this repo concurrently in unrelated files; failures there are not yours to diagnose. The controller runs the full suite at the end.
 
 - [ ] **Step 7: Commit**
 
@@ -723,10 +758,18 @@ Expected: PASS — 5 runs, 0 failures, 0 errors
 
 **Note on `resource_icon`:** it renders the Material Symbols glyph name as element text (`<span class="material-symbols">school</span>`), so a card's `h6` reads as `"schoolStudents"`, not `"Students"`. Capybara's `assert_link`/`click_on` do substring matching, so the tests above work — but an exact-text assertion on a card title will not. Use substring or regex matching for card titles.
 
-- [ ] **Step 5: Run the whole suite**
+- [ ] **Step 5: Run this plan's own tests together**
 
-Run: `bin/rails test && bin/rails test:system`
-Expected: PASS, 0 failures, 0 errors across both. Report the actual counts.
+Run exactly these:
+
+```
+bin/rails test test/services/navigation_test.rb test/controllers/home_controller_test.rb test/controllers/users_controller_test.rb test/integration/navigation_parity_test.rb
+bin/rails test:system test/system/home_test.rb
+```
+
+Expected: PASS, 0 failures, 0 errors. Report the actual counts.
+
+**Do not run the full `bin/rails test` suite** — another session is committing concurrently in unrelated files. The controller runs the full suite once, at the end, and reads any failures with that session in mind.
 
 - [ ] **Step 6: Commit**
 
