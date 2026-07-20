@@ -161,8 +161,12 @@ class SchedulesController < ApplicationController
   # this renders as a plain table.
   def teaching_matrix
     default_year = Semester.joins(course_offerings: { sections: :teachings }).maximum(:year_be)
-    @year = (params[:year].presence || default_year).to_i
-    @semester_number = params[:semester_number].presence&.to_i
+    @year = (params[:year].presence || current_term_context.academic_year_be || default_year).to_i
+    # Only borrow the context's semester_number when the year itself is also
+    # defaulting from the context — an explicit ?year= with no semester_number
+    # is a deliberate whole-year request and must keep summing across semesters,
+    # even though the context (almost) always has a specific semester_number.
+    @semester_number = (params[:semester_number].presence || (current_term_context.semester_number if params[:year].blank?))&.to_i
     @semester_number = nil unless Semester::SEMESTER_NUMBERS.include?(@semester_number)
     @course_scope = params[:course_scope] == "all" ? "all" : "dept"
 

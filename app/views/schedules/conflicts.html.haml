@@ -9,7 +9,7 @@
     = form_with(url: schedules_conflicts_path, method: :get, class: "row g-2 align-items-end") do |f|
       .col-md-4
         %label.form-label.mb-0 Semester
-        = select_tag :semester_id, options_for_select(@semesters.map { |s| ["#{s.display_name} — #{Semester::SEMESTER_LABELS[s.semester_number]}", s.id] }, params[:semester_id]), include_blank: "Select semester", class: "form-select form-select-sm", data: { controller: "select2" }
+        = select_tag :semester_id, options_for_select(@semesters.map { |s| ["#{s.display_name} — #{Semester::SEMESTER_LABELS[s.semester_number]}", s.id] }, params[:semester_id].presence || current_term_context.semester_record&.id), include_blank: "Select semester", class: "form-select form-select-sm", data: { controller: "select2" }
       .col-auto
         %label.form-label.mb-0 Conflict Type
         .btn-group.btn-group-sm

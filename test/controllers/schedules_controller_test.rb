@@ -127,4 +127,28 @@ class SchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match(/No teaching data/, response.body)
   end
+
+  test "room preselects the context semester when none is given" do
+    patch term_context_path, params: { year_be: 2567, semester: 1 }
+    get schedules_room_path
+    assert_select "select#semester_id option[selected][value=?]", semesters(:sem_2567_1).id.to_s
+  end
+
+  test "room honors an explicit semester over the context" do
+    patch term_context_path, params: { year_be: 2567, semester: 1 }
+    get schedules_room_path, params: { semester_id: semesters(:sem_2568_2).id }
+    assert_select "select#semester_id option[selected][value=?]", semesters(:sem_2568_2).id.to_s
+  end
+
+  test "teaching matrix defaults its year to the context year" do
+    patch term_context_path, params: { year_be: 2567, semester: 1 }
+    get schedules_teaching_matrix_path
+    assert_select "input#year[value=?]", "2567"
+  end
+
+  test "teaching matrix honors an explicit year over the context" do
+    patch term_context_path, params: { year_be: 2567, semester: 1 }
+    get schedules_teaching_matrix_path, params: { year: 2568 }
+    assert_select "input#year[value=?]", "2568"
+  end
 end
