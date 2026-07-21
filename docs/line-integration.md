@@ -109,11 +109,28 @@ intents. The LLM can chain tools across rounds (up to `max_rounds`).
 
 | Tool | Purpose | Example queries |
 |---|---|---|
-| `student_lookup` | Find students by ID/name/program/year/status. Returns profile, GPA, credits. | "ขอข้อมูล 6530200321", "หานิสิตชื่อสมชาย", "how many 2nd year CP students?" |
-| `course_lookup` | Find courses by course_no or name (TH/EN), filter by program group or revision year. Returns names, credits, revision year, program. | "วิชา 2110327 กี่หน่วยกิต", "มีวิชาเกี่ยวกับปัญญาประดิษฐ์ไหม" |
-| `staff_lookup` | Find staff by name/initials. Returns staff info + current teaching assignments. | "what does อ.ณัฐ teach?", "staff NNN" |
-| `schedule_lookup` *(planned)* | Query sections/time slots for a semester — by course, staff, or room. | "what room is 2110327 in?", "Tuesday schedule for ENG 305" |
-| `grade_summary` *(planned)* | Aggregate queries: grade distribution, pass rates, program statistics. | "grade distribution for 2110327", "average GPA of CP 65" |
+| `student_lookup` | Find students by ID/name/program/year/status. Profile, GPA, credits, counts. | "ขอข้อมูล 6530200321", "how many 2nd year CP students?" |
+| `student_grades` | One student's record term by term: courses+grades, GPA, GPAX. | "ผลการเรียนของ 6530200321", "is X improving?" |
+| `staff_lookup` | Find staff by name/initials; includes recent per-semester teaching summary with load totals. | "what does อ.ณัฐ teach?", "ภาระงานสอนของ อ.สมชาย" |
+| `course_lookup` | Static course info by course_no or name (TH/EN): credits, revision, program. | "วิชา 2110327 กี่หน่วยกิต" |
+| `course_offering_lookup` | Who teaches a course, its sections and meeting times, per semester. | "who teaches 2110211?", "2110327 มีกี่เซค" |
+| `course_enrollment` | Enrollment counts for a course-term (program × cohort breakdown) + single-student membership check. | "how many students take 2110101?", "did 6530200321 enroll in 2110499?" |
+| `grade_distribution` | Count per grade + course GPA for a course-term. | "grade distribution for 2110327" |
+| `cohort_gpa` | Per-semester GPA/GPAX statistics for one admission cohort. | "average GPA of CP 65" |
+| `semester_overview` | Offerings/sections/courses counts for a term, by program. | "how many courses offered in 2568/1?" |
+| `room_schedule` | A room's weekly class schedule for a term. | "what's in ENG4-303?", "ห้อง 303 วันอังคาร" |
+| `search` | Cross-entity search when the query is ambiguous. | "สมชาย" |
+
+### Tool-selection eval
+
+`bin/rails llm:eval` scores tool selection against `test/llm_eval/cases.yml`
+(selection-only — tools never execute). Knobs: `MODEL=` (llm.yml key), `N=`
+repeats, `CASES=` id filter, `REGISTRY=current|candidate`, `SWEEP=1` for the
+accuracy-vs-registry-size curve with decoy tools. Results history:
+`docs/llm-eval-results.md`. **Every tool addition or description change must
+add/adjust cases and re-run the eval** (gate: no more than a 3-point drop on
+existing cases for qwen, ≥80% on new cases). Standard matrix: qwen + gemma
+(always live); glm/kimi opportunistically when swapped into the DGX slot.
 
 ### Tool parameter pattern
 

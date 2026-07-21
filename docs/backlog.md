@@ -118,6 +118,30 @@ correctness, and each already defaults to `2110` server-side:
 - `schedules/student` — a single student's ~6 courses for one term; too small to
   warrant a filter.
 
+## 4. LINE tool coverage (recurring)
+
+**Trigger: any new/changed report, any new/changed entity show page, any new
+data domain (a new model with user-facing value).**
+
+When the web app learns to answer a new question, decide whether the LINE bot
+should answer it too. Check the tool inventory in `docs/line-integration.md`:
+
+- **If yes**: extend an existing entity-focused tool before adding a new one —
+  overlapping "twin" tools measurably degrade model tool selection (see
+  `docs/llm-data-query.md`). Add eval cases to `test/llm_eval/cases.yml`
+  covering the new capability (Thai + English), then run
+  `bin/rails llm:eval MODEL=qwen` and compare against
+  `docs/llm-eval-results.md` (gate: ≤3-point drop on existing cases, ≥80% on
+  new cases). Record the numbers there.
+- **If no**: note why below, so the next session doesn't re-litigate.
+
+Decisions so far (2026-07-21): schedule *conflict* reports and the teaching
+matrix stay web-only (dense cross-tabs, unreadable in chat); data-coverage is
+admin tooling, not chat material. Known gap 2026-07-22: gemma has no working
+tool-calling path (no vLLM tool parser on the A100 box + its call:name{...}
+content format is unknown to Line::ToolCallParser) — LINE data-query is
+qwen-only until fixed; see docs/llm-eval-results.md.
+
 ## How to add an item
 
 One `## N. Title (recurring|one-shot)` section, a bold **Trigger:** line, then
