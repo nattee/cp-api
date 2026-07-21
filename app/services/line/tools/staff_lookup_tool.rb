@@ -4,7 +4,9 @@ class Line::Tools::StaffLookupTool
   DEFINITION = {
     description: "Look up staff or lecturer information. Search by name (Thai or English), initials (e.g. 'NNN'), " \
                  "and optionally filter by program, staff type, or status. " \
-                 "Returns staff details including name, academic title, type, status, and affiliated programs.",
+                 "Returns staff details including name, academic title, type, status, and affiliated programs. " \
+                 "Also returns recent teaching assignments per semester with section counts and total " \
+                 "teaching load — use this for 'what does X teach?' and 'how much does X teach?'.",
     parameters: {
       type: "object",
       properties: {
@@ -41,6 +43,7 @@ class Line::Tools::StaffLookupTool
 
   MAX_LIMIT = 50
   DEFAULT_LIMIT = 10
+  RECENT_TERMS = 3
 
   def self.call(arguments, user: nil)
     query = arguments["query"].to_s.strip
@@ -98,10 +101,36 @@ class Line::Tools::StaffLookupTool
       status: staff_member.status,
       programs: staff_member.programs.includes(:program_group).map { |p|
         "#{p.program_group.code} (#{p.year_started_be})"
-      }
+      },
+      teaching: teaching_summary(staff_member)
     }
   end
   private_class_method :serialize
+
+  # Last few semesters of teaching — what, how many sections, and the summed
+  # load_ratio — so "how much does X teach?" needs no second tool. Newest
+  # first, capped at RECENT_TERMS semesters.
+  def self.teaching_summary(staff_member)
+    teachings = staff_member.teachings
+                            .includes(section: { course_offering: [ :course, :semester ] })
+                            .to_a
+    return [] if teachings.empty?
+
+    by_semester = teachings.group_by { |t| t.section.course_offering.semester }
+    by_semester.keys.sort_by { |s| [ -s.year_be, -s.semester_number ] }.first(RECENT_TERMS).map do |sem|
+      sem_teachings = by_semester[sem]
+      {
+        semester: sem.display_name,
+        sections: sem_teachings.map { |t|
+          offering = t.section.course_offering
+          "#{offering.course.course_no} Sec #{t.section.section_number}"
+        }.sort,
+        section_count: sem_teachings.size,
+        total_load: sem_teachings.sum { |t| t.load_ratio.to_f }.round(2)
+      }
+    end
+  end
+  private_class_method :teaching_summary
 
   def self.describe_filters(query, program_code, staff_type, status)
     parts = []

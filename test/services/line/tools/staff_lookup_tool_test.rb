@@ -124,6 +124,27 @@ class Line::Tools::StaffLookupToolTest < ActiveSupport::TestCase
     assert_equal 3, data["total"]
   end
 
+  # --- Teaching summary ---
+
+  test "includes per-semester teaching summary with load totals" do
+    result = JSON.parse(Line::Tools::StaffLookupTool.call({ "query" => "JS" }))
+    teaching = result["staff"].first["teaching"]
+
+    # lecturer_smith fixtures: 2568/1 → intro_sec_1 (1.0) + intro_sec_2 (0.5);
+    # 2567/2 → 1 section; 2567/1 → 2 sections.
+    assert_equal [ "2568/1", "2567/2", "2567/1" ], teaching.map { |t| t["semester"] }
+
+    latest = teaching.first
+    assert_equal 2, latest["section_count"]
+    assert_in_delta 1.5, latest["total_load"], 0.001
+    assert_includes latest["sections"], "2110101 Sec 1"
+  end
+
+  test "staff with no teachings gets an empty teaching list" do
+    result = JSON.parse(Line::Tools::StaffLookupTool.call({ "query" => "Brown" }))
+    assert_equal [], result["staff"].first["teaching"]
+  end
+
   private
 
   def call_tool(**args)
