@@ -7,7 +7,7 @@
   parameters:
     type: object
     properties:
-      query: { type: string, description: Title, author, or ISBN to search for. }
+      query: { type: string, description: "Title, author, or ISBN to search for." }
     required: [query]
 - name: payroll_lookup
   description: Look up salary payment records and payslip history for an employee by ID.

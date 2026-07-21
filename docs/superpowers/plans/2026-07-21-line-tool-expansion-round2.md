@@ -899,7 +899,7 @@ Create `test/llm_eval/decoy_tools.yml` (13 decoys; the last four are deliberatel
   parameters:
     type: object
     properties:
-      query: { type: string, description: Title, author, or ISBN to search for. }
+      query: { type: string, description: "Title, author, or ISBN to search for." }
     required: [query]
 - name: payroll_lookup
   description: Look up salary payment records and payslip history for an employee by ID.
@@ -995,7 +995,7 @@ Create `test/llm_eval/decoy_tools.yml` (13 decoys; the last four are deliberatel
 
 - [ ] **Step 6: Create the case set**
 
-Create `test/llm_eval/cases.yml` (38 cases; Thai/English mix; `group` drives per-group reporting):
+Create `test/llm_eval/cases.yml` (42 cases; Thai/English mix; `group` drives per-group reporting):
 
 ```yaml
 # Tool-selection eval cases for bin/rails llm:eval.
@@ -1307,7 +1307,7 @@ Expected: PASS (scorer + registry builder).
 Also validate the YAML loads and case ids are unique:
 
 Run: `bin/rails runner "cases = YAML.load_file('test/llm_eval/cases.yml'); raise 'dup ids' if cases.map { |c| c['id'] }.uniq.size != cases.size; raise 'bad group' if cases.any? { |c| !%w[existing new none].include?(c['group']) }; puts \"#{cases.size} cases OK\""`
-Expected: `38 cases OK`
+Expected: `42 cases OK`
 
 - [ ] **Step 8: Commit**
 
@@ -1317,7 +1317,7 @@ hg commit app/services/llm_eval test/services/llm_eval test/llm_eval -m "Add eva
 
 Whether the LINE bot's tool registry can grow without hurting tool-selection
 accuracy has so far been folklore (docs/llm-data-query.md's 8-10 tool claim
-predates the current model lineup). These are the measurement pieces: 38
+predates the current model lineup). These are the measurement pieces: 42
 annotated Thai/English questions with accept-alternatives, 13 decoy tool
 definitions (four deliberately near-overlapping) for the breaking-point
 sweep, subset param scoring with containment semantics, and registry
@@ -1533,7 +1533,7 @@ bin/rails llm:eval MODEL=gemma N=3
 bin/rails llm:eval MODEL=gemma N=3 REGISTRY=candidate
 ```
 
-Note: with 38 cases × 3 repeats this is 114 requests per run (~10–30 min each depending on model speed). Run sequentially; qwen and gemma runs may go in parallel terminals (different machines).
+Note: with 42 cases × 3 repeats this is 126 requests per run (~10–30 min each depending on model speed). Run sequentially; qwen and gemma runs may go in parallel terminals (different machines).
 
 - [ ] **Step 2: Run the sweep**
 

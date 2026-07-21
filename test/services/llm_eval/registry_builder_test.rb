@@ -38,6 +38,19 @@ class LlmEval::RegistryBuilderTest < ActiveSupport::TestCase
     assert decoy.dig(:function, :parameters).present?
   end
 
+  test "every decoy parses into a sane schema" do
+    decoys = YAML.load_file(Rails.root.join("test/llm_eval/decoy_tools.yml"))
+    assert_equal 13, decoys.size
+    decoys.each do |d|
+      assert d["name"].present?, "decoy missing name"
+      assert d["description"].is_a?(String) && d["description"].present?, "#{d['name']}: bad description"
+      (d.dig("parameters", "properties") || {}).each do |prop, schema|
+        assert_equal [], schema.keys - %w[type description], "#{d['name']}.#{prop}: unexpected keys #{schema.keys.inspect} — unquoted comma in flow mapping?"
+        assert schema["description"].is_a?(String) && schema["description"].present?, "#{d['name']}.#{prop}: description not a clean string"
+      end
+    end
+  end
+
   test "unknown variant raises" do
     assert_raises(ArgumentError) { LlmEval::RegistryBuilder.build("bogus") }
   end
