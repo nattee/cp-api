@@ -55,6 +55,6 @@ universal law — and it says nothing about smaller models (see gemma).
 
 - Qwen existing regression: 100.0 → 100.0 = **0.0 points** (limit 3) → PASS
 - Qwen new-tool accuracy: **100.0%** (floor 80%) → PASS
-- Decision: **(pending human review)**
+- Decision: **PASS — rollout completed 2026-07-22** (whole-branch review confirmed; tools registered and verified live).
 
 Raw logs and per-attempt CSVs: `tmp/llm_eval/` (`run-{qwen,gemma}-{current,candidate,sweep}.log`, `2026...csv`).

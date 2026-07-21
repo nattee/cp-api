@@ -2,7 +2,10 @@
 # Returns an array of tool-result messages ready to append to the conversation.
 #
 # Each tool_call is a hash like:
-#   { "id" => "call_123", "function" => { "name" => "echo", "arguments" => "{\"text\":\"hi\"}" } }
+#   { "id" => "call_123", "function" => { "name" => "student_lookup", "arguments" => "{\"query\":\"6732100021\"}" } }
+#
+# Handlers are invoked as .call(arguments, user: user) — the current LINE-linked
+# user (or nil) is always passed through so tools can scope results per-caller.
 #
 # If a handler raises, the error message is returned as the tool result
 # so the LLM can recover gracefully.

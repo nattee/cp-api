@@ -53,4 +53,23 @@ class Line::Tools::SemesterOverviewToolTest < ActiveSupport::TestCase
     assert_equal 2, cp_row["offerings"]
     assert_equal result["offerings"], result["by_program"].sum { |row| row["offerings"] }
   end
+
+  test "by_program surfaces an unlinked row for offerings whose course has no program pairing" do
+    # sem_2568_1's fixture offerings (intro_computing, senior_project) are both
+    # paired via program_courses fixtures (intro_cp, senior_cp) -- so add an
+    # unpaired course/offering here rather than editing fixtures, to exercise
+    # the gap-reconciliation logic without disturbing other tests.
+    orphan_course = Course.create!(
+      name: "Orphan Elective", course_no: "9999901", revision_year_be: 2565,
+      is_gened: false, credits: 3, l_credits: 3, nl_credits: 0,
+      l_hours: 3, nl_hours: 0, s_hours: 6, is_thesis: false
+    )
+    CourseOffering.create!(course: orphan_course, semester: semesters(:sem_2568_1), status: "confirmed")
+
+    result = JSON.parse(Line::Tools::SemesterOverviewTool.call({ "semester" => "2568/1" }))
+
+    assert_equal 3, result["offerings"]
+    assert_equal({ "program" => "unlinked", "offerings" => 1 }, result["by_program"].last)
+    assert_equal result["offerings"], result["by_program"].sum { |row| row["offerings"] }
+  end
 end

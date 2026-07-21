@@ -74,13 +74,14 @@ class Line::Tools::RoomScheduleTool
       }
     end
 
-    {
+    result = {
       room: room.display_name,
       semester: semester.display_name,
       capacity: room.capacity,
       room_type: room.room_type,
-      entries: entries,
-      note: entries.empty? ? "No classes scheduled in this room for #{semester.display_name}." : nil
-    }.compact.to_json
+      entries: entries
+    }
+    result[:note] = "No classes scheduled in this room for #{semester.display_name}." if entries.empty?
+    result.to_json
   end
 end

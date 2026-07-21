@@ -52,4 +52,19 @@ class Line::Tools::RoomScheduleToolTest < ActiveSupport::TestCase
     assert_equal [], result["entries"]
     assert_match(/No classes/, result["note"])
   end
+
+  test "capacity and room_type keys are always present, even when nil" do
+    # No fixture room has a nil capacity/room_type -- create one in-test
+    # (never edit fixtures) to prove the response no longer drops these keys
+    # via a blanket .compact.
+    Room.create!(building: "ENG9", room_number: "TBD", room_type: nil, capacity: nil)
+
+    result = JSON.parse(Line::Tools::RoomScheduleTool.call(
+      { "room" => "ENG9-TBD", "semester" => "2568/1" }))
+
+    assert result.key?("capacity")
+    assert_nil result["capacity"]
+    assert result.key?("room_type")
+    assert_nil result["room_type"]
+  end
 end

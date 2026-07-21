@@ -45,8 +45,21 @@ class Line::Tools::CourseEnrollmentToolTest < ActiveSupport::TestCase
     assert_equal [], result["enrollments"]
   end
 
+  test "student_query matches a full Thai name via CONCAT" do
+    result = JSON.parse(Line::Tools::CourseEnrollmentTool.call(
+      { "course_no" => "2110101", "year" => 2567, "student_query" => "ธนวัฒน์ ศรีเจริญ" }))
+
+    assert result["enrolled"]
+    assert_equal "6732100021", result["student"]["student_id"]
+  end
+
   test "missing required params return error" do
     result = JSON.parse(Line::Tools::CourseEnrollmentTool.call({ "course_no" => "2110101" }))
     assert_match(/required/, result["error"])
+  end
+
+  test "unknown course_no returns error" do
+    result = JSON.parse(Line::Tools::CourseEnrollmentTool.call({ "course_no" => "9999999", "year" => 2567 }))
+    assert_match(/No course found/, result["error"])
   end
 end

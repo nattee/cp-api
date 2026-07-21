@@ -45,7 +45,7 @@ ChatJob --> LlmService --> vLLM (OpenAI-compatible API)
 | `config/initializers/line_tools.rb` | Registers tools at boot |
 | `config/llm.yml` | vLLM endpoints, models, system prompt |
 | **Tools** | |
-| `app/services/line/tools/echo_tool.rb` | Test tool — echoes arguments back |
+| `app/services/line/tools/` | 11 chatbot tools (see Tool inventory) + `semester_param.rb` helper |
 | **Models** | |
 | `app/models/chat_message.rb` | Conversation history (user, assistant, tool messages) |
 | `app/models/line_contact.rb` | Unlinked LINE users awaiting admin onboarding |
@@ -91,7 +91,7 @@ For VIPs who just chat without going through the linking flow. See `docs/line-qu
 
 ## Adding Tools
 
-1. Create `app/services/line/tools/your_tool.rb` with `DEFINITION` hash and `.call(arguments)` method
+1. Create `app/services/line/tools/your_tool.rb` with `DEFINITION` hash and `.call(arguments, user: nil)` method
 2. Register in `config/initializers/line_tools.rb`
 3. See `docs/llm-data-query.md` for the planned meta-tool pattern
 

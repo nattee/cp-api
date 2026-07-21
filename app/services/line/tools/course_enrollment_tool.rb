@@ -39,6 +39,10 @@ class Line::Tools::CourseEnrollmentTool
     year = arguments["year"].to_i
     return { error: "course_no and year are required" }.to_json if course_no.blank? || year.zero?
 
+    unless Course.exists?(course_no: course_no)
+      return { error: "No course found with course_no #{course_no}" }.to_json
+    end
+
     year_ce = year < 2400 ? year : year - 543
     semester = arguments["semester"].presence&.to_i
 
@@ -72,7 +76,9 @@ class Line::Tools::CourseEnrollmentTool
       else
         like = "%#{student_query}%"
         Student.where("first_name LIKE :q OR last_name LIKE :q OR " \
-                      "first_name_th LIKE :q OR last_name_th LIKE :q", q: like)
+                      "first_name_th LIKE :q OR last_name_th LIKE :q OR " \
+                      "CONCAT(first_name, ' ', last_name) LIKE :q OR " \
+                      "CONCAT(first_name_th, ' ', last_name_th) LIKE :q", q: like)
       end.limit(2).to_a
 
     return { error: "No student found matching '#{student_query}'" }.to_json if students.empty?

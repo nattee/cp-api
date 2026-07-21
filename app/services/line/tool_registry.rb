@@ -1,6 +1,6 @@
 # Central registry of tools available to the LLM.
 # Each tool registers itself with a name, an OpenAI-format function definition,
-# and a handler class that implements .call(arguments).
+# and a handler class that implements .call(arguments, user: nil).
 #
 # Usage:
 #   Line::ToolRegistry.register("search", definition: { ... }, handler: Line::Tools::SearchTool)

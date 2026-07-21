@@ -25,6 +25,7 @@ class Line::Tools::SemesterOverviewTool
 
     offerings = CourseOffering.where(semester: semester)
     sections = Section.joins(:course_offering).where(course_offerings: { semester_id: semester.id })
+    total_offerings = offerings.count
 
     by_program = offerings.joins(course: { program_courses: { program: :program_group } })
                           .group("program_groups.code")
@@ -32,9 +33,19 @@ class Line::Tools::SemesterOverviewTool
                           .map { |code, count| { program: code, offerings: count } }
                           .sort_by { |row| row[:program] }
 
+    # The join above only matches offerings whose course has a program_courses
+    # pairing. Some offerings (e.g. gen-ed or unpaired electives) have none and
+    # would silently vanish from the breakdown, making by_program sum to less
+    # than the headline "offerings" total. Surface the gap as an explicit row
+    # instead of a self-contradicting number.
+    paired = offerings.joins(course: { program_courses: { program: :program_group } })
+                      .distinct.count("course_offerings.id")
+    unlinked = total_offerings - paired
+    by_program << { program: "unlinked", offerings: unlinked } if unlinked.positive?
+
     {
       semester: semester.display_name,
-      offerings: offerings.count,
+      offerings: total_offerings,
       sections: sections.count,
       distinct_courses: offerings.joins(:course).distinct.count("courses.course_no"),
       by_program: by_program
