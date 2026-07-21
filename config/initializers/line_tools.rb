@@ -59,4 +59,10 @@ Rails.application.config.to_prepare do
     definition: Line::Tools::CourseEnrollmentTool::DEFINITION,
     handler: Line::Tools::CourseEnrollmentTool
   )
+
+  Line::ToolRegistry.register(
+    "semester_overview",
+    definition: Line::Tools::SemesterOverviewTool::DEFINITION,
+    handler: Line::Tools::SemesterOverviewTool
+  )
 end

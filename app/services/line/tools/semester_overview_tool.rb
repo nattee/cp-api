@@ -20,6 +20,24 @@ class Line::Tools::SemesterOverviewTool
   }.freeze
 
   def self.call(arguments, user: nil)
-    raise NotImplementedError, "semester_overview is not implemented yet (eval-only definition)"
+    semester = Line::Tools::SemesterParam.resolve(arguments["semester"])
+    return semester.to_json unless semester.is_a?(Semester)
+
+    offerings = CourseOffering.where(semester: semester)
+    sections = Section.joins(:course_offering).where(course_offerings: { semester_id: semester.id })
+
+    by_program = offerings.joins(course: { program_courses: { program: :program_group } })
+                          .group("program_groups.code")
+                          .count
+                          .map { |code, count| { program: code, offerings: count } }
+                          .sort_by { |row| row[:program] }
+
+    {
+      semester: semester.display_name,
+      offerings: offerings.count,
+      sections: sections.count,
+      distinct_courses: offerings.joins(:course).distinct.count("courses.course_no"),
+      by_program: by_program
+    }.to_json
   end
 end
