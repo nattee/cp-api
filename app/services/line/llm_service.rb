@@ -72,7 +72,7 @@ class Line::LlmService
       # array. Parse them client-side when the server-side parser misses. Server
       # parsers have improved, but this is cheap insurance (see docs/llm-api.md).
       if tool_calls.blank?
-        parsed = parse_tool_calls_from_content(assistant_message["content"].to_s)
+        parsed = Line::ToolCallParser.parse(assistant_message["content"].to_s)
         if parsed.present?
           tool_calls = parsed
           assistant_message = { "role" => "assistant", "tool_calls" => tool_calls }
@@ -369,102 +369,5 @@ class Line::LlmService
     end
 
     details.compact
-  end
-
-  # Fallback parser for tool calls embedded in content as XML tags or bare JSON.
-  # Handles: <tool_call>...</tool_call>, <tools>...</tools>, and bare JSON with
-  # "name" + "arguments" keys (some models skip the XML wrapper entirely).
-  # Returns an array of tool_call hashes matching the OpenAI format, or nil.
-  TOOL_CALL_PATTERN = /<tool_call>\s*(.*?)\s*<\/tool_call>|<tools>\s*(.*?)\s*<\/tools>/m
-
-  # GLM sometimes emits ```action\nname\n{json}\n``` code blocks instead of
-  # structured tool_calls or XML tags.
-  ACTION_BLOCK_PATTERN = /```action\s*\n(\S+)\s*\n(.*?)```/m
-
-  def parse_tool_calls_from_content(content)
-    # Try XML-wrapped format first.
-    matches = content.scan(TOOL_CALL_PATTERN)
-    if matches.present?
-      return build_calls_from_matches(matches)
-    end
-
-    # Try ```action``` code block format (GLM variant).
-    action = parse_action_block(content)
-    return action if action.present?
-
-    # Try bare JSON: the entire content (or a line) is a JSON object with "name" + "arguments".
-    bare = try_parse_bare_tool_call(content)
-    bare.presence
-  end
-
-  # GLM sometimes emits tool calls as <tool_call>name<arg_key>k</arg_key><arg_value>v</arg_value></tool_call>
-  # instead of JSON inside the tags. Detect and parse this format first.
-  ARG_KV_PATTERN = /<arg_key>\s*(.*?)\s*<\/arg_key>\s*<arg_value>\s*(.*?)\s*<\/arg_value>/m
-
-  def build_calls_from_matches(matches)
-    calls = matches.flat_map do |tool_call_match, tools_match|
-      raw = (tool_call_match || tools_match).strip
-
-      if raw.match?(ARG_KV_PATTERN)
-        parse_arg_kv_tool_call(raw)
-      else
-        raw.split("\n").filter_map { |line| parse_single_tool_json(line) }
-      end
-    end
-    calls.presence
-  end
-
-  def parse_arg_kv_tool_call(raw)
-    # Extract tool name: text before the first <arg_key> tag.
-    name = raw.sub(/<arg_key>.*\z/m, "").strip
-    return [] if name.empty?
-
-    args = {}
-    raw.scan(ARG_KV_PATTERN).each { |k, v| args[k.strip] = v.strip }
-
-    [{
-      "id" => "fallback_#{SecureRandom.hex(4)}",
-      "type" => "function",
-      "function" => { "name" => name, "arguments" => args.to_json }
-    }]
-  end
-
-  def parse_action_block(content)
-    matches = content.scan(ACTION_BLOCK_PATTERN)
-    return nil if matches.empty?
-
-    calls = matches.filter_map do |name, body|
-      args = JSON.parse(body.strip)
-      {
-        "id" => "fallback_#{SecureRandom.hex(4)}",
-        "type" => "function",
-        "function" => { "name" => name.strip, "arguments" => args.to_json }
-      }
-    rescue JSON::ParserError
-      nil
-    end
-    calls.presence
-  end
-
-  def try_parse_bare_tool_call(content)
-    calls = content.strip.split("\n").filter_map { |line| parse_single_tool_json(line) }
-    calls.presence
-  end
-
-  def parse_single_tool_json(line)
-    line = line.strip
-    return nil if line.empty?
-    parsed = JSON.parse(line)
-    return nil unless parsed.is_a?(Hash) && parsed["name"].present? && parsed.key?("arguments")
-    {
-      "id" => "fallback_#{SecureRandom.hex(4)}",
-      "type" => "function",
-      "function" => {
-        "name" => parsed["name"],
-        "arguments" => parsed["arguments"].is_a?(String) ? parsed["arguments"] : parsed["arguments"].to_json
-      }
-    }
-  rescue JSON::ParserError
-    nil
   end
 end
