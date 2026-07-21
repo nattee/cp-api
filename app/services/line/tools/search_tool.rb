@@ -26,7 +26,7 @@ class Line::Tools::SearchTool
   MAX_LIMIT = 10
   DEFAULT_LIMIT = 3
 
-  def self.call(arguments)
+  def self.call(arguments, user: nil)
     query = arguments["query"].to_s.strip
     return { error: "query is required" }.to_json if query.blank?
 

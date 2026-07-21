@@ -42,7 +42,7 @@ class Line::Tools::StaffLookupTool
   MAX_LIMIT = 50
   DEFAULT_LIMIT = 10
 
-  def self.call(arguments)
+  def self.call(arguments, user: nil)
     query = arguments["query"].to_s.strip
     program_code = arguments["program_code"].to_s.strip.presence
     staff_type = arguments["staff_type"].to_s.strip.presence

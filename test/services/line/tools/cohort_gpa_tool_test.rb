@@ -15,9 +15,9 @@ class Line::Tools::CohortGpaToolTest < ActiveSupport::TestCase
 
   test "returns per-term GPA/GPAX; B.E. and C.E. admission years are equivalent" do
     be = JSON.parse(Line::Tools::CohortGpaTool.call(
-      "program_code" => "CP", "admission_year" => 2599))
+      { "program_code" => "CP", "admission_year" => 2599 }))
     ce = JSON.parse(Line::Tools::CohortGpaTool.call(
-      "program_code" => "cp", "admission_year" => 2056))
+      { "program_code" => "cp", "admission_year" => 2056 }))
 
     assert_equal be, ce                       # era rule + case-insensitive code
     assert_equal "CP", be["program"]
@@ -30,7 +30,7 @@ class Line::Tools::CohortGpaToolTest < ActiveSupport::TestCase
 
   test "unknown program code returns an error listing valid codes" do
     result = JSON.parse(Line::Tools::CohortGpaTool.call(
-      "program_code" => "ZZ", "admission_year" => 2599))
+      { "program_code" => "ZZ", "admission_year" => 2599 }))
 
     assert_match(/Unknown program code ZZ/, result["error"])
     assert_match(/CP/, result["error"])

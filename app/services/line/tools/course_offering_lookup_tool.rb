@@ -38,7 +38,7 @@ class Line::Tools::CourseOfferingLookupTool
   MAX_LIMIT = 20
   DEFAULT_LIMIT = 5
 
-  def self.call(arguments)
+  def self.call(arguments, user: nil)
     course_no = arguments["course_no"].to_s.strip
     semester_str = arguments["semester"].to_s.strip.presence
     limit = (arguments["limit"] || DEFAULT_LIMIT).to_i.clamp(1, MAX_LIMIT)

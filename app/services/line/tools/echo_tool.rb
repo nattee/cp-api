@@ -12,7 +12,7 @@ class Line::Tools::EchoTool
     }
   }.freeze
 
-  def self.call(arguments)
+  def self.call(arguments, user: nil)
     arguments.to_json
   end
 end

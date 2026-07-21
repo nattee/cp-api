@@ -26,7 +26,7 @@ class Line::Tools::CohortGpaTool
     }
   }.freeze
 
-  def self.call(arguments)
+  def self.call(arguments, user: nil)
     code = arguments["program_code"].to_s.strip.upcase
     year = arguments["admission_year"].to_i
     return { error: "program_code and admission_year are required" }.to_json if code.blank? || year.zero?

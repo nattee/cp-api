@@ -7,19 +7,19 @@
 # If a handler raises, the error message is returned as the tool result
 # so the LLM can recover gracefully.
 class Line::ToolExecutor
-  def self.execute(tool_calls)
+  def self.execute(tool_calls, user: nil)
     tool_calls.map do |tool_call|
       name = tool_call.dig("function", "name")
       raw_args = tool_call.dig("function", "arguments")
       call_id = tool_call["id"]
 
-      result = invoke(name, raw_args)
+      result = invoke(name, raw_args, user)
 
       { role: "tool", tool_call_id: call_id, content: result.to_s }
     end
   end
 
-  def self.invoke(name, raw_args)
+  def self.invoke(name, raw_args, user)
     handler = Line::ToolRegistry.handler_for(name)
     unless handler
       ApiEvent.log(service: "llm", action: "tool_call", severity: "warning",
@@ -28,7 +28,7 @@ class Line::ToolExecutor
     end
 
     arguments = raw_args.is_a?(String) ? JSON.parse(raw_args) : raw_args
-    result = handler.call(arguments)
+    result = handler.call(arguments, user: user)
 
     ApiEvent.log(service: "llm", action: "tool_call", severity: "info",
                  message: "Tool: #{name}", details: { tool: name, arguments: arguments, result: result.to_s.truncate(500) })

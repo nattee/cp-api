@@ -15,9 +15,9 @@ class Line::Tools::GradeDistributionToolTest < ActiveSupport::TestCase
 
   test "returns distribution and GPA; C.E. and B.E. years are equivalent" do
     ce = JSON.parse(Line::Tools::GradeDistributionTool.call(
-      "course_no" => "9960001", "year" => 2025, "semester" => 2))
+      { "course_no" => "9960001", "year" => 2025, "semester" => 2 }))
     be = JSON.parse(Line::Tools::GradeDistributionTool.call(
-      "course_no" => "9960001", "year" => 2568, "semester" => 2))
+      { "course_no" => "9960001", "year" => 2568, "semester" => 2 }))
 
     assert_equal ce, be
     assert_equal({ "A" => 1 }, ce["counts"])
@@ -29,7 +29,7 @@ class Line::Tools::GradeDistributionToolTest < ActiveSupport::TestCase
 
   test "omitting semester returns every term of the year" do
     result = JSON.parse(Line::Tools::GradeDistributionTool.call(
-      "course_no" => "9960001", "year" => 2568))
+      { "course_no" => "9960001", "year" => 2568 }))
 
     assert_equal 1, result["semesters"].size
     assert_equal 2, result["semesters"].first["semester"]
@@ -37,8 +37,8 @@ class Line::Tools::GradeDistributionToolTest < ActiveSupport::TestCase
 
   test "unknown course and missing params return errors" do
     assert_includes Line::Tools::GradeDistributionTool.call(
-      "course_no" => "0000000", "year" => 2568), "error"
+      { "course_no" => "0000000", "year" => 2568 }), "error"
     assert_includes Line::Tools::GradeDistributionTool.call(
-      "course_no" => "9960001"), "error"
+      { "course_no" => "9960001" }), "error"
   end
 end

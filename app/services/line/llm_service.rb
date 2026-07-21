@@ -91,7 +91,7 @@ class Line::LlmService
       messages << assistant_message
 
       # Execute each tool and append results to the conversation.
-      tool_results = Line::ToolExecutor.execute(tool_calls)
+      tool_results = Line::ToolExecutor.execute(tool_calls, user: @user)
       messages.concat(tool_results)
 
       # Persist intermediate messages for audit trail.

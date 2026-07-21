@@ -26,7 +26,7 @@ class Line::Tools::GradeDistributionTool
     }
   }.freeze
 
-  def self.call(arguments)
+  def self.call(arguments, user: nil)
     course_no = arguments["course_no"].to_s.strip
     year = arguments["year"].to_i
     return { error: "course_no and year are required" }.to_json if course_no.blank? || year.zero?

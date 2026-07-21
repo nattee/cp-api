@@ -70,7 +70,7 @@ class Line::ToolExecutorTest < ActiveSupport::TestCase
   test "execute logs error when handler raises" do
     # Register a tool that always raises
     failing_handler = Class.new do
-      def self.call(_args)
+      def self.call(_args, user: nil)
         raise "something broke"
       end
     end
@@ -102,5 +102,29 @@ class Line::ToolExecutorTest < ActiveSupport::TestCase
       results = Line::ToolExecutor.execute(tool_calls)
       assert_equal 2, results.size
     end
+  end
+
+  test "execute passes user to handlers" do
+    probe = Class.new do
+      class << self
+        attr_accessor :received_user
+
+        def call(_arguments, user: nil)
+          self.received_user = user
+          "ok"
+        end
+      end
+    end
+    Line::ToolRegistry.register("probe_tool",
+      definition: { description: "probe", parameters: { type: "object", properties: {} } },
+      handler: probe)
+
+    user = User.new(name: "probe user")
+    Line::ToolExecutor.execute(
+      [ { "id" => "call_1", "function" => { "name" => "probe_tool", "arguments" => "{}" } } ],
+      user: user
+    )
+
+    assert_same user, probe.received_user
   end
 end
