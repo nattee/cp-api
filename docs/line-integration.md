@@ -151,12 +151,4 @@ The LLM maps natural language to parameters:
 
 ## Production
 
-Change the Zoraxy target from `localhost:3000` to the cp-api **production app host** on `:3000`, and drop the SSH tunnel.
-
-> ⚠️ **The production host is NOT `10.0.5.59`.** A previous version of this line
-> named `10.0.5.59:3000` as an example and it has repeatedly been mistaken for
-> production. Verified 2026-07-21: `10.0.5.59` is `cafe-build-server` — a
-> build/DB box (MySQL, Postgres, an Apache app, the `isolate/` judging repo) with
-> **no cp-api checkout, no Puma, and :3000 closed**. cp-api is not deployed there.
-> The real cp-api production host is **still unconfirmed** — fill it in here once
-> established (or note here if cp-api has no dedicated production server yet).
+Change Zoraxy target from `localhost:3000` to `10.0.5.59:3000` (or wherever the production server is) and drop the SSH tunnel.
