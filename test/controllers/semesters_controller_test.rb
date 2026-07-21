@@ -54,4 +54,32 @@ class SemestersControllerTest < ActionDispatch::IntegrationTest
     assert_match(/attachment.*schedule_2568_1\.csv/, response.headers["Content-Disposition"])
     assert_match(/course_no/, response.body)
   end
+
+  test "export_sections returns CSV download with all course scope" do
+    get export_sections_semester_path(semesters(:sem_2568_1), course_scope: "all")
+    assert_response :success
+    assert_equal "text/csv", response.content_type.split(";").first
+    assert_match(/attachment.*sections_2568_1\.csv/, response.headers["Content-Disposition"])
+    assert_match(/course_no/, response.body)
+  end
+
+  test "export_sections with dept scope filters courses by course_no prefix" do
+    # sem_2567_1 has both 2110% (2110101) and non-2110% (2103106) courses
+    dept_response = begin
+      get export_sections_semester_path(semesters(:sem_2567_1))
+      response
+    end
+    assert_response :success
+    assert_equal "text/csv", dept_response.content_type.split(";").first
+    assert_match(/attachment.*sections_2567_1_dept\.csv/, dept_response.headers["Content-Disposition"])
+    assert_match(/2110101/, dept_response.body)
+    assert_no_match(/2103106/, dept_response.body)
+
+    # Same semester with all scope includes all courses
+    get export_sections_semester_path(semesters(:sem_2567_1), course_scope: "all")
+    assert_response :success
+    assert_match(/attachment.*sections_2567_1\.csv/, response.headers["Content-Disposition"])
+    assert_match(/2110101/, response.body)
+    assert_match(/2103106/, response.body)
+  end
 end
