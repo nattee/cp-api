@@ -1,0 +1,101 @@
+# Definition-only fake tools used to pad the registry for the breaking-point
+# sweep (bin/rails llm:eval SWEEP=1). Never registered, never executed.
+# Ordered easy → hard: the first entries are clearly out-of-domain; the last
+# four deliberately sit close to real tools to stress selection.
+- name: library_search
+  description: Search the university library catalog for books, journals, and theses by title, author, or ISBN.
+  parameters:
+    type: object
+    properties:
+      query: { type: string, description: Title, author, or ISBN to search for. }
+    required: [query]
+- name: payroll_lookup
+  description: Look up salary payment records and payslip history for an employee by ID.
+  parameters:
+    type: object
+    properties:
+      employee_id: { type: string, description: Employee ID. }
+      month: { type: string, description: "Month in YYYY-MM format." }
+    required: [employee_id]
+- name: leave_request
+  description: Submit or check the status of a staff annual/sick leave request.
+  parameters:
+    type: object
+    properties:
+      staff_id: { type: string, description: Staff ID. }
+      status_only: { type: boolean, description: Only check status of existing requests. }
+    required: [staff_id]
+- name: parking_availability
+  description: Check available parking spots per building parking lot on campus.
+  parameters:
+    type: object
+    properties:
+      building: { type: string, description: Building name. }
+    required: []
+- name: print_queue_status
+  description: Check the department print server queue and printer toner levels.
+  parameters:
+    type: object
+    properties:
+      printer: { type: string, description: Printer name. }
+    required: []
+- name: it_ticket_lookup
+  description: Look up IT helpdesk tickets by ticket number or reporter name.
+  parameters:
+    type: object
+    properties:
+      query: { type: string, description: Ticket number or reporter name. }
+    required: [query]
+- name: inventory_lookup
+  description: Search department equipment inventory by asset tag or equipment name.
+  parameters:
+    type: object
+    properties:
+      query: { type: string, description: Asset tag or equipment name. }
+    required: [query]
+- name: shuttle_schedule
+  description: Get the campus shuttle bus timetable between buildings and gates.
+  parameters:
+    type: object
+    properties:
+      route: { type: string, description: Route name or number. }
+    required: []
+- name: cafeteria_menu
+  description: Get today's menu for campus cafeterias.
+  parameters:
+    type: object
+    properties:
+      cafeteria: { type: string, description: Cafeteria name. }
+    required: []
+# --- near-overlap decoys: close to real tools on purpose ---
+- name: meeting_room_booking
+  description: Book or check availability of department MEETING rooms for staff meetings (not classrooms or class schedules).
+  parameters:
+    type: object
+    properties:
+      room: { type: string, description: Meeting room name. }
+      date: { type: string, description: "Date in YYYY-MM-DD." }
+    required: []
+- name: thesis_defense_schedule
+  description: Look up graduate thesis defense appointments by student or examiner (not regular class schedules).
+  parameters:
+    type: object
+    properties:
+      query: { type: string, description: Student or examiner name. }
+    required: [query]
+- name: alumni_lookup
+  description: Search the alumni association directory by name or graduation year (not current student records).
+  parameters:
+    type: object
+    properties:
+      query: { type: string, description: Alumni name. }
+      graduation_year: { type: integer, description: Graduation year (B.E.). }
+    required: []
+- name: admission_stats
+  description: Get APPLICANT statistics for admission rounds - applications received per round (not enrolled student counts).
+  parameters:
+    type: object
+    properties:
+      year: { type: integer, description: Admission year (B.E.). }
+      round: { type: string, description: "TCAS round, e.g. 'TCAS1'." }
+    required: [year]

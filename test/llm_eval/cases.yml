@@ -1,0 +1,299 @@
+# Tool-selection eval cases for bin/rails llm:eval.
+# Schema per case:
+#   id       — unique slug
+#   group    — existing | new | none  (reporting buckets; gate applies per group)
+#   question — the user message, verbatim
+#   accept   — alternatives; the attempt passes tool selection when the called
+#              tool matches ANY entry. params are a SUBSET check against that
+#              entry (strings: case-insensitive containment; ints: normalized).
+#              tool: none = correct answer is NO tool call.
+# Data referenced here does not need to exist — eval never executes tools.
+
+# ---- student_lookup (existing) ----
+- id: student_by_id
+  group: existing
+  question: "ขอข้อมูลนิสิต 6732100021"
+  accept:
+    - tool: student_lookup
+      params: { query: "6732100021" }
+- id: student_by_name_en
+  group: existing
+  question: "Find the student named Thanawat"
+  accept:
+    - tool: student_lookup
+      params: { query: "Thanawat" }
+    - tool: search
+      params: { query: "Thanawat" }
+- id: student_count_cohort
+  group: existing
+  question: "How many CP students were admitted in 2567?"
+  accept:
+    - tool: student_lookup
+      params: { program_code: "CP", admission_year: 2567 }
+- id: student_count_th
+  group: existing
+  question: "นิสิต CEDT รุ่นปี 2568 มีกี่คน"
+  accept:
+    - tool: student_lookup
+      params: { program_code: "CEDT", admission_year: 2568 }
+- id: student_status_filter
+  group: existing
+  question: "List CP students who are currently on leave"
+  accept:
+    - tool: student_lookup
+      params: { program_code: "CP", status: "on_leave" }
+
+# ---- staff_lookup (existing; also covers workload after Task 13) ----
+- id: staff_by_initials
+  group: existing
+  question: "Who is staff JS?"
+  accept:
+    - tool: staff_lookup
+      params: { query: "JS" }
+    - tool: search
+      params: { query: "JS" }
+- id: staff_by_name_th
+  group: existing
+  question: "อ.สมิธ อยู่ภาควิชาโปรแกรมไหน"
+  accept:
+    - tool: staff_lookup
+      params: { query: "สมิธ" }
+- id: staff_teaching_th
+  group: existing
+  question: "อ.สมิธ สอนวิชาอะไรบ้างเทอมนี้"
+  accept:
+    - tool: staff_lookup
+      params: { query: "สมิธ" }
+- id: staff_workload_en
+  group: existing
+  question: "How much teaching load does Prof. Jones have this semester?"
+  accept:
+    - tool: staff_lookup
+      params: { query: "Jones" }
+- id: staff_load_th
+  group: existing
+  question: "ภาระงานสอนของ อ.เจน โจนส์ เป็นเท่าไหร่"
+  accept:
+    - tool: staff_lookup
+      params: { query: "เจน" }
+
+# ---- course_lookup (existing) ----
+- id: course_credits_th
+  group: existing
+  question: "วิชา 2110327 กี่หน่วยกิต"
+  accept:
+    - tool: course_lookup
+      params: { query: "2110327" }
+- id: course_by_topic_th
+  group: existing
+  question: "มีวิชาเกี่ยวกับปัญญาประดิษฐ์ไหม"
+  accept:
+    - tool: course_lookup
+      params: { query: "ปัญญาประดิษฐ์" }
+    - tool: search
+      params: { query: "ปัญญาประดิษฐ์" }
+- id: course_name_en
+  group: existing
+  question: "What is course 2110101 called in English and how many credits is it?"
+  accept:
+    - tool: course_lookup
+      params: { query: "2110101" }
+
+# ---- course_offering_lookup (existing) ----
+- id: offering_who_teaches
+  group: existing
+  question: "Who teaches 2110101 in semester 2568/1?"
+  accept:
+    - tool: course_offering_lookup
+      params: { course_no: "2110101", semester: "2568/1" }
+- id: offering_sections_th
+  group: existing
+  question: "2110327 มีกี่เซค ใครสอนเซคไหนบ้าง"
+  accept:
+    - tool: course_offering_lookup
+      params: { course_no: "2110327" }
+- id: offering_schedule_en
+  group: existing
+  question: "When does 2110499 meet this semester?"
+  accept:
+    - tool: course_offering_lookup
+      params: { course_no: "2110499" }
+- id: offering_room_of_course
+  group: existing
+  question: "วิชา 2110101 เรียนห้องไหน"
+  accept:
+    - tool: course_offering_lookup
+      params: { course_no: "2110101" }
+
+# ---- grade_distribution (existing) ----
+- id: grade_dist_en
+  group: existing
+  question: "Show the grade distribution for 2110327 in year 2567"
+  accept:
+    - tool: grade_distribution
+      params: { course_no: "2110327", year: 2567 }
+- id: grade_dist_th
+  group: existing
+  question: "วิชา 2110101 ปี 2567 เทอม 1 มีคนได้ A กี่คน"
+  accept:
+    - tool: grade_distribution
+      params: { course_no: "2110101", year: 2567, semester: 1 }
+- id: course_gpa_term
+  group: existing
+  question: "What was the average grade of 2110203 in 2566/2?"
+  accept:
+    - tool: grade_distribution
+      params: { course_no: "2110203", year: 2566, semester: 2 }
+- id: grade_dist_fail_count
+  group: existing
+  question: "How many students failed 2110203 in 2566?"
+  accept:
+    - tool: grade_distribution
+      params: { course_no: "2110203", year: 2566 }
+
+# ---- cohort_gpa (existing) ----
+- id: cohort_gpa_en
+  group: existing
+  question: "What's the average GPA of the CP 2565 cohort?"
+  accept:
+    - tool: cohort_gpa
+      params: { program_code: "CP", admission_year: 2565 }
+- id: cohort_gpax_th
+  group: existing
+  question: "GPAX เฉลี่ยของ CEDT รุ่น 2566 เป็นเท่าไหร่"
+  accept:
+    - tool: cohort_gpa
+      params: { program_code: "CEDT", admission_year: 2566 }
+- id: cohort_trend
+  group: existing
+  question: "How has the CP 2564 cohort's GPA developed semester by semester?"
+  accept:
+    - tool: cohort_gpa
+      params: { program_code: "CP", admission_year: 2564 }
+
+# ---- search (existing) ----
+- id: search_bare_name
+  group: existing
+  question: "สมิธ"
+  accept:
+    - tool: search
+      params: { query: "สมิธ" }
+    - tool: staff_lookup
+      params: { query: "สมิธ" }
+    - tool: student_lookup
+      params: { query: "สมิธ" }
+- id: search_ambiguous_number
+  group: existing
+  question: "2110"
+  accept:
+    - tool: search
+      params: { query: "2110" }
+    - tool: course_lookup
+      params: { query: "2110" }
+
+# ---- no tool (none) ----
+- id: none_greeting
+  group: none
+  question: "สวัสดีครับ"
+  accept:
+    - tool: none
+- id: none_general_knowledge
+  group: none
+  question: "What is the capital of France?"
+  accept:
+    - tool: none
+
+# ---- student_grades (new) ----
+- id: transcript_all_terms
+  group: new
+  question: "How did student 6532100071 perform over the years?"
+  accept:
+    - tool: student_grades
+      params: { query: "6532100071" }
+- id: transcript_one_term_th
+  group: new
+  question: "เกรดของนิสิต 6732100021 เทอม 2567/2 เป็นยังไงบ้าง"
+  accept:
+    - tool: student_grades
+      params: { query: "6732100021", semester: "2567/2" }
+- id: transcript_by_name_th
+  group: new
+  question: "ผลการเรียนของธนวัฒน์ ศรีเจริญ ดูหน่อย"
+  accept:
+    - tool: student_grades
+      params: { query: "ธนวัฒน์" }
+- id: transcript_improving
+  group: new
+  question: "Is student 6632100063 improving or getting worse each semester?"
+  accept:
+    - tool: student_grades
+      params: { query: "6632100063" }
+- id: gpa_of_student_ambiguous
+  group: new
+  question: "GPA ของนิสิต 6532100071 เป็นเท่าไหร่"
+  accept:
+    - tool: student_grades
+      params: { query: "6532100071" }
+    - tool: student_lookup
+      params: { query: "6532100071" }
+
+# ---- course_enrollment (new) ----
+- id: enrollment_count_en
+  group: new
+  question: "How many students took 2110101 in 2567?"
+  accept:
+    - tool: course_enrollment
+      params: { course_no: "2110101", year: 2567 }
+- id: enrollment_breakdown_th
+  group: new
+  question: "วิชา 2110327 ปี 2568 เทอม 1 มีนิสิตภาคไหนเรียนบ้าง อย่างละกี่คน"
+  accept:
+    - tool: course_enrollment
+      params: { course_no: "2110327", year: 2568, semester: 1 }
+- id: enrollment_membership
+  group: new
+  question: "Did student 6732100021 enroll in 2110499 in 2567?"
+  accept:
+    - tool: course_enrollment
+      params: { course_no: "2110499", year: 2567, student_query: "6732100021" }
+    - tool: student_grades
+      params: { query: "6732100021" }
+
+# ---- semester_overview (new) ----
+- id: overview_named_term
+  group: new
+  question: "How many courses are offered in semester 2568/1?"
+  accept:
+    - tool: semester_overview
+      params: { semester: "2568/1" }
+- id: overview_current_th
+  group: new
+  question: "เทอมนี้เปิดสอนกี่วิชา กี่เซค"
+  accept:
+    - tool: semester_overview
+- id: overview_year_term_th
+  group: new
+  question: "ปีการศึกษา 2567 เทอม 2 มีวิชาเปิดกี่วิชา"
+  accept:
+    - tool: semester_overview
+      params: { semester: "2567/2" }
+
+# ---- room_schedule (new) ----
+- id: room_week
+  group: new
+  question: "What is the class schedule of room ENG4-303 in 2568/1?"
+  accept:
+    - tool: room_schedule
+      params: { room: "303", semester: "2568/1" }
+- id: room_day_th
+  group: new
+  question: "ห้อง ENG4-303 วันอังคารมีเรียนวิชาอะไรบ้าง"
+  accept:
+    - tool: room_schedule
+      params: { room: "303" }
+- id: room_free_check
+  group: new
+  question: "Is room ENG3-201 free on Friday afternoon this semester?"
+  accept:
+    - tool: room_schedule
+      params: { room: "201" }
