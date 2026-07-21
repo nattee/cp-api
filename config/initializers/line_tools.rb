@@ -47,4 +47,10 @@ Rails.application.config.to_prepare do
     definition: Line::Tools::CohortGpaTool::DEFINITION,
     handler: Line::Tools::CohortGpaTool
   )
+
+  Line::ToolRegistry.register(
+    "student_grades",
+    definition: Line::Tools::StudentGradesTool::DEFINITION,
+    handler: Line::Tools::StudentGradesTool
+  )
 end
