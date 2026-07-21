@@ -218,3 +218,10 @@ sync policy), and `docs/chulabooster-client-guide.md` (CB's API contract).
   pairings and fills blank `course_group_code` tags (same dry-run/`COMMIT=1`/`SNAPSHOT_DIR=`
   contract; differing tags report-only). Run `program_courses:backfill_legacy_groups` after
   it, once, to fill what CB doesn't cover.
+
+## Production
+
+- **Website server: `dae@10.0.5.12`**, app at `~/cp-api`, Passenger on port 80 (`:3000` is closed). Not to be confused with `10.0.5.59` in `docs/line-integration.md` — that is the LLM-backend-side production server, a different machine.
+- **Deploy** (server has no GitHub key — push directly over ssh): `hg push ssh://10.0.5.12/cp-api`, then on the server `hg update tip`, `bundle check || bundle install`, `RAILS_ENV=production bin/rails db:migrate dartsass:build assets:precompile` (rvm gemset `ruby-3.4.8@cp-api`, DB password env `CP_API_DATABASE_PASSWORD`), then `touch tmp/restart.txt`. Check `hg parent` on the server before pushing to catch server-side hotfixes.
+- `config/llm.yml` is gitignored per-host — re-copy at deploy time only when it changed locally (production override: `log_level: headers`).
+- `solid_queue` worker restart requires interactive sudo (`ssh -t 10.0.5.12 sudo systemctl restart solid_queue`) — needed only when job-side code changes.
