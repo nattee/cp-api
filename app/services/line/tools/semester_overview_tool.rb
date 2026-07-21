@@ -28,7 +28,7 @@ class Line::Tools::SemesterOverviewTool
 
     by_program = offerings.joins(course: { program_courses: { program: :program_group } })
                           .group("program_groups.code")
-                          .count
+                          .distinct.count("course_offerings.id")
                           .map { |code, count| { program: code, offerings: count } }
                           .sort_by { |row| row[:program] }
 

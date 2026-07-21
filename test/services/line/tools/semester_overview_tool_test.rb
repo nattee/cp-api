@@ -30,4 +30,27 @@ class Line::Tools::SemesterOverviewToolTest < ActiveSupport::TestCase
     result = JSON.parse(Line::Tools::SemesterOverviewTool.call({ "semester" => "next term" }))
     assert_match(/Could not parse semester/, result["error"])
   end
+
+  test "by_program does not double-count a course pairing fan-out within the same program group" do
+    # program_courses is many-to-many: intro_computing is already paired to
+    # cp_bachelor (fixture intro_cp). Pair it to a SECOND program in the SAME
+    # group (CP) too -- this mirrors production, where a course row is paired
+    # to multiple revisions of one program group. A plain grouped .count over
+    # the join would count the intro_computing offering twice under "CP".
+    second_cp_program = Program.create!(
+      program_code: "9901",
+      program_group: program_groups(:cp_group),
+      year_started_be: 2560
+    )
+    ProgramCourse.create!(program: second_cp_program, course: courses(:intro_computing))
+
+    result = JSON.parse(Line::Tools::SemesterOverviewTool.call({ "semester" => "2568/1" }))
+    cp_row = result["by_program"].find { |row| row["program"] == "CP" }
+
+    # sem_2568_1 has exactly 2 offerings (intro_computing, senior_project),
+    # both paired only to CP-group programs -- so CP's offering count must
+    # stay 2, not inflate to 3 from the extra pairing.
+    assert_equal 2, cp_row["offerings"]
+    assert_equal result["offerings"], result["by_program"].sum { |row| row["offerings"] }
+  end
 end

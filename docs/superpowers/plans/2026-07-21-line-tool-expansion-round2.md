@@ -2233,9 +2233,9 @@ Replace the `call` body in `app/services/line/tools/semester_overview_tool.rb`:
     offerings = CourseOffering.where(semester: semester)
     sections = Section.joins(:course_offering).where(course_offerings: { semester_id: semester.id })
 
-    by_program = offerings.joins(course: { program: :program_group })
+    by_program = offerings.joins(course: { program_courses: { program: :program_group } })
                           .group("program_groups.code")
-                          .count
+                          .distinct.count("course_offerings.id")
                           .map { |code, count| { program: code, offerings: count } }
                           .sort_by { |row| row[:program] }
 
