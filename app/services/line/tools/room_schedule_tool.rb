@@ -27,7 +27,60 @@ class Line::Tools::RoomScheduleTool
     }
   }.freeze
 
+  MAX_MATCH_CHOICES = 10
+
   def self.call(arguments, user: nil)
-    raise NotImplementedError, "room_schedule is not implemented yet (eval-only definition)"
+    room_query = arguments["room"].to_s.strip
+    return { error: "room is required" }.to_json if room_query.blank?
+
+    rooms = Room.where(
+      "CONCAT(building, '-', room_number) LIKE :q OR building LIKE :q OR room_number LIKE :q",
+      q: "%#{room_query}%"
+    ).order(:building, :room_number).to_a
+
+    return { error: "No room found matching '#{room_query}'" }.to_json if rooms.empty?
+    if rooms.size > 1
+      return {
+        error: "Multiple rooms match '#{room_query}'. Retry with the full room name.",
+        matches: rooms.first(MAX_MATCH_CHOICES).map(&:display_name)
+      }.to_json
+    end
+    room = rooms.first
+
+    semester = Line::Tools::SemesterParam.resolve(arguments["semester"])
+    return semester.to_json unless semester.is_a?(Semester)
+
+    day_index = nil
+    if (day_str = arguments["day"].to_s.strip.presence)
+      day_index = TimeSlot::DAY_NAMES.index { |name| name.downcase.start_with?(day_str.downcase) }
+      return { error: "Could not parse day '#{day_str}'. Use an English day name like 'Tuesday' or 'Tue'." }.to_json unless day_index
+    end
+
+    slots = TimeSlot.where(room: room)
+                    .joins(section: :course_offering)
+                    .where(course_offerings: { semester_id: semester.id })
+                    .includes(section: [ { teachings: :staff }, { course_offering: :course } ])
+    slots = slots.where(day_of_week: day_index) if day_index
+
+    entries = slots.sort_by { |ts| [ ts.day_of_week, ts.start_time ] }.map do |ts|
+      offering = ts.section.course_offering
+      {
+        day: ts.day_name,
+        time: ts.time_range,
+        course_no: offering.course.course_no,
+        name: offering.course.name,
+        section: ts.section.section_number,
+        instructors: ts.section.teachings.map { |t| t.staff.display_name_th }
+      }
+    end
+
+    {
+      room: room.display_name,
+      semester: semester.display_name,
+      capacity: room.capacity,
+      room_type: room.room_type,
+      entries: entries,
+      note: entries.empty? ? "No classes scheduled in this room for #{semester.display_name}." : nil
+    }.compact.to_json
   end
 end

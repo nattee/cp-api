@@ -65,4 +65,10 @@ Rails.application.config.to_prepare do
     definition: Line::Tools::SemesterOverviewTool::DEFINITION,
     handler: Line::Tools::SemesterOverviewTool
   )
+
+  Line::ToolRegistry.register(
+    "room_schedule",
+    definition: Line::Tools::RoomScheduleTool::DEFINITION,
+    handler: Line::Tools::RoomScheduleTool
+  )
 end
