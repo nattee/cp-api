@@ -1379,12 +1379,16 @@ module LlmEval
     private
 
     def attempt(kase, attempt_no)
-      tool_call = first_tool_call(kase["question"])
+      tool_call =
+        begin
+          first_tool_call(kase["question"])
+        rescue StandardError => e
+          return { case_id: kase["id"], group: kase["group"], attempt: attempt_no,
+                   called_tool: "ERROR: #{e.class}", tool_ok: false, params_ok: false, misses: [] }
+        end
+
       LlmEval::Scorer.score(kase, tool_call)
              .merge(case_id: kase["id"], group: kase["group"], attempt: attempt_no)
-    rescue StandardError => e
-      { case_id: kase["id"], group: kase["group"], attempt: attempt_no,
-        called_tool: "ERROR: #{e.class}", tool_ok: false, params_ok: false, misses: [] }
     end
 
     def first_tool_call(question)
