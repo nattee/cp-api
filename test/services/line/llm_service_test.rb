@@ -1,13 +1,21 @@
 require "test_helper"
 
+# Local stand-in for the retired echo tool: returns its arguments as JSON,
+# which is exactly what the executor tests assert on.
+class LlmServiceStubEcho
+  def self.call(arguments, user: nil)
+    arguments.to_json
+  end
+end
+
 class Line::LlmServiceTest < ActiveSupport::TestCase
   setup do
     @line_user_id = "U_LLM_TEST_123"
     @user = users(:viewer)
 
     Line::ToolRegistry.register("echo",
-      definition: Line::Tools::EchoTool::DEFINITION,
-      handler: Line::Tools::EchoTool)
+      definition: { description: "test echo", parameters: { type: "object", properties: { text: { type: "string" } } } },
+      handler: LlmServiceStubEcho)
 
     ChatMessage.where(line_user_id: @line_user_id).delete_all
   end

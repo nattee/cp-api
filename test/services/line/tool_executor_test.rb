@@ -1,12 +1,18 @@
 require "test_helper"
 
+# Local stand-in for the retired echo tool: returns its arguments as JSON,
+# which is exactly what the executor tests assert on.
+class ToolExecutorStubEcho
+  def self.call(arguments, user: nil)
+    arguments.to_json
+  end
+end
+
 class Line::ToolExecutorTest < ActiveSupport::TestCase
   setup do
-    # Ensure echo tool is registered (it should be from initializer,
-    # but re-register to be safe in test isolation).
     Line::ToolRegistry.register("echo",
-      definition: Line::Tools::EchoTool::DEFINITION,
-      handler: Line::Tools::EchoTool)
+      definition: { description: "test echo", parameters: { type: "object", properties: { text: { type: "string" } } } },
+      handler: ToolExecutorStubEcho)
   end
 
   test "execute returns tool result messages" do

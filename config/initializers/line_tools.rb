@@ -7,12 +7,6 @@
 # keeping the registry populated. In production (eager loading), it runs once.
 Rails.application.config.to_prepare do
   Line::ToolRegistry.register(
-    "echo",
-    definition: Line::Tools::EchoTool::DEFINITION,
-    handler: Line::Tools::EchoTool
-  )
-
-  Line::ToolRegistry.register(
     "student_lookup",
     definition: Line::Tools::StudentLookupTool::DEFINITION,
     handler: Line::Tools::StudentLookupTool

@@ -3,9 +3,9 @@
 # and a handler class that implements .call(arguments).
 #
 # Usage:
-#   Line::ToolRegistry.register("echo", definition: { ... }, handler: Line::Tools::EchoTool)
+#   Line::ToolRegistry.register("search", definition: { ... }, handler: Line::Tools::SearchTool)
 #   Line::ToolRegistry.definitions   # => array of OpenAI tool objects for the API request
-#   Line::ToolRegistry.handler_for("echo") # => Line::Tools::EchoTool
+#   Line::ToolRegistry.handler_for("search") # => Line::Tools::SearchTool
 class Line::ToolRegistry
   class << self
     def register(name, definition:, handler:)
