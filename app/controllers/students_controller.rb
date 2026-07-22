@@ -30,15 +30,23 @@ class StudentsController < ApplicationController
     students = base.order(order_clause).offset(start).limit(length)
 
     is_admin = current_user.admin?
+    full_access = current_user.can?("students.read_full")
+    advisee_ids = current_user.advisee_ids
 
     data = students.map do |student|
+      status_cell =
+        if full_access || advisee_ids.include?(student.id)
+          render_to_string(partial: "students/status_badge", locals: { student: student }, layout: false)
+        else
+          "—"
+        end
       [
         student.student_id,
         student.display_name,
         student.program&.name_en.to_s,
         ("<span class=\"badge badge-#{student.program&.degree_level}\">#{student.program&.degree_level&.titleize}</span>" if student.program).to_s,
         student.admission_year_be,
-        render_to_string(partial: "students/status_badge", locals: { student: student }, layout: false),
+        status_cell,
         render_to_string(partial: "students/actions", locals: { student: student, is_admin: is_admin }, layout: false)
       ]
     end
@@ -121,14 +129,19 @@ class StudentsController < ApplicationController
     order_col = params.dig(:order, "0", :column).to_i
     order_dir = params.dig(:order, "0", :dir) == "desc" ? "DESC" : "ASC"
     column = COLUMNS_MAP[order_col] || "students.student_id"
+    column = "students.student_id" if column == "students.status" && !current_user.can?("students.read_full")
     Arel.sql("#{column} #{order_dir}")
   end
 
   def set_student
     @student = Student.find(params[:id])
     if action_name == "show"
-      @grades = @student.grades.includes(course: { programs: :program_group })
-      load_schedule_data
+      @full_access = current_user.can_view_student_fully?(@student)
+      @grades_visible = current_user.can_view_grades?(@student)
+      if @full_access
+        @grades = @student.grades.includes(course: { programs: :program_group })
+        load_schedule_data
+      end
     end
   end
 

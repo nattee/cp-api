@@ -36,45 +36,55 @@
           %span.fs-4.fw-semibold CP API
         %hr.d-none.d-lg-block
         %ul.nav.nav-pills.flex-column.mb-auto
-          %li.nav-item
-            = link_to program_groups_path, class: "nav-link d-flex align-items-center #{'active' if controller_name.in?(%w[program_groups programs])}" do
-              = resource_icon("program_groups")
-              Programs
-          %li.nav-item
-            = link_to courses_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'courses'}" do
-              = resource_icon("courses")
-              Courses
-          %li.nav-item
-            = link_to staffs_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'staffs'}" do
-              = resource_icon("staffs")
-              Staff
-          %li.nav-item
-            = link_to students_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'students'}" do
-              = resource_icon("students")
-              Students
-          %li.nav-item
-            = link_to grades_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'grades'}" do
-              = resource_icon("grades")
-              Grades
-          %li.nav-item
-            = link_to reports_path, class: "nav-link d-flex align-items-center #{'active' if controller_name.in?(%w[reports schedules])}" do
-              = resource_icon("reports")
-              Reports
+          - if current_user.can?("courses.read")
+            %li.nav-item
+              = link_to program_groups_path, class: "nav-link d-flex align-items-center #{'active' if controller_name.in?(%w[program_groups programs])}" do
+                = resource_icon("program_groups")
+                Programs
+            %li.nav-item
+              = link_to courses_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'courses'}" do
+                = resource_icon("courses")
+                Courses
+            %li.nav-item
+              = link_to staffs_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'staffs'}" do
+                = resource_icon("staffs")
+                Staff
 
-          %li.mt-3.mb-1.px-3
-            %small.text-uppercase.fw-semibold.text-body-secondary.letter-spacing-wide Teaching
-          %li.nav-item
-            = link_to semesters_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'semesters'}" do
-              = resource_icon("semesters")
-              Semesters
-          %li.nav-item
-            = link_to rooms_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'rooms'}" do
-              = resource_icon("rooms")
-              Rooms
-          %li.nav-item
-            = link_to scrapes_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'scrapes'}" do
-              = resource_icon("scrapes")
-              Scraper
+          - if current_user.can?("students.read_minimal")
+            %li.nav-item
+              = link_to students_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'students'}" do
+                = resource_icon("students")
+                Students
+
+          - if current_user.can?("grades.read")
+            %li.nav-item
+              = link_to grades_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'grades'}" do
+                = resource_icon("grades")
+                Grades
+
+          - if current_user.can?("courses.read")
+            %li.nav-item
+              = link_to reports_path, class: "nav-link d-flex align-items-center #{'active' if controller_name.in?(%w[reports schedules])}" do
+                = resource_icon("reports")
+                Reports
+
+          - if current_user.can?("courses.read")
+            %li.mt-3.mb-1.px-3
+              %small.text-uppercase.fw-semibold.text-body-secondary.letter-spacing-wide Teaching
+            %li.nav-item
+              = link_to semesters_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'semesters'}" do
+                = resource_icon("semesters")
+                Semesters
+            %li.nav-item
+              = link_to rooms_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'rooms'}" do
+                = resource_icon("rooms")
+                Rooms
+
+          - if current_user.admin?
+            %li.nav-item
+              = link_to scrapes_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'scrapes'}" do
+                = resource_icon("scrapes")
+                Scraper
 
           %li.nav-item
             = link_to line_account_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'line_accounts'}" do

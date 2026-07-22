@@ -29,13 +29,14 @@ class NavigationTest < ActiveSupport::TestCase
   test "groups and access use only the permitted values" do
     Navigation::AREAS.each do |area|
       assert_includes %i[records teaching_setup admin account], area[:group]
-      assert_includes %i[all admin], area[:access]
+      assert area[:access].nil? || Permission.valid_key?(area[:access]),
+             "#{area[:label]} has an unknown access value: #{area[:access].inspect}"
     end
   end
 
   test "every admin-group area is admin access" do
     Navigation.for_group(:admin).each do |area|
-      assert_equal :admin, area[:access], "#{area[:label]} is in :admin but open to all"
+      assert_equal "users.manage", area[:access], "#{area[:label]} is in :admin but open to non-admins"
     end
   end
 
@@ -45,8 +46,8 @@ class NavigationTest < ActiveSupport::TestCase
   end
 
   test "visible_to hides admin areas from non-admins" do
-    admin_areas = Navigation.visible_to(Navigation::AREAS, admin: true)
-    viewer_areas = Navigation.visible_to(Navigation::AREAS, admin: false)
+    admin_areas = Navigation.visible_to(Navigation::AREAS, user: users(:admin))
+    viewer_areas = Navigation.visible_to(Navigation::AREAS, user: users(:viewer))
 
     assert_includes admin_areas.map { |a| a[:label] }, "Imports"
     assert_not_includes viewer_areas.map { |a| a[:label] }, "Imports"

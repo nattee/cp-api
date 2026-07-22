@@ -8,7 +8,7 @@
 -# (Records ended up rendered 8x on the admin view). A partial does not share
 -# that captured-buffer state across renders, so each band renders exactly
 -# once regardless of how many bands precede it.
-- areas = Navigation.visible_to(Navigation.for_group(group), admin: current_user.admin?)
+- areas = Navigation.visible_to(Navigation.for_group(group), user: current_user)
 - if areas.any?
   .mb-4
     %h6.text-uppercase.text-body-secondary.small.fw-semibold.mb-2= title

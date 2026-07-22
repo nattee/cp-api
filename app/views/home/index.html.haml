@@ -37,7 +37,7 @@
         = render "area_card", path: user_path(current_user), icon_key: "profile",
                               label: "Profile",
                               description: "Your own account details and LINE link status."
-        - Navigation.visible_to(Navigation.for_group(:account), admin: current_user.admin?).each do |area|
+        - Navigation.visible_to(Navigation.for_group(:account), user: current_user).each do |area|
           = render "area_card", path: navigation_area_path(area), icon_key: area[:key],
                                 label: area[:label], description: area[:description]
 

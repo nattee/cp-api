@@ -14,64 +14,64 @@ module Navigation
   # :key         — ApplicationHelper::RESOURCE_ICONS key, for resource_icon
   # :path_helper — zero-argument route helper, resolved with public_send
   # :group       — which band on home: :records, :teaching_setup, :admin, :account
-  # :access      — :all or :admin
+  # :access      — a Permission::CATALOG key, or nil for everyone
   AREAS = [
     # --- Records: the "look something up" destinations ---
-    { key: "program_groups", label: "Programs", group: :records, access: :all,
+    { key: "program_groups", label: "Programs", group: :records, access: "courses.read",
       path_helper: :program_groups_path,
       description: "Curricula and their revisions, with course requirements." }.freeze,
-    { key: "courses", label: "Courses", group: :records, access: :all,
+    { key: "courses", label: "Courses", group: :records, access: "courses.read",
       path_helper: :courses_path,
       description: "Course catalogue across curriculum revisions." }.freeze,
-    { key: "staffs", label: "Staff", group: :records, access: :all,
+    { key: "staffs", label: "Staff", group: :records, access: "courses.read",
       path_helper: :staffs_path,
       description: "Lecturers and their teaching assignments." }.freeze,
-    { key: "students", label: "Students", group: :records, access: :all,
+    { key: "students", label: "Students", group: :records, access: "students.read_minimal",
       path_helper: :students_path,
       description: "Student records, transcripts and course history." }.freeze,
-    { key: "grades", label: "Grades", group: :records, access: :all,
+    { key: "grades", label: "Grades", group: :records, access: "grades.read",
       path_helper: :grades_path,
       description: "Enrolment and grade rows by term." }.freeze,
 
     # --- Teaching setup: the data the schedule reports read from ---
-    { key: "semesters", label: "Semesters", group: :teaching_setup, access: :all,
+    { key: "semesters", label: "Semesters", group: :teaching_setup, access: "courses.read",
       path_helper: :semesters_path,
       description: "Terms, course offerings, sections and time slots." }.freeze,
-    { key: "rooms", label: "Rooms", group: :teaching_setup, access: :all,
+    { key: "rooms", label: "Rooms", group: :teaching_setup, access: "courses.read",
       path_helper: :rooms_path,
       description: "Teaching rooms and their capacity." }.freeze,
-    { key: "scrapes", label: "Scraper", group: :teaching_setup, access: :all,
+    { key: "scrapes", label: "Scraper", group: :teaching_setup, access: "users.manage",
       path_helper: :scrapes_path,
       description: "Pull schedule data from the registrar's site." }.freeze,
 
     # --- Administration: system operation, admin-only ---
-    { key: "users", label: "Users", group: :admin, access: :admin,
+    { key: "users", label: "Users", group: :admin, access: "users.manage",
       path_helper: :users_path,
       description: "Accounts, roles and LLM settings." }.freeze,
-    { key: "data_imports", label: "Imports", group: :admin, access: :admin,
+    { key: "data_imports", label: "Imports", group: :admin, access: "users.manage",
       path_helper: :data_imports_path,
       description: "CSV and Excel uploads, with column mapping." }.freeze,
-    { key: "data_sources", label: "Data Sources", group: :admin, access: :admin,
+    { key: "data_sources", label: "Data Sources", group: :admin, access: "users.manage",
       path_helper: :data_sources_path,
       description: "Where each kind of data comes from, and how complete it is." }.freeze,
-    { key: "api_events", label: "API Events", group: :admin, access: :admin,
+    { key: "api_events", label: "API Events", group: :admin, access: "users.manage",
       path_helper: :api_events_path,
       description: "External API calls and their failures." }.freeze,
-    { key: "chats", label: "Chat Playground", group: :admin, access: :admin,
+    { key: "chats", label: "Chat Playground", group: :admin, access: "users.manage",
       path_helper: :chat_path,
       description: "Try the assistant against live data." }.freeze,
-    { key: "chat_messages", label: "Chat History", group: :admin, access: :admin,
+    { key: "chat_messages", label: "Chat History", group: :admin, access: "users.manage",
       path_helper: :chat_messages_path,
       description: "Past assistant conversations and their tool calls." }.freeze,
-    { key: "line_contacts", label: "LINE Contacts", group: :admin, access: :admin,
+    { key: "line_contacts", label: "LINE Contacts", group: :admin, access: "users.manage",
       path_helper: :line_contacts_path,
       description: "Unlinked LINE users waiting for an account." }.freeze,
-    { key: "dev", label: "Style Guide", group: :admin, access: :admin,
+    { key: "dev", label: "Style Guide", group: :admin, access: "users.manage",
       path_helper: :dev_styleguide_path,
       description: "Colour playground and component reference." }.freeze,
 
     # --- Your account: personal settings, not domain data ---
-    { key: "line_accounts", label: "LINE Account", group: :account, access: :all,
+    { key: "line_accounts", label: "LINE Account", group: :account, access: nil,
       path_helper: :line_account_path,
       description: "Link your LINE account so the bot can answer as you." }.freeze
   ].freeze
@@ -82,7 +82,7 @@ module Navigation
     AREAS.select { |a| a[:group] == group }
   end
 
-  def visible_to(areas, admin:)
-    admin ? areas : areas.reject { |a| a[:access] == :admin }
+  def visible_to(areas, user:)
+    areas.select { |a| a[:access].nil? || user.can?(a[:access]) }
   end
 end
