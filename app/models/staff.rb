@@ -30,6 +30,9 @@ class Staff < ApplicationRecord
   has_many :programs, through: :staff_programs
   has_many :teachings, dependent: :restrict_with_error
   has_many :sections, through: :teachings
+  has_many :advisorships, dependent: :destroy
+  has_many :current_advisorships, -> { current }, class_name: "Advisorship", inverse_of: :staff
+  has_many :current_advisees, through: :current_advisorships, source: :student
 
   validates :title, presence: true
   validates :first_name, presence: true

@@ -61,6 +61,11 @@
     - if user.errors[:role].any?
       .invalid-feedback= user.errors[:role].first
 
+  .mb-3
+    = f.label :staff_id, "Staff record", class: "form-label"
+    = f.select :staff_id, options_for_select([["— none —", ""]] + Staff.order(:first_name).map { |s| [s.display_name_th, s.id] }, user.staff_id), {}, class: "form-select", data: { controller: "select2" }
+    .form-text Links this account to a Staff record — determines whose advisees they can fully access.
+
   .mb-3.form-check
     = f.check_box :active, class: "form-check-input"
     = f.label :active, class: "form-check-label"

@@ -21,6 +21,13 @@
       %dd.col-sm-9
         %span.badge{class: "badge-role badge-#{@user.role.name.dasherize}"}= @user.role.display_name
 
+      %dt.col-sm-3 Staff record
+      %dd.col-sm-9
+        - if @user.staff
+          = link_to @user.staff.display_name_th, @user.staff
+        - else
+          %span.text-muted — none —
+
       %dt.col-sm-3 Active
       %dd.col-sm-9
         %span.badge{class: @user.active? ? "badge-active" : "badge-inactive"}

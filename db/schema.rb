@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_22_123215) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_22_124456) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -37,6 +37,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_123215) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "advisorships", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "ended_on"
+    t.string "note"
+    t.bigint "staff_id", null: false
+    t.date "started_on", null: false
+    t.bigint "student_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["staff_id"], name: "index_advisorships_on_staff_id"
+    t.index ["student_id", "staff_id", "ended_on"], name: "index_advisorships_on_student_id_and_staff_id_and_ended_on"
+    t.index ["student_id"], name: "index_advisorships_on_student_id"
   end
 
   create_table "api_events", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -368,6 +381,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_123215) do
     t.string "password_digest", null: false
     t.string "provider"
     t.bigint "role_id", null: false
+    t.bigint "staff_id"
     t.string "uid"
     t.datetime "updated_at", null: false
     t.string "username", null: false
@@ -375,11 +389,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_123215) do
     t.index ["line_link_token"], name: "index_users_on_line_link_token", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"
+    t.index ["staff_id"], name: "index_users_on_staff_id"
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "advisorships", "staffs"
+  add_foreign_key "advisorships", "students"
   add_foreign_key "course_offerings", "courses"
   add_foreign_key "course_offerings", "semesters"
   add_foreign_key "data_imports", "users"
@@ -402,4 +419,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_123215) do
   add_foreign_key "time_slots", "rooms"
   add_foreign_key "time_slots", "sections"
   add_foreign_key "users", "roles"
+  add_foreign_key "users", "staffs"
 end

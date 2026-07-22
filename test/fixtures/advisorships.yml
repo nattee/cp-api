@@ -1,0 +1,4 @@
+one_current:
+  student: active_student
+  staff: lecturer_smith
+  started_on: 2025-08-01

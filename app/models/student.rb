@@ -15,6 +15,9 @@ class Student < ApplicationRecord
 
   belongs_to :program
   has_many :grades, dependent: :destroy
+  has_many :advisorships, dependent: :destroy
+  has_many :current_advisorships, -> { current }, class_name: "Advisorship", inverse_of: :student
+  has_many :advisors, through: :current_advisorships, source: :staff
 
   validates :student_id, presence: true, uniqueness: true
   validates :first_name, presence: true

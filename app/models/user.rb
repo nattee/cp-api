@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_secure_password
 
   belongs_to :role
+  belongs_to :staff, optional: true
 
   # Least-privilege default: new accounts (manual creation and the LINE
   # quick-link flow alike) start as public_info until an admin raises them.
@@ -28,6 +29,26 @@ class User < ApplicationRecord
 
   def admin?
     can?("users.manage")
+  end
+
+  # Current advisee student IDs via the linked Staff record; empty when the
+  # account has no staff link. Memoized per request.
+  def advisee_ids
+    @advisee_ids ||= staff ? staff.current_advisorships.pluck(:student_id) : []
+  end
+
+  def advisee?(student)
+    advisee_ids.include?(student.id)
+  end
+
+  # Composite scoped checks — single source of truth; views and LINE tools
+  # must use these, never re-derive the advisee logic.
+  def can_view_student_fully?(student)
+    can?("students.read_full") || (can?("advisees.read_full") && advisee?(student))
+  end
+
+  def can_view_grades?(student)
+    can?("grades.read") || (can?("advisees.read_full") && advisee?(student))
   end
 
   private
