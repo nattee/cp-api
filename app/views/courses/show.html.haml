@@ -104,7 +104,7 @@
                   = link_to course_offering_path(offering), class: "btn-ghost btn-ghost-primary", title: "Show" do
                     %span.material-symbols{style: "font-size: 18px"} visibility
 
-- if @grade_dist_chart_data[:datasets].any?
+- if @grade_dist_chart_data && @grade_dist_chart_data[:datasets].any?
   .card.mt-3{"data-controller" => "chart", "data-chart-type-value" => "grade-distribution",
              "data-chart-data-value" => @grade_dist_chart_data.to_json}
     .card-body.p-3
@@ -114,28 +114,29 @@
       %div{style: "height: 300px"}
         %canvas{"data-chart-target" => "canvas"}
 
-.card.mt-3
-  .card-body.p-3
-    .d-flex.justify-content-between.align-items-center.mb-3
-      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
-        %span.material-symbols.resource-icon.me-2 groups
-        Grades
-        %span.text-muted.ms-2.fw-normal
-          (#{@grades_count})
+- if current_user.can?("grades.read")
+  .card.mt-3
+    .card-body.p-3
+      .d-flex.justify-content-between.align-items-center.mb-3
+        %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+          %span.material-symbols.resource-icon.me-2 groups
+          Grades
+          %span.text-muted.ms-2.fw-normal
+            (#{@grades_count})
 
-    - if @available_years.any?
-      = form_with(url: course_path(@course), method: :get, class: "row g-2 align-items-end mb-3") do |f|
-        .col-auto
-          %label.form-label.mb-0{for: "year"} Year
-          = select_tag :year, options_for_select(@available_years, @selected_year), include_blank: "Select year", class: "form-select form-select-sm", style: "width: 120px"
-        .col-auto
-          %label.form-label.mb-0{for: "semester"} Semester
-          = select_tag :semester, options_for_select(Grade::SEMESTERS, @selected_semester), include_blank: "All", class: "form-select form-select-sm", style: "width: 120px"
-        .col-auto
-          %button.btn.btn-outline-primary.btn-sm{type: "submit"}
-            %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} filter_list
-            Filter
+      - if @available_years.any?
+        = form_with(url: course_path(@course), method: :get, class: "row g-2 align-items-end mb-3") do |f|
+          .col-auto
+            %label.form-label.mb-0{for: "year"} Year
+            = select_tag :year, options_for_select(@available_years, @selected_year), include_blank: "Select year", class: "form-select form-select-sm", style: "width: 120px"
+          .col-auto
+            %label.form-label.mb-0{for: "semester"} Semester
+            = select_tag :semester, options_for_select(Grade::SEMESTERS, @selected_semester), include_blank: "All", class: "form-select form-select-sm", style: "width: 120px"
+          .col-auto
+            %button.btn.btn-outline-primary.btn-sm{type: "submit"}
+              %span.material-symbols{style: "font-size: 16px; vertical-align: middle"} filter_list
+              Filter
 
-      = render "grades_table"
-    - else
-      %p.text-muted.mb-0 No grade information available.
+        = render "grades_table"
+      - else
+        %p.text-muted.mb-0 No grade information available.

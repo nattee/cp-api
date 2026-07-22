@@ -14,8 +14,8 @@ class ProgramsController < ApplicationController
     @curriculum = @program.program_courses.includes(:course)
                           .sort_by { |pc| [ProgramCourse.group_sort_key(pc.course_group_code), pc.course.course_no, pc.course.revision_year_be] }
                           .group_by(&:course_group_code)
-    prepare_admission_chart_data(@students)
-    prepare_gpa_chart_data([@program.id])
+    prepare_admission_chart_data(@students) if current_user.can?("students.read_minimal")
+    prepare_gpa_chart_data([@program.id]) if current_user.can?("grades.read")
   end
 
   def new

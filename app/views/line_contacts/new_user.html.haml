@@ -67,7 +67,7 @@
             .form-text Share this password with the user if they need web access. They primarily use LINE.
 
           .mb-3
-            = f.label :role, class: "form-label"
+            = f.label :role_id, "Role", class: "form-label"
             = f.select :role_id, options_for_select(Role.order(:name).map { |r| [r.display_name, r.id] }, @user.role_id), {}, class: "form-select", data: { controller: "select2" }
             - if @user.errors[:role].any?
               .invalid-feedback= @user.errors[:role].first

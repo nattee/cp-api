@@ -28,7 +28,7 @@ class ProgramGroupsController < ApplicationController
     @program_group = ProgramGroup.find(params[:id])
     @programs = @program_group.programs.order(year_started_be: :desc)
     @students = Student.joins(:program).where(programs: { program_group_id: @program_group.id })
-    prepare_admission_chart_data(@students)
-    prepare_gpa_chart_data(@programs.pluck(:id))
+    prepare_admission_chart_data(@students) if current_user.can?("students.read_minimal")
+    prepare_gpa_chart_data(@programs.pluck(:id)) if current_user.can?("grades.read")
   end
 end
