@@ -49,6 +49,12 @@ Rails.application.config.to_prepare do
   )
 
   Line::ToolRegistry.register(
+    "cohort_ranking",
+    definition: Line::Tools::CohortRankingTool::DEFINITION,
+    handler: Line::Tools::CohortRankingTool
+  )
+
+  Line::ToolRegistry.register(
     "student_grades",
     definition: Line::Tools::StudentGradesTool::DEFINITION,
     handler: Line::Tools::StudentGradesTool

@@ -36,29 +36,15 @@ class Line::Tools::CohortGpaTool
   }.freeze
 
   def self.call(arguments, user: nil)
-    code = arguments["program_code"].to_s.strip.upcase
-    year = arguments["admission_year"].to_i
-    return { error: "program_code is required" }.to_json if code.blank?
+    resolved = Line::Tools::CohortParam.resolve(
+      program_code: arguments["program_code"],
+      admission_year: arguments["admission_year"],
+      generation: arguments["generation"]
+    )
+    return resolved.to_json if resolved[:error]
 
-    group = ProgramGroup.find_by(code: code)
-    unless group
-      valid = ProgramGroup.order(:code).pluck(:code).join(", ")
-      return { error: "Unknown program code #{code}. Valid codes: #{valid}" }.to_json
-    end
-
-    generation = arguments["generation"].presence&.to_i
-
-    admission_year_be =
-      if !year.zero?
-        # Students store admission year in B.E. — the opposite conversion from grades.
-        year < 2400 ? year + 543 : year
-      elsif generation
-        year_be = group.year_for_generation(generation)
-        return { error: "#{group.code} has no recorded first intake year — ask by admission year instead" }.to_json unless year_be
-        year_be
-      else
-        return { error: "admission_year or generation is required" }.to_json
-      end
+    group = resolved[:group]
+    admission_year_be = resolved[:admission_year_be]
 
     data = GradeStats::CohortGpa.call(program_group: group, admission_year_be: admission_year_be)
 
