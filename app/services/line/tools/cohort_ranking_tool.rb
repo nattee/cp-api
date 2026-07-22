@@ -16,14 +16,12 @@ class Line::Tools::CohortRankingTool
         admission_year: {
           type: "integer",
           description: "Admission year. Buddhist Era (e.g. 2565) or Christian Era accepted; values below " \
-                       "2400 are treated as C.E. Provide either admission_year or generation. " \
-                       "Never derive this from cohort labels like 'CP51' — use generation for those."
+                       "2400 are treated as C.E. Provide either admission_year or generation. " +
+                       Line::Tools::CohortParam::ADMISSION_YEAR_LABEL_WARNING
         },
         generation: {
           type: "integer",
-          description: "Generation/cohort index from labels like 'CP51' or 'รุ่น 51'. The number is a " \
-                       "RUNNING INDEX starting at 1, NOT an abbreviated B.E. year. Provide either " \
-                       "admission_year or generation."
+          description: Line::Tools::CohortParam::GENERATION_DESCRIPTION + " Provide either admission_year or generation."
         },
         limit: {
           type: "integer",

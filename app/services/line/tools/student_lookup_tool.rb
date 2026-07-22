@@ -18,16 +18,12 @@ class Line::Tools::StudentLookupTool
         },
         admission_year: {
           type: "integer",
-          description: "Admission year in Buddhist Era (e.g. 2568). Filters students by admission_year_be. " \
-                       "Never derive this from cohort labels like 'CP51' — use generation for those."
+          description: "Admission year in Buddhist Era (e.g. 2568). Filters students by admission_year_be. " +
+                       Line::Tools::CohortParam::ADMISSION_YEAR_LABEL_WARNING
         },
         generation: {
           type: "integer",
-          description: "Generation/cohort index from labels like 'CP51', 'CEDT01', or 'รุ่น 51'. " \
-                       "The number is a RUNNING INDEX starting at 1, NOT an abbreviated B.E. year: " \
-                       "CP51 = the 51st CP cohort (NOT admission year 2551). Never convert the " \
-                       "number to a year yourself — pass it here and the system resolves the " \
-                       "actual admission year. Requires program_code."
+          description: Line::Tools::CohortParam::GENERATION_DESCRIPTION + " Requires program_code."
         },
         status: {
           type: "string",
