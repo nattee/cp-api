@@ -109,14 +109,14 @@ intents. The LLM can chain tools across rounds (up to `max_rounds`).
 
 | Tool | Purpose | Example queries |
 |---|---|---|
-| `student_lookup` | Find students by ID/name/program/year/status. Profile, GPA, credits, counts. | "ขอข้อมูล 6530200321", "how many 2nd year CP students?" |
+| `student_lookup` | Find students by ID/name/program/year/status. Profile, GPA, credits, counts. | "ขอข้อมูล 6530200321", "how many 2nd year CP students?", "นิสิต cp53 มีกี่คน" |
 | `student_grades` | One student's record term by term: courses+grades, GPA, GPAX. | "ผลการเรียนของ 6530200321", "is X improving?" |
 | `staff_lookup` | Find staff by name/initials; includes recent per-semester teaching summary with load totals. | "what does อ.ณัฐ teach?", "ภาระงานสอนของ อ.สมชาย" |
 | `course_lookup` | Static course info by course_no or name (TH/EN): credits, revision, program. | "วิชา 2110327 กี่หน่วยกิต" |
 | `course_offering_lookup` | Who teaches a course, its sections and meeting times, per semester. | "who teaches 2110211?", "2110327 มีกี่เซค" |
 | `course_enrollment` | Enrollment counts for a course-term (program × cohort breakdown) + single-student membership check. | "how many students take 2110101?", "did 6530200321 enroll in 2110499?" |
 | `grade_distribution` | Count per grade + course GPA for a course-term. | "grade distribution for 2110327" |
-| `cohort_gpa` | Per-semester GPA/GPAX statistics for one admission cohort. | "average GPA of CP 65" |
+| `cohort_gpa` | Per-semester GPA/GPAX statistics for one admission cohort. | "average GPA of CP 65", "GPA เฉลี่ยของรุ่น cp50" |
 | `semester_overview` | Offerings/sections/courses counts for a term, by program. | "how many courses offered in 2568/1?" |
 | `room_schedule` | A room's weekly class schedule for a term. | "what's in ENG4-303?", "ห้อง 303 วันอังคาร" |
 | `search` | Cross-entity search when the query is ambiguous. | "สมชาย" |

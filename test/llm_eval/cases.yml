@@ -297,3 +297,37 @@
   accept:
     - tool: room_schedule
       params: { room: "201" }
+
+# ---- cohort/generation notation (existing; CP53/CEDT01-style labels) ----
+- id: cohort_label_count_th
+  group: existing
+  question: "นิสิต cp53 มีกี่คน"
+  accept:
+    - tool: student_lookup
+      params: { program_code: "CP", generation: 53 }
+    - tool: student_lookup
+      params: { program_code: "CP", admission_year: 2569 }
+- id: cohort_label_count_en
+  group: existing
+  question: "How many students are in CEDT01?"
+  accept:
+    - tool: student_lookup
+      params: { program_code: "CEDT", generation: 1 }
+    - tool: student_lookup
+      params: { program_code: "CEDT", admission_year: 2566 }
+- id: cohort_label_gpa
+  group: existing
+  question: "GPA เฉลี่ยของรุ่น cp50 เป็นเท่าไหร่"
+  accept:
+    - tool: cohort_gpa
+      params: { program_code: "CP", generation: 50 }
+    - tool: cohort_gpa
+      params: { program_code: "CP", admission_year: 2566 }
+- id: cohort_label_generation_th
+  group: existing
+  question: "CEDT รุ่นที่ 2 มีนิสิตสถานะ active กี่คน"
+  accept:
+    - tool: student_lookup
+      params: { program_code: "CEDT", generation: 2, status: "active" }
+    - tool: student_lookup
+      params: { program_code: "CEDT", admission_year: 2567, status: "active" }

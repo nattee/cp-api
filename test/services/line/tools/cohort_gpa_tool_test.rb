@@ -35,4 +35,33 @@ class Line::Tools::CohortGpaToolTest < ActiveSupport::TestCase
     assert_match(/Unknown program code ZZ/, result["error"])
     assert_match(/CP/, result["error"])
   end
+
+  # --- Cohort/generation notation (generation param) ---
+
+  test "generation resolves to admission_year via program group epoch" do
+    # program_groups(:cp_group) fixture has first_intake_year_be: 2517.
+    # Generation 83 -> 2517 + 83 - 1 = 2599, matching the setup student's admission year.
+    by_generation = JSON.parse(Line::Tools::CohortGpaTool.call({ "program_code" => "CP", "generation" => 83 }))
+    by_year = JSON.parse(Line::Tools::CohortGpaTool.call({ "program_code" => "CP", "admission_year" => 2599 }))
+
+    assert_equal by_year, by_generation
+    assert_equal 2599, by_generation["admission_year_be"]
+  end
+
+  test "generation for a group without a recorded epoch returns an error" do
+    result = JSON.parse(Line::Tools::CohortGpaTool.call({ "program_code" => "OTHER", "generation" => 1 }))
+    assert_match(/no recorded first intake year/, result["error"])
+  end
+
+  test "admission_year wins when both admission_year and generation are given" do
+    by_both = JSON.parse(Line::Tools::CohortGpaTool.call(
+      { "program_code" => "CP", "admission_year" => 2599, "generation" => 1 }))
+
+    assert_equal 2599, by_both["admission_year_be"]
+  end
+
+  test "neither admission_year nor generation returns an error" do
+    result = JSON.parse(Line::Tools::CohortGpaTool.call({ "program_code" => "CP" }))
+    assert_match(/admission_year or generation is required/, result["error"])
+  end
 end

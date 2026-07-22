@@ -10,7 +10,7 @@ class LlmEval::CasesStructureTest < ActiveSupport::TestCase
 
   test "every eval case is structurally valid" do
     cases = YAML.load_file(Rails.root.join("test/llm_eval/cases.yml"))
-    assert_equal 42, cases.size
+    assert_equal 46, cases.size
     assert_equal cases.size, cases.map { |c| c["id"] }.uniq.size, "duplicate case ids"
 
     cases.each do |c|

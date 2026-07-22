@@ -6,6 +6,7 @@ cp_group:
   degree_name: Bachelor of Engineering
   field_of_study: Computer Engineering
   degree_abbr: B.Eng.
+  first_intake_year_be: 2517
 
 cm_group:
   code: CM
@@ -15,6 +16,7 @@ cm_group:
   degree_name: Master of Engineering
   field_of_study: Computer Engineering
   degree_abbr: M.Eng.
+  first_intake_year_be: 2535
 
 other_group:
   code: OTHER

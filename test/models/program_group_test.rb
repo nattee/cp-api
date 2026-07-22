@@ -77,4 +77,32 @@ class ProgramGroupTest < ActiveSupport::TestCase
     group = program_groups(:cp_group)
     assert_includes group.courses, courses(:intro_computing)
   end
+
+  # --- Cohort/generation notation (CP53 = 53rd CP generation) ---
+
+  test "year_for_generation computes admission year from epoch" do
+    group = program_groups(:cp_group)
+    assert_equal 2569, group.year_for_generation(53)
+  end
+
+  test "year_for_generation returns nil for generation 0 or nil" do
+    group = program_groups(:cp_group)
+    assert_nil group.year_for_generation(0)
+    assert_nil group.year_for_generation(nil)
+  end
+
+  test "year_for_generation returns nil when group has no epoch" do
+    group = program_groups(:other_group)
+    assert_nil group.year_for_generation(1)
+  end
+
+  test "generation_for_year is the inverse of year_for_generation" do
+    group = program_groups(:cp_group)
+    assert_equal 53, group.generation_for_year(2569)
+  end
+
+  test "generation_for_year returns nil below the epoch" do
+    group = program_groups(:cp_group)
+    assert_nil group.generation_for_year(2516)
+  end
 end

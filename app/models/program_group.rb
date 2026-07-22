@@ -34,4 +34,18 @@ class ProgramGroup < ApplicationRecord
   def placeholder?
     code == "OTHER"
   end
+
+  # Cohort/generation notation: "CP53" = the 53rd CP intake. Generations are
+  # anchored by first_intake_year_be (institutional knowledge, seeds-managed):
+  # generation 1 enrolled in first_intake_year_be.
+  def year_for_generation(generation)
+    return nil if first_intake_year_be.blank? || generation.to_i < 1
+    first_intake_year_be + generation.to_i - 1
+  end
+
+  def generation_for_year(year_be)
+    return nil if first_intake_year_be.blank? || year_be.blank?
+    gen = year_be.to_i - first_intake_year_be + 1
+    gen >= 1 ? gen : nil
+  end
 end

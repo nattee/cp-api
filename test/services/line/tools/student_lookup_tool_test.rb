@@ -139,6 +139,36 @@ class Line::Tools::StudentLookupToolTest < ActiveSupport::TestCase
     assert_equal 3, data["total"]
   end
 
+  # --- Cohort/generation notation (generation param) ---
+
+  test "generation resolves to admission_year via program group epoch" do
+    # program_groups(:cp_group) fixture has first_intake_year_be: 2517.
+    # Generation 50 -> 2517 + 50 - 1 = 2566, matching on_leave_student's admission year.
+    result = call_tool(program_code: "CP", generation: 50)
+    data = JSON.parse(result)
+    assert_equal 1, data["students"].size
+    assert_equal "6632100063", data["students"].first["student_id"]
+  end
+
+  test "generation without program_code returns an error" do
+    result = call_tool(generation: 50)
+    data = JSON.parse(result)
+    assert_match(/generation requires program_code/, data["error"])
+  end
+
+  test "generation for a group without a recorded epoch returns an error" do
+    result = call_tool(program_code: "OTHER", generation: 1)
+    data = JSON.parse(result)
+    assert_match(/no recorded first intake year/, data["error"])
+  end
+
+  test "admission_year wins when both admission_year and generation are given" do
+    result = call_tool(program_code: "CP", admission_year: 2567, generation: 50)
+    data = JSON.parse(result)
+    assert_equal 1, data["students"].size
+    assert_equal "6732100021", data["students"].first["student_id"]
+  end
+
   private
 
   def call_tool(**args)

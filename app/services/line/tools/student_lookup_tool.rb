@@ -20,6 +20,12 @@ class Line::Tools::StudentLookupTool
           type: "integer",
           description: "Admission year in Buddhist Era (e.g. 2568). Filters students by admission_year_be."
         },
+        generation: {
+          type: "integer",
+          description: "Cohort/generation number as written in labels like 'CP53' or 'CEDT01' — " \
+                       "the number after the program code. Requires program_code. " \
+                       "Use INSTEAD of admission_year when the user says a generation label."
+        },
         status: {
           type: "string",
           enum: Student::STATUSES,
@@ -48,6 +54,17 @@ class Line::Tools::StudentLookupTool
     status = arguments["status"].to_s.strip.presence
     count_only = arguments["count_only"] == true
     limit = (arguments["limit"] || DEFAULT_LIMIT).to_i.clamp(1, MAX_LIMIT)
+
+    generation = arguments["generation"].presence&.to_i
+    if generation && admission_year.blank?
+      return { error: "generation requires program_code (e.g. CP53 → program_code CP, generation 53)" }.to_json if program_code.blank?
+
+      group = ProgramGroup.find_by(code: program_code.upcase)
+      return { error: "Unknown program code #{program_code}" }.to_json unless group
+
+      admission_year = group.year_for_generation(generation)
+      return { error: "#{group.code} has no recorded first intake year — ask by admission year instead" }.to_json unless admission_year
+    end
 
     scope = build_scope(query, program_code:, admission_year:, status:)
 

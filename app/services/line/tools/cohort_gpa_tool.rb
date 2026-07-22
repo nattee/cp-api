@@ -19,17 +19,23 @@ class Line::Tools::CohortGpaTool
         admission_year: {
           type: "integer",
           description: "Admission year of the cohort. Buddhist Era (e.g. 2565) or Christian Era (e.g. 2022) " \
-                       "accepted; values below 2400 are treated as C.E."
+                       "accepted; values below 2400 are treated as C.E. Provide either admission_year or generation."
+        },
+        generation: {
+          type: "integer",
+          description: "Cohort/generation number as written in labels like 'CP53' or 'CEDT01' — " \
+                       "the number after the program code. " \
+                       "Use INSTEAD of admission_year when the user says a generation label."
         }
       },
-      required: [ "program_code", "admission_year" ]
+      required: [ "program_code" ]
     }
   }.freeze
 
   def self.call(arguments, user: nil)
     code = arguments["program_code"].to_s.strip.upcase
     year = arguments["admission_year"].to_i
-    return { error: "program_code and admission_year are required" }.to_json if code.blank? || year.zero?
+    return { error: "program_code and admission_year are required" }.to_json if code.blank?
 
     group = ProgramGroup.find_by(code: code)
     unless group
@@ -37,8 +43,20 @@ class Line::Tools::CohortGpaTool
       return { error: "Unknown program code #{code}. Valid codes: #{valid}" }.to_json
     end
 
-    # Students store admission year in B.E. — the opposite conversion from grades.
-    admission_year_be = year < 2400 ? year + 543 : year
+    generation = arguments["generation"].presence&.to_i
+
+    admission_year_be =
+      if !year.zero?
+        # Students store admission year in B.E. — the opposite conversion from grades.
+        year < 2400 ? year + 543 : year
+      elsif generation
+        year_be = group.year_for_generation(generation)
+        return { error: "#{group.code} has no recorded first intake year — ask by admission year instead" }.to_json unless year_be
+        year_be
+      else
+        return { error: "admission_year or generation is required" }.to_json
+      end
+
     data = GradeStats::CohortGpa.call(program_group: group, admission_year_be: admission_year_be)
 
     {
