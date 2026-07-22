@@ -66,3 +66,5 @@ the cohort-label definitional cases, the array-valued course_nos param, and
 the ranking_vs_stats_guard confirming "GPAX เฉลี่ย" still routes to cohort_gpa).
 Same-day earlier gates: 46-case run after the emoji FORMATTING prompt
 (138/138), 48-case run after the CP51 description fix (144/144).
+Post-unification rerun (shared description constants, round-3 tools
+strengthened with the anti-2551 guard): 162/162.
