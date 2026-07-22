@@ -45,6 +45,16 @@ consciously skip them; never ignore silently.
 - Controllers that allow unauthenticated access must `skip_before_action :require_login`
 - Login page uses a separate `auth` layout (no sidebar)
 
+## Roles & Permissions
+
+- **Permission catalog is code** (`Permission::CATALOG`, 6 keys); **roles are DB rows** (`Role`) bundling keys, with DAG inheritance via `role_inheritances`. Admin CRUD at `/roles`. Seeded roles: `admin` (locked), `staff`, `minimal`, `public_info`; new users default to `public_info`.
+- **Check permissions via `user.can?("key")`**, writes via `require_admin`, reads via `require_permission("key")` in controllers (both live in `ApplicationController` — do NOT re-define per controller).
+- **Advisor is data, not a role**: `advisees.read_full` activates only through `advisorships` rows (history-preserving join of student↔staff; `users.staff_id` links the account). Scoped checks go through `user.can_view_student_fully?(student)` / `user.can_view_grades?(student)` — never re-derive advisee logic.
+- **students.read_minimal limits fields, not rows** (full roster browse, minimal columns). `students.read_full` does NOT include grade values — those are `grades.read` / advisee scope.
+- **LINE tools declare `permission:`** at registration; definitions are filtered per user, the executor re-checks, and student-scoped tools check per student (see `docs/llm-data-query.md`).
+- **Reports carry a permission key** in `Reports::Catalog` (`access:`); the hub filters by `current_user.can?`.
+- Spec: `docs/superpowers/specs/2026-07-22-roles-permissions-design.md`.
+
 ## Development
 
 ```
@@ -91,7 +101,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 
 ## UI Component Conventions
 
-- **Badges**: Every badge must use a named semantic `.badge-*` class — never raw Bootstrap `bg-*` classes. When introducing a new badge, add a new `.badge-<concept>` class in `application.scss` following the frosted style (semi-transparent tinted background, subtle border) rather than reusing an existing class with a different meaning. Existing classes: `.badge-admin`, `.badge-editor`, `.badge-viewer`, `.badge-active`, `.badge-inactive`, `.badge-graduated`, `.badge-on-leave`, `.badge-retired`, `.badge-bachelor`, `.badge-master`, `.badge-doctoral`, `.badge-planned`, `.badge-confirmed`, `.badge-cancelled`, `.badge-pending`, `.badge-running`, `.badge-completed`, `.badge-failed`, `.badge-create-only`, `.badge-upsert`, `.badge-imported`, `.badge-manual`, `.badge-chulabooster`, `.badge-course-group`. Two classes may share similar colors if they represent different domain concepts. **Render badges data-driven** — derive the class from the value (e.g. `"badge-#{status.dasherize}"`) instead of if/elsif chains. This way adding a new value only requires a model constant + SCSS class, no view changes.
+- **Badges**: Every badge must use a named semantic `.badge-*` class — never raw Bootstrap `bg-*` classes. When introducing a new badge, add a new `.badge-<concept>` class in `application.scss` following the frosted style (semi-transparent tinted background, subtle border) rather than reusing an existing class with a different meaning. Existing classes: `.badge-admin`, `.badge-role`, `.badge-staff`, `.badge-minimal`, `.badge-public-info`, `.badge-active`, `.badge-inactive`, `.badge-graduated`, `.badge-on-leave`, `.badge-retired`, `.badge-bachelor`, `.badge-master`, `.badge-doctoral`, `.badge-planned`, `.badge-confirmed`, `.badge-cancelled`, `.badge-pending`, `.badge-running`, `.badge-completed`, `.badge-failed`, `.badge-create-only`, `.badge-upsert`, `.badge-imported`, `.badge-manual`, `.badge-chulabooster`, `.badge-course-group`. Two classes may share similar colors if they represent different domain concepts. **Render badges data-driven** — derive the class from the value (e.g. `"badge-#{status.dasherize}"`) instead of if/elsif chains. This way adding a new value only requires a model constant + SCSS class, no view changes.
 - **Icon action buttons**: Use ghost button classes (`.btn-ghost .btn-ghost-*`) for icon-only action links in tables. These extend Bootstrap's `btn-link` with no underline, custom color per variant, and a subtle tinted background on hover. Variants: `-primary` (view/show), `-secondary` (edit), `-danger` (delete). Do not use `btn-outline-*` for icon-only actions.
 - **Icons**: Use Material Symbols (`%span.material-symbols`) for action icons, typically at `font-size: 18px` in tables. When placing icons inline with text, add `vertical-align: middle` — see `docs/material-symbols-vertical-align.md`.
 - **Input group icons**: Styled with `$input-icon-color` (defined post-import in `application.scss`). Currently `darken($light, 5%)` — a dimmed version of the `$light` theme color.
@@ -126,6 +136,7 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - **Cohort/generation notation**: the department refers to cohorts as `[program_group][generation]` (e.g. `CP53` = the 53rd CP intake = admission year B.E. 2569). Epochs (`first_intake_year_be`) live on `ProgramGroup`, seeds-managed institutional knowledge — resolve generation ↔ admission year via `ProgramGroup#year_for_generation` / `#generation_for_year`. Tools accept a `generation` param directly; never make the LLM do the arithmetic itself.
 - **Student name display**: Use `Student#display_name` (prefers `full_name_th`, falls back to `full_name`) in all index pages, tables, and list contexts. Reserve `full_name` / `full_name_th` for show-page detail fields where both languages are displayed explicitly.
 - **Staff name display**: Use `Staff#display_name_th` (prefers Thai, falls back to English) in all dropdowns, tables, and display contexts. Reserve `display_name` (English) for export/import matching where column data is in English.
+- **Advisorships**: `advisorships(student_id, staff_id, started_on, ended_on, note)` — current = `ended_on IS NULL`; co-advisors legal; same pair active once. Managed from the student show page card; bulk via `Importers::AdvisorshipImporter`.
 
 ## Teaching Schedule
 

@@ -216,6 +216,10 @@ Expand `QUERY_TYPES` enum and `HANDLERS` hash in QueryTool. No infrastructure ch
 
 All handlers receive the `user` object from `ToolExecutor`. Authorization failures return a human-readable error string that the LLM can relay to the user.
 
+## Tool permissions
+
+Every `ToolRegistry.register` call declares `permission:` (a `Permission::CATALOG` key). Three gates apply: `definitions(user:)` filters what the LLM is offered; `ToolExecutor` re-checks by name (hallucinated/history-replayed calls); student-scoped tools (`student_grades`, `student_lookup`, `search`) additionally check `can_view_grades?` / `can_view_student_fully?` per resolved student. `nil` user (admin playground, eval harness) bypasses filtering.
+
 ## Current Semester Resolution
 
 `Semester.ordered.first` returns the latest semester by `year_be DESC, semester_number DESC`. If the user specifies a semester (e.g. "2568/1"), parse with `year, num = str.split("/")` and look up `Semester.find_by(year_be:, semester_number:)`.
