@@ -1,6 +1,8 @@
 class ProgramGroupsController < ApplicationController
   include ProgramCharts
 
+  before_action -> { require_permission("courses.read") }
+
   def index
     @program_groups = ProgramGroup.where.not(code: "OTHER")
                                   .includes(:programs)

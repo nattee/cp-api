@@ -20,12 +20,4 @@ class ChatMessagesController < ApplicationController
 
     redirect_to chat_messages_path, alert: "No messages found for this user." if @messages.empty?
   end
-
-  private
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to root_path, alert: "Only admins can access chat history."
-    end
-  end
 end

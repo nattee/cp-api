@@ -17,7 +17,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
 
   test "non-admin cannot access new" do
     get new_course_path
-    assert_redirected_to courses_path
+    assert_redirected_to root_path
     assert_equal "Only admins can perform this action.", flash[:alert]
   end
 
@@ -25,18 +25,18 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference "Course.count" do
       post courses_path, params: { course: { name: "Test", course_no: "9999999", revision_year_be: 2565, program_id: programs(:cp_bachelor).id } }
     end
-    assert_redirected_to courses_path
+    assert_redirected_to root_path
   end
 
   test "non-admin cannot access edit" do
     get edit_course_path(courses(:intro_computing))
-    assert_redirected_to courses_path
+    assert_redirected_to root_path
   end
 
   test "non-admin cannot update" do
     course = courses(:intro_computing)
     patch course_path(course), params: { course: { name: "Hacked" } }
-    assert_redirected_to courses_path
+    assert_redirected_to root_path
     assert_equal "Introduction to Computing", course.reload.name
   end
 
@@ -44,7 +44,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference "Course.count" do
       delete course_path(courses(:intro_computing))
     end
-    assert_redirected_to courses_path
+    assert_redirected_to root_path
   end
 
   test "admin create assigns the program via program_ids (join row created)" do

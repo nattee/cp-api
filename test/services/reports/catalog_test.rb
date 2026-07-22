@@ -13,20 +13,31 @@ class Reports::CatalogTest < ActiveSupport::TestCase
   end
 
   test "hub entries exclude the system section and are all hub?" do
-    assert Reports::Catalog.hub_entries.none? { |e| e.section == :system }
-    assert Reports::Catalog.hub_entries.all?(&:hub?)
+    admin = users(:admin)
+    assert Reports::Catalog.hub_entries(user: admin).none? { |e| e.section == :system }
+    assert Reports::Catalog.hub_entries(user: admin).all?(&:hub?)
   end
 
-  test "data coverage is an admin-gated system report, absent from the hub" do
+  test "data coverage is a users.manage-gated system report, absent from the hub" do
     dc = Reports::Catalog.find("data_coverage")
     assert_equal :system, dc.section
-    assert_equal :admin, dc.access
+    assert_equal "users.manage", dc.access
     assert_not dc.hub?
-    assert Reports::Catalog.hub_entries.none? { |e| e.key == "data_coverage" }
+    assert Reports::Catalog.hub_entries(user: users(:admin)).none? { |e| e.key == "data_coverage" }
   end
 
-  test "all hub entries are open to any logged-in user" do
-    assert Reports::Catalog.hub_entries.all? { |e| e.access == :all }
+  test "hub entries are filtered to what the viewer may open" do
+    # minimal has courses.read (via public_info) but not grades.read.
+    keys = Reports::Catalog.hub_entries(user: users(:minimal)).map(&:key)
+    assert_includes keys, "schedules_room", "courses.read entry should be visible"
+    assert_not_includes keys, "schedules_student", "grades.read entry should be hidden"
+    assert_not_includes keys, "failing_students", "grades.read entry should be hidden"
+
+    # staff (viewer/editor fixture role) reads everything except users.manage.
+    staff_keys = Reports::Catalog.hub_entries(user: users(:viewer)).map(&:key)
+    assert_includes staff_keys, "schedules_room"
+    assert_includes staff_keys, "schedules_student"
+    assert_includes staff_keys, "failing_students"
   end
 
   test "registry entries wrap a report class; external entries carry a path helper" do
@@ -53,7 +64,7 @@ class Reports::CatalogTest < ActiveSupport::TestCase
   end
 
   test "grouped orders sections per SECTIONS and omits system" do
-    order = Reports::Catalog.grouped.keys
+    order = Reports::Catalog.grouped(Reports::Catalog.hub_entries(user: users(:admin))).keys
     assert_equal order, order.sort_by { |s| Reports::Catalog::SECTIONS.keys.index(s) }
     assert_not_includes order, :system
   end

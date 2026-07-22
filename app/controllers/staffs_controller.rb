@@ -1,6 +1,7 @@
 class StaffsController < ApplicationController
   before_action :set_staff, only: %i[show edit update destroy]
   before_action :require_admin, only: %i[new create edit update destroy]
+  before_action -> { require_permission("courses.read") }
 
   def index
     @staffs = Staff.all
@@ -60,12 +61,6 @@ class StaffsController < ApplicationController
 
   def set_staff
     @staff = Staff.find(params[:id])
-  end
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to staffs_path, alert: "Only admins can perform this action."
-    end
   end
 
   def staff_params

@@ -175,12 +175,6 @@ class DataImportsController < ApplicationController
 
   private
 
-  def require_admin
-    unless current_user.admin?
-      redirect_to root_path, alert: "Only admins can access imports."
-    end
-  end
-
   def data_import_params
     params.require(:data_import).permit(:target_type, :mode, :file)
   end

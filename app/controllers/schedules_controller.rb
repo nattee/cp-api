@@ -1,4 +1,9 @@
 class SchedulesController < ApplicationController
+  # All schedule reports are courses.read; the student timetable also shows
+  # grade values, so it needs grades.read on top.
+  before_action -> { require_permission("courses.read") }
+  before_action -> { require_permission("grades.read") }, only: :student
+
   WORKLOAD_METRICS = [
     { key: "credits",  label: "Credits",     icon: "school" },
     { key: "sections", label: "Sections",    icon: "view_agenda" },

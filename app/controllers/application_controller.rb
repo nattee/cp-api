@@ -32,4 +32,20 @@ class ApplicationController < ActionController::Base
       redirect_to login_path, alert: "You must be signed in."
     end
   end
+
+  # Generalized read gate. Writes stay behind require_admin. nil-safe: an
+  # expired session hits require_login first, but belt-and-braces here.
+  def require_permission(key)
+    unless current_user&.can?(key)
+      redirect_to root_path, alert: "You are not authorized to view that page."
+    end
+  end
+
+  # Kept as a named alias (not inlined at call sites) so the existing
+  # `before_action :require_admin` lines across controllers keep working.
+  def require_admin
+    unless current_user&.can?("users.manage")
+      redirect_to root_path, alert: "Only admins can perform this action."
+    end
+  end
 end

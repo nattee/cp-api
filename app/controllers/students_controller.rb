@@ -1,6 +1,7 @@
 class StudentsController < ApplicationController
   before_action :set_student, only: %i[show edit update destroy]
   before_action :require_admin, only: %i[new create edit update destroy export]
+  before_action -> { require_permission("students.read_minimal") }
 
   # Maps DataTables column indices to DB columns (matches the thead order in
   # the index view). Shared by the datatable and export actions for ordering.
@@ -153,12 +154,6 @@ class StudentsController < ApplicationController
                   end
         { grade: grade, offering: offering, section: section }
       end
-    end
-  end
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to students_path, alert: "Only admins can perform this action."
     end
   end
 

@@ -1,13 +1,14 @@
 class ReportsController < ApplicationController
   # Access is per-report (see Reports::Catalog), not a blanket controller gate:
-  # every hub report is open to any logged-in lecturer; only :admin reports
-  # (Data Coverage) are restricted.
+  # each entry carries a permission key (courses.read, grades.read, or
+  # users.manage for the admin-only Data Coverage check) checked via
+  # User#can?, so what a lecturer sees in the hub depends on their role.
 
   # Hub: lecturer-facing reports grouped by section, optional program filter.
   def index
     @program_groups = ProgramGroup.order(:code)
     @selected_group = @program_groups.find_by(code: params[:program_group]) if params[:program_group].present?
-    entries = Reports::Catalog.hub_entries
+    entries = Reports::Catalog.hub_entries(user: current_user)
     entries = entries.select { |e| e.applicable_to?(@selected_group) } if @selected_group
     @entries_by_section = Reports::Catalog.grouped(entries)
   end
@@ -18,8 +19,8 @@ class ReportsController < ApplicationController
     return redirect_to(reports_path, alert: "Unknown report.") unless entry
     # External reports render in their own controller — send the user to the real page.
     return redirect_to(public_send(entry.path_helper)) unless entry.registry?
-    if entry.access == :admin && !current_user.admin?
-      return redirect_to(root_path, alert: "Only admins can view that report.")
+    unless current_user.can?(entry.access)
+      return redirect_to(root_path, alert: "You are not authorized to view that report.")
     end
     @report = entry.report_class
 

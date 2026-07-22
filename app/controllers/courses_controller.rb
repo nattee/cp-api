@@ -1,6 +1,7 @@
 class CoursesController < ApplicationController
   before_action :set_course, only: %i[show edit update destroy]
   before_action :require_admin, only: %i[new create edit update destroy]
+  before_action -> { require_permission("courses.read") }
 
   def index
     @courses = Course.includes(:programs, program_courses: :program)
@@ -70,12 +71,6 @@ class CoursesController < ApplicationController
 
   def set_course
     @course = Course.find(params[:id])
-  end
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to courses_path, alert: "Only admins can perform this action."
-    end
   end
 
   def prepare_grade_distribution_chart

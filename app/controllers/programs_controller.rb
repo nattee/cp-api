@@ -3,6 +3,7 @@ class ProgramsController < ApplicationController
 
   before_action :set_program, only: %i[show edit update destroy]
   before_action :require_admin, only: %i[new create edit update destroy]
+  before_action -> { require_permission("courses.read") }
 
   def index
     @programs = Program.includes(:program_group).all
@@ -52,12 +53,6 @@ class ProgramsController < ApplicationController
 
   def set_program
     @program = Program.find(params[:id])
-  end
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to programs_path, alert: "Only admins can perform this action."
-    end
   end
 
   def program_params

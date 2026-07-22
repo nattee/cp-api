@@ -60,14 +60,6 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
   end
 
-  # Redirects to root_path, not users_path: index is admin-gated, so pointing a
-  # denied non-admin back at /users would loop.
-  def require_admin
-    unless current_user.admin?
-      redirect_to root_path, alert: "Only admins can perform this action."
-    end
-  end
-
   # A lecturer reaches their own record via the sidebar's Profile link, but has
   # no reason to enumerate colleagues' roles and LLM settings.
   def require_admin_or_self

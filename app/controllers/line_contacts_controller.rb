@@ -42,12 +42,6 @@ class LineContactsController < ApplicationController
     @line_contact = LineContact.find(params[:id])
   end
 
-  def require_admin
-    unless current_user.admin?
-      redirect_to root_path, alert: "Only admins can access LINE contacts."
-    end
-  end
-
   def user_params
     params.require(:user).permit(:username, :email, :name, :password, :password_confirmation, :role_id)
   end

@@ -2,6 +2,7 @@ class GradesController < ApplicationController
   before_action :set_grade, only: %i[show edit update destroy]
   before_action :require_admin, only: %i[new create edit update destroy]
   before_action :require_manual_source, only: %i[edit update]
+  before_action -> { require_permission("grades.read") }
 
   # Grade-distribution report.
   LETTER_GRADES  = %w[A B+ B C+ C D+ D F].freeze  # GPA grades, in column order
@@ -182,12 +183,6 @@ class GradesController < ApplicationController
 
   def set_grade
     @grade = Grade.find(params[:id])
-  end
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to grades_path, alert: "Only admins can perform this action."
-    end
   end
 
   def require_manual_source

@@ -1,6 +1,7 @@
 class SemestersController < ApplicationController
   before_action :set_semester, only: %i[show edit update destroy export export_sections]
   before_action :require_admin, only: %i[new create edit update destroy]
+  before_action -> { require_permission("courses.read") }
 
   def index
     @semesters = Semester.ordered
@@ -63,12 +64,6 @@ class SemestersController < ApplicationController
   # explicit "all" means the department default.
   def course_scope_param
     params[:course_scope] == "all" ? "all" : "dept"
-  end
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to semesters_path, alert: "Only admins can perform this action."
-    end
   end
 
   def semester_params

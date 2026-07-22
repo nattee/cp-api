@@ -52,10 +52,4 @@ class ChatsController < ApplicationController
   def line_user_id
     "web_#{current_user.id}"
   end
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to root_path, alert: "Not authorized."
-    end
-  end
 end

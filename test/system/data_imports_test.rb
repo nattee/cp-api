@@ -34,7 +34,7 @@ class DataImportsTest < ApplicationSystemTestCase
     click_on "Sign In"
 
     visit data_imports_path
-    assert_text "Only admins can access imports"
+    assert_text "Only admins can perform this action."
   end
 
   test "index page shows imports heading" do

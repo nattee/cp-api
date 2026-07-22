@@ -2,6 +2,7 @@ class CourseOfferingsController < ApplicationController
   before_action :set_semester, only: %i[index new create]
   before_action :set_course_offering, only: %i[show edit update destroy]
   before_action :require_admin, only: %i[new create edit update destroy]
+  before_action -> { require_permission("courses.read") }
 
   def index
     redirect_to @semester
@@ -52,13 +53,6 @@ class CourseOfferingsController < ApplicationController
 
   def set_course_offering
     @course_offering = CourseOffering.find(params[:id])
-  end
-
-  def require_admin
-    redirect_path = @course_offering ? semester_path(@course_offering.semester) : semester_path(@semester)
-    unless current_user.admin?
-      redirect_to redirect_path, alert: "Only admins can perform this action."
-    end
   end
 
   def course_offering_params

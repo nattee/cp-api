@@ -13,6 +13,7 @@ class Reports::DataCoverageTest < ActiveSupport::TestCase
     CourseOffering.delete_all
     Scrape.delete_all
     Semester.delete_all
+    Advisorship.delete_all
     Student.delete_all
     @seq = 0
     @student = Student.create!(

@@ -4,6 +4,6 @@
 # /data_sources instead.
 class HomeController < ApplicationController
   def index
-    @report_sections = Reports::Catalog.grouped
+    @report_sections = Reports::Catalog.grouped(Reports::Catalog.hub_entries(user: current_user))
   end
 end

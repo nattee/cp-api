@@ -42,12 +42,6 @@ class ProgramCoursesController < ApplicationController
     @program_course = @program.program_courses.find(params[:id])
   end
 
-  def require_admin
-    unless current_user.admin?
-      redirect_to programs_path, alert: "Only admins can perform this action."
-    end
-  end
-
   def create_params
     params.require(:program_course).permit(:course_id, :course_group_code)
   end

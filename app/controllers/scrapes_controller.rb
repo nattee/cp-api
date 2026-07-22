@@ -1,5 +1,5 @@
 class ScrapesController < ApplicationController
-  before_action :require_admin, only: %i[create]
+  before_action :require_admin
 
   def index
     @scrapes = Scrape.recent.includes(:semester, :user)
@@ -23,13 +23,5 @@ class ScrapesController < ApplicationController
     scrape.update!(state: "pending")
 
     redirect_to scrape_path(scrape), notice: "Scrape job has been queued."
-  end
-
-  private
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to scrapes_path, alert: "Only admins can perform this action."
-    end
   end
 end

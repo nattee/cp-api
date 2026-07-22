@@ -9,16 +9,18 @@ class ScrapesControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference "Scrape.count" do
       post scrapes_path, params: { scrape: { semester_id: semesters(:sem_2568_1).id, source: "cugetreg", study_program: "S" } }
     end
-    assert_redirected_to scrapes_path
+    assert_redirected_to root_path
   end
 
-  test "viewer can view index" do
+  # Scrape history is an ops page: index/show now require admin (previously
+  # reachable by every logged-in user).
+  test "non-admin cannot view index" do
     get scrapes_path
-    assert_response :success
+    assert_redirected_to root_path
   end
 
-  test "viewer can view show" do
+  test "non-admin cannot view show" do
     get scrape_path(scrapes(:completed_scrape))
-    assert_response :success
+    assert_redirected_to root_path
   end
 end

@@ -1,6 +1,7 @@
 class RoomsController < ApplicationController
   before_action :set_room, only: %i[edit update destroy]
   before_action :require_admin, only: %i[new create edit update destroy]
+  before_action -> { require_permission("courses.read") }
 
   def index
     @rooms = Room.order(:building, :room_number)
@@ -42,12 +43,6 @@ class RoomsController < ApplicationController
 
   def set_room
     @room = Room.find(params[:id])
-  end
-
-  def require_admin
-    unless current_user.admin?
-      redirect_to rooms_path, alert: "Only admins can perform this action."
-    end
   end
 
   def room_params
