@@ -21,6 +21,14 @@ class Line::MarkdownScrubberTest < ActiveSupport::TestCase
     assert_equal "A: 12\nB: 8\n", Line::MarkdownScrubber.scrub("```\nA: 12\nB: 8\n```\n")
   end
 
+  test "inline triple-backtick span keeps its content" do
+    assert_equal "code", Line::MarkdownScrubber.scrub("```code```")
+  end
+
+  test "inline fence mid-line keeps surrounding text" do
+    assert_equal "ใช้ x + 1 ตรงนี้", Line::MarkdownScrubber.scrub("ใช้ ```x + 1``` ตรงนี้")
+  end
+
   test "converts links to text (url)" do
     assert_equal "ดูที่นี่ (http://example.com)", Line::MarkdownScrubber.scrub("[ดูที่นี่](http://example.com)")
   end

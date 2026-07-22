@@ -81,7 +81,10 @@ class Line::LlmService
 
       # No tool calls — the LLM produced a final text answer.
       if tool_calls.blank?
-        reply = assistant_message["content"].to_s.strip
+        # Scrub Markdown before SAVING, not just before delivery: raw markdown
+        # persisted into history re-teaches the model markdown by self-imitation
+        # (the FORMATTING prompt rule loses to recent assistant-turn examples).
+        reply = Line::MarkdownScrubber.scrub(assistant_message["content"].to_s.strip)
         reply = "ขออภัยค่ะ ระบบไม่สามารถสร้างคำตอบได้ กรุณาลองใหม่อีกครั้ง" if reply.empty?
         save_message(role: "assistant", content: reply)
         return Result.new(reply: reply, tool_rounds: @tool_rounds)
@@ -115,7 +118,7 @@ class Line::LlmService
 
     # Safety net: max rounds exhausted, extract whatever content we have.
     Rails.logger.warn("LLM reached max rounds (#{@max_rounds}) without final text reply")
-    fallback = messages.last&.dig("content").to_s.strip.presence ||
+    fallback = Line::MarkdownScrubber.scrub(messages.last&.dig("content").to_s.strip).presence ||
                "ขออภัยค่ะ ระบบไม่สามารถประมวลผลคำขอให้เสร็จได้ กรุณาลองใหม่อีกครั้ง"
     save_message(role: "assistant", content: fallback)
     Result.new(reply: fallback, tool_rounds: @tool_rounds)

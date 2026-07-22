@@ -143,6 +143,26 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     assert_equal "Hello from the default", last.content
   end
 
+  # --- Markdown scrubbing at the source (before save, not just delivery) ---
+
+  test "final reply is scrubbed of Markdown before returning and before saving" do
+    service = Line::LlmService.new("Hi", line_user_id: @line_user_id, user: @user)
+    # Header on its own line so the ATX rule (line-start only, by design) applies;
+    # a mid-sentence "##" is left alone as ambiguous (see scrubber file header).
+    responses = [text_response("**สรุป**: ได้\n## ดีมาก")]
+    stub_chat_completion(service, responses) do
+      result = service.call
+      assert_includes result.reply, "สรุป"
+      assert_not_includes result.reply, "**"
+      assert_not_includes result.reply, "##"
+    end
+
+    last = ChatMessage.where(line_user_id: @line_user_id, role: "assistant").order(:created_at).last
+    assert_includes last.content, "สรุป"
+    assert_not_includes last.content, "**"
+    assert_not_includes last.content, "##"
+  end
+
   test "a connection error on the default model surfaces (nothing to fall back to)" do
     viewer = users(:viewer)
     viewer.llm_model = nil # default resident (qwen)

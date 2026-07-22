@@ -11,7 +11,10 @@ module Line::MarkdownScrubber
     return text if text.blank?
 
     out = text.dup
-    # Fenced code blocks: drop the fence lines, keep the content.
+    # Inline triple-backtick spans on one line: ```code``` → code.
+    out.gsub!(/```([^`\n]+)```/, '\1')
+    # Remaining fence lines (multi-line blocks, optional language tag):
+    # drop the fence lines, keep the content between them.
     out.gsub!(/^```[^\n]*\n?/, "")
     # Bold / underline emphasis pairs: **text** / __text__ → text.
     out.gsub!(/\*\*(.+?)\*\*/m, '\1')
