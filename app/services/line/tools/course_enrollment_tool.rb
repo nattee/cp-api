@@ -53,12 +53,14 @@ class Line::Tools::CourseEnrollmentTool
       return membership_result(scope, course_no, year_ce, semester, student_query)
     end
 
-    breakdown = scope.joins(student: { program: :program_group })
-                     .group("program_groups.code", "students.admission_year_be")
-                     .count
-                     .map { |(code, admission_year), count|
-                       { program: code, admission_year_be: admission_year, count: count } }
-                     .sort_by { |row| [ row[:program], row[:admission_year_be] ] }
+    counts = scope.joins(student: { program: :program_group })
+                  .group("program_groups.code", "students.admission_year_be")
+                  .count
+    groups = ProgramGroup.where(code: counts.keys.map(&:first).uniq).index_by(&:code)
+    breakdown = counts.map { |(code, admission_year), count|
+                  { program: code, admission_year_be: admission_year,
+                    cohort: groups[code]&.cohort_label(admission_year), count: count } }
+               .sort_by { |row| [ row[:program], row[:admission_year_be] ] }
 
     {
       course_no: course_no,

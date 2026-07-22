@@ -6,6 +6,7 @@ class Line::Tools::StudentGradesToolTest < ActiveSupport::TestCase
 
     assert_equal "6732100021", result["student"]["student_id"]
     assert_equal "CP", result["student"]["program"]
+    assert_equal "CP51", result["student"]["cohort"]
 
     # Fixture grades for active_student: 2024/1 (A intro + B gened), 2024/2 (B+ senior)
     terms = result["terms"]
@@ -54,5 +55,16 @@ class Line::Tools::StudentGradesToolTest < ActiveSupport::TestCase
     result = JSON.parse(Line::Tools::StudentGradesTool.call(
       { "query" => "6732100021", "semester" => "first term" }))
     assert_match(/Could not parse semester/, result["error"])
+  end
+
+  test "student cohort is nil when the program group has no epoch" do
+    Student.create!(student_id: "9900001101", first_name: "No", last_name: "Epoch",
+                    first_name_th: "ไม่มี", last_name_th: "รุ่น",
+                    admission_year_be: 2560, status: "active", program: Program.placeholder)
+
+    result = JSON.parse(Line::Tools::StudentGradesTool.call({ "query" => "9900001101" }))
+
+    assert result["student"].key?("cohort")
+    assert_nil result["student"]["cohort"]
   end
 end

@@ -22,6 +22,7 @@ class Line::Tools::CohortGpaToolTest < ActiveSupport::TestCase
     assert_equal be, ce                       # era rule + case-insensitive code
     assert_equal "CP", be["program"]
     assert_equal 2599, be["admission_year_be"]
+    assert_equal "CP83", be["cohort"]
     term = be["terms"].first
     assert_equal "2565/1", term["term"]
     assert_in_delta 3.5, term["gpa"]["avg"], 0.001
@@ -63,5 +64,13 @@ class Line::Tools::CohortGpaToolTest < ActiveSupport::TestCase
   test "neither admission_year nor generation returns an error" do
     result = JSON.parse(Line::Tools::CohortGpaTool.call({ "program_code" => "CP" }))
     assert_match(/admission_year or generation is required/, result["error"])
+  end
+
+  test "cohort is nil when the program group has no epoch" do
+    result = JSON.parse(Line::Tools::CohortGpaTool.call(
+      { "program_code" => "OTHER", "admission_year" => 2560 }))
+
+    assert result.key?("cohort")
+    assert_nil result["cohort"]
   end
 end

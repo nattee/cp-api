@@ -105,4 +105,21 @@ class ProgramGroupTest < ActiveSupport::TestCase
     group = program_groups(:cp_group)
     assert_nil group.generation_for_year(2516)
   end
+
+  test "cohort_label formats code and generation, unpadded" do
+    assert_equal "CP53", program_groups(:cp_group).cohort_label(2569)
+
+    # Unsaved instance (fixtures carry only CP/CM/OTHER — see
+    # chulabooster/program_resolver_test.rb, which owns the CEDT code dynamically).
+    cedt = ProgramGroup.new(code: "CEDT", first_intake_year_be: 2566)
+    assert_equal "CEDT1", cedt.cohort_label(2566)
+  end
+
+  test "cohort_label returns nil when the group has no epoch" do
+    assert_nil program_groups(:other_group).cohort_label(2566)
+  end
+
+  test "cohort_label returns nil for a year before the epoch" do
+    assert_nil program_groups(:cp_group).cohort_label(2516)
+  end
 end

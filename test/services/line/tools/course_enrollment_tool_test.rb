@@ -10,7 +10,7 @@ class Line::Tools::CourseEnrollmentToolTest < ActiveSupport::TestCase
 
     assert_equal 2567, result["year_be"]
     assert_equal 1, result["total"]
-    assert_equal [ { "program" => "CP", "admission_year_be" => 2567, "count" => 1 } ],
+    assert_equal [ { "program" => "CP", "admission_year_be" => 2567, "cohort" => "CP51", "count" => 1 } ],
                  result["by_program_cohort"]
   end
 
@@ -61,5 +61,22 @@ class Line::Tools::CourseEnrollmentToolTest < ActiveSupport::TestCase
   test "unknown course_no returns error" do
     result = JSON.parse(Line::Tools::CourseEnrollmentTool.call({ "course_no" => "9999999", "year" => 2567 }))
     assert_match(/No course found/, result["error"])
+  end
+
+  test "by_program_cohort row has nil cohort when the program group has no epoch" do
+    course = Course.create!(course_no: "9970002", name: "Enrollment Tool Course",
+                            revision_year_be: 2566, credits: 3)
+    student = Student.create!(student_id: "9900001201", first_name: "No", last_name: "Epoch",
+                              first_name_th: "ไม่มี", last_name_th: "รุ่น",
+                              admission_year_be: 2560, status: "active", program: Program.placeholder)
+    Grade.create!(student: student, course: course, year_ce: 2017, semester: 1,
+                  grade: "A", grade_weight: 4.0, source: "imported")
+
+    result = JSON.parse(Line::Tools::CourseEnrollmentTool.call(
+      { "course_no" => "9970002", "year" => 2560 }))
+
+    row = result["by_program_cohort"].first
+    assert row.key?("cohort")
+    assert_nil row["cohort"]
   end
 end

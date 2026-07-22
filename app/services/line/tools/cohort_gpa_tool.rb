@@ -65,6 +65,7 @@ class Line::Tools::CohortGpaTool
     {
       program: group.code,
       admission_year_be: admission_year_be,
+      cohort: group.cohort_label(admission_year_be),
       terms: data[:terms].map do |t|
         { term: "#{t[:year_ce] + 543}/#{t[:semester]}",
           year_ce: t[:year_ce], semester: t[:semester],

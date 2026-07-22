@@ -48,4 +48,11 @@ class ProgramGroup < ApplicationRecord
     gen = year_be.to_i - first_intake_year_be + 1
     gen >= 1 ? gen : nil
   end
+
+  # "CP53"-style label for a cohort, or nil when the group has no epoch or
+  # the year predates it. Unpadded: CEDT generation 1 => "CEDT1".
+  def cohort_label(year_be)
+    generation = generation_for_year(year_be)
+    generation && "#{code}#{generation}"
+  end
 end

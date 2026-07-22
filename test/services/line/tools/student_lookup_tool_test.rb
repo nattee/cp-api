@@ -129,6 +129,19 @@ class Line::Tools::StudentLookupToolTest < ActiveSupport::TestCase
     assert student["program"].present?
     assert_equal "active", student["status"]
     assert_equal 2567, student["admission_year"]
+    assert_equal "CP51", student["cohort"]
+  end
+
+  test "serialized student has nil cohort when the program group has no epoch" do
+    Student.create!(student_id: "9900001001", first_name: "No", last_name: "Epoch",
+                    first_name_th: "ไม่มี", last_name_th: "รุ่น",
+                    admission_year_be: 2560, status: "active", program: Program.placeholder)
+
+    result = call_tool(query: "9900001001")
+    student = JSON.parse(result)["students"].first
+
+    assert student.key?("cohort")
+    assert_nil student["cohort"]
   end
 
   # --- No arguments ---

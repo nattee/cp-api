@@ -61,6 +61,7 @@ class Line::Tools::StudentGradesTool
         name: student.display_name,
         program: student.program.program_group.code,
         admission_year_be: student.admission_year_be,
+        cohort: student.program.program_group.cohort_label(student.admission_year_be),
         status: student.status
       },
       terms: terms.map { |t|

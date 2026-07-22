@@ -114,6 +114,7 @@ class Line::Tools::StudentLookupTool
       program: "#{student.program.program_group.code} (#{student.program.year_started_be})",
       status: student.status,
       admission_year: student.admission_year_be,
+      cohort: student.program.program_group.cohort_label(student.admission_year_be),
       gpa: student.gpa,
       total_credits: student.total_credits
     }
