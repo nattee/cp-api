@@ -58,3 +58,11 @@ universal law — and it says nothing about smaller models (see gemma).
 - Decision: **PASS — rollout completed 2026-07-22** (whole-branch review confirmed; tools registered and verified live).
 
 Raw logs and per-attempt CSVs: `tmp/llm_eval/` (`run-{qwen,gemma}-{current,candidate,sweep}.log`, `2026...csv`).
+
+## 2026-07-22 — round-3 gate (13 tools: + cohort_ranking, missing_enrollments), N=3
+
+qwen: existing 100/100, new 100/100, none 100/100 (162/162 attempts — includes
+the cohort-label definitional cases, the array-valued course_nos param, and
+the ranking_vs_stats_guard confirming "GPAX เฉลี่ย" still routes to cohort_gpa).
+Same-day earlier gates: 46-case run after the emoji FORMATTING prompt
+(138/138), 48-case run after the CP51 description fix (144/144).

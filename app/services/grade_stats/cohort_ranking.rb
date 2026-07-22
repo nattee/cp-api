@@ -13,7 +13,7 @@ module GradeStats
                     .having("SUM(courses.credits) > 0")
                     .order(Arel.sql(
                       "SUM(grades.grade_weight * courses.credits) / SUM(courses.credits) DESC, " \
-                      "SUM(courses.credits) DESC"))
+                      "SUM(courses.credits) DESC, students.id ASC"))
                     .limit(limit)
                     .pluck(Arel.sql(
                       "students.id, " \
