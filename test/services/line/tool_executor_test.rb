@@ -12,7 +12,8 @@ class Line::ToolExecutorTest < ActiveSupport::TestCase
   setup do
     Line::ToolRegistry.register("echo",
       definition: { description: "test echo", parameters: { type: "object", properties: { text: { type: "string" } } } },
-      handler: ToolExecutorStubEcho)
+      handler: ToolExecutorStubEcho,
+      permission: "courses.read")
   end
 
   test "execute returns tool result messages" do
@@ -82,7 +83,8 @@ class Line::ToolExecutorTest < ActiveSupport::TestCase
     end
     Line::ToolRegistry.register("fail_tool",
       definition: { description: "Always fails", parameters: { type: "object", properties: {} } },
-      handler: failing_handler)
+      handler: failing_handler,
+      permission: "courses.read")
 
     tool_calls = [
       { "id" => "call_1", "function" => { "name" => "fail_tool", "arguments" => "{}" } }
@@ -123,9 +125,13 @@ class Line::ToolExecutorTest < ActiveSupport::TestCase
     end
     Line::ToolRegistry.register("probe_tool",
       definition: { description: "probe", parameters: { type: "object", properties: {} } },
-      handler: probe)
+      handler: probe,
+      permission: "courses.read")
 
-    user = User.new(name: "probe user")
+    # A fixture user (not User.new) because gate 2 now checks user.can? — an
+    # unsaved User.new has no role, so it would be denied before reaching the
+    # handler, defeating the point of this pass-through test.
+    user = users(:viewer)
     Line::ToolExecutor.execute(
       [ { "id" => "call_1", "function" => { "name" => "probe_tool", "arguments" => "{}" } } ],
       user: user

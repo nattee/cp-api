@@ -18,7 +18,8 @@ class LlmEval::RegistryBuilderTest < ActiveSupport::TestCase
   test "candidate variant skips tools that are already registered" do
     Line::ToolRegistry.register("student_grades",
       definition: Line::Tools::StudentGradesTool::DEFINITION,
-      handler: Line::Tools::StudentGradesTool)
+      handler: Line::Tools::StudentGradesTool,
+      permission: "students.read_minimal")
     names = LlmEval::RegistryBuilder.build("candidate").map { |d| d.dig(:function, :name) }
     assert_equal 1, names.count("student_grades")
   ensure

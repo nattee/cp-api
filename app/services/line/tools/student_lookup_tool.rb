@@ -71,7 +71,7 @@ class Line::Tools::StudentLookupTool
       { count: scope.count, filters: describe_filters(query, program_code, admission_year, status) }.to_json
     else
       total = scope.count
-      students = scope.limit(limit).map { |s| serialize(s) }
+      students = scope.limit(limit).map { |s| serialize(s, user) }
       result = { students: students, total: total }
       result[:note] = "Showing #{students.size} of #{total} results" if total > students.size
       result.to_json
@@ -102,18 +102,25 @@ class Line::Tools::StudentLookupTool
   end
   private_class_method :build_scope
 
-  def self.serialize(student)
-    {
+  def self.serialize(student, user)
+    base = {
       student_id: student.student_id,
       name_th: student.full_name_th,
       name_en: student.full_name,
       program: "#{student.program.program_group.code} (#{student.program.year_started_be})",
-      status: student.status,
       admission_year: student.admission_year_be,
-      cohort: student.program.program_group.cohort_label(student.admission_year_be),
-      gpa: student.gpa,
-      total_credits: student.total_credits
+      cohort: student.program.program_group.cohort_label(student.admission_year_be)
     }
+    # Field-level tiering mirrors the web UI: status is read_full territory,
+    # GPA/credits are grade data. nil user (admin playground/eval) sees all.
+    if user.nil? || user.can_view_student_fully?(student)
+      base[:status] = student.status
+    end
+    if user.nil? || user.can_view_grades?(student)
+      base[:gpa] = student.gpa
+      base[:total_credits] = student.total_credits
+    end
+    base
   end
   private_class_method :serialize
 

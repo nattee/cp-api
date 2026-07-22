@@ -32,7 +32,7 @@ class Line::LlmService
     save_message(role: "user", content: @user_message)
 
     messages = build_initial_messages
-    tools = Line::ToolRegistry.definitions
+    tools = Line::ToolRegistry.definitions(user: @user)
 
     begin
       run_rounds(messages, tools)

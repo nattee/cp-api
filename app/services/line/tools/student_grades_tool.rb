@@ -46,6 +46,13 @@ class Line::Tools::StudentGradesTool
     end
 
     student = students.first
+
+    # Gate 3: the only place advisee scope CAN be enforced — it depends on
+    # which student the arguments resolved to.
+    unless user.nil? || user.can_view_grades?(student)
+      return { error: "You are not authorized to view this student's grades." }.to_json
+    end
+
     terms = GradeStats::StudentTranscript.call(student: student)[:terms]
 
     if (semester_str = arguments["semester"].to_s.strip.presence)

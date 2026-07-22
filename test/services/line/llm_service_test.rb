@@ -15,7 +15,8 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
 
     Line::ToolRegistry.register("echo",
       definition: { description: "test echo", parameters: { type: "object", properties: { text: { type: "string" } } } },
-      handler: LlmServiceStubEcho)
+      handler: LlmServiceStubEcho,
+      permission: "courses.read")
 
     ChatMessage.where(line_user_id: @line_user_id).delete_all
   end

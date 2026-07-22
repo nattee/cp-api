@@ -32,7 +32,11 @@ class Line::Tools::SearchTool
 
     limit = (arguments["limit"] || DEFAULT_LIMIT).to_i.clamp(1, MAX_LIMIT)
 
-    students = search_students(query, limit)
+    students = if user.nil? || user.can?("students.read_minimal")
+      search_students(query, limit, user)
+    else
+      { results: [], total: 0 }
+    end
     staff = search_staff(query, limit)
     courses = search_courses(query, limit)
 
@@ -49,7 +53,7 @@ class Line::Tools::SearchTool
 
   # --- Student search ---
 
-  def self.search_students(query, limit)
+  def self.search_students(query, limit, user)
     scope = Student.joins(program: :program_group)
 
     if query.match?(/\A\d+\z/)
@@ -65,13 +69,14 @@ class Line::Tools::SearchTool
 
     total = scope.count
     results = scope.order(:student_id).limit(limit).map do |s|
-      {
+      entry = {
         student_id: s.student_id,
         name_th: s.full_name_th,
         name_en: s.full_name,
-        program: "#{s.program.program_group.code} (#{s.program.year_started_be})",
-        status: s.status
+        program: "#{s.program.program_group.code} (#{s.program.year_started_be})"
       }
+      entry[:status] = s.status if user.nil? || user.can_view_student_fully?(s)
+      entry
     end
 
     { results: results, total: total }

@@ -30,6 +30,16 @@ class Line::ToolExecutor
       return "Error: unknown tool '#{name}'"
     end
 
+    # Gate 2: the definitions filter (gate 1) only controls what the LLM is
+    # TOLD exists. Local models hallucinate un-offered tools, and replayed
+    # chat history advertises tools the user could call before a role edit.
+    permission = Line::ToolRegistry.required_permission_for(name)
+    if user && permission && !user.can?(permission)
+      ApiEvent.log(service: "llm", action: "tool_call", severity: "warning",
+                   message: "Denied tool: #{name}", details: { tool: name, user_id: user.id, permission: permission })
+      return "Error: you are not authorized to use '#{name}'."
+    end
+
     arguments = raw_args.is_a?(String) ? JSON.parse(raw_args) : raw_args
     result = handler.call(arguments, user: user)
 
