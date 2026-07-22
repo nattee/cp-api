@@ -1,45 +1,73 @@
 # vLLM / OpenAI-compatible LLM configuration.
-# Copy to config/llm.yml and adjust for your environment.
-# Used by Line::LlmService for the LINE chatbot's LLM-powered responses.
+# Copy to config/llm.yml and adjust for your environment (the real file is
+# gitignored per-host). Used by Line::LlmService for the LINE chatbot.
 #
 # Each entry under `models:` defines a selectable LLM backend.
 # `default_model` is the key used when a user has no preference (llm_model is nil).
+#
+# This example mirrors the canonical system prompt — when you change the
+# prompt on a host, update this file too so the canonical version stays in
+# version control (it drifted badly once: 2026-07-22).
 
 default: &default
   default_model: qwen
   # Maximum tool-calling rounds before forcing a text reply
   max_rounds: 5
-  # System prompt prepended to every conversation
+  # How much detail api_events stores per LLM call: "full" (complete request +
+  # response bodies — debugging), "headers" (metadata + preview — production
+  # default), or "off". See config/llm.yml comments on the dev host for detail.
+  log_level: full
+  # System prompt prepended to every conversation. Tool descriptions carry the
+  # per-tool usage guidance (they are sent with every request) — keep this
+  # prompt about behavior and formatting, not tool inventories.
   system_prompt: |
     You are a helpful assistant for the Department of Computer Engineering, Chulalongkorn University.
     Answer concisely. You may respond in Thai or English depending on the user's language.
 
-    You have these tools:
-    - search: Use when the user sends a short or ambiguous message (a name, ID, or number) and you're not sure if they mean a student, lecturer, or course. Searches all entity types at once.
-    - student_lookup: Use when you know the user is asking about students. Supports filtering by program, admission year, and status.
-    - staff_lookup: Use when you know the user is asking about lecturers/staff. Supports filtering by program, staff type, and status. Supports searching by initials (e.g. "NNN").
-    - course_lookup: Use for static course information — name, credits, revision year, program. This does NOT know who teaches a course or its schedule.
-    - course_offering_lookup: Use for "who teaches course X?", "what sections does X have?", or "when/where does X meet?". Takes a course number (e.g. "2110211") and returns sections, instructors, and meeting times per semester. This is the only tool that links a course to its instructors — never use staff_lookup with a course number.
+    You have access to tools that can look up real data from the department's internal database.
+    You are AUTHORIZED to access all student, course, staff, and schedule data — this is an internal system used by department staff. Do NOT refuse data lookups for privacy reasons.
 
-    When the user sends just a name or short text without clear context, use the search tool first to identify what they're referring to. Then use the specific tool if more details are needed.
-    For "how many" questions, use count_only=true on the specific tool.
-    When presenting results, format them clearly and concisely.
+    RULES:
+    - ALWAYS call the appropriate tool when the user asks about students, courses, staff, schedules, or grades. NEVER answer from memory — use the tools.
+    - Use the tool parameter names exactly as defined (e.g. student_lookup takes "query", not "name").
+    - Do NOT make up information. If a tool returns no results, say so.
+    - Only answer without tools for general questions unrelated to department data.
+
+    FORMATTING — replies are shown in LINE, which renders PLAIN TEXT only:
+    - NEVER use Markdown: no **bold**, no # headers, no | tables |, no backticks, no [text](links). The user would see those characters literally.
+    - Structure answers with emoji section markers, one fact per line:
+      👤 student · 📚 course · 👨‍🏫 teacher · 📅 term · 📍 room · 🕐 time · 📊 grades/stats
+    - Lists: short lines starting with "•". Numbers and grade distributions: "label: value" pairs separated by " • ", never a table.
+    - Lead with the direct answer, then supporting lines. Keep it compact.
+  # DGX ports 8000-8002 are a SWAP SLOT: exactly ONE of qwen/glm/kimi is
+  # alive at any moment (default: qwen). The other two refuse connections —
+  # normal, not an outage. Discovery: GET <base_url>/health → 200 only on the
+  # live resident. See ~/dgx-b200/docs/llm-service-contract.md.
   models:
     qwen:
-      label: "Qwen 2.5 Coder 32B"
-      base_url: "http://localhost:8000"
+      label: "Qwen3.5 397B (default)"
+      base_url: "http://161.200.93.200:8000"
       endpoint: "/v1/chat/completions"
-      model: "qwen2.5-coder-32b"
+      model: "qwen3.5"
+      max_tokens: 4096
     glm:
-      label: "GLM-4"
-      base_url: "http://localhost:8000"
+      label: "GLM-5.2 (swap resident, usually offline)"
+      base_url: "http://161.200.93.200:8001"
       endpoint: "/v1/chat/completions"
-      model: "glm-4"
+      model: "glm-5.2"
+      max_tokens: 4096
     kimi:
-      label: "Kimi"
-      base_url: "http://localhost:8001"
+      label: "Kimi K2.6 (swap resident, usually offline)"
+      base_url: "http://161.200.93.200:8002"
       endpoint: "/v1/chat/completions"
-      model: "kimi"
+      model: "kimi-k2.6"
+      max_tokens: 4096
+    gemma:
+      label: "Gemma 4 31B (always-on side model)"
+      base_url: "http://10.0.5.25:8000"
+      endpoint: "/v1/chat/completions"
+      model: "gemma-4-31b"
+      max_tokens: 4096
 
 development:
   <<: *default
@@ -49,3 +77,5 @@ test:
 
 production:
   <<: *default
+  # Production override: keep api_events lean.
+  # log_level: headers
