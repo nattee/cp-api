@@ -179,9 +179,15 @@ $input-icon-color: darken($light, 5%);
 .teaching-history-table tr > * + * { border-left: 1px solid $table-row-border-color; }
 
 // Outlined / frosted badges (neon-bright text, tinted glow bg)
+// Role badges. .badge-role is the generic fallback so roles created later in
+// the admin UI look sane with no deploy; seeded-role classes below override it
+// (defined after, same specificity). .badge-admin must come after .badge-role
+// too, since role views always emit both classes together.
+.badge-role        { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
+.badge-staff       { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }
+.badge-minimal     { background-color: rgba($info, 0.2);      color: $info;       border: 1px solid rgba($info, 0.4); }
+.badge-public-info { background-color: rgba($success, 0.2);   color: $success;    border: 1px solid rgba($success, 0.4); }
 .badge-admin    { background-color: rgba($danger, 0.2);    color: $danger;                    border: 1px solid rgba($danger, 0.4); }
-.badge-editor   { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }
-.badge-viewer   { background-color: rgba($secondary, 0.2); color: $secondary;  border: 1px solid rgba($secondary, 0.4); }
 .badge-active    { background-color: rgba($success, 0.2);   color: $success;    border: 1px solid rgba($success, 0.4); }
 .badge-inactive  { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
 .badge-graduated { background-color: rgba($info, 0.2);    color: $info;       border: 1px solid rgba($info, 0.4); }

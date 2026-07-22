@@ -99,6 +99,10 @@
                 = resource_icon("users")
                 Users
             %li.nav-item
+              = link_to roles_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'roles'}" do
+                = resource_icon("roles")
+                Roles
+            %li.nav-item
               = link_to chat_path, class: "nav-link d-flex align-items-center #{'active' if controller_name == 'chats'}" do
                 = resource_icon("chats")
                 Chat Playground

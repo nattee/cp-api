@@ -1,0 +1,55 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1
+    = @role.display_name
+    - if @role.locked?
+      %span.material-symbols.ms-2{style: "font-size: 24px; vertical-align: middle; opacity: 0.6"} lock
+  .d-flex.gap-2
+    - unless @role.locked?
+      = link_to "Edit", edit_role_path(@role), class: "btn btn-outline-secondary"
+    = link_to "Back", roles_path, class: "btn btn-outline-primary"
+
+.card
+  .card-body
+    .detail-section
+      %dl.dl-fields.row.mb-0
+        %dt.col-sm-3 Name
+        %dd.col-sm-9
+          %span.badge{class: "badge-role badge-#{@role.name.dasherize}"}= @role.display_name
+
+        %dt.col-sm-3 Description
+        %dd.col-sm-9= @role.description.presence || "—"
+
+        %dt.col-sm-3 Inherits from
+        %dd.col-sm-9
+          - if @role.parent_roles.any?
+            - @role.parent_roles.each do |parent|
+              = link_to parent.display_name, parent, class: "me-2"
+          - else
+            %span.text-muted — none —
+
+        %dt.col-sm-3 Users
+        %dd.col-sm-9= @role.users.count
+
+    .detail-section
+      %h6.section-title Effective Permissions
+      -# Own grants plus inherited, labeled with where each came from, so
+      -# "what can this role actually do?" is answerable at a glance.
+      %table.table.mb-0
+        %thead
+          %tr
+            %th Permission
+            %th Description
+            %th Source
+        %tbody
+          - own = @role.permission_keys
+          - @role.effective_permission_keys.sort.each do |key|
+            %tr
+              %td
+                %code= key
+              %td.text-muted= Permission.label(key)
+              %td
+                - if own.include?(key)
+                  own
+                - else
+                  - source = @role.parent_roles.find { |p| p.effective_permission_keys.include?(key) }
+                  inherited via #{source&.display_name}

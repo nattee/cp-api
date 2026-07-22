@@ -1,0 +1,44 @@
+.card{"data-controller" => "datatable"}
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        = resource_icon
+        Roles
+      - if current_user.admin?
+        = link_to "New Role", new_role_path, class: "btn btn-primary btn-sm"
+    .table-responsive
+      %table.table.table-hover.mb-0{"data-datatable-target" => "table"}
+        %thead
+          %tr
+            %th Role
+            %th Description
+            %th Inherits From
+            %th.text-center Permissions
+            %th.text-center Users
+            %th Actions
+        %tbody
+          - @roles.each do |role|
+            %tr
+              %td
+                %span.badge{class: "badge-role badge-#{role.name.dasherize}"}= role.display_name
+                - if role.locked?
+                  %span.material-symbols.ms-1{style: "font-size: 14px; vertical-align: middle; opacity: 0.6"} lock
+              %td= role.description
+              %td
+                - if role.parent_roles.any?
+                  = role.parent_roles.map(&:display_name).join(", ")
+                - else
+                  %span.text-muted —
+              %td.text-center= role.effective_permission_keys.size
+              %td.text-center= role.users.size
+              %td
+                = link_to role, class: "btn-ghost btn-ghost-primary me-1", title: "Show" do
+                  %span.material-symbols{style: "font-size: 18px"} visibility
+                - unless role.locked?
+                  = link_to edit_role_path(role), class: "btn-ghost btn-ghost-secondary me-1", title: "Edit" do
+                    %span.material-symbols{style: "font-size: 18px"} edit
+                  = link_to role, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn-ghost btn-ghost-danger", title: "Delete" do
+                    %span.material-symbols{style: "font-size: 18px"} delete
+          - if @roles.empty?
+            %tr
+              %td.text-muted.text-center{colspan: 6} No roles found.

@@ -7,6 +7,7 @@ module ApplicationHelper
     "students"      => "school",
     "grades"        => "grading",
     "users"         => "group",
+    "roles"         => "verified_user",
     "line_accounts"  => "chat",
     "chats"          => "smart_toy",
     "reports"        => "query_stats",
