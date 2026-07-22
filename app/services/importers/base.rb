@@ -158,6 +158,11 @@ module Importers
               end
             end
 
+            # Importer-specific end-of-sheet reconciliation (e.g. the
+            # advisorship snapshot mode). Runs inside the transaction so a
+            # rollback below undoes it too. Returns how many records it updated.
+            updated += finalize_sheet
+
             if row_errors.any? && !data_import.skip_failures
               raise ActiveRecord::Rollback
             end
@@ -271,6 +276,13 @@ module Importers
 
     def transform_attributes(attrs)
       attrs
+    end
+
+    # Called once per sheet after the row loop, inside the transaction.
+    # Importers that reconcile whole-file state (e.g. AdvisorshipImporter's
+    # snapshot mode) override this; must return the number of records updated.
+    def finalize_sheet
+      0
     end
 
     def unique_key_fields
