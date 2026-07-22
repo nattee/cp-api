@@ -1,0 +1,7 @@
+minimal_from_public:
+  role: minimal
+  parent_role: public_info
+
+staff_from_minimal:
+  role: staff
+  parent_role: minimal

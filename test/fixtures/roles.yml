@@ -1,0 +1,20 @@
+admin:
+  name: admin
+  description: Administrator - everything
+  permission_keys: ["courses.read", "students.read_minimal", "students.read_full", "grades.read", "advisees.read_full", "users.manage"]
+  locked: true
+
+staff:
+  name: staff
+  description: Department staff - full read access, advisee access via advisorships
+  permission_keys: ["students.read_full", "grades.read", "advisees.read_full"]
+
+minimal:
+  name: minimal
+  description: Minimal student access - identity, program, admission year
+  permission_keys: ["students.read_minimal"]
+
+public_info:
+  name: public_info
+  description: Public-by-nature data - course offerings and basic course info
+  permission_keys: ["courses.read"]

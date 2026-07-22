@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_22_022711) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_22_122749) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -195,6 +195,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_022711) do
     t.index ["program_group_id"], name: "index_programs_on_program_group_id"
   end
 
+  create_table "role_inheritances", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "parent_role_id", null: false
+    t.bigint "role_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["parent_role_id"], name: "index_role_inheritances_on_parent_role_id"
+    t.index ["role_id", "parent_role_id"], name: "index_role_inheritances_on_role_id_and_parent_role_id", unique: true
+    t.index ["role_id"], name: "index_role_inheritances_on_role_id"
+  end
+
+  create_table "roles", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.boolean "locked", default: false, null: false
+    t.string "name", null: false
+    t.json "permission_keys"
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_roles_on_name", unique: true
+  end
+
   create_table "rooms", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "building", null: false
     t.integer "capacity"
@@ -368,6 +388,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_022711) do
   add_foreign_key "program_courses", "courses"
   add_foreign_key "program_courses", "programs"
   add_foreign_key "programs", "program_groups"
+  add_foreign_key "role_inheritances", "roles"
+  add_foreign_key "role_inheritances", "roles", column: "parent_role_id"
   add_foreign_key "scrapes", "semesters"
   add_foreign_key "scrapes", "users"
   add_foreign_key "sections", "course_offerings"
