@@ -149,3 +149,6 @@
         %p.text-muted.small.mt-2.mb-0
           Showing the last 20 years —
           = link_to "Show all", staff_path(@staff, history: "all")
+
+- if current_user.can?("students.read_minimal")
+  = render "advisees_card", staff: @staff

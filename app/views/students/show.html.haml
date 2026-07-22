@@ -118,6 +118,9 @@
           %dt.col-sm-3 Updated at
           %dd.col-sm-9= @student.updated_at.strftime("%B %d, %Y %H:%M")
 
+- if @full_access
+  = render "advisors_card", student: @student
+
 - if @full_access && @schedule_semesters&.any?
   .card.mt-3
     .card-body.p-3

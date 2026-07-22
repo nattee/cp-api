@@ -68,6 +68,7 @@ Rails.application.routes.draw do
     end
   end
   resources :roles
+  resources :advisorships, only: %i[create update destroy]
   resource :chat, only: [:show, :create]
   resources :reports, only: [:index, :show]
   resources :line_contacts, only: [:index, :show] do
