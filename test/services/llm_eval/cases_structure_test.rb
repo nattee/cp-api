@@ -3,14 +3,15 @@ require "test_helper"
 class LlmEval::CasesStructureTest < ActiveSupport::TestCase
   KNOWN_TOOLS = %w[
     student_lookup staff_lookup course_lookup course_offering_lookup search
-    grade_distribution cohort_gpa
+    grade_distribution cohort_gpa cohort_ranking
     student_grades course_enrollment semester_overview room_schedule
+    missing_enrollments
     none
   ].freeze
 
   test "every eval case is structurally valid" do
     cases = YAML.load_file(Rails.root.join("test/llm_eval/cases.yml"))
-    assert_equal 48, cases.size
+    assert_equal 54, cases.size
     assert_equal cases.size, cases.map { |c| c["id"] }.uniq.size, "duplicate case ids"
 
     cases.each do |c|

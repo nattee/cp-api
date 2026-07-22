@@ -349,3 +349,43 @@
       params: { program_code: "CP", generation: 51 }
     - tool: cohort_gpa
       params: { program_code: "CP", generation: 51 }
+
+# ---- round 3: missing_enrollments (chase-list) + cohort_ranking (top students) ----
+- id: missing_basic_th
+  group: new
+  question: "นิสิต cp51 คนไหนยังไม่ได้ลงเรียน 2110327 บ้าง"
+  accept:
+    - tool: missing_enrollments
+      params: { program_code: "CP", generation: 51, course_nos: ["2110327"] }
+- id: missing_multi_en
+  group: new
+  question: "Which CEDT1 students haven't taken 2110101 and 2110221?"
+  accept:
+    - tool: missing_enrollments
+      params: { program_code: "CEDT", generation: 1 }
+- id: missing_needs_th
+  group: new
+  question: "รุ่น cp50 ใครยังต้องเรียน 2110327 อีกบ้าง รวมคนที่ติด W หรือ F ด้วย"
+  accept:
+    - tool: missing_enrollments
+      params: { program_code: "CP", generation: 50, mode: "needs_course" }
+    - tool: missing_enrollments
+      params: { program_code: "CP", generation: 50 }
+- id: ranking_best_th
+  group: new
+  question: "ใคร GPAX สูงสุดในรุ่น cp51"
+  accept:
+    - tool: cohort_ranking
+      params: { program_code: "CP", generation: 51 }
+- id: ranking_topn_en
+  group: new
+  question: "Show the top 10 students of CP50 by GPAX"
+  accept:
+    - tool: cohort_ranking
+      params: { program_code: "CP", generation: 50, limit: 10 }
+- id: ranking_vs_stats_guard
+  group: existing
+  question: "GPAX เฉลี่ยของรุ่น cp51 เป็นเท่าไหร่"
+  accept:
+    - tool: cohort_gpa
+      params: { program_code: "CP", generation: 51 }

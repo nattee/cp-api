@@ -77,4 +77,10 @@ Rails.application.config.to_prepare do
     definition: Line::Tools::RoomScheduleTool::DEFINITION,
     handler: Line::Tools::RoomScheduleTool
   )
+
+  Line::ToolRegistry.register(
+    "missing_enrollments",
+    definition: Line::Tools::MissingEnrollmentsTool::DEFINITION,
+    handler: Line::Tools::MissingEnrollmentsTool
+  )
 end

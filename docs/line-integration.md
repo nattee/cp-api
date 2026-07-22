@@ -45,7 +45,7 @@ ChatJob --> LlmService --> vLLM (OpenAI-compatible API)
 | `config/initializers/line_tools.rb` | Registers tools at boot |
 | `config/llm.yml` | vLLM endpoints, models, system prompt |
 | **Tools** | |
-| `app/services/line/tools/` | 11 chatbot tools (see Tool inventory) + `semester_param.rb` helper |
+| `app/services/line/tools/` | 13 chatbot tools (see Tool inventory) + `semester_param.rb`, `cohort_param.rb` helpers |
 | **Models** | |
 | `app/models/chat_message.rb` | Conversation history (user, assistant, tool messages) |
 | `app/models/line_contact.rb` | Unlinked LINE users awaiting admin onboarding |
@@ -117,8 +117,10 @@ intents. The LLM can chain tools across rounds (up to `max_rounds`).
 | `course_enrollment` | Enrollment counts for a course-term (program × cohort breakdown) + single-student membership check. | "how many students take 2110101?", "did 6530200321 enroll in 2110499?" |
 | `grade_distribution` | Count per grade + course GPA for a course-term. | "grade distribution for 2110327" |
 | `cohort_gpa` | Per-semester GPA/GPAX statistics for one admission cohort. | "average GPA of CP 65", "GPA เฉลี่ยของรุ่น cp50" |
+| `cohort_ranking` | Top individual students of one admission cohort by GPAX (named people, not stats). | "who has the best GPAX in CP51?", "top 10 students of CEDT1" |
 | `semester_overview` | Offerings/sections/courses counts for a term, by program. | "how many courses offered in 2568/1?" |
 | `room_schedule` | A room's weekly class schedule for a term. | "what's in ENG4-303?", "ห้อง 303 วันอังคาร" |
+| `missing_enrollments` | Which students of a cohort haven't enrolled in (or still need) given course(s) — the advisor chase-list. | "who in CP51 hasn't taken 2110327?", "which CEDT1 students still need 2110101?" |
 | `search` | Cross-entity search when the query is ambiguous. | "สมชาย" |
 
 ### Tool-selection eval
