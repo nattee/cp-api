@@ -341,6 +341,12 @@
       params: { program_code: "CP", generation: 51 }
     - tool: cohort_gpa
       params: { program_code: "CP", generation: 51 }
+    # Bare "what is X" is definitional: identifying the CP program first via
+    # program_lookup is a legitimate opening hop. Generation-specific
+    # questions (definitional_th, counts, GPA) still require the cohort
+    # tools with the generation param — do NOT loosen those.
+    - tool: program_lookup
+      params: { program_code: "CP" }
 - id: cohort_label_definitional_th
   group: existing
   question: "CP51 คือรุ่นไหน เข้าปีอะไร"

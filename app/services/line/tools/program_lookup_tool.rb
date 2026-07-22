@@ -12,7 +12,9 @@ class Line::Tools::ProgramLookupTool
                  "identified by the B.E. year they started — 'หลักสูตร CP 2566' means the CP " \
                  "revision that started in 2566. Use for 'what programs are there?', what a " \
                  "program code stands for, degree levels, or curriculum revision questions. " \
-                 "Never answer program names from memory.",
+                 "Never answer program names from memory. NOT for cohort labels like 'CP51' " \
+                 "(program code + intake number, รุ่น) — those are student cohorts, not " \
+                 "curricula; use student_lookup or cohort_gpa with the generation param.",
     parameters: {
       type: "object",
       properties: {

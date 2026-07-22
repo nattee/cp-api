@@ -45,7 +45,7 @@ ChatJob --> LlmService --> vLLM (OpenAI-compatible API)
 | `config/initializers/line_tools.rb` | Registers tools at boot |
 | `config/llm.yml` | vLLM endpoints, models, system prompt |
 | **Tools** | |
-| `app/services/line/tools/` | 13 chatbot tools (see Tool inventory) + `semester_param.rb`, `cohort_param.rb` helpers |
+| `app/services/line/tools/` | 14 chatbot tools (see Tool inventory) + `semester_param.rb`, `cohort_param.rb` helpers |
 | **Models** | |
 | `app/models/chat_message.rb` | Conversation history (user, assistant, tool messages) |
 | `app/models/line_contact.rb` | Unlinked LINE users awaiting admin onboarding |
@@ -121,6 +121,7 @@ intents. The LLM can chain tools across rounds (up to `max_rounds`).
 | `semester_overview` | Offerings/sections/courses counts for a term, by program. | "how many courses offered in 2568/1?" |
 | `room_schedule` | A room's weekly class schedule for a term. | "what's in ENG4-303?", "ห้อง 303 วันอังคาร" |
 | `missing_enrollments` | Which students of a cohort haven't enrolled in (or still need) given course(s) — the advisor chase-list. | "who in CP51 hasn't taken 2110327?", "which CEDT1 students still need 2110101?" |
+| `program_lookup` | The department's programs (หลักสูตร): official names TH/EN, degree level, student counts, curriculum revisions. Source of truth for what program codes mean. | "หลักสูตร", "what does CM stand for?", "หลักสูตร CP ปี 2566 กี่หน่วยกิต" |
 | `search` | Cross-entity search when the query is ambiguous. | "สมชาย" |
 
 ### Tool-selection eval
