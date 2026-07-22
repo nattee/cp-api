@@ -138,6 +138,8 @@
   accept:
     - tool: grade_distribution
       params: { course_no: "2110101", year: 2567, semester: 1 }
+    - tool: grade_distribution
+      params: { course_no: "2110101", year: 2024, semester: 1 }
 - id: course_gpa_term
   group: existing
   question: "What was the average grade of 2110203 in 2566/2?"

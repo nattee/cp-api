@@ -35,7 +35,7 @@ class Line::Tools::CohortGpaTool
   def self.call(arguments, user: nil)
     code = arguments["program_code"].to_s.strip.upcase
     year = arguments["admission_year"].to_i
-    return { error: "program_code and admission_year are required" }.to_json if code.blank?
+    return { error: "program_code is required" }.to_json if code.blank?
 
     group = ProgramGroup.find_by(code: code)
     unless group
