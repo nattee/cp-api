@@ -16,7 +16,7 @@ class Line::ChatJob < ApplicationJob
     user = User.find_by(provider: "line", uid: line_user_id)
     result = Line::LlmService.new(message, line_user_id: line_user_id, user: user).call
 
-    deliver(reply_token, line_user_id, result.reply)
+    deliver(reply_token, line_user_id, Line::MarkdownScrubber.scrub(result.reply))
   rescue Line::LlmService::LlmError => e
     Rails.logger.error("LLM error: #{e.message}")
     Line::ReplyService.push(line_user_id, "Sorry, I'm having trouble processing your request right now.")
