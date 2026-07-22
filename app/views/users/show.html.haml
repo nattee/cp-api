@@ -19,7 +19,7 @@
 
       %dt.col-sm-3 Role
       %dd.col-sm-9
-        %span.badge{class: "badge-#{@user.role}"}= @user.role.titleize
+        %span.badge{class: "badge-role badge-#{@user.role.name.dasherize}"}= @user.role.display_name
 
       %dt.col-sm-3 Active
       %dd.col-sm-9

@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   before_action :require_admin_or_self, only: %i[show]
 
   def index
-    @users = User.all
+    @users = User.includes(:role).all
   end
 
   def show
@@ -77,6 +77,6 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:username, :email, :name, :password, :password_confirmation, :role, :active, :provider, :uid, :llm_consent, :llm_model, :debug_tool_calls)
+    params.require(:user).permit(:username, :email, :name, :password, :password_confirmation, :role_id, :active, :provider, :uid, :llm_consent, :llm_model, :debug_tool_calls)
   end
 end

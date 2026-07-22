@@ -25,7 +25,7 @@
               %td= user.email
               %td= user.name
               %td
-                %span.badge{class: "badge-#{user.role}"}= user.role.titleize
+                %span.badge{class: "badge-role badge-#{user.role.name.dasherize}"}= user.role.display_name
               %td
                 %span.badge{class: user.active? ? "badge-active" : "badge-inactive"}
                   = user.active? ? "Active" : "Inactive"

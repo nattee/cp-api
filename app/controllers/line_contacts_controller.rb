@@ -15,7 +15,7 @@ class LineContactsController < ApplicationController
     @generated_password = SecureRandom.alphanumeric(16)
     @user = User.new(
       name: @line_contact.display_name,
-      role: "viewer"
+      role: Role.find_by(name: "public_info")
     )
   end
 
@@ -49,6 +49,6 @@ class LineContactsController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:username, :email, :name, :password, :password_confirmation, :role)
+    params.require(:user).permit(:username, :email, :name, :password, :password_confirmation, :role_id)
   end
 end

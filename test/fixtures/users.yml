@@ -13,7 +13,7 @@ editor:
   email: editor@example.com
   name: Editor User
   password_digest: "<%= password_digest %>"
-  role: editor
+  role: staff
   active: true
 
 viewer:
@@ -21,7 +21,7 @@ viewer:
   email: viewer@example.com
   name: Viewer User
   password_digest: "<%= password_digest %>"
-  role: viewer
+  role: staff
   active: true
 
 inactive:
@@ -29,5 +29,21 @@ inactive:
   email: inactive@example.com
   name: Inactive User
   password_digest: "<%= password_digest %>"
-  role: viewer
+  role: staff
   active: false
+
+minimal:
+  username: minimal_user
+  email: minimal@example.com
+  name: Minimal User
+  password_digest: "<%= password_digest %>"
+  role: minimal
+  active: true
+
+public_info:
+  username: public_user
+  email: public@example.com
+  name: Public Info User
+  password_digest: "<%= password_digest %>"
+  role: public_info
+  active: true

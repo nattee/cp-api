@@ -70,7 +70,7 @@ class LineContactsControllerTest < ActionDispatch::IntegrationTest
             name: "VIP Person",
             password: "password123",
             password_confirmation: "password123",
-            role: "viewer"
+            role_id: roles(:staff).id
           }
         }
       end
@@ -82,7 +82,7 @@ class LineContactsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "line", user.provider
     assert_equal "U_CTRL_TEST", user.uid
     assert user.llm_consent?
-    assert_equal "viewer", user.role
+    assert_equal roles(:staff), user.role
   end
 
   test "create_user re-renders form on validation error" do
@@ -90,7 +90,7 @@ class LineContactsControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_difference "User.count" do
       post create_user_line_contact_path(@contact), params: {
-        user: { username: "", email: "", name: "", password: "", role: "viewer" }
+        user: { username: "", email: "", name: "", password: "", role_id: roles(:staff).id }
       }
     end
 
@@ -111,7 +111,7 @@ class LineContactsControllerTest < ActionDispatch::IntegrationTest
           name: "VIP Person",
           password: "password123",
           password_confirmation: "password123",
-          role: "viewer"
+          role_id: roles(:staff).id
         }
       }
     end

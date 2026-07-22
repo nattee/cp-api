@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_22_122749) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_22_123215) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -367,13 +367,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_122749) do
     t.string "name", null: false
     t.string "password_digest", null: false
     t.string "provider"
-    t.string "role", default: "viewer", null: false
+    t.bigint "role_id", null: false
     t.string "uid"
     t.datetime "updated_at", null: false
     t.string "username", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["line_link_token"], name: "index_users_on_line_link_token", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+    t.index ["role_id"], name: "index_users_on_role_id"
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
@@ -400,4 +401,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_122749) do
   add_foreign_key "teachings", "staffs"
   add_foreign_key "time_slots", "rooms"
   add_foreign_key "time_slots", "sections"
+  add_foreign_key "users", "roles"
 end

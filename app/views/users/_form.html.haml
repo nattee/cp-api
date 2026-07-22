@@ -56,8 +56,8 @@
         .invalid-feedback= user.errors[:password_confirmation].first
 
   .mb-3
-    = f.label :role, class: "form-label"
-    = f.select :role, options_for_select(User::ROLES.map { |r| [r.titleize, r, { data: { icon: User::ROLE_ICONS[r] } }] }, user.role), {}, class: "form-select #{'is-invalid' if user.errors[:role].any?}", data: { controller: "select2" }
+    = f.label :role_id, "Role", class: "form-label"
+    = f.select :role_id, options_for_select(Role.order(:name).map { |r| [r.display_name, r.id] }, user.role_id), {}, class: "form-select #{'is-invalid' if user.errors[:role].any?}", data: { controller: "select2" }
     - if user.errors[:role].any?
       .invalid-feedback= user.errors[:role].first
 

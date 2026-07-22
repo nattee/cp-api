@@ -37,7 +37,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   test "non-admin cannot create" do
     assert_no_difference "User.count" do
-      post users_path, params: { user: { username: "newuser", email: "new@example.com", name: "New", password: "password123", role: "viewer" } }
+      post users_path, params: { user: { username: "newuser", email: "new@example.com", name: "New", password: "password123", role_id: roles(:staff).id } }
     end
     assert_redirected_to root_path
   end
