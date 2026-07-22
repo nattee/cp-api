@@ -19,13 +19,16 @@ class Line::Tools::CohortGpaTool
         admission_year: {
           type: "integer",
           description: "Admission year of the cohort. Buddhist Era (e.g. 2565) or Christian Era (e.g. 2022) " \
-                       "accepted; values below 2400 are treated as C.E. Provide either admission_year or generation."
+                       "accepted; values below 2400 are treated as C.E. Provide either admission_year or generation. " \
+                       "Never derive this from cohort labels like 'CP51' — use generation for those."
         },
         generation: {
           type: "integer",
-          description: "Cohort/generation number as written in labels like 'CP53' or 'CEDT01' — " \
-                       "the number after the program code. " \
-                       "Use INSTEAD of admission_year when the user says a generation label."
+          description: "Generation/cohort index from labels like 'CP51', 'CEDT01', or 'รุ่น 51'. " \
+                       "The number is a RUNNING INDEX starting at 1, NOT an abbreviated B.E. year: " \
+                       "CP51 = the 51st CP cohort (NOT admission year 2551). Never convert the " \
+                       "number to a year yourself — pass it here and the system resolves the " \
+                       "actual admission year. Provide either admission_year or generation."
         }
       },
       required: [ "program_code" ]

@@ -333,3 +333,19 @@
       params: { program_code: "CEDT", generation: 2, status: "active" }
     - tool: student_lookup
       params: { program_code: "CEDT", admission_year: 2567, status: "active" }
+- id: cohort_label_definitional_en
+  group: existing
+  question: "What is CP51?"
+  accept:
+    - tool: student_lookup
+      params: { program_code: "CP", generation: 51 }
+    - tool: cohort_gpa
+      params: { program_code: "CP", generation: 51 }
+- id: cohort_label_definitional_th
+  group: existing
+  question: "CP51 คือรุ่นไหน เข้าปีอะไร"
+  accept:
+    - tool: student_lookup
+      params: { program_code: "CP", generation: 51 }
+    - tool: cohort_gpa
+      params: { program_code: "CP", generation: 51 }
