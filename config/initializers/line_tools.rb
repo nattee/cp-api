@@ -83,4 +83,10 @@ Rails.application.config.to_prepare do
     definition: Line::Tools::MissingEnrollmentsTool::DEFINITION,
     handler: Line::Tools::MissingEnrollmentsTool
   )
+
+  Line::ToolRegistry.register(
+    "program_lookup",
+    definition: Line::Tools::ProgramLookupTool::DEFINITION,
+    handler: Line::Tools::ProgramLookupTool
+  )
 end

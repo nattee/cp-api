@@ -389,3 +389,36 @@
   accept:
     - tool: cohort_gpa
       params: { program_code: "CP", generation: 51 }
+
+# ---- program_lookup (new; regression for the 2026-07-22 หลักสูตร incident
+# ---- where the model invented "Computer Mathematics" for CM) ----
+- id: program_list_bare_th
+  group: new
+  question: "หลักสูตร"
+  accept:
+    - tool: program_lookup
+- id: program_list_th
+  group: new
+  question: "ภาคมีหลักสูตรอะไรบ้าง"
+  accept:
+    - tool: program_lookup
+- id: program_code_meaning_en
+  group: new
+  question: "What does the program code CM stand for?"
+  accept:
+    - tool: program_lookup
+      params: { program_code: "CM" }
+    - tool: program_lookup
+- id: program_revision_th
+  group: new
+  question: "หลักสูตร CP ปี 2566 มีทั้งหมดกี่หน่วยกิต"
+  accept:
+    - tool: program_lookup
+      params: { program_code: "CP" }
+- id: program_degree_level_th
+  group: new
+  question: "หลักสูตรปริญญาโทของภาคมีอะไรบ้าง"
+  accept:
+    - tool: program_lookup
+      params: { degree_level: "master" }
+    - tool: program_lookup
