@@ -12,7 +12,7 @@
 default: &default
   default_model: qwen
   # Maximum tool-calling rounds before forcing a text reply
-  max_rounds: 5
+  max_rounds: 7
   # How much detail api_events stores per LLM call: "full" (complete request +
   # response bodies — debugging), "headers" (metadata + preview — production
   # default), or "off". See config/llm.yml comments on the dev host for detail.

@@ -116,12 +116,52 @@ class Line::LlmService
       Rails.logger.info("LLM tool-calling round #{round + 1}: #{tool_calls.map { |tc| tc.dig("function", "name") }.join(", ")}")
     end
 
-    # Safety net: max rounds exhausted, extract whatever content we have.
-    Rails.logger.warn("LLM reached max rounds (#{@max_rounds}) without final text reply")
-    fallback = Line::MarkdownScrubber.scrub(messages.last&.dig("content").to_s.strip).presence ||
-               "ขออภัยค่ะ ระบบไม่สามารถประมวลผลคำขอให้เสร็จได้ กรุณาลองใหม่อีกครั้ง"
-    save_message(role: "assistant", content: fallback)
-    Result.new(reply: fallback, tool_rounds: @tool_rounds)
+    # Safety net: max rounds exhausted while the model still wants tools. The
+    # loop only calls the LLM at the top of a round, so the LAST round's tool
+    # results have never been shown back to the model — without this it can
+    # hold the complete answer and still never get to say it.
+    Rails.logger.warn("LLM reached max rounds (#{@max_rounds}) — forcing final answer without tools")
+    forced_final_answer(messages)
+  end
+
+  # Trailing system instruction for the forced final completion. Asking the
+  # model to propose a narrower follow-up (rather than hard-coding a "please
+  # split your question" reply) keeps the good case good: the gathered results
+  # often already contain the full answer.
+  FINAL_ANSWER_INSTRUCTION =
+    "You have used up the tool-call budget for this request. Do not request any more " \
+    "tools. Answer the user's question now using only the tool results above. If they " \
+    "are not enough for a complete answer, state what you did find and suggest a " \
+    "smaller, more specific follow-up question the user could ask.".freeze
+
+  # One last completion with NO tools in the request, so the model cannot keep
+  # tool-calling and must produce text. If even this call fails, degrade to the
+  # last tool result instead of raising — at max-rounds we hold real data, and
+  # a partial answer beats ChatJob's generic "sorry" push.
+  #
+  # The instruction rides in a "user"-role message: sglang rejects system
+  # messages anywhere but position 0 ("System message must be at the
+  # beginning"). It is appended only to the outgoing request, never saved to
+  # ChatMessage, so it cannot pollute the conversation history.
+  def forced_final_answer(messages)
+    response = chat_completion(messages + [ { "role" => "user", "content" => FINAL_ANSWER_INSTRUCTION } ])
+    reply = Line::MarkdownScrubber.scrub(response.dig("choices", 0, "message", "content").to_s.strip)
+    reply = last_resort_reply(messages) if reply.empty?
+    save_message(role: "assistant", content: reply)
+    Result.new(reply: reply, tool_rounds: @tool_rounds)
+  rescue LlmError
+    reply = last_resort_reply(messages)
+    save_message(role: "assistant", content: reply)
+    Result.new(reply: reply, tool_rounds: @tool_rounds)
+  end
+
+  # Tool-result hashes use symbol keys (built by ToolExecutor) while messages
+  # from the API use string keys — dig both, or the tool-result case (the only
+  # one that can reach here) silently yields nil and always emits the apology.
+  def last_resort_reply(messages)
+    last_content = messages.last&.dig(:content) || messages.last&.dig("content")
+    Line::MarkdownScrubber.scrub(last_content.to_s.strip).presence ||
+      "ขออภัยค่ะ ระบบไม่สามารถประมวลผลคำขอให้เสร็จได้ กรุณาลองใหม่อีกครั้ง"
   end
 
   # The always-on default resident (qwen), used as the fallback target.

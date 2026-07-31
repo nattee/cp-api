@@ -85,6 +85,66 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     assert_equal %w[user assistant tool assistant tool assistant], messages.map(&:role)
   end
 
+  # --- Max rounds exhausted: forced final answer ---
+
+  test "forces a final no-tools completion when max rounds are exhausted" do
+    service = Line::LlmService.new("Count things", line_user_id: @line_user_id, user: @user)
+    service.instance_variable_set(:@max_rounds, 1)
+
+    captured = []
+    responses = [
+      tool_call_response("echo", '{"text":"ping"}', call_id: "call_1"),
+      text_response("Final forced answer")
+    ]
+    service.define_singleton_method(:chat_completion) do |messages, tools: []|
+      captured << { messages: messages, tools: tools }
+      responses.shift
+    end
+
+    result = service.call
+    assert_equal "Final forced answer", result.reply
+
+    assert_equal 2, captured.size
+    final_call = captured.last
+    assert_empty final_call[:tools], "forced final completion must offer no tools"
+    instruction = final_call[:messages].last
+    assert_equal "user", instruction["role"]
+    assert_includes instruction["content"], "tool-call budget"
+
+    # The instruction is transient — history holds only the real conversation:
+    # user -> assistant(tool_calls) -> tool -> assistant(final).
+    messages = ChatMessage.where(line_user_id: @line_user_id).order(:created_at)
+    assert_equal %w[user assistant tool assistant], messages.map(&:role)
+    assert_equal "Final forced answer", messages.last.content
+  end
+
+  test "degrades to the last tool result when the forced final completion fails" do
+    service = Line::LlmService.new("Count things", line_user_id: @line_user_id, user: @user)
+    service.instance_variable_set(:@max_rounds, 1)
+
+    responses = [tool_call_response("echo", '{"text":"ping"}', call_id: "call_1")]
+    service.define_singleton_method(:chat_completion) do |_messages, tools: []|
+      responses.shift || raise(Line::LlmService::LlmError, "boom")
+    end
+
+    result = service.call
+    # Tool-result hashes are symbol-keyed; before the dig fix this path could
+    # only ever produce the generic apology.
+    assert_equal '{"text":"ping"}', result.reply
+    assert_no_match(/ขออภัย/, result.reply)
+
+    last = ChatMessage.where(line_user_id: @line_user_id, role: "assistant").order(:created_at).last
+    assert_equal '{"text":"ping"}', last.content
+  end
+
+  test "last_resort_reply digs symbol and string keys and falls back to the apology" do
+    service = Line::LlmService.new("Hi", line_user_id: @line_user_id, user: @user)
+    assert_equal "data", service.send(:last_resort_reply, [ { role: "tool", content: "data" } ])
+    assert_equal "data", service.send(:last_resort_reply, [ { "role" => "assistant", "content" => "data" } ])
+    assert_match(/ขออภัย/, service.send(:last_resort_reply, [ { role: "tool", content: "" } ]))
+    assert_match(/ขออภัย/, service.send(:last_resort_reply, []))
+  end
+
   # --- Result struct ---
 
   test "call returns Result with reply and empty tool_rounds when no tools used" do
