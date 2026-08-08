@@ -62,15 +62,19 @@ class Line::Tools::StudentGradesTool
       terms = terms.select { |t| t[:year_ce] + 543 == year_be && t[:semester] == num }
     end
 
+    student_info = {
+      student_id: student.student_id,
+      name: student.display_name,
+      program: student.program.program_group.code,
+      admission_year_be: student.admission_year_be,
+      cohort: student.program.program_group.cohort_label(student.admission_year_be)
+    }
+    # status is students.read_full-tier (mirrors student_lookup's field tiering);
+    # can_view_grades? above can pass via the advisee branch without read_full.
+    student_info[:status] = student.status if user.nil? || user.can_view_student_fully?(student)
+
     {
-      student: {
-        student_id: student.student_id,
-        name: student.display_name,
-        program: student.program.program_group.code,
-        admission_year_be: student.admission_year_be,
-        cohort: student.program.program_group.cohort_label(student.admission_year_be),
-        status: student.status
-      },
+      student: student_info,
       terms: terms.map { |t|
         { term: "#{t[:year_ce] + 543}/#{t[:semester]}",
           courses: t[:courses], gpa: t[:gpa], gpax: t[:gpax] }

@@ -155,6 +155,26 @@ class Line::Tools::SearchToolTest < ActiveSupport::TestCase
     assert course.key?("revision_year")
   end
 
+  # --- Per-caller student gating ---
+  # The tool is registered at courses.read, so the student block relies on an
+  # internal students.read_minimal check. A courses.read-only caller must not
+  # see any students.
+
+  test "a public_info user (courses.read only) gets no student results" do
+    data = JSON.parse(Line::Tools::SearchTool.call(
+      { "query" => "Thanawat" }, user: users(:public_info)))
+
+    assert_equal 0, data["students_total"]
+    assert_empty data["students"]
+  end
+
+  test "a students.read_minimal user does get student results" do
+    data = JSON.parse(Line::Tools::SearchTool.call(
+      { "query" => "Thanawat" }, user: users(:minimal)))
+
+    assert_operator data["students_total"], :>=, 1
+  end
+
   private
 
   def call_tool(**args)

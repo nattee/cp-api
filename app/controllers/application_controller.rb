@@ -12,7 +12,10 @@ class ApplicationController < ActionController::Base
   private
 
   def current_user
-    if ENV["AUTO_LOGIN"].present?
+    # AUTO_LOGIN bypasses authentication entirely, so it must never take effect
+    # off a developer's machine — one stray env var in production would sign in
+    # every request as this user id (docs use 1 = super admin).
+    if Rails.env.development? && ENV["AUTO_LOGIN"].present?
       @current_user ||= User.find_by(id: ENV["AUTO_LOGIN"])
     else
       @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]

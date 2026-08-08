@@ -73,4 +73,21 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     # admission_year must NOT be pre-filled with the context year
     assert_select "input#admission_year[value=?]", "2567", count: 0
   end
+
+  # --- CSV export honours required-param validation ---
+  # A bare `.csv` request must not execute a report with blank required params
+  # (the CSV branch runs the report directly, bypassing the HTML run gate).
+
+  test "csv export redirects when required params are blank" do
+    login users(:viewer)
+    get report_path("failing_students", format: :csv)
+    assert_redirected_to report_path("failing_students")
+  end
+
+  test "csv export runs when required params are present" do
+    login users(:viewer)
+    get report_path("failing_students", format: :csv), params: { course_no: "2110101", year: 2567 }
+    assert_response :success
+    assert_equal "text/csv", response.media_type
+  end
 end

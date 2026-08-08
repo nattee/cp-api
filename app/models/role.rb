@@ -38,7 +38,7 @@ class Role < ApplicationRecord
       keys.merge(role.permission_keys)
       queue.concat(role.parent_roles.to_a)
     end
-    keys
+    Permission.expand(keys)
   end
 
   def ancestor_role_ids

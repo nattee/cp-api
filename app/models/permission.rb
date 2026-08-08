@@ -14,6 +14,30 @@ module Permission
 
   KEYS = CATALOG.keys.freeze
 
+  # Structural containment: granting the left key is meaningless (or unsafe)
+  # without the right keys, so effective permission sets always include them.
+  # - grades.read exposes student identity (names + IDs) through grade reports
+  #   and the schedule roster, so it cannot be held without the identity key.
+  # - students.read_full is a strict superset of the minimal fields, and the
+  #   students controller gates every action on students.read_minimal.
+  # Expanded once, at the end of Role#effective_permission_keys.
+  IMPLICATIONS = {
+    "grades.read"        => %w[students.read_minimal],
+    "students.read_full" => %w[students.read_minimal]
+  }.freeze
+
+  # Given granted keys, return them plus every key they structurally imply.
+  # Fixed-point, so a future chained implication still fully resolves.
+  def self.expand(keys)
+    result = Set.new(keys)
+    loop do
+      implied = Set.new(result.flat_map { |k| IMPLICATIONS[k] || [] })
+      break if implied.subset?(result)
+      result |= implied
+    end
+    result
+  end
+
   def self.valid_key?(key) = CATALOG.key?(key)
 
   def self.label(key) = CATALOG[key]

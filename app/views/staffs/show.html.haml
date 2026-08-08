@@ -34,7 +34,7 @@
         %dd.col-sm-9
           %span.badge{class: "badge-#{@staff.status.dasherize}"}= @staff.status.titleize
 
-        - if @staff.employment_date.present?
+        - if @staff.employment_date.present? && current_user.admin?
           %dt.col-sm-3 Employment Date
           %dd.col-sm-9= @staff.employment_date.strftime("%B %-d, %Y")
 
@@ -54,7 +54,9 @@
             %dt.col-sm-3 Room
             %dd.col-sm-9= @staff.room
 
-    - if @staff.birthdate.present?
+    -# Birthdate is personal PII, not directory data — the whole page is only
+    -# gated by courses.read, so restrict DOB to admins.
+    - if @staff.birthdate.present? && current_user.admin?
       .detail-section
         %h6.section-title Personal
         %dl.dl-fields.row.mb-0

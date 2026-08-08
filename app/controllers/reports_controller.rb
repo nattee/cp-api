@@ -24,21 +24,28 @@ class ReportsController < ApplicationController
     end
     @report = entry.report_class
 
-    if params[:run].present?
-      missing = @report.params_spec.select { |p| p[:required] && params[p[:name]].blank? }
-      if missing.any?
-        flash.now[:alert] = "Please fill in: #{missing.map { |p| p[:name].to_s.humanize }.join(', ')}"
-      else
-        @result = @report.new(report_params).run
-      end
+    missing = @report.params_spec.select { |p| p[:required] && params[p[:name]].blank? }
+    missing_msg = "Please fill in: #{missing.map { |p| p[:name].to_s.humanize }.join(', ')}"
+
+    if params[:run].present? && missing.any?
+      flash.now[:alert] = missing_msg
+    elsif params[:run].present?
+      @result = @report.new(report_params).run
     end
 
     respond_to do |format|
       format.html
       format.csv do
-        @result ||= @report.new(report_params).run
-        exporter = Exporters::ReportExporter.new(@result, filename: @report.key)
-        send_data exporter.to_csv, filename: exporter.filename, type: "text/csv", disposition: "attachment"
+        # The CSV branch runs the report directly, so it must repeat the
+        # required-param check the HTML path does — otherwise a bare `.csv`
+        # request executes the report with blank required params.
+        if missing.any?
+          redirect_to report_path(params[:id]), alert: missing_msg
+        else
+          @result ||= @report.new(report_params).run
+          exporter = Exporters::ReportExporter.new(@result, filename: @report.key)
+          send_data exporter.to_csv, filename: exporter.filename, type: "text/csv", disposition: "attachment"
+        end
       end
     end
   end

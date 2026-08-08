@@ -67,4 +67,36 @@ class Line::Tools::StudentGradesToolTest < ActiveSupport::TestCase
     assert result["student"].key?("cohort")
     assert_nil result["student"]["cohort"]
   end
+
+  # --- Per-caller grade authorization (Gate 3) ---
+  # The tool is registered at students.read_minimal, so the ONLY thing gating
+  # grade data is the internal can_view_grades? check. Lock it down.
+
+  test "denies grades to a students.read_minimal-only user" do
+    result = JSON.parse(Line::Tools::StudentGradesTool.call(
+      { "query" => "6732100021" }, user: users(:minimal)))
+
+    assert_match(/not authorized/i, result["error"])
+    assert_nil result["terms"]
+  end
+
+  test "allows grades to a grades.read user" do
+    result = JSON.parse(Line::Tools::StudentGradesTool.call(
+      { "query" => "6732100021" }, user: users(:editor)))
+
+    assert_equal "6732100021", result["student"]["student_id"]
+    assert result.key?("terms")
+  end
+
+  test "withholds status from a grades.read viewer without students.read_full" do
+    role = Role.create!(name: "grades_only", permission_keys: ["grades.read"])
+    viewer = User.create!(username: "grades_only_user", email: "grades_only@example.com",
+                          name: "Grades Only", password: "password123", role: role)
+
+    result = JSON.parse(Line::Tools::StudentGradesTool.call(
+      { "query" => "6732100021" }, user: viewer))
+
+    assert result.key?("terms")                       # grade data is visible
+    assert_not result["student"].key?("status")       # status is read_full-tier
+  end
 end
