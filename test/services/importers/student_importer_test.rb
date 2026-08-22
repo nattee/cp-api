@@ -211,6 +211,40 @@ class Importers::StudentImporterTest < ActiveSupport::TestCase
     assert_match(/Required fields not mapped/, data_import.error_message)
   end
 
+  # --- upsert program guard ---
+
+  UPSERT_PROGRAM_MAPPING = {
+    "student_id" => "A: student_id", "first_name" => "B: first_name",
+    "last_name" => "C: last_name", "first_name_th" => "D: first_name_th",
+    "last_name_th" => "E: last_name_th", "admission_year_be" => "F: admission_year_be",
+    "program_name" => "G: program_name"
+  }.freeze
+
+  test "upsert does not overwrite an existing program assignment" do
+    student = students(:active_student)
+    original_program_id = student.program_id
+    assert_not_equal original_program_id, programs(:cp_master).id
+
+    di = create_data_import("students_upsert_program.csv", column_mapping: UPSERT_PROGRAM_MAPPING)
+    di.update!(mode: "upsert")
+    Importers::StudentImporter.new(di).call
+
+    assert_equal "completed", di.reload.state, di.error_message.to_s
+    assert_equal original_program_id, student.reload.program_id
+  end
+
+  test "upsert fills a blank program assignment" do
+    student = students(:active_student)
+    student.update_columns(program_id: nil)
+
+    di = create_data_import("students_upsert_program.csv", column_mapping: UPSERT_PROGRAM_MAPPING)
+    di.update!(mode: "upsert")
+    Importers::StudentImporter.new(di).call
+
+    assert_equal "completed", di.reload.state, di.error_message.to_s
+    assert_equal programs(:cp_master).id, student.reload.program_id
+  end
+
   private
 
   def build_importer

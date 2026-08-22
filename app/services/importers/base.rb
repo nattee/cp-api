@@ -138,7 +138,7 @@ module Importers
               end
 
               if data_import.mode == "upsert" && (existing = find_existing_record(attrs))
-                existing.assign_attributes(attrs.except(*unique_key_fields))
+                existing.assign_attributes(attrs.except(*unique_key_fields, *update_protected_fields(existing)))
                 if existing.changed?
                   if existing.save
                     updated += 1
@@ -286,6 +286,14 @@ module Importers
     end
 
     def unique_key_fields
+      []
+    end
+
+    # Attributes a subclass refuses to overwrite on an existing record in
+    # upsert mode, decided per record. Lets an importer treat a field as
+    # fill-blank-only (e.g. StudentImporter protects an already-assigned
+    # program_id).
+    def update_protected_fields(_existing)
       []
     end
   end

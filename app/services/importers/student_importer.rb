@@ -63,7 +63,8 @@ module Importers
         { attribute: :program_name,      label: "Program",           required: false,
           aliases: %w[coursecodeno program program_name program_id program_code majorcode major หลักสูตร สาขา],
           help: "From file: looks up by program code (4-digit) first, then alternative program code, " \
-                "then English name, then Thai name. If multiple programs share the same name, the latest one (by year started) is used.",
+                "then English name, then Thai name. If multiple programs share the same name, the latest one (by year started) is used. " \
+                "On upsert, existing students keep their current program — file values only fill blanks.",
           fixed_options: -> { Program.includes(:program_group).order(year_started_be: :desc).map { |p| [ "#{p.program_group.code} — #{p.program_code} — #{p.name_en} (#{p.year_started_be})", p.id ] } },
           group_options: -> { ProgramGroup.where.not(code: "OTHER").order(:id).map { |g| [ "#{g.code} — #{g.name_en}", g.id ] } } },
         { attribute: :old_program,       label: "Old Program",       required: false,
@@ -86,6 +87,15 @@ module Importers
     FEMALE_TITLES = %w[น.ส. นางสาว นาง ด.ญ. เด็กหญิง Mrs. Miss Ms.].freeze
 
     private
+
+    # Program assignment is authoritative once set — same policy as the CB
+    # student sync. A re-imported file may fill a blank program but never
+    # change it: name-based resolution re-picks a revision heuristically on
+    # every upsert, and an unresolvable value would even null the assignment
+    # (transform_attributes sets attrs[:program_id] = program&.id).
+    def update_protected_fields(existing)
+      existing.program_id.present? ? [ :program_id ] : []
+    end
 
     def find_existing_record(attrs)
       Student.find_by(student_id: attrs[:student_id])
