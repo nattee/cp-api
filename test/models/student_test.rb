@@ -127,4 +127,24 @@ class StudentTest < ActiveSupport::TestCase
     student = students(:active_student)
     assert_equal 9, student.total_credits
   end
+  # --- study_track ---
+
+  test "study_track accepts regular, special, and nil" do
+    student = students(:active_student)
+    %w[regular special].each do |track|
+      student.study_track = track
+      assert student.valid?, "expected #{track} to be valid: #{student.errors.full_messages}"
+    end
+    student.study_track = nil
+    assert student.valid?
+  end
+
+  test "study_track rejects unknown values and normalizes blank to nil" do
+    student = students(:active_student)
+    student.study_track = "evening"
+    assert_not student.valid?
+    student.study_track = ""
+    assert student.valid?
+    assert_nil student.study_track
+  end
 end

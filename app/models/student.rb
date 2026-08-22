@@ -13,6 +13,15 @@ class Student < ApplicationRecord
     "unknown"   => "help"
   }.freeze
 
+  # M.Sc. study track: ภาคปกติ vs ภาคนอกเวลาราชการ (the department's "CT"
+  # cohorts, CS intakes 2533–2560). Null = unknown or not applicable
+  # (bachelors, unclassified eras). Backfilled from registrar evidence —
+  # see docs/superpowers/specs/2026-08-21-cs-study-track-design.md.
+  # Deliberately has NO importer attribute, so file imports never touch it.
+  STUDY_TRACKS = %w[regular special].freeze
+  STUDY_TRACK_ICONS = { "regular" => "light_mode", "special" => "dark_mode" }.freeze
+  STUDY_TRACK_LABELS = { "regular" => "Regular", "special" => "นอกเวลาราชการ" }.freeze
+
   belongs_to :program
   has_many :grades, dependent: :destroy
   has_many :advisorships, dependent: :destroy
@@ -28,6 +37,10 @@ class Student < ApplicationRecord
   validates :sex, inclusion: { in: SEXES }, allow_nil: true
   validates :status, presence: true, inclusion: { in: STATUSES }
   validates :tcas, inclusion: { in: TCAS_ROUNDS }, allow_nil: true
+  validates :study_track, inclusion: { in: STUDY_TRACKS }, allow_nil: true
+
+  # Blank select submissions arrive as "" — store the absence as NULL.
+  before_validation { self.study_track = nil if study_track.blank? }
 
   scope :active, -> { where(status: "active") }
 
