@@ -60,8 +60,13 @@ programs = {
     { program_code: "2205", total_credit: 36, short_name: "วท.ม. (CS)", year_started_be: 2014 + 543 },
     { program_code: "3626", total_credit: 36, short_name: "วท.ม. (CS)", year_started_be: 2018 + 543 },
     { program_code: "4242", total_credit: 36, short_name: "วท.ม. (CS)", year_started_be: 2023 + 543 },
-    # Strange one: CS but has CM-like name_en — group assignment is by seed structure, not by name
-    { program_code: "0999", total_credit: 48, short_name: "วท.ม. (CS)", year_started_be: 1997 + 543 },
+    # NOTE: deliberately NO row for the B.E. 2540 (1997 CE) M.Sc.-CS
+    # registration (CB program 175211001997, major_code 21100). That is the
+    # special program (ภาคนอกเวลาราชการ — the department's "CT" cohorts,
+    # intakes 2533–2560), recorded per-student in students.study_track; it
+    # is not a curriculum revision of the regular CS lineage. A synthetic
+    # stand-in code "0999" was dissolved on 2026-08-22 (programs:dissolve_0999)
+    # — do not re-add. See docs/superpowers/specs/2026-08-21-cs-study-track-design.md.
   ],
   "CM" => [
     { program_code: "0037", total_credit: 36, short_name: "วศ.ม. (CM)", year_started_be: 1992 + 543 },
