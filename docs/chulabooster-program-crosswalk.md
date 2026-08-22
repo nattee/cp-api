@@ -37,8 +37,9 @@ exports (2026-07-03/04):
    variants for that year.
 6. **`degree_code` behaves like a stable per-program-lineage identifier**, not a degree-level
    bucket: `233` → CP (7/7 of CP's revision years, 1976–2023, exact match), `235` → CM's earliest
-   revisions, `387` → CD's earliest revision, `175` → CS's oldest revision (`0999`, from before CS
-   had its own `major_code`). Every local revision year for CP/CM/CD has *some* corresponding CB
+   revisions, `387` → CD's earliest revision, `175` → the M.Sc.-CS lineage (its `major_code=21100`
+   oddball row `175211001997` turned out to be the CS *special program* — see §7, 2026-08-22).
+   Every local revision year for CP/CM/CD has *some* corresponding CB
    row under `major_code=21100` — zero gaps — once the twin-collapsing in point 5 is accounted for.
 
 **Conclusion: the reconciliation report's `24 cb-only / 44 local-only` program counts are a
@@ -224,3 +225,34 @@ fires 0 times in this population (it remains as a safety net; §4 validates it o
 **6d. Status-code families hold on the import population** (see the status crosswalk doc): every
 CB-only status code maps into a known family; derived statuses for the 1,441 would be
 **944 retired / 464 graduated / 33 active** — consistent with the 62.7%-pre-2010 cohort profile.
+
+## 7. The CS special program (ภาคนอกเวลาราชการ) — resolved 2026-08-22
+
+CB row `175211001997` (degree lineage 175 = M.Sc.-CS, revision 1997 CE = B.E. 2540, blank name,
+`major_code=21100` where every regular CS revision uses `21101`) is the **special program** —
+the department's "CT" cohorts (CT = นอกเวลาราชการ, confirmed by dept hard copy), intakes B.E.
+2533–2560. It is a parallel program, not a curriculum revision: the regular lineage runs
+1027/2524 → 0038/2538 → 2205/2557 → 3626/2561 → 4242/2566 with **no** 2540 entry.
+
+**There is deliberately no local Program row for it.** The synthetic stand-in code `0999` was
+dissolved on 2026-08-22 (`programs:dissolve_0999`; its ~730 students — both tracks, an artifact
+of latest-revision-by-year resolution — moved to the regular lineage). The track is recorded
+per-student in `students.study_track`, backfilled by `students:backfill_study_track` from:
+
+- the dept label `enrollment_method = "โครงการภาคนอกเวลาราชการ"` (719 students across CS/SE/CM;
+  agrees with CB's classifier 717/719);
+- CB students-export `project` (`201` regular / `212` special) + `fee_type` (`1`/`01` regular,
+  `4`/`04`/`07` special): an **exact partition** of CS-group students for intakes 2533–2553,
+  appearing precisely at 2533 (the special program's first intake);
+- student-ID digits 3–4 (`70` regular / `71` special) for 2554–2560, after fees blur (the
+  regular program went special-fee ~2554; last special intake 2560).
+
+Cross-validated against the 30th-anniversary book's CT01–CT16 alumni rosters: 675/684 agree;
+all 9 conflicts side with the classifier (7 are 7-digit-era serial-block anomalies, 2 are
+book-roster quirks).
+
+**Open questions this does NOT settle:** (a) SE/CM run นอกเวลา tracks too (the label proves it),
+but their CB twin program-row pairs do *not* split cleanly along the label — twin semantics
+(regular/special vs แผน ก/ข vs something else) still unknown; local student→twin assignments
+came from file `COURSECODENO` where available and resolution guesses elsewhere. (b) CS students
+with ID segment `72` (2562+) are a different, unidentified track — `study_track` left null.
