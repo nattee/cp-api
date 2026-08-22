@@ -592,3 +592,32 @@ In `student_params` permit list: add `:study_track`.
 - Spec coverage: migration/model ✓ (T1), backfill rules ✓ (T3), dissolution + seeds ✓ (T4), importer guard ✓ (T2), UI ✓ (T5), docs ✓ (T6), rollout dev half ✓ (T7; production deliberately deferred to dae).
 - Types: `decide` returns `Decision(track, evidence, review_reason)` everywhere; `update_protected_fields` symbol array in both files.
 - Out of scope (per spec): book add-missing, SE/CM twins, segment-72, CT notation, exporter column (consciously omitted — export mirrors the table minus the new column for now; note for dae).
+
+---
+
+## Execution record (2026-08-22, autonomous run)
+
+All 7 tasks executed inline this session; every step's tests green; full unit
+suite 839 runs / 0 failures. Commits d2b136c5c8ed (T1), 7eec0c262052 (T2),
+0e39e50f1c0e (T3), e77bf3158394 (T4), 7741d4233c7f (T5), f7d684123ebd (T6),
+plus 6b22b9164c14 (mid-execution rule refinement, see below) and e63ec518a16e
+(test-fixture fix). Data tasks committed on dev: backfill 1,903 assignments /
+34 review rows; dissolution moved 730 students → 0038 and destroyed 0999.
+
+**Deviations from the plan as written:**
+
+1. Task 3's 2554–2560 segment rule was refined mid-execution (spec amended
+   with a dated note): the first dry-run's conflict tripwire surfaced 41
+   dept-labeled special students with 70-range IDs, so "70 → regular" became
+   "70 + CB plan-201 → regular; otherwise review".
+2. Task 3/4's CS fixtures moved from global fixture files into per-test
+   setup blocks after breaking 16 unrelated tests (ProgramResolverTest
+   creates its own CS group; ProgramLookupToolTest asserts the group list).
+
+**Pre-existing, NOT caused by this work:** test/system/students_test.rb fails
+2F/5E identically at the pre-change baseline 6c96e6acc686 (stale English-name
+expectations vs display_name's Thai preference; Capybara substring-ambiguous
+labels "Program"/"Old Program", "Status"/"Status Note").
+
+Revert anchor: hg 6c96e6acc686 + tmp/backup-20260822-pre-study-track/
+(full dev-DB dump, dry-run CSVs, UI screenshots).
