@@ -9,3 +9,15 @@ cp_master:
   program_group: cm_group
   short_name: "วศ.ม. (CM)"
   year_started_be: 2545
+
+cs_master_1995:
+  program_code: "0038"
+  program_group: cs_group
+  short_name: "วท.ม. (CS)"
+  year_started_be: 2538
+
+cs_master_0999:
+  program_code: "0999"
+  program_group: cs_group
+  short_name: "วท.ม. (CS)"
+  year_started_be: 2540

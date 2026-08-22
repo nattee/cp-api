@@ -24,3 +24,13 @@ other_group:
   degree_level: bachelor
   degree_name: Unknown
   field_of_study: Unknown
+
+cs_group:
+  code: CS
+  name_en: Computer Science
+  name_th: วิทยาศาสตร์คอมพิวเตอร์
+  degree_level: master
+  degree_name: Master of Science
+  field_of_study: Computer Engineering
+  degree_abbr: M.Sc.
+  first_intake_year_be: 2514
