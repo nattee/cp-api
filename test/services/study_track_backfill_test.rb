@@ -3,6 +3,18 @@ require "test_helper"
 class StudyTrackBackfillTest < ActiveSupport::TestCase
   LABEL = StudyTrackBackfill::SPECIAL_LABEL
 
+  setup do
+    @cs_group = ProgramGroup.create!(
+      code: "CS", name_en: "Computer Science", name_th: "วิทยาศาสตร์คอมพิวเตอร์",
+      degree_level: "master", degree_name: "Master of Science",
+      field_of_study: "Computer Engineering", first_intake_year_be: 2514
+    )
+    @cs_master = Program.create!(
+      program_code: "0038", program_group: @cs_group,
+      short_name: "วท.ม. (CS)", year_started_be: 2538
+    )
+  end
+
   def backfill
     StudyTrackBackfill.new(cb_rows: {}, commit: false)
   end
@@ -11,7 +23,7 @@ class StudyTrackBackfillTest < ActiveSupport::TestCase
     Student.new(
       student_id: sid || "#{year - 2500}70000021",
       admission_year_be: year,
-      program: programs(:cs_master_1995),
+      program: @cs_master,
       enrollment_method: label,
       first_name: "a", last_name: "b", first_name_th: "ก", last_name_th: "ข"
     )
