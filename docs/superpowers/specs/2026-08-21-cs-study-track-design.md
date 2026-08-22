@@ -126,10 +126,13 @@ an earlier assignment):
    `project == "201"` and `fee_type` in `%w[1 01]` → `regular`;
    any other combination → review CSV, left null.
 3. **CS group, intakes 2554–2560:** student ID digits 3–4:
-   `"71"` → `special`; `"70"` → `regular` (the university still issued the
-   71 range for special admissions through 2560, so a 70-range ID means a
-   regular admission even where fee/project blur); anything else → review
-   CSV, left null.
+   `"71"` → `special`; `"70"` **plus CB plan `project == "201"`** →
+   `regular`; anything else → review CSV, left null.
+   *(Amended 2026-08-22 during execution: the first dry-run surfaced 41
+   students the dept label marks special who carry 70-range IDs — after
+   2554 the 71 range stops being reliably issued, so a bare 70-range ID
+   proves nothing and "regular" needs plan-201 corroboration. The original
+   rule "`70` → regular" over-claimed.)*
 4. **CS group, intakes ≤ 2532:** `regular` (the special program did not yet
    exist).
 5. Everything else (CS 2561+, unlabeled SE/CM, other groups): left null.

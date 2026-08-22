@@ -14,9 +14,11 @@ class StudyTrackBackfill
   REGULAR_FEES = %w[1 01].freeze
   # CB fee_type + project partition the CS group exactly in these years.
   CB_RULE_YEARS = (2533..2553)
-  # From 2554 fees blur (the regular program went special-fee too), but the
-  # university kept issuing the 71xx ID range for special admissions
-  # through the last special intake in 2560.
+  # From 2554 fees blur (the regular program went special-fee too) AND the
+  # 71xx ID range stops being reliably issued to special admissions: the
+  # first dry-run (2026-08-22) surfaced 41 students the dept label marks
+  # special carrying 70xx IDs. So in this era only positive signals count:
+  # 71xx -> special, 70xx + CB plan 201 -> regular, anything else -> review.
   SEGMENT_RULE_YEARS = (2554..2560)
 
   Decision = Struct.new(:track, :evidence, :review_reason)
@@ -79,10 +81,10 @@ class StudyTrackBackfill
           ("cb:project=#{cb_row&.dig('project')},fee=#{cb_row&.dig('fee_type')}" if track),
           (cb_row.nil? ? "CS #{year}: not in CB export" : "CS #{year}: unrecognized CB combo project=#{cb_row['project']} fee=#{cb_row['fee_type']}") ]
       elsif cs && SEGMENT_RULE_YEARS.cover?(year)
-        track = segment_classify(student.student_id)
+        track = late_era_classify(student.student_id, cb_row)
         [ track,
-          ("segment:#{student.student_id[2, 2]}" if track),
-          "CS #{year}: unrecognized ID segment #{student.student_id[2, 2]}" ]
+          ("segment:#{student.student_id[2, 2]},project=#{cb_row&.dig('project')}" if track),
+          "CS #{year}: segment #{student.student_id[2, 2]} without plan-201 corroboration (project=#{cb_row&.dig('project').inspect})" ]
       else
         [ nil, nil, nil ]
       end
@@ -117,9 +119,16 @@ class StudyTrackBackfill
     nil
   end
 
-  def segment_classify(student_id)
+  # 2554-2560: only positive evidence classifies. 71xx was never issued to
+  # regular students; a 70xx ID alone proves nothing (the dept label marks
+  # 41 such students special), so "regular" additionally requires the CB
+  # thesis-plan project code 201 — the special program was plan-ข-only.
+  def late_era_classify(student_id, cb_row)
     return nil unless student_id.to_s.length == 10
-    { "71" => "special", "70" => "regular" }[student_id[2, 2]]
+    segment = student_id[2, 2]
+    return "special" if segment == "71"
+    return "regular" if segment == "70" && cb_row&.dig("project").to_s == "201"
+    nil
   end
 
   def write_csv(name, headers, rows)

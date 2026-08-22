@@ -43,9 +43,26 @@ class StudyTrackBackfillTest < ActiveSupport::TestCase
     assert decision.review_reason.present?
   end
 
-  test "segment 71 is special and 70 regular in 2554-2560" do
+  test "segment 71 is special in 2554-2560" do
     assert_equal "special", backfill.decide(cs_student(year: 2556, sid: "5671000021"), nil).track
-    assert_equal "regular", backfill.decide(cs_student(year: 2556, sid: "5670000021"), nil).track
+  end
+
+  test "segment 70 in 2554-2560 is regular only with plan-201 corroboration" do
+    regular = backfill.decide(cs_student(year: 2556, sid: "5670000021"), { "project" => "201", "fee_type" => "07" })
+    assert_equal "regular", regular.track
+
+    uncorroborated = backfill.decide(cs_student(year: 2556, sid: "5670000021"), { "project" => "212", "fee_type" => "07" })
+    assert_nil uncorroborated.track
+    assert_match(/without plan-201 corroboration/, uncorroborated.review_reason)
+
+    no_cb = backfill.decide(cs_student(year: 2556, sid: "5670000021"), nil)
+    assert_nil no_cb.track
+    assert no_cb.review_reason.present?
+  end
+
+  test "label beats a segment-70 plan-212 row in 2554-2560" do
+    decision = backfill.decide(cs_student(year: 2556, sid: "5670000021", label: LABEL), { "project" => "212", "fee_type" => "07" })
+    assert_equal "special", decision.track
   end
 
   test "pre-2533 CS is regular, 2561-plus CS is nil, non-CS unlabeled is nil" do
