@@ -29,6 +29,11 @@
           - else
             .text-muted Not assigned
 
+        - if @student.study_track.present?
+          %dt.col-sm-3 Study Track
+          %dd.col-sm-9
+            %span.badge{class: "badge-track-#{@student.study_track}"}= Student::STUDY_TRACK_LABELS[@student.study_track]
+
         - if @full_access && @student.old_program.present?
           %dt.col-sm-3 Old Program
           %dd.col-sm-9= @student.old_program

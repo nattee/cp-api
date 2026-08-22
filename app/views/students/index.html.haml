@@ -14,6 +14,9 @@
         .d-flex.align-items-center.gap-2{style: "min-width: 160px"}
           %span.form-label.mb-0.small.text-muted Year
           = select_tag "filter-year", options_for_select([["All", ""]] + @admission_years.map { |y| [y, y] }), data: { controller: "select2", datatable_target: "filter", action: "change->datatable#filter", datatable_column_index: "4" }
+        .d-flex.align-items-center.gap-2{style: "min-width: 160px"}
+          %span.form-label.mb-0.small.text-muted Track
+          = select_tag "filter-track", options_for_select([["All", ""]] + Student::STUDY_TRACKS.map { |t| [Student::STUDY_TRACK_LABELS[t], t] }), data: { controller: "select2", datatable_target: "filter", action: "change->datatable#filter", datatable_column_index: "6" }
       - if current_user.admin?
         .d-flex.align-items-center.gap-2
           %button.btn.btn-outline-secondary.btn-sm.d-flex.align-items-center.gap-1{type: "button", data: { action: "datatable#export" }}
@@ -30,5 +33,6 @@
             %th Degree
             %th Admission Year (B.E.)
             %th Status
+            %th Study Track
             %th Actions
         %tbody

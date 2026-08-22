@@ -61,6 +61,13 @@
         - if student.errors[:program].any?
           .invalid-feedback= student.errors[:program].first
       .col-md-6.mb-3
+        = f.label :study_track, "Study Track", class: "form-label"
+        = f.select :study_track, options_for_select(Student::STUDY_TRACKS.map { |t| [Student::STUDY_TRACK_LABELS[t], t, { data: { icon: Student::STUDY_TRACK_ICONS[t] } }] }, student.study_track), { include_blank: "— Unknown —" }, class: "form-select #{'is-invalid' if student.errors[:study_track].any?}", data: { controller: "select2" }
+        - if student.errors[:study_track].any?
+          .invalid-feedback= student.errors[:study_track].first
+
+    .row
+      .col-md-6.mb-3
         = f.label :old_program, "Old Program", class: "form-label"
         .input-group
           %span.input-group-text

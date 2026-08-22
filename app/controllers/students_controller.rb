@@ -11,7 +11,8 @@ class StudentsController < ApplicationController
     2 => "program_groups.name_en",
     3 => "program_groups.degree_level",
     4 => "students.admission_year_be",
-    5 => "students.status"
+    5 => "students.status",
+    6 => "students.study_track"
   }.freeze
 
   def index
@@ -47,6 +48,7 @@ class StudentsController < ApplicationController
         ("<span class=\"badge badge-#{student.program&.degree_level}\">#{student.program&.degree_level&.titleize}</span>" if student.program).to_s,
         student.admission_year_be,
         status_cell,
+        (student.study_track ? "<span class=\"badge badge-track-#{student.study_track}\">#{ERB::Util.html_escape(Student::STUDY_TRACK_LABELS[student.study_track])}</span>" : ""),
         render_to_string(partial: "students/actions", locals: { student: student, is_admin: is_admin }, layout: false)
       ]
     end
@@ -119,9 +121,11 @@ class StudentsController < ApplicationController
     col_search_program = params.dig(:columns, "2", :search, :value).to_s.strip
     col_search_degree = params.dig(:columns, "3", :search, :value).to_s.strip
     col_search_year = params.dig(:columns, "4", :search, :value).to_s.strip
+    col_search_track = params.dig(:columns, "6", :search, :value).to_s.strip
     base = base.where("program_groups.name_en" => col_search_program) if col_search_program.present?
     base = base.where("program_groups.degree_level" => col_search_degree) if col_search_degree.present?
     base = base.where("students.admission_year_be" => col_search_year.to_i) if col_search_year.present?
+    base = base.where("students.study_track" => col_search_track) if col_search_track.present?
     base
   end
 
@@ -176,7 +180,7 @@ class StudentsController < ApplicationController
       :email, :phone, :address, :discord, :line_id,
       :guardian_name, :guardian_phone, :previous_school, :enrollment_method,
       :program_id, :old_program, :admission_year_be, :status, :graduation_year_be,
-      :tcas, :status_note, :remark
+      :tcas, :status_note, :remark, :study_track
     )
   end
 end
