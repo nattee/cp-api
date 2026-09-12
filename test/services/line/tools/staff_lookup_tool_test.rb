@@ -171,6 +171,23 @@ class Line::Tools::StaffLookupToolTest < ActiveSupport::TestCase
     assert_includes latest["sections"], "2110101 Sec 1"
   end
 
+  # A 43-row roster with three semesters of teaching per row is ~32 KB of JSON;
+  # the model condensing it dropped and invented names (prod 2026-09-12). Lists
+  # are for "who", teaching detail is for "what does X teach" — one person.
+  test "long lists omit teaching details and say so" do
+    4.times { |i| Staff.create!(title: "นาย", first_name: "Extra#{i}", last_name: "Zed#{i}", staff_type: "lecturer", status: "active") }
+    data = JSON.parse(call_tool(staff_type: "lecturer", limit: 50))
+    assert_equal 7, data["staff"].size
+    assert data["staff"].none? { |s| s.key?("teaching") }, "teaching must be omitted on long lists"
+    assert_match(/teaching details omitted/i, data["note"])
+  end
+
+  test "short lists keep teaching details" do
+    data = JSON.parse(call_tool(staff_type: "lecturer"))
+    assert_equal 3, data["staff"].size
+    assert data["staff"].all? { |s| s.key?("teaching") }
+  end
+
   test "staff with no teachings gets an empty teaching list" do
     result = JSON.parse(Line::Tools::StaffLookupTool.call({ "query" => "Brown" }))
     assert_equal [], result["staff"].first["teaching"]

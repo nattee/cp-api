@@ -9,7 +9,8 @@ class Line::Tools::StaffLookupTool
                  "teaching load — use this for 'what does X teach?' and 'how much does X teach?'. " \
                  "Counts and lists include RETIRED staff unless you pass status — for 'how many lecturers " \
                  "do we have' or 'who are our lecturers' (current staff) pass status='active'. Every result " \
-                 "carries a by_status breakdown; lists are ordered active staff first.",
+                 "carries a by_status breakdown; lists are ordered active staff first. Teaching details " \
+                 "are included only when 5 or fewer staff match — look one person up for what they teach.",
     parameters: {
       type: "object",
       properties: {
@@ -37,16 +38,25 @@ class Line::Tools::StaffLookupTool
         },
         limit: {
           type: "integer",
-          description: "Max number of results to return (default 10, max 50)"
+          description: "Max number of results to return (default 10, max 100)"
         }
       },
       required: []
     }
   }.freeze
 
-  MAX_LIMIT = 50
+  # Compact rows (~200 B) let the whole staff table (90 rows) fit: a cap of 50
+  # truncated a status-only query of 54 active staff and cost 4 lecturers.
+  MAX_LIMIT = 100
   DEFAULT_LIMIT = 10
   RECENT_TERMS = 3
+
+  # Teaching detail rides along only on small result sets. Lists answer "who";
+  # teaching answers "what does X teach" — one or two people. A 43-row roster
+  # with three semesters of sections per row is ~32 KB of JSON, and the model
+  # condensing it dropped names and invented others (prod 2026-09-12); the same
+  # roster without teaching is ~5 KB and gets copied faithfully.
+  TEACHING_DETAIL_MAX_ROWS = 5
 
   # List order: current staff before former. Alphabetical-only ordering let the
   # MAX_LIMIT cut drop ACTIVE lecturers while keeping retired ones (prod
@@ -77,12 +87,17 @@ class Line::Tools::StaffLookupTool
         filters: describe_filters(query, program_code, staff_type, status) }.to_json
     else
       total = scope.count
-      staff = scope.limit(limit).map { |s| serialize(s) }
+      rows = scope.limit(limit).to_a
+      detailed = rows.size <= TEACHING_DETAIL_MAX_ROWS
+      staff = rows.map { |s| serialize(s, teaching: detailed) }
       result = { staff: staff, total: total, by_status: by_status }
+      notes = []
       if total > staff.size
-        result[:note] = "Showing #{staff.size} of #{total} results (#{describe_breakdown(by_status)})."
-        result[:note] += " Pass status='active' to list only current staff." unless status
+        notes << "Showing #{staff.size} of #{total} results (#{describe_breakdown(by_status)})."
+        notes << "Pass status='active' to list only current staff." unless status
       end
+      notes << "Teaching details omitted for lists longer than #{TEACHING_DETAIL_MAX_ROWS} — look up one person by name or initials for what they teach." unless detailed
+      result[:note] = notes.join(" ") if notes.any?
       result.to_json
     end
   end
@@ -126,8 +141,8 @@ class Line::Tools::StaffLookupTool
   end
   private_class_method :build_scope
 
-  def self.serialize(staff_member)
-    {
+  def self.serialize(staff_member, teaching: true)
+    row = {
       name_th: staff_member.display_name_th,
       name_en: staff_member.display_name,
       initials: staff_member.initials,
@@ -135,9 +150,10 @@ class Line::Tools::StaffLookupTool
       status: staff_member.status,
       programs: staff_member.programs.includes(:program_group).map { |p|
         "#{p.program_group.code} (#{p.year_started_be})"
-      },
-      teaching: teaching_summary(staff_member)
+      }
     }
+    row[:teaching] = teaching_summary(staff_member) if teaching
+    row
   end
   private_class_method :serialize
 
