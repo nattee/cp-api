@@ -85,6 +85,70 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     assert_equal %w[user assistant tool assistant tool assistant], messages.map(&:role)
   end
 
+  # --- Answer-round retry without thinking (qwen3.5 empty / mark-dropped replies) ---
+
+  test "a clean text reply is delivered after a single call" do
+    service = Line::LlmService.new("Hi", line_user_id: @line_user_id, user: @user)
+    calls = capture_chat_completion(service, [ text_response("Hello!") ])
+    assert_equal "Hello!", service.call.reply
+    assert_equal 1, calls.size
+  end
+
+  test "retries the answer round without thinking (and without tools) when content is empty" do
+    service = Line::LlmService.new("List things", line_user_id: @line_user_id, user: @user)
+    calls = capture_chat_completion(service, [ text_response(""), text_response("Recovered answer") ])
+
+    result = service.call
+    assert_equal "Recovered answer", result.reply
+
+    assert_equal 2, calls.size
+    retry_call = calls.last
+    assert_equal false, retry_call[:thinking], "retry must disable thinking"
+    assert_empty retry_call[:tools], "retry must offer no tools"
+    assert_equal calls.first[:messages], retry_call[:messages], "retry re-sends the same conversation"
+
+    # Only the delivered reply is persisted — the empty round leaves no trace in history.
+    messages = ChatMessage.where(line_user_id: @line_user_id).order(:created_at)
+    assert_equal %w[user assistant], messages.map(&:role)
+    assert_equal "Recovered answer", messages.last.content
+  end
+
+  test "retries without thinking when the reply dropped Thai marks, then repairs the rest from tool data" do
+    service = Line::LlmService.new("ใครสอน", line_user_id: @line_user_id, user: @user)
+    calls = capture_chat_completion(service, [
+      tool_call_response("echo", '{"text":"สุธี เรืองวิเศษ"}', call_id: "call_1"),
+      text_response("อาจารย สธ เรืองวเศษ"),        # thinking-on answer: marks dropped
+      text_response("อาจารย์ สธ เรืองวิเศษ")       # retry: better, one name still damaged
+    ])
+
+    result = service.call
+    assert_equal "อาจารย์ สุธี เรืองวิเศษ", result.reply
+
+    assert_equal 3, calls.size
+    assert_equal false, calls.last[:thinking]
+    assert_equal "อาจารย์ สุธี เรืองวิเศษ", ChatMessage.where(line_user_id: @line_user_id, role: "assistant").last.content
+  end
+
+  test "keeps the repaired original reply when the no-thinking retry fails" do
+    service = Line::LlmService.new("ใครสอน", line_user_id: @line_user_id, user: @user)
+    responses = [
+      tool_call_response("echo", '{"text":"สุธี เรืองวิเศษ"}', call_id: "call_1"),
+      text_response("สธ สอนวิชานี้")
+    ]
+    service.define_singleton_method(:chat_completion) do |_messages, tools: [], **|
+      responses.shift || raise(Line::LlmService::LlmError, "boom")
+    end
+
+    assert_equal "สุธี สอนวิชานี้", service.call.reply
+  end
+
+  test "apologises only when both the answer round and the retry come back empty" do
+    service = Line::LlmService.new("Hi", line_user_id: @line_user_id, user: @user)
+    calls = capture_chat_completion(service, [ text_response(""), text_response("") ])
+    assert_match(/ขออภัย/, service.call.reply)
+    assert_equal 2, calls.size
+  end
+
   # --- Max rounds exhausted: forced final answer ---
 
   test "forces a final no-tools completion when max rounds are exhausted" do
@@ -96,8 +160,8 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
       tool_call_response("echo", '{"text":"ping"}', call_id: "call_1"),
       text_response("Final forced answer")
     ]
-    service.define_singleton_method(:chat_completion) do |messages, tools: []|
-      captured << { messages: messages, tools: tools }
+    service.define_singleton_method(:chat_completion) do |messages, tools: [], **opts|
+      captured << { messages: messages, tools: tools, **opts }
       responses.shift
     end
 
@@ -123,7 +187,7 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     service.instance_variable_set(:@max_rounds, 1)
 
     responses = [tool_call_response("echo", '{"text":"ping"}', call_id: "call_1")]
-    service.define_singleton_method(:chat_completion) do |_messages, tools: []|
+    service.define_singleton_method(:chat_completion) do |_messages, tools: [], **|
       responses.shift || raise(Line::LlmService::LlmError, "boom")
     end
 
@@ -262,10 +326,20 @@ class Line::LlmServiceTest < ActiveSupport::TestCase
     }
   end
 
+  # Like stub_chat_completion, but records every call's messages/tools/options.
+  def capture_chat_completion(service, responses)
+    calls = []
+    service.define_singleton_method(:chat_completion) do |messages, tools: [], **opts|
+      calls << { messages: messages.dup, tools: tools, **opts }
+      responses.shift
+    end
+    calls
+  end
+
   # Stubs the private chat_completion method to return canned responses in sequence.
   def stub_chat_completion(service, responses)
     call_index = 0
-    service.define_singleton_method(:chat_completion) do |_messages, tools: []|
+    service.define_singleton_method(:chat_completion) do |_messages, tools: [], **|
       resp = responses[call_index]
       call_index += 1
       resp

@@ -57,10 +57,19 @@ Notes on parameters:
 - `model` — see the table. On the DGX the value is echoed, not validated (a
   wrong name still answers — the *port* selects the model). On `10.0.5.25`
   vLLM **validates**: wrong names get an error.
-- `max_tokens` — use **at least 512, we standardize on 4096**. The DGX models
-  are reasoning models: they think before answering, and the thinking counts
-  against `max_tokens`. Small budgets can be consumed entirely by reasoning,
-  yielding an **empty `content`** — that is the classic symptom.
+- `max_tokens` — use **at least 512; the LINE bot runs the default resident at
+  8192** (was 4096 until 2026-09-12). The DGX models are reasoning models: they
+  think before answering, and the thinking counts against `max_tokens`. Small
+  budgets can be consumed entirely by reasoning, yielding an **empty `content`**
+  — that is the classic symptom, and it is also a latency cap (~100 tok/s, so
+  4096 tokens ≈ 40 s). A bigger budget only moves the cliff; the robust fix is
+  to retry the answer round with `"chat_template_kwargs": {"enable_thinking": false}`
+  (honoured by sglang and vLLM), which is what `Line::LlmService#finalize_reply` does.
+- Thai output: qwen3.5 in thinking mode stochastically **drops Thai combining
+  marks** when copying names out of long tool results (สุธี → สธ). Not fixable by
+  sampling parameters (repetition_penalty, top_p/top_k, temperature all tested);
+  disabling thinking cuts it ~10×, and `Line::ThaiMarkRepair` restores the rest
+  from the tool results themselves.
 - `repetition_penalty` is no longer recommended (it was tuned for the retired
   qwen2.5-coder; on reasoning models it degrades the thinking trace). The
   server defaults are correct.

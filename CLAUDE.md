@@ -97,6 +97,11 @@ Bot integration for LINE Messaging API. See `docs/line-integration.md` for archi
 - Webhook controller inherits `ActionController::API` (not `ApplicationController`) to skip CSRF, auth, and browser checks
 - **LLM data query tools**: See `docs/llm-data-query.md` for the meta-tool design (enum-based dispatch, query handlers)
 - **Tool chain audit**: See `docs/tool-chain-audit.md` for how tool calls are persisted, logged, and inspected
+- **Reply post-processing is deterministic, model residue is expected**: qwen3.5 (thinking mode) sometimes
+  returns EMPTY content (thinking ate `max_tokens`) or drops Thai combining marks when copying names from
+  tool results (สุธี → สธ). `LlmService#finalize_reply` retries the answer round once with thinking off
+  (`chat_template_kwargs`), then `Line::ThaiMarkRepair` restores marks from the conversation's own tool
+  results. Sampling parameters do NOT fix this — measured 2026-09-12, don't re-try them.
 - **Quick link (admin onboarding)**: See `docs/line-quick-link.md`. Unlinked LINE users are recorded as `LineContact` (bounded JSON messages, rate-limited). Admin reviews at `/line_contacts` and clicks "Create & Link" — zero friction for the VIP.
 
 ## UI Component Conventions

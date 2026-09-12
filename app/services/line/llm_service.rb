@@ -81,11 +81,7 @@ class Line::LlmService
 
       # No tool calls — the LLM produced a final text answer.
       if tool_calls.blank?
-        # Scrub Markdown before SAVING, not just before delivery: raw markdown
-        # persisted into history re-teaches the model markdown by self-imitation
-        # (the FORMATTING prompt rule loses to recent assistant-turn examples).
-        reply = Line::MarkdownScrubber.scrub(assistant_message["content"].to_s.strip)
-        reply = "ขออภัยค่ะ ระบบไม่สามารถสร้างคำตอบได้ กรุณาลองใหม่อีกครั้ง" if reply.empty?
+        reply = finalize_reply(assistant_message["content"], messages)
         save_message(role: "assistant", content: reply)
         return Result.new(reply: reply, tool_rounds: @tool_rounds)
       end
@@ -124,6 +120,47 @@ class Line::LlmService
     forced_final_answer(messages)
   end
 
+  EMPTY_REPLY_APOLOGY = "ขออภัยค่ะ ระบบไม่สามารถสร้างคำตอบได้ กรุณาลองใหม่อีกครั้ง".freeze
+
+  # Turns the model's text round into the LINE reply. Two model-side failure
+  # modes of qwen3.5 in thinking mode are handled here, both measured against
+  # the real prod conversation of 2026-09-12 (evidence in Line::ThaiMarkRepair):
+  #   - EMPTY content: the thinking trace consumed the whole max_tokens budget
+  #     (~100 tok/s on the DGX: 4096 tokens ≈ 40 s of reasoning, then no answer).
+  #   - DROPPED Thai marks in names copied out of tool results (43-name list:
+  #     78% of names wrong with thinking on, 7% with it off).
+  # Either way the SAME conversation is re-run once with thinking disabled and no
+  # tools — we know this is the answer round because the model just returned
+  # text instead of tool calls — and whatever marks are still missing are then
+  # restored from the conversation's own sources. One extra ~7 s call, only when
+  # needed; the retry's absence of thinking is what makes it both fast and clean.
+  #
+  # Scrub Markdown before SAVING, not just before delivery: raw markdown
+  # persisted into history re-teaches the model markdown by self-imitation
+  # (the FORMATTING prompt rule loses to recent assistant-turn examples).
+  def finalize_reply(content, messages)
+    repairer = Line::ThaiMarkRepair.from_messages(messages)
+    reply = Line::MarkdownScrubber.scrub(content.to_s.strip)
+
+    if reply.empty? || repairer.damaged?(reply)
+      Rails.logger.info("LLM answer round #{reply.empty? ? 'empty' : 'dropped Thai marks'} — retrying without thinking")
+      retried = retry_without_thinking(messages)
+      reply = retried if retried.present?  # a failed or empty retry keeps the original
+    end
+
+    repairer.repair(reply).presence || EMPTY_REPLY_APOLOGY
+  end
+
+  # Same conversation, no tools, thinking off. nil on failure so the caller can
+  # fall back to the original reply instead of surfacing an error for a retry.
+  def retry_without_thinking(messages)
+    response = chat_completion(messages, thinking: false)
+    Line::MarkdownScrubber.scrub(response.dig("choices", 0, "message", "content").to_s.strip)
+  rescue LlmError => e
+    Rails.logger.warn("[vLLM] no-thinking retry failed: #{e.message}")
+    nil
+  end
+
   # Trailing system instruction for the forced final completion. Asking the
   # model to propose a narrower follow-up (rather than hard-coding a "please
   # split your question" reply) keeps the good case good: the gathered results
@@ -144,8 +181,10 @@ class Line::LlmService
   # beginning"). It is appended only to the outgoing request, never saved to
   # ChatMessage, so it cannot pollute the conversation history.
   def forced_final_answer(messages)
-    response = chat_completion(messages + [ { "role" => "user", "content" => FINAL_ANSWER_INSTRUCTION } ])
+    response = chat_completion(messages + [ { "role" => "user", "content" => FINAL_ANSWER_INSTRUCTION } ],
+                               thinking: false)
     reply = Line::MarkdownScrubber.scrub(response.dig("choices", 0, "message", "content").to_s.strip)
+    reply = Line::ThaiMarkRepair.from_messages(messages).repair(reply)
     reply = last_resort_reply(messages) if reply.empty?
     save_message(role: "assistant", content: reply)
     Result.new(reply: reply, tool_rounds: @tool_rounds)
@@ -275,20 +314,26 @@ class Line::LlmService
   #   "headers" — stores metadata only: message count, payload bytes, tool
   #               names, and a truncated response preview (1000 chars).
   #   "off"     — stores only outcome, model name, and response time.
-  def chat_completion(messages, tools: [])
+  #
+  # thinking: false disables the reasoning trace for this one call via the chat
+  # template (sglang and vLLM both honour chat_template_kwargs; non-reasoning
+  # models ignore it). Used for the answer-round retry — see #finalize_reply.
+  def chat_completion(messages, tools: [], thinking: true)
     uri = URI("#{@model_config[:base_url]}#{@model_config[:endpoint]}")
     body = {
       model: @model_config[:model],
       messages: messages,
       temperature: 0.7,
       # Reasoning models spend tokens thinking before answering; a small budget
-      # gets consumed by the thinking trace, leaving content empty. Standardize
-      # on 4096 (see docs/llm-api.md). repetition_penalty is deliberately NOT
-      # sent — it degrades the thinking trace on reasoning models; server
-      # defaults are correct.
+      # gets consumed by the thinking trace, leaving content empty (measured
+      # ~100 tok/s on the DGX, so the budget is also a latency cap). Configured
+      # per model in llm.yml — 8192 for the default resident; see docs/llm-api.md.
+      # repetition_penalty is deliberately NOT sent — it degrades the thinking
+      # trace on reasoning models; server defaults are correct.
       max_tokens: @model_config[:max_tokens] || 4096
     }
     body[:tools] = tools if tools.present?
+    body[:chat_template_kwargs] = { enable_thinking: false } unless thinking
 
     request_json = body.to_json
     started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -316,7 +361,7 @@ class Line::LlmService
 
     ApiEvent.log(service: "llm", action: "chat_completion", severity: "info", message: "OK",
                  details: build_success_log(uri, tool_names, has_tool_calls, assistant_msg,
-                                            request_json, response.body),
+                                            request_json, response.body, thinking:),
                  response_time_ms: elapsed_ms)
 
     parsed
@@ -352,12 +397,13 @@ class Line::LlmService
   #               offered, and a truncated preview of the response.
   #
   #   "off"     — just the model name and endpoint. Confirms a call happened.
-  def build_success_log(uri, tool_names, has_tool_calls, assistant_msg, request_json, response_body)
+  def build_success_log(uri, tool_names, has_tool_calls, assistant_msg, request_json, response_body, thinking: true)
     # Base details — always present regardless of log level.
     details = {
       endpoint: uri.to_s,
       model: @model_config[:model]
     }
+    details[:thinking] = false unless thinking  # marks the no-thinking answer-round retry
 
     level = LLM_CONFIG[:log_level].to_s
 
