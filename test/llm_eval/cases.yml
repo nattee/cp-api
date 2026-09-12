@@ -77,6 +77,23 @@
     - tool: staff_lookup
       params: { query: "เจน" }
 
+# "How many lecturers" must go through count_only; the tool's by_status
+# breakdown then makes active vs retired visible (prod 2026-09-12 answered 74
+# for 43 active). status='active' is welcome but not required here — the
+# scorer checks only the listed params.
+- id: staff_count_th
+  group: existing
+  question: "ภาควิชามีอาจารย์กี่คน"
+  accept:
+    - tool: staff_lookup
+      params: { staff_type: "lecturer", count_only: true }
+- id: staff_count_en
+  group: existing
+  question: "How many lecturers do we have?"
+  accept:
+    - tool: staff_lookup
+      params: { staff_type: "lecturer", count_only: true }
+
 # ---- course_lookup (existing) ----
 - id: course_credits_th
   group: existing

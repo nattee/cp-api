@@ -15,6 +15,8 @@ EventDispatchJob --> EventRouter --> MessageRouter
 
 ChatJob --> LlmService --> vLLM (OpenAI-compatible API)
   --> Tool-calling loop (max 5 rounds): LLM requests tools → ToolExecutor dispatches → results fed back
+  --> Answer round: empty or Thai-mark-dropped reply → one retry with thinking off, then
+      MarkdownScrubber + ThaiMarkRepair (restores names from the tool results) before save/send
   --> Final text reply sent via ReplyService (reply_token, fallback to push)
   --> All messages (including tool rounds) persisted to ChatMessage
 ```
@@ -39,7 +41,8 @@ ChatJob --> LlmService --> vLLM (OpenAI-compatible API)
 | `app/services/line/commands/unknown_command.rb` | Fallback for unrecognized input |
 | **LLM** | |
 | `app/jobs/line/chat_job.rb` | Async job: calls LlmService, sends reply |
-| `app/services/line/llm_service.rb` | Tool-calling loop with vLLM |
+| `app/services/line/llm_service.rb` | Tool-calling loop with vLLM; answer-round retry without thinking |
+| `app/services/line/thai_mark_repair.rb` | Restores Thai combining marks the model dropped or altered, from tool results + user message |
 | `app/services/line/tool_executor.rb` | Dispatches tool calls to handlers, logs to ApiEvent |
 | `app/services/line/tool_registry.rb` | Maps tool names to definitions + handler classes |
 | `config/initializers/line_tools.rb` | Registers tools at boot |
@@ -111,7 +114,7 @@ intents. The LLM can chain tools across rounds (up to `max_rounds`).
 |---|---|---|
 | `student_lookup` | Find students by ID/name/program/year/status. Profile, GPA, credits, counts. | "ขอข้อมูล 6530200321", "how many 2nd year CP students?", "นิสิต cp53 มีกี่คน" |
 | `student_grades` | One student's record term by term: courses+grades, GPA, GPAX. | "ผลการเรียนของ 6530200321", "is X improving?" |
-| `staff_lookup` | Find staff by name/initials; includes recent per-semester teaching summary with load totals. | "what does อ.ณัฐ teach?", "ภาระงานสอนของ อ.สมชาย" |
+| `staff_lookup` | Find staff by name/initials; includes recent per-semester teaching summary with load totals. Counts and lists include retired staff unless `status` is given — every result carries a `by_status` breakdown and lists are ordered active-first, so a truncated list never drops current staff in favour of retired ones. | "what does อ.ณัฐ teach?", "ภาระงานสอนของ อ.สมชาย" |
 | `course_lookup` | Static course info by course_no or name (TH/EN): credits, revision, program. | "วิชา 2110327 กี่หน่วยกิต" |
 | `course_offering_lookup` | Who teaches a course, its sections and meeting times, per semester. | "who teaches 2110211?", "2110327 มีกี่เซค" |
 | `course_enrollment` | Enrollment counts for a course-term (program × cohort breakdown) + single-student membership check. | "how many students take 2110101?", "did 6530200321 enroll in 2110499?" |

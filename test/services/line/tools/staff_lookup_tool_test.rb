@@ -92,6 +92,37 @@ class Line::Tools::StaffLookupToolTest < ActiveSupport::TestCase
     assert_not data.key?("staff")
   end
 
+  # Without a status filter the count silently mixes retired staff into
+  # "how many lecturers do we have?" (prod 2026-09-12: 74 reported, 43 active).
+  # The breakdown makes the split visible even when the model forgets the filter.
+  test "count_only includes a by_status breakdown" do
+    data = JSON.parse(call_tool(staff_type: "lecturer", count_only: true))
+    assert_equal 3, data["count"]
+    assert_equal({ "active" => 2, "retired" => 1 }, data["by_status"])
+  end
+
+  test "list results include the by_status breakdown of the whole match" do
+    data = JSON.parse(call_tool(staff_type: "lecturer", limit: 1))
+    assert_equal({ "active" => 2, "retired" => 1 }, data["by_status"])
+  end
+
+  # --- ordering ---
+
+  # Alphabetical-only ordering let a limit cut drop ACTIVE lecturers while
+  # keeping retired ones (prod: Sudsang was 55th of 74 by surname, past the
+  # 50-row cap, while 21 retired staff made the list). Current staff first.
+  test "orders active staff before retired, then by last name" do
+    data = JSON.parse(call_tool(staff_type: "lecturer"))
+    assert_equal [ "active", "active", "retired" ], data["staff"].map { |s| s["status"] }
+    assert_equal [ "Jones", "Smith", "Brown" ], data["staff"].map { |s| s["name_en"][/\w+\z/] }
+  end
+
+  test "a limit cut keeps active staff and drops retired first" do
+    data = JSON.parse(call_tool(staff_type: "lecturer", limit: 2))
+    assert data["staff"].all? { |s| s["status"] == "active" }
+    assert_match(/status='active'/, data["note"])
+  end
+
   # --- limit ---
 
   test "respects limit parameter" do

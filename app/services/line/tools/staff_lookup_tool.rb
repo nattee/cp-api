@@ -6,7 +6,10 @@ class Line::Tools::StaffLookupTool
                  "and optionally filter by program, staff type, or status. " \
                  "Returns staff details including name, academic title, type, status, and affiliated programs. " \
                  "Also returns recent teaching assignments per semester with section counts and total " \
-                 "teaching load — use this for 'what does X teach?' and 'how much does X teach?'.",
+                 "teaching load — use this for 'what does X teach?' and 'how much does X teach?'. " \
+                 "Counts and lists include RETIRED staff unless you pass status — for 'how many lecturers " \
+                 "do we have' or 'who are our lecturers' (current staff) pass status='active'. Every result " \
+                 "carries a by_status breakdown; lists are ordered active staff first.",
     parameters: {
       type: "object",
       properties: {
@@ -45,6 +48,15 @@ class Line::Tools::StaffLookupTool
   DEFAULT_LIMIT = 10
   RECENT_TERMS = 3
 
+  # List order: current staff before former. Alphabetical-only ordering let the
+  # MAX_LIMIT cut drop ACTIVE lecturers while keeping retired ones (prod
+  # 2026-09-12: Sudsang was 55th of 74 by surname, past the 50-row cap, while
+  # 21 retired staff made the list and were presented as "active lecturers").
+  STATUS_ORDER = %w[active on_leave retired].freeze
+  STATUS_ORDER_SQL = Arel.sql(
+    "FIELD(staffs.status, #{STATUS_ORDER.map { |st| "'#{st}'" }.join(", ")})"
+  )
+
   def self.call(arguments, user: nil)
     query = arguments["query"].to_s.strip
     program_code = arguments["program_code"].to_s.strip.presence
@@ -55,16 +67,38 @@ class Line::Tools::StaffLookupTool
 
     scope = build_scope(query, program_code:, staff_type:, status:)
 
+    # by_status rides along in BOTH shapes: without it a model that forgets the
+    # status filter reports retired staff as current ("74 lecturers" when 43
+    # are active — prod 2026-09-12) and has no way to notice.
+    by_status = status_breakdown(scope)
+
     if count_only
-      { count: scope.count, filters: describe_filters(query, program_code, staff_type, status) }.to_json
+      { count: scope.count, by_status: by_status,
+        filters: describe_filters(query, program_code, staff_type, status) }.to_json
     else
       total = scope.count
       staff = scope.limit(limit).map { |s| serialize(s) }
-      result = { staff: staff, total: total }
-      result[:note] = "Showing #{staff.size} of #{total} results" if total > staff.size
+      result = { staff: staff, total: total, by_status: by_status }
+      if total > staff.size
+        result[:note] = "Showing #{staff.size} of #{total} results (#{describe_breakdown(by_status)})."
+        result[:note] += " Pass status='active' to list only current staff." unless status
+      end
       result.to_json
     end
   end
+
+  # { "active" => 43, "retired" => 31 } for the whole match, ignoring limit.
+  # The scope carries ORDER BY (invalid under GROUP BY with ONLY_FULL_GROUP_BY)
+  # and DISTINCT over the program join, so count distinct staff ids per status.
+  def self.status_breakdown(scope)
+    scope.unscope(:order).group("staffs.status").distinct.count("staffs.id")
+  end
+  private_class_method :status_breakdown
+
+  def self.describe_breakdown(by_status)
+    STATUS_ORDER.filter_map { |st| "#{by_status[st]} #{st}" if by_status[st] }.join(", ")
+  end
+  private_class_method :describe_breakdown
 
   def self.build_scope(query, program_code:, staff_type:, status:)
     scope = Staff.left_joins(staff_programs: { program: :program_group }).distinct
@@ -88,7 +122,7 @@ class Line::Tools::StaffLookupTool
     scope = scope.where(staff_type: staff_type) if staff_type
     scope = scope.where(status: status) if status
 
-    scope.order(:last_name, :first_name)
+    scope.order(STATUS_ORDER_SQL).order(:last_name, :first_name)
   end
   private_class_method :build_scope
 
