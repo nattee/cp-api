@@ -1,10 +1,11 @@
 class ProgramGroup < ApplicationRecord
-  DEGREE_LEVELS = %w[bachelor master doctoral].freeze
+  DEGREE_LEVELS = %w[certificate bachelor master doctoral].freeze
 
   DEGREE_LEVEL_ICONS = {
-    "bachelor" => "school",
-    "master"   => "psychology",
-    "doctoral" => "science"
+    "certificate" => "workspace_premium",
+    "bachelor"    => "school",
+    "master"      => "psychology",
+    "doctoral"    => "science"
   }.freeze
 
   PLACEHOLDER_NAME = "Unknown Program".freeze

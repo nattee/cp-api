@@ -122,4 +122,12 @@ class ProgramGroupTest < ActiveSupport::TestCase
   test "cohort_label returns nil for a year before the epoch" do
     assert_nil program_groups(:cp_group).cohort_label(2516)
   end
+
+  test "certificate is a valid degree level" do
+    group = ProgramGroup.new(code: "CE", name_en: "Computer Science Certificate", degree_level: "certificate",
+                             degree_name: "Certificate in Computer Science", field_of_study: "Computer Science",
+                             first_intake_year_be: 2512)
+    assert group.valid?, group.errors.full_messages.join(", ")
+    assert_equal 2520, group.year_for_generation(9)
+  end
 end

@@ -197,6 +197,7 @@ $input-icon-color: darken($light, 5%);
 .badge-bachelor  { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }
 .badge-master    { background-color: rgba($info, 0.2);      color: $info;       border: 1px solid rgba($info, 0.4); }
 .badge-doctoral  { background-color: rgba($warning, 0.2);   color: $warning;                    border: 1px solid rgba($warning, 0.4); }
+.badge-certificate { background-color: rgba(#7c6fdc, 0.2); color: #a89ff0; border: 1px solid rgba(#7c6fdc, 0.4); }
 
 // Study track badges (M.Sc. programs): regular vs นอกเวลาราชการ (special/evening)
 .badge-track-regular { background-color: rgba($secondary, 0.2); color: $secondary;  border: 1px solid rgba($secondary, 0.4); }

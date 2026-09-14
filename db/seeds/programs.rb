@@ -12,6 +12,10 @@ group_data = {
   "CS"    => { name_en: "Computer Science",                            name_th: "วิทยาศาสตร์คอมพิวเตอร์",                         degree_level: "master",   degree_name: "Master of Science",       degree_name_th: "วิทยาศาสตรมหาบัณฑิต",      field_of_study: "Computer Engineering", degree_abbr: "M.Sc.", first_intake_year_be: 2514 },
   "SE"    => { name_en: "Software Engineering",                        name_th: "วิศวกรรมซอฟต์แวร์",                              degree_level: "master",   degree_name: "Master of Science",       degree_name_th: "วิทยาศาสตรมหาบัณฑิต",      field_of_study: "Computer Engineering", degree_abbr: "M.Sc.", first_intake_year_be: 2545 },
   "CD"    => { name_en: "Computer Engineering",                        name_th: "วิศวกรรมคอมพิวเตอร์",                            degree_level: "doctoral", degree_name: "Doctor of Philosophy",    degree_name_th: "วิศวกรรมศาสตรดุษฎีบัณฑิต", field_of_study: "Computer Engineering", degree_abbr: "Ph.D.", first_intake_year_be: 2541 },
+  # Pre-department certificate taught by หน่วยคอมพิวเตอร์ไซแอนส์ under the Graduate School,
+  # intakes 2512–2520 (book ครบรอบ 30 ปี, p. 231 legend + pp. 19/27/226). No registrar code
+  # exists for it; its one revision uses the deliberately non-numeric code CE2512.
+  "CE"    => { name_en: "Computer Science Certificate",                 name_th: "ประกาศนียบัตรคอมพิวเตอร์ไซแอนส์",               degree_level: "certificate", degree_name: "Certificate in Computer Science", degree_name_th: "ประกาศนียบัตร", field_of_study: "Computer Science", degree_abbr: "Cert.", first_intake_year_be: 2512 },
   "OTHER" => { name_en: "Unknown Program",                             name_th: nil,                                               degree_level: "bachelor", degree_name: "Unknown",                degree_name_th: nil,                         field_of_study: "Unknown",              degree_abbr: nil,      first_intake_year_be: nil },
   # Discontinued 2006 track known only from ChulaBooster (major_code 21103, 9 students,
   # blank names in CB's export). Synthetic code; rename here once the real track is identified.
@@ -96,6 +100,9 @@ programs = {
     # export dates this track's one revision to 2006 CE.
     { program_code: "21103", total_credit: nil, short_name: "21103", year_started_be: 2006 + 543 },
   ],
+  "CE" => [
+    { program_code: "CE2512", total_credit: nil, short_name: "CE", year_started_be: 2512 },
+  ],
 }
 
 # ChulaBooster major_code per program group (see docs/chulabooster-program-crosswalk.md).
@@ -104,6 +111,7 @@ CB_MAJOR_CODES = {
   "CP" => "21100", "CM" => "21100", "CD" => "21100",
   "CS" => "21101", "SE" => "21102", "CEDT" => "21104",
   "21103" => "21103",
+  "CE" => nil,
   "OTHER" => nil
 }.freeze
 
