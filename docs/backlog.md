@@ -73,6 +73,9 @@ Status as of 2026-07-09:
   anchor. Keep regardless.
 - `teaching_matrix` (at `/schedules`, not the registry) — set/aggregate report
   (staff × course per term/year), no single-entity anchor. Keep regardless.
+- **2026-09-15** — book30 report vs students/show book lines — no overlap: the
+  ledger is cross-cohort counts, the student page shows only that student's
+  lines; keep both.
 
 ## 3. Course lists → shared course filter (recurring)
 

@@ -15,7 +15,9 @@
       per-term counts for grades, schedule, and new students, with gaps flagged.
 
     %p.text-body-secondary
-      For the legacy book import, see the
+      For the history of every row, see
+      #{link_to "Where the data came from", data_sources_provenance_path},
+      and for the legacy book import, the
       #{link_to "30-Year Book Import report", data_sources_book30_path}.
 
     - @sources.each_with_index do |src, index|

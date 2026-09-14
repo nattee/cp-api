@@ -1,0 +1,167 @@
+- s = @summary
+- source_label = ->(k) { Student::SOURCE_LABELS[k] || k.to_s.humanize }
+
+.card.mb-4
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        %span.material-symbols.resource-icon.me-2 history
+        Where the Data Came From
+      = link_to "Data Sources", data_sources_path, class: "btn btn-outline-secondary btn-sm"
+    %p.text-body-secondary
+      Every table traced to the file, system, or seed that filled it. Numbers are live; the narrative is the
+      record of how the database was built. Full text with dates:
+      %code docs/data-provenance-report.md
+
+    %h6.section-title Students by source
+    .table-responsive
+      %table.table.mb-4
+        %thead
+          %tr
+            %th Source
+            %th.text-end Students
+            %th How to tell on the row
+        %tbody
+          - s.students_by_source.sort_by { |_, n| -n }.each do |src, n|
+            %tr
+              %td
+                %span.badge{class: "badge-#{src}"}= source_label.(src)
+              %td.text-end= number_with_delimiter(n)
+              %td.small.text-body-secondary
+                - case src
+                - when "imported"
+                  Created 12 Apr 2026 by the Excel load of record. Which of the eleven files created a given student is not recorded.
+                - when "chulabooster"
+                  Created 5 Jul 2026 by the ChulaBooster student sync; a remark beginning "ChulaBooster sync" explains a heuristic programme choice.
+                - when "book30"
+                  Placeholder from the 30-year book; ID B30-<cohort>-<nnn>, Thai names only, status unknown. See the
+                  = link_to "book import report", data_sources_book30_path
+                - when "manual"
+                  Entered through the student form.
+
+    %h6.section-title Grades and courses
+    .row.g-3
+      .col-md-6
+        %table.table.mb-0
+          %thead
+            %tr
+              %th Grades by source
+              %th.text-end Rows
+          %tbody
+            - s.grades_by_source.sort_by { |_, n| -n }.each do |src, n|
+              %tr
+                %td= src == "imported" ? "Excel (transcript workbook)" : src.titleize
+                %td.text-end= number_with_delimiter(n)
+            %tr.text-body-secondary.small
+              %td= "Students with any grade: #{number_with_delimiter(s.students_with_grades)} of #{number_with_delimiter(Student.count)}; years #{s.grade_year_range.join(' to ')} (CE)"
+              %td
+      .col-md-6
+        %table.table.mb-0
+          %thead
+            %tr
+              %th Courses by origin
+              %th.text-end Rows
+          %tbody
+            - s.courses_by_generation.sort.each do |kind, n|
+              %tr
+                %td= { "none" => "Real course row", "placeholder" => "Stub created so a grade could attach", "copied" => "Clone of a neighbouring revision" }[kind] || kind
+                %td.text-end= number_with_delimiter(n)
+
+.card.mb-4
+  .card-body.p-3
+    %h5.card-title.fw-semibold.mb-3 Reference data and schedule
+    .table-responsive
+      %table.table.mb-0
+        %thead
+          %tr
+            %th Entity
+            %th.text-end Rows
+            %th Source
+        %tbody
+          - c = s.counts
+          - [["Programme groups", c[:program_groups], "Seeds (db/seeds/programs.rb); one created for ChulaBooster's orphan 2006 track; CE from the 30-year book"], ["Programme revisions", c[:programs], "Seeds with official four-digit codes and CB major codes"], ["Programme-course links", c[:program_courses], "Backfilled 1 Jul 2026 from the old courses column, then ChulaBooster on 7 Jul"], ["Staff", c[:staffs], "Seeds (db/seeds/staffs.rb) with registrar initials"], ["Semesters", c[:semesters], "CuGetReg scrapes"], ["Course offerings", c[:course_offerings], "CuGetReg scrapes"], ["Sections", c[:sections], "CuGetReg scrapes"], ["Time slots", c[:time_slots], "CuGetReg scrapes"], ["Teachings", c[:teachings], "CuGetReg scrapes, matched by staff initials"], ["Rooms", c[:rooms], "CuGetReg scrapes"], ["Advisorships", c[:advisorships], "Advisorship importer"], ["Users and roles", c[:users] + c[:roles], "Seeds"]].each do |name, n, src|
+            %tr
+              %td= name
+              %td.text-end= number_with_delimiter(n)
+              %td.small.text-body-secondary= src
+
+.card.mb-4
+  .card-body.p-3
+    %h5.card-title.fw-semibold.mb-1 Import runs
+    %p.text-body-secondary.small
+      The Excel load of record (12 Apr 2026), all in upsert mode: a student present in several files was created by
+      the first and updated by the later ones. File-name prefixes are the year of the extract (20 = 2020, 21 = 2021,
+      24 = 2024, 25 = 2025); 00 is the consolidated all-students file.
+    .table-responsive
+      %table.table.table-sm.mb-0
+        %thead
+          %tr
+            %th.text-end #
+            %th Date
+            %th Target
+            %th File
+            %th.text-end Rows
+            %th.text-end Created
+            %th.text-end Updated
+            %th.text-end Unchanged
+            %th.text-end Skipped
+            %th State
+        %tbody
+          - s.imports.each do |d|
+            %tr
+              %td.text-end= d.id
+              %td= d.created_at.to_date
+              %td= d.target_type
+              %td.small= d.file.attached? ? d.file.filename.to_s : "—"
+              %td.text-end= number_with_delimiter(d.total_rows)
+              %td.text-end= number_with_delimiter(d.created_count)
+              %td.text-end= number_with_delimiter(d.updated_count)
+              %td.text-end= number_with_delimiter(d.unchanged_count)
+              %td.text-end= number_with_delimiter(d.skipped_count)
+              %td
+                %span.badge{class: "badge-#{d.state.dasherize}"}= d.state.titleize
+
+.card.mb-4
+  .card-body.p-3
+    %h5.card-title.fw-semibold.mb-3 Schedule scrapes
+    .table-responsive
+      %table.table.table-sm.mb-0
+        %thead
+          %tr
+            %th.text-end #
+            %th Date
+            %th Term
+            %th Programme
+            %th.text-end Courses found
+            %th State
+        %tbody
+          - s.scrapes.each do |sc|
+            %tr
+              %td.text-end= sc.id
+              %td= sc.created_at.to_date
+              %td= "#{sc.semester.year_be}/#{sc.semester.semester_number}"
+              %td= sc.study_program == "S" ? "Thai" : "International"
+              %td.text-end= "#{sc.courses_found} of #{sc.total_courses}"
+              %td
+                %span.badge{class: "badge-#{sc.state.dasherize}"}= sc.state.titleize
+
+.card
+  .card-body.p-3
+    %h5.card-title.fw-semibold.mb-3 Timeline and known gaps
+    %ol.small
+      %li 13 Mar 2026: a colleague's transcript workbook arrives (students, courses, 33,565 grade rows for 2018–2025).
+      %li 1–11 Apr 2026: the importer is built against the files; programme and staff seeds are written.
+      %li 12 Apr 2026: the Excel load of record — thirteen runs, eleven files.
+      %li 14 Apr 2026: eight CuGetReg scrapes fill the schedule for 2565/1–2568/2.
+      %li 1 Jul 2026: courses↔programmes become many-to-many; links backfilled.
+      %li 2 Jul 2026: read-only reconciliation against ChulaBooster, nothing changed.
+      %li 5–7 Jul 2026: ChulaBooster syncs add students, courses, grades and pairings; CB status codes mirrored.
+      %li 8–21 Jul 2026: CuGetReg scrapes for 2569.
+      %li 16 Jul 2026: production replaced with a copy of this database.
+      %li 22 Aug 2026: study-track backfill; programme 0999 dissolved.
+      %li 14 Sep 2026: the 30-year book import — 19 first-cohort M.Eng. students re-filed from CP 0018 to CM 0037 first.
+    %ul.small.mb-0
+      %li No per-row link from a student to the Excel file that created it (counts per file only).
+      %li Status defaulted to active at import and was never re-confirmed for Excel rows; CB's code is the better signal.
+      %li Grades exist only for #{s.grade_year_range.join('–')} (CE); most alumni have none.
+      %li Placeholder students from the book carry no ID, English name, status or grades.
