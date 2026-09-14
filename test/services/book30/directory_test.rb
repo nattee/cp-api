@@ -22,23 +22,23 @@ class Book30DirectoryTest < ActiveSupport::TestCase
 
   test "groups lines under cohort headers in reading order, dropping noise" do
     dir = Book30::Directory.new(xml)
-    assert_equal({ "CP14" => ["นาย สมชาย ใจดี", "นางสาว สมหญิง ดีใจ", "(แซ่ลี้)"],
-                   "CT01" => ["ดร. กอบกุล (เตชะ) วณิช", "นาย เอนก"] }, dir.cohorts)
+    assert_equal({ "CP14" => [ "นาย สมชาย ใจดี", "นางสาว สมหญิง ดีใจ", "(แซ่ลี้)" ],
+                   "CT01" => [ "ดร. กอบกุล (เตชะ) วณิช", "นาย เอนก" ] }, dir.cohorts)
   end
 
   test "lines carry cohort facts, parsed names, folded aliases and sex" do
     lines = Book30::Directory.new(xml).lines
     assert_equal %w[CP14 CP14 CT01 CT01], lines.map(&:cohort)
     a, b, c, d = lines
-    assert_equal ["CP", "CP", 2530, 1, "สมชาย", "ใจดี", nil, "M"], [a.prefix, a.group, a.year, a.line_no, a.first, a.last, a.alias_name, a.sex]
-    assert_equal [2, "สมหญิง", "ดีใจ", "แซ่ลี้", "F"], [b.line_no, b.first, b.last, b.alias_name, b.sex]
-    assert_equal ["CT", "CS", 2533, 1, "กอบกุล", "วณิช", "เตชะ", nil], [c.prefix, c.group, c.year, c.line_no, c.first, c.last, c.alias_name, c.sex]
-    assert_equal ["เอนก", ""], [d.first, d.last]
+    assert_equal [ "CP", "CP", 2530, 1, "สมชาย", "ใจดี", nil, "M" ], [ a.prefix, a.group, a.year, a.line_no, a.first, a.last, a.alias_name, a.sex ]
+    assert_equal [ 2, "สมหญิง", "ดีใจ", "แซ่ลี้", "F" ], [ b.line_no, b.first, b.last, b.alias_name, b.sex ]
+    assert_equal [ "CT", "CS", 2533, 1, "กอบกุล", "วณิช", "เตชะ", nil ], [ c.prefix, c.group, c.year, c.line_no, c.first, c.last, c.alias_name, c.sex ]
+    assert_equal [ "เอนก", "" ], [ d.first, d.last ]
   end
 
   test "decode maps PUA glyphs and reorders marks" do
     # U+F70A is the PSL private-use variant of the tone mark ่ ; the PDF puts it BEFORE the vowel ุ
-    assert_equal "รุ่น", Book30::Directory.decode("รุน")
+    assert_equal "รุ่น", Book30::Directory.decode("ร\uF70A\u0E38น")
     assert_equal "รุ่น", Book30::Directory.decode("&#xe23;&#xf70a;&#xe38;&#xe19;")
   end
 

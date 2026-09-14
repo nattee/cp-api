@@ -56,11 +56,11 @@ module Book30
         @xml.split(/<page id="page\d+"/).drop(1).each do |chunk|
           lines = chunk.scan(%r{<line bbox="([\d.]+) ([\d.]+) [\d.]+ [\d.]+"[^>]*>(.*?)</line>}m).filter_map do |x0, y0, body|
             text = self.class.decode(body.scan(/<char[^>]*c="([^"]*)"/).join).squish
-            [x0.to_f, y0.to_f, text] unless text.blank? || text.match?(NOISE_RE)
+            [ x0.to_f, y0.to_f, text ] unless text.blank? || text.match?(NOISE_RE)
           end
           # Two-column layout: left column (x < 180) reads before right. mutool emits lines in
           # BLOCK order, not top-down, so each column is re-sorted by y or headers scramble.
-          [true, false].each do |left|
+          [ true, false ].each do |left|
             lines.select { |x0, _, _| (x0 < 180) == left }.sort_by { |_, y0, _| y0 }.each { |_, _, text| sequence << text }
           end
         end
@@ -129,7 +129,7 @@ module Book30
     def self.clean_name(raw)
       stripped = raw.gsub(/\([^)]*\)/, " ").squish.sub(TITLE_RE, "").strip
       parts = stripped.split
-      [parts.first.to_s, parts.drop(1).join(" ")]
+      [ parts.first.to_s, parts.drop(1).join(" ") ]
     end
 
     def self.normalize(name)
