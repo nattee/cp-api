@@ -18,9 +18,14 @@ class AddSourceToStudentsAndRelaxEnglishNames < ActiveRecord::Migration[8.1]
   end
 
   def down
-    remove_index :students, :source
-    remove_column :students, :source
+    # Placeholders from the book have no English names; the NOT NULL constraints cannot
+    # come back while they exist, and MySQL DDL is not transactional — fail before touching anything.
+    if Student.where("first_name IS NULL OR last_name IS NULL").exists?
+      raise ActiveRecord::IrreversibleMigration, "students with NULL English names exist; run `bin/rails book30:rollback COMMIT=1` first"
+    end
     change_column_null :students, :first_name, false
     change_column_null :students, :last_name, false
+    remove_index :students, :source
+    remove_column :students, :source
   end
 end
