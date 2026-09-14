@@ -77,6 +77,38 @@
                     - if ex.note.present?
                       %div= ex.note
 
+  .card.mb-4
+    .card-body.p-3
+      %h5.card-title.fw-semibold.mb-3 Corrections made by the import
+      .detail-section
+        %h6.section-title CM01–CM04 re-filed
+        %p.text-body-secondary.small
+          = s.refiled_cm.size
+          students of the first M.Eng. cohorts (2535–2538) carried graduate-school IDs
+          beginning with C but sat under CP revision 0018, the bachelor programme; the book's
+          CM01–CM04 matched them, so the import moved them to CM revision 0037 before matching.
+          This is the only change the import makes to pre-existing students, and
+          %code book30:rollback
+          does not undo it.
+        %ul.small.mb-0
+          - s.refiled_cm.each do |student|
+            %li
+              = link_to student.display_name, student
+              = "(#{student.student_id}, admitted #{student.admission_year_be})"
+      .detail-section.mb-0
+        %h6.section-title CE programme group
+        %p.text-body-secondary.small.mb-0
+          The book's CE cohorts are the pre-department Certificate in Computer Science (first
+          intake 2512, last cohort 2520), a programme the database did not have; the import
+          relies on programme group
+          - if s.ce_group
+            = link_to "CE", program_group_path(s.ce_group)
+          - else
+            CE
+          (degree level certificate) with one revision, CE2512, a deliberately non-numeric code.
+          = number_with_delimiter(s.ce_placeholders_count)
+          CE placeholders were created.
+
   .card
     .card-body.p-3
       %h5.card-title.fw-semibold.mb-1 Cohort ledger

@@ -30,4 +30,16 @@ class Book30SummaryTest < ActiveSupport::TestCase
     Book30Entry.delete_all
     assert_not Book30::Summary.new.any?
   end
+
+  test "refiled_cm returns students with the re-file remark and excludes others" do
+    refiled = Student.create!(student_id: "C518701", first_name: "G", last_name: "H", first_name_th: "ฉ", last_name_th: "ช",
+                              admission_year_be: 2535, status: "retired", program: @prog,
+                              remark: "re-filed from 0018 to 0037 (book30 CM01)")
+    other = Student.create!(student_id: "4031000047", first_name: "E", last_name: "F", first_name_th: "ซ", last_name_th: "ฌ",
+                            admission_year_be: 2540, status: "graduated", program: @prog, remark: "unrelated remark")
+
+    result = Book30::Summary.new.refiled_cm
+    assert_includes result, refiled
+    assert_not_includes result, other
+  end
 end

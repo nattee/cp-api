@@ -65,5 +65,19 @@ module Book30
       Row.new(cohort: "total", year: nil, prefix: rows.first&.prefix, book: rows.sum(&:book), db: rows.sum(&:db),
               counts: Book30Entry::OUTCOMES.to_h { |o| [ o, rows.sum { |r| r.counts[o] } ] }, db_only: rows.sum(&:db_only))
     end
+
+    # The one change the import makes to pre-existing rows: the first M.Eng. cohorts
+    # (graduate-school C-prefixed IDs) were filed under the bachelor revision 0018.
+    def refiled_cm
+      @refiled_cm ||= Student.where("remark LIKE ?", "%re-filed from 0018 to 0037%").includes(program: :program_group).order(:student_id).to_a
+    end
+
+    def ce_group
+      @ce_group ||= ProgramGroup.find_by(code: "CE")
+    end
+
+    def ce_placeholders_count
+      @ce_placeholders_count ||= Student.where(source: "book30").joins(program: :program_group).where(program_groups: { code: "CE" }).count
+    end
   end
 end

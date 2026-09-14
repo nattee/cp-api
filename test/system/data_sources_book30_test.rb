@@ -19,6 +19,7 @@ class DataSourcesBook30Test < ApplicationSystemTestCase
     assert_text "Cohort ledger"
     assert_text "CP51"
     assert_text "Confirmed"
+    assert_text "Corrections made by the import"
     visit student_path(student)
     assert_text "30-Year Book"
   end
