@@ -14,6 +14,8 @@ module Book30
 
     NEAR_YEAR_WINDOW = 2 # |DB year − book year| within this links as other_year; beyond it is a namesake
 
+    VARIANT_LABELS = { "variant_surname" => "surname", "variant_firstname" => "first name", "variant_typo" => "spelling" }.freeze
+
     # lines: Array<Directory::Line>; pools: { [group_code, year_be] => Array<PoolStudent> }
     def initialize(lines:, pools:)
       @lines = lines
@@ -95,9 +97,11 @@ module Book30
           d.student, d.kind, d.score = best[1], "variant_typo", best[0] + 1
         else
           others = @all_by_group[l.group].reject { |s| s.year == l.year }
-          if (xy = others.find { |s| lk(s.first, s.last) == lk(l.first, l.last) })
+          matches = others.select { |s| lk(s.first, s.last) == lk(l.first, l.last) }
+          if (xy = matches.min_by { |s| (s.year - l.year).abs })
             d.student, d.kind, d.score = xy, year_kind(xy, l), 1
-          elsif (b2 = others.map { |s| [ dist(norm(s.first) + norm(s.last), nf + nl), s ] }.min_by(&:first)) && b2[0] <= 1
+          elsif (b2 = others.map { |s| [ dist(norm(s.first) + norm(s.last), nf + nl), s ] }
+                       .min_by { |cand_dist, s| [ cand_dist, (s.year - l.year).abs ] }) && b2[0] <= 1
             d.student, d.kind, d.score = b2[1], year_kind(b2[1], l), 2
           end
         end
@@ -112,13 +116,13 @@ module Book30
     # ties go to the earlier cohort then the earlier line. Losers stay unlinked (d.lost).
     def resolve_claims(live)
       live.select { |d| d.student && d.kind != "namesake" }.group_by { |d| d.student.id }.each_value do |claims|
-        winner = claims.min_by { |d| [ d.score, d.line.year, d.line.line_no ] }
+        winner = claims.min_by { |d| [ d.score, d.line.year, d.line.cohort, d.line.line_no ] }
         winner.outcome = case winner.kind
         when "exact"      then "linked_exact"
         when "other_year" then "linked_other_year"
         else                   "linked_variant"
         end
-        winner.notes << "book differs in #{winner.kind.delete_prefix('variant_')}" if winner.kind.start_with?("variant_")
+        winner.notes << "book differs in #{VARIANT_LABELS[winner.kind]}" if VARIANT_LABELS.key?(winner.kind)
         winner.notes << "book year #{winner.line.year}, DB year #{winner.student.year}" if winner.kind == "other_year"
         if (conflict = track_conflict(winner.line.prefix, winner.student.study_track))
           winner.notes << conflict
@@ -132,10 +136,11 @@ module Book30
       live.select { |d| d.outcome.nil? }.each do |d|
         other = by_key[[ d.line.group, name_key(d.line) ]].find { |o| !o.equal?(d) && o.outcome.to_s.start_with?("linked") }
         next unless other
+        lost_student_id = d.student&.student_id
         d.outcome = "second_listing"
         d.student = other.student
         d.notes << "same person linked under #{other.line.cohort}"
-        d.notes << "lost claim on #{d.student.student_id} to a closer name" if d.lost
+        d.notes << "lost claim on #{lost_student_id} to a closer name" if d.lost
       end
     end
 
@@ -143,7 +148,7 @@ module Book30
     # second listings pointing at that head line (the importer wires the created student).
     def mark_creates(live)
       live.select { |d| d.outcome.nil? }.group_by { |d| [ d.line.group, name_key(d.line) ] }.each_value do |listings|
-        listings = listings.sort_by { |d| [ d.line.year, d.line.line_no ] }
+        listings = listings.sort_by { |d| [ d.line.year, d.line.cohort, d.line.line_no ] }
         head = listings.first
         head.outcome =
           if head.student && head.kind == "namesake"

@@ -35,7 +35,7 @@ class Book30ClassifierTest < ActiveSupport::TestCase
     d = classify([ line("CP14", 1, "ปิยะรัตน์", "เสริมชัยวงศ์"), line("CP14", 2, "วิษณู", "สมบุญปีติ") ], pools)
     assert_equal %w[linked_variant linked_variant], d.map(&:outcome)
     assert_includes d[0].note, "book differs in surname"
-    assert_includes d[1].note, "book differs in firstname"
+    assert_includes d[1].note, "book differs in first name"
   end
 
   test "same name in a neighbouring year links; thirteen years away is a namesake" do
@@ -80,6 +80,30 @@ class Book30ClassifierTest < ActiveSupport::TestCase
     d = classify(lines, pools)
     assert_equal %w[create_missing duplicate_line unparsed create_book_only_cohort], d.map(&:outcome)
     assert_includes d[0].note, "also listed under CM01 (other programme)"
+  end
+
+  test "typo across the whole name links via edit distance when surname is not unique" do
+    pools = { [ "CS", 2535 ] => [ pool(1, "สมชาย", "ใจดี", group: "CS", year: 2535),
+                               pool(2, "สมชาย", "อื่นคน", group: "CS", year: 2535) ] }
+    d = classify([ line("CS22", 1, "สมชาย", "ใจตี") ], pools)
+    assert_equal "linked_variant", d[0].outcome
+    assert_equal 1, d[0].student.id
+    assert_includes d[0].note, "book differs in spelling"
+  end
+
+  test "cross-year candidate within edit distance 1 links as other_year" do
+    pools = { [ "CP", 2536 ] => [ pool(1, "เกษมชัย", "วัฒนศิริชัยกุล", group: "CP", year: 2536) ], [ "CP", 2537 ] => [] }
+    d = classify([ line("CP21", 1, "เกษมชัย", "วัฒนะศิริชัยกุล") ], pools)
+    assert_equal "linked_other_year", d[0].outcome
+    assert_equal 1, d[0].student.id
+    assert_includes d[0].note, "book year 2537, DB year 2536"
+  end
+
+  test "alias/maiden name in the book is carried into the note" do
+    pools = { [ "CP", 2530 ] => [ pool(1, "ก", "ข", group: "CP", year: 2530) ] }
+    d = classify([ line("CP14", 1, "ก", "ข", alias_name: "แซ่ลี้") ], pools)
+    assert_equal "linked_exact", d[0].outcome
+    assert_includes d[0].note, "maiden/alias in book: แซ่ลี้"
   end
 
   test "edit distance" do
