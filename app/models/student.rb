@@ -35,9 +35,9 @@ class Student < ApplicationRecord
     "book30"       => "30-year book"
   }.freeze
   SOURCE_ICONS = {
-    "imported"     => "upload_file",
+    "imported"     => "cloud_download",
+    "manual"       => "edit_note",
     "chulabooster" => "sync",
-    "manual"       => "edit",
     "book30"       => "menu_book"
   }.freeze
 
