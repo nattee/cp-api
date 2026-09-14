@@ -12,11 +12,13 @@ namespace :book30 do
   task import: :environment do
     pdf = ENV.fetch("PDF", Book30::Directory::DEFAULT_PDF)
     abort "PDF not found: #{pdf} (pass PDF=<path>)" unless File.exist?(pdf)
-    Book30::Importer.new(pdf_path: pdf, commit: ENV["COMMIT"] == "1").run
+    result = Book30::Importer.new(pdf_path: pdf, commit: ENV["COMMIT"] == "1").run
+    abort "book30:import did not run (see the message above)" if result.nil?
   end
 
   desc "Delete every book30_entries row and every source=book30 placeholder student. DRY-RUN by default; COMMIT=1 deletes."
   task rollback: :environment do
-    Book30::Rollback.new(commit: ENV["COMMIT"] == "1").run
+    ok = Book30::Rollback.new(commit: ENV["COMMIT"] == "1").run
+    abort "book30:rollback refused (see the message above)" unless ok
   end
 end
