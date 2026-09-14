@@ -12,12 +12,17 @@
         %dt.col-sm-3 Student ID
         %dd.col-sm-9= @student.student_id
 
-        %dt.col-sm-3 Name (EN)
-        %dd.col-sm-9= @student.full_name
+        - if @student.full_name.present?
+          %dt.col-sm-3 Name (EN)
+          %dd.col-sm-9= @student.full_name
 
         - if @student.full_name_th.present?
           %dt.col-sm-3 Name (TH)
           %dd.col-sm-9= @student.full_name_th
+
+        %dt.col-sm-3 Source
+        %dd.col-sm-9
+          %span.badge{class: "badge-source-#{@student.source}"}= Student::SOURCE_LABELS[@student.source]
 
     .detail-section
       %h6.section-title Academic

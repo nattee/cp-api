@@ -84,6 +84,7 @@ module Chulabooster
         admission_year_be: admission_year_be,
         program: result.program,
         status: status,
+        source: "chulabooster",
         cb_status_code: row["student_status"].to_s
       )
       if result.flags.any?

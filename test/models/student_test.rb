@@ -147,4 +147,30 @@ class StudentTest < ActiveSupport::TestCase
     assert student.valid?
     assert_nil student.study_track
   end
+
+  # --- Provenance (source) ---
+
+  test "source defaults to imported and must be a known value" do
+    student = students(:active_student)
+    assert_equal "imported", student.source
+    student.source = "bogus"
+    assert_not student.valid?
+    assert_includes student.errors[:source], "is not included in the list"
+  end
+
+  test "book30 students need no English names" do
+    student = Student.new(student_id: "B30-CP01-001", first_name_th: "สมชาย", last_name_th: "ใจดี",
+                          admission_year_be: 2517, status: "unknown", source: "book30", program: programs(:cp_bachelor))
+    assert student.valid?, student.errors.full_messages.join(", ")
+    assert_nil student.full_name
+    assert_equal "สมชาย ใจดี", student.display_name
+  end
+
+  test "imported students still need English names" do
+    student = Student.new(student_id: "9999900009", first_name_th: "ก", last_name_th: "ข",
+                          admission_year_be: 2567, status: "active", source: "imported", program: programs(:cp_bachelor))
+    assert_not student.valid?
+    assert_includes student.errors[:first_name], "can't be blank"
+    assert_includes student.errors[:last_name], "can't be blank"
+  end
 end

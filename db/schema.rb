@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_22_015130) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_14_090000) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -319,12 +319,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_22_015130) do
     t.string "discord"
     t.string "email"
     t.string "enrollment_method"
-    t.string "first_name", null: false
+    t.string "first_name"
     t.string "first_name_th"
     t.integer "graduation_year_be"
     t.string "guardian_name"
     t.string "guardian_phone"
-    t.string "last_name", null: false
+    t.string "last_name"
     t.string "last_name_th"
     t.string "line_id"
     t.string "old_program"
@@ -333,6 +333,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_22_015130) do
     t.bigint "program_id"
     t.string "remark"
     t.string "sex"
+    t.string "source", default: "imported", null: false
     t.string "status", default: "active", null: false
     t.string "status_note"
     t.string "student_id", null: false
@@ -341,6 +342,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_22_015130) do
     t.datetime "updated_at", null: false
     t.index ["admission_year_be"], name: "index_students_on_admission_year_be"
     t.index ["program_id"], name: "index_students_on_program_id"
+    t.index ["source"], name: "index_students_on_source"
     t.index ["student_id"], name: "index_students_on_student_id", unique: true
   end
 

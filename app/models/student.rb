@@ -22,15 +22,35 @@ class Student < ApplicationRecord
   STUDY_TRACK_ICONS = { "regular" => "light_mode", "special" => "dark_mode" }.freeze
   STUDY_TRACK_LABELS = { "regular" => "Regular", "special" => "นอกเวลาราชการ" }.freeze
 
+  # Where a student row came from. `book30` rows are placeholders built from the
+  # 30-year anniversary book (Thai names only, synthetic IDs) — see
+  # docs/superpowers/specs/2026-09-14-book30-import-design.md. LEGACY_SOURCES are
+  # the ones allowed to lack English names.
+  SOURCES = %w[imported chulabooster manual book30].freeze
+  LEGACY_SOURCES = %w[book30].freeze
+  SOURCE_LABELS = {
+    "imported"     => "Excel import",
+    "chulabooster" => "ChulaBooster",
+    "manual"       => "Manual entry",
+    "book30"       => "30-year book"
+  }.freeze
+  SOURCE_ICONS = {
+    "imported"     => "upload_file",
+    "chulabooster" => "sync",
+    "manual"       => "edit",
+    "book30"       => "menu_book"
+  }.freeze
+
   belongs_to :program
   has_many :grades, dependent: :destroy
   has_many :advisorships, dependent: :destroy
   has_many :current_advisorships, -> { current }, class_name: "Advisorship", inverse_of: :student
   has_many :advisors, through: :current_advisorships, source: :staff
+  has_many :book30_entries, dependent: :nullify
 
   validates :student_id, presence: true, uniqueness: true
-  validates :first_name, presence: true
-  validates :last_name, presence: true
+  validates :first_name, presence: true, unless: :legacy_source?
+  validates :last_name, presence: true, unless: :legacy_source?
   validates :first_name_th, presence: true
   validates :last_name_th, presence: true
   validates :admission_year_be, presence: true, numericality: { only_integer: true }
@@ -38,6 +58,7 @@ class Student < ApplicationRecord
   validates :status, presence: true, inclusion: { in: STATUSES }
   validates :tcas, inclusion: { in: TCAS_ROUNDS }, allow_nil: true
   validates :study_track, inclusion: { in: STUDY_TRACKS }, allow_nil: true
+  validates :source, presence: true, inclusion: { in: SOURCES }
 
   # Blank select submissions arrive as "" — store the absence as NULL.
   before_validation { self.study_track = nil if study_track.blank? }
@@ -45,7 +66,8 @@ class Student < ApplicationRecord
   scope :active, -> { where(status: "active") }
 
   def full_name
-    "#{first_name} #{last_name}"
+    return nil if first_name.blank? && last_name.blank?
+    "#{first_name} #{last_name}".strip
   end
 
   def full_name_th
@@ -53,9 +75,14 @@ class Student < ApplicationRecord
     "#{first_name_th} #{last_name_th}"
   end
 
-  # Prefer Thai name for display; fall back to English
+  # Prefer Thai name for display; fall back to English, then to the ID (book
+  # placeholders have no English name at all).
   def display_name
-    full_name_th.presence || full_name
+    full_name_th.presence || full_name.presence || student_id
+  end
+
+  def legacy_source?
+    source.in?(LEGACY_SOURCES)
   end
 
   def active?

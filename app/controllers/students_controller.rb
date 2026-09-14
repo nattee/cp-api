@@ -73,7 +73,7 @@ class StudentsController < ApplicationController
   end
 
   def create
-    @student = Student.new(student_params)
+    @student = Student.new(student_params.merge(source: "manual"))
 
     if @student.save
       redirect_to @student, notice: "Student was successfully created."

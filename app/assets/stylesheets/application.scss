@@ -202,6 +202,13 @@ $input-icon-color: darken($light, 5%);
 .badge-track-regular { background-color: rgba($secondary, 0.2); color: $secondary;  border: 1px solid rgba($secondary, 0.4); }
 .badge-track-special { background-color: rgba($warning, 0.15);  color: $warning;    border: 1px solid rgba($warning, 0.35); }
 
+// Student provenance badges (students.source): where the row came from.
+// Four domain concepts, four classes — never reuse a status badge for these.
+.badge-source-imported     { background-color: rgba(150, 150, 150, 0.18); color: rgba(210, 210, 210, 0.8); border: 1px solid rgba(150, 150, 150, 0.35); }
+.badge-source-chulabooster { background-color: rgba($secondary, 0.2);     color: $secondary; border: 1px solid rgba($secondary, 0.4); }
+.badge-source-manual       { background-color: rgba($info, 0.2);          color: $info;      border: 1px solid rgba($info, 0.4); }
+.badge-source-book30       { background-color: rgba(#7c6fdc, 0.2);        color: #a89ff0;    border: 1px solid rgba(#7c6fdc, 0.4); }
+
 // Staff type badges
 .badge-lecturer         { background-color: rgba($primary, 0.2);   color: $primary;    border: 1px solid rgba($primary, 0.4); }
 .badge-adjunct          { background-color: rgba($info, 0.2);      color: $info;       border: 1px solid rgba($info, 0.4); }
