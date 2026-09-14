@@ -1,8 +1,17 @@
 # 30th-Anniversary Book: Alumni Directory Import Report
 
-Status: **outcome definitions and pre-import counts, 2026-09-14.** The counts come from a
-dry classification of every book line under the rules below (`tmp/book30_report/scripts/decide.rb`,
-run with `REFILE_CM=1`). They will be re-stamped with the real numbers after the import runs.
+Status: **imported, 2026-09-14.** `bin/rails book30:import COMMIT=1` ran on the development
+database; logs in `tmp/book30_import/20260914-164537/` (the dry run, `tmp/book30_import/20260914-164326/`,
+produced identical numbers). The PDF prints 4,010 lines in the student sections; one of them is a
+bracket-only maiden-name continuation that gets folded into the previous line's alias instead of
+logged on its own, so the import log holds 4,009 rows. Outcomes: `linked_exact` 2,325,
+`linked_variant` 178, `linked_other_year` 4, `second_listing` 25, `duplicate_line` 2, `unparsed` 3,
+`create_book_only_cohort` 1,353, `create_missing` 102, `create_lost_claim` 15, `create_namesake` 2.
+1,472 placeholders created: CE 666, CS 418, CT 25, CP 353, SE 9, CD 1. Programme revisions used:
+1027 ×393, 0038 ×50, 0018 ×344, 0928 ×6, 0779 ×3, CE2512 ×666, 0772 ×9, 0458 ×1. The 19 CM01–CM04
+students were re-filed from program 0018 to 0037 as the importer's pre-step. Students now 10,093
+(imported 7,181 / chulabooster 1,440 / book30 1,472). DB students in book cohorts that no book line
+claimed: 224. Live version: `/data_sources/book30` (admin).
 
 ## Source
 
@@ -226,3 +235,7 @@ program and admission year, CS/CT split by study track. `DB only` = outcome 11. 
 `tmp/book30_report/decisions.csv` is the dry run's one-row-per-line log. `cohort_table.html`,
 `competing_examples.html` and the `scripts/` folder hold the analysis behind these numbers.
 `bin/rails book30:report` (needs `PDF=` since the file was renamed) regenerates the August match report.
+The actual commit run's logs are `tmp/book30_import/20260914-164537/decisions.csv` and
+`summary.csv` (dry run at `tmp/book30_import/20260914-164326/`, same numbers). All of these `tmp/`
+files are scratch and hg-ignored — the app pages (`/data_sources/book30`, `/data_sources/provenance`)
+supersede them as the live, browsable version; regenerate the `tmp/` files only for one-off analysis.

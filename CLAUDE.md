@@ -244,6 +244,24 @@ sync policy), and `docs/chulabooster-client-guide.md` (CB's API contract).
   contract; differing tags report-only). Run `program_courses:backfill_legacy_groups` after
   it, once, to fill what CB doesn't cover.
 
+## 30-Year Book Import (legacy source)
+
+The department's 30th-anniversary book (`/home/dae/book ครบรอบ 30 ปี.pdf`, alumni directory on PDF
+pages 232–303) was imported on 2026-09-14. Spec: `docs/superpowers/specs/2026-09-14-book30-import-design.md`;
+results and the outcome vocabulary: `docs/book30-import-report.md`; admin page: `/data_sources/book30`.
+
+- **One `book30_entries` row per printed line** (`Book30Entry`, outcome ∈ `OUTCOMES`); linked students are
+  never modified; placeholders have `students.source = "book30"`, IDs `B30-<cohort>-<nnn>`, Thai names only,
+  status `unknown`. `Student::LEGACY_SOURCES` rows may lack English names.
+- **Pipeline**: `Book30::Directory` (PDF → lines, needs `mutool`) → `Book30::Classifier` (pure rules) →
+  `Book30::Importer` (transactional; dry-run by default, `COMMIT=1`). `bin/rails book30:import`,
+  `book30:rollback`, `book30:report`. The CM01–CM04 re-file (19 C-prefixed students, CP 0018 → CM 0037)
+  runs as the importer's pre-step.
+- **CE** is the pre-department Computer Science certificate (cohorts 2512–2520): programme group `CE`,
+  degree level `certificate`, revision `CE2512` (deliberately non-numeric).
+- `students.source` (`imported|chulabooster|manual|book30`) records provenance for every row;
+  `/data_sources/provenance` shows the whole picture.
+
 ## Production
 
 - **Website server: `dae@10.0.5.12`**, app at `~/cp-api`, Passenger on port 80 (`:3000` is closed). Not to be confused with `10.0.5.59` in `docs/line-integration.md` — that is the LLM-backend-side production server, a different machine.

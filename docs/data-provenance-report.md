@@ -1,20 +1,20 @@
 # Data Provenance Report
 
-Status: **generated 14 September 2026 from the development database**, which production was copied from on 16 July 2026 and has tracked step for step since. Regenerate with `bin/rails runner tmp/provenance_report/scripts/report.rb`. The HTML reading copy is `tmp/provenance_report/report.html`.
+Status: **generated 14 September 2026 from the development database**, which production was copied from on 16 July 2026 and has tracked step for step since. The 30-year book import (`bin/rails book30:import COMMIT=1`) ran on 2026-09-14, on development only — production has not run it yet. Regenerate with `bin/rails runner tmp/provenance_report/scripts/report.rb`. The HTML reading copy is `tmp/provenance_report/report.html`. Live version: `/data_sources/provenance` (admin). The book is now an actual source: see students by source.
 
 ## In one paragraph
 
-Everything in cp-api so far came in through five doors, and a sixth, the 30-year anniversary book, is matched and waiting to import. Registrar Excel extracts, loaded on 12 April 2026, created 7,181 of the 8,621 students (83%) and 31,079 grades. ChulaBooster, the registrar system, was first compared read-only and then allowed to add what it alone knew: 1,440 students, 30,201 grades, 345 courses, and a status-code mirror on 8,575 students. CuGetReg scrapes supplied the whole teaching schedule. Seeds supplied programmes, staff and roles. A handful of documented backfills corrected what the imports got wrong.
+Everything in cp-api came in through six doors. Registrar Excel extracts, loaded on 12 April 2026, created 7,181 of the 10,093 students (71%) and 31,079 grades. ChulaBooster, the registrar system, was first compared read-only and then allowed to add what it alone knew: 1,440 students, 30,201 grades, 345 courses, and a status-code mirror on 8,575 students. CuGetReg scrapes supplied the whole teaching schedule. Seeds supplied programmes, staff and roles. The 30-year anniversary book, matched line by line against the students table, was imported on 14 September 2026: 1,472 placeholder students from cohorts back to B.E. 2512 that no spreadsheet ever covered. A handful of documented backfills corrected what the imports got wrong.
 
 ## Where the rows came from
 
-| Entity | Rows | Excel | ChulaBooster | CuGetReg | Seeds | Book (planned) | How to tell |
+| Entity | Rows | Excel | ChulaBooster | CuGetReg | Seeds | Book | How to tell |
 |---|---|---|---|---|---|---|---|
-| Students | 8,621 | 7,181 | 1,440 |  |  | 1,472 | Date created: 12 Apr 2026 is Excel, 5 Jul 2026 is CB. A remark beginning ChulaBooster sync marks a heuristic programme assignment. cb_status_code present means CB confirms the student exists. |
+| Students | 10,093 | 7,181 | 1,440 |  |  | 1,472 | Date created: 12 Apr 2026 is Excel, 5 Jul 2026 is CB, 14 Sep 2026 is the book. A remark beginning ChulaBooster sync marks a heuristic programme assignment. cb_status_code present means CB confirms the student exists. source = book30 marks a book placeholder (student_id shaped B30-<cohort>-<nnn>). |
 | Grades | 61,280 | 31,079 | 30,201 |  |  |  | The source column: imported, chulabooster, or manual. |
 | Courses | 898 | 553 | 345 |  |  |  | Date created, plus auto_generated: none for a real row, placeholder for a stub the grade import needed, copied for a clone of a neighbouring revision. |
-| Programme groups | 8 |  | 1 |  | 7 | 1 | Seven seeded groups plus one created for CB's orphan track. The book adds CE, the certificate programme. |
-| Programmes | 46 |  | 1 |  | 45 |  | Seeded with official codes and CB major codes. |
+| Programme groups | 9 |  | 1 |  | 7 | 1 | Seven seeded groups plus one created for CB's orphan track. The book adds CE, the certificate programme, created by the 2026-09-14 import. |
+| Programmes | 47 |  | 1 |  | 45 | 1 | Seeded with official codes and CB major codes. The book adds revision CE2512, the certificate's non-numeric revision code; every other book cohort reuses an existing revision. |
 | Programme-course links | 637 | 553 | 84 |  |  |  | Date created: 1 Jul is the one-to-one backfill from the old courses column, 7 Jul is CB. |
 | Staff | 90 |  |  |  | 90 |  | db/seeds/staffs.rb, with the three-letter registrar initials. |
 | Course offerings | 2,722 |  |  | 2,722 |  |  | All schedule entities come from scrapes; the Scrape row records term, source and counts. |
@@ -30,7 +30,7 @@ Everything in cp-api so far came in through five doors, and a sixth, the 30-year
 | ChulaBooster (CB) | The university registrar system, read through a GET-only client. A read-only reconciliation ran first; then additive syncs wrote with COMMIT=1. Local programme identity stays authoritative; CB is authoritative for grades and the better signal for status. | Students CB has that we lacked, their raw status code mirrored onto every matched student, courses, grades, programme-to-course pairings. | Course offerings, sections, rooms, teachers. Current-semester data, since CB lags a term. |
 | CuGetReg | The university's course-registration GraphQL API, scraped per term from the web UI at /scrapes. | Semesters, course offerings, sections, time slots, rooms, and teaching assignments matched by staff initials. | Grades, student records, programme structure. |
 | Seeds | Hand-authored Ruby files under db/seeds, loaded with db:seed. Institutional knowledge that no external system provides. | Programme groups and programme revisions with official four-digit codes and CB major codes, staff with initials, roles and the admin user. | Anything per student. |
-| 30-year anniversary book (legacy, planned) | The department's 30th-anniversary book carries an alumni directory, cohort by cohort, on its last 72 pages. Parsed from the PDF text, matched line by line against the students table, import pending approval. The first of the legacy sources; more will follow here. | Thai names of alumni from B.E. 2512 onward, including the certificate cohorts and every cohort before 2530 that no spreadsheet covered; a cohort code that fixes programme and admission year. | Student IDs, English names, status, grades, anything after the book went to print in 2548. Its foreword says details were withheld for privacy, so it is not complete either. |
+| 30-year anniversary book (legacy) | The department's 30th-anniversary book carries an alumni directory, cohort by cohort, on its last 72 pages. Parsed from the PDF text, matched line by line against the students table, imported 2026-09-14 (development). The first of the legacy sources; more will follow here. | Thai names of alumni from B.E. 2512 onward, including the certificate cohorts and every cohort before 2530 that no spreadsheet covered; a cohort code that fixes programme and admission year. | Student IDs, English names, status, grades, anything after the book went to print in 2548. Its foreword says details were withheld for privacy, so it is not complete either. |
 | Backfills and corrections | Console tasks run once, dry-run by default, with a written spec each. | Study track for the M.Sc. CS evening programme, the dissolution of the invented programme 0999, per-pairing course groups, auto-generated course rows promoted to real ones. | New records, apart from placeholders the grade sync needed. |
 
 ## Legacy sources
@@ -39,7 +39,7 @@ Records that exist on paper or in print rather than in a system. Each is matched
 
 | Source | What it is | Coverage | Status | Rows | Report |
 |---|---|---|---|---|---|
-| 30-year anniversary book | ทำเนียบศิษย์เก่า in book ครบรอบ 30 ปี.pdf, PDF pages 232 to 303, one line per alumnus under a cohort header. | CE 2512 to 2520, CS 2514 to 2548, CP 2517 to 2548, CT 2533 to 2548, CM 2535 to 2548, CD 2541 to 2548, SE 2545 to 2548; 118 cohorts | Matched; import awaiting approval of the CM re-file and the placeholder shape | 4,010 lines: 2,507 link to existing students, 1,472 become placeholders | `docs/book30-import-report.md` |
+| 30-year anniversary book | ทำเนียบศิษย์เก่า in book ครบรอบ 30 ปี.pdf, PDF pages 232 to 303, one line per alumnus under a cohort header. | CE 2512 to 2520, CS 2514 to 2548, CP 2517 to 2548, CT 2533 to 2548, CM 2535 to 2548, CD 2541 to 2548, SE 2545 to 2548; 118 cohorts | Imported 2026-09-14 (development database; production not yet run) | 4,010 lines, 4,009 log rows: 2,507 link to existing students, 1,472 become placeholders | `docs/book30-import-report.md` |
 
 ## Timeline
 
@@ -57,7 +57,7 @@ Records that exist on paper or in print rather than in a system. Each is matched
 - **22 Jul 2026.** Advisorships model and importer added. No rows in this database yet.
 - **22 Aug 2026.** Study-track backfill from the department label plus CB fee and study-plan codes; programme 0999 dissolved onto the regular CS lineage. Run identically on development and production.
 - **19 to 22 Aug 2026.** The 30-year book's alumni directory is parsed from the PDF and matched against the students table, report only: 4,010 printed lines, 2,311 confirmed at first pass.
-- **14 Sep 2026.** The book's cohort codes are identified from its own legend (CE is the pre-department certificate), matching rules are settled, and every line is assigned an outcome: 2,507 links, 1,472 placeholders to create. The same pass revealed 19 first-cohort M.Eng. students filed under the bachelor programme. Import pending approval.
+- **14 Sep 2026.** The book's cohort codes are identified from its own legend (CE is the pre-department certificate), matching rules are settled, and every line is assigned an outcome: 2,507 links, 1,472 placeholders to create. The same pass revealed 19 first-cohort M.Eng. students filed under the bachelor programme; they are re-filed to CM revision 0037 as the importer's pre-step. `bin/rails book30:import COMMIT=1` runs the same day on development: 1,472 students created, programme group CE and revision CE2512 added. Production has not run it yet.
 
 ## The Excel load of 12 April 2026
 
@@ -125,23 +125,23 @@ Offerings per term: 2565/1 233, 2565/2 236, 2566/1 238, 2566/2 240, 2567/1 253, 
 
 ## Reading a student row
 
-- Created 12 Apr 2026: from Excel. Created 5 Jul 2026: from CB.
-- Student ID shape: 10-digit 7,795, 7-digit 446, C-prefixed 380. Ten digits is the modern registrar ID, seven digits the pre-2540 bachelor ID, a C prefix the graduate-school ID of the 2530s.
-- Admission years 2530 to 2568. Nothing before 2530 exists; the 30-year book import will add those cohorts.
-- Status by origin: 12 Apr active 1,587, 12 Apr graduated 4,729, 12 Apr retired 820, 12 Apr unknown 45, 5 Jul active 33, 5 Jul graduated 464, 5 Jul retired 943.
+- Created 12 Apr 2026: from Excel. Created 5 Jul 2026: from CB. Created 14 Sep 2026: from the book (source book30).
+- Student ID shape: 10-digit 7,795, 7-digit 446, C-prefixed 380, B30-prefixed 1,472. Ten digits is the modern registrar ID, seven digits the pre-2540 bachelor ID, a C prefix the graduate-school ID of the 2530s, B30-<cohort>-<nnn> a book placeholder with no real registrar ID.
+- Admission years 2512 to 2568. Below 2530 is book-only (CE 2512–2520, CS/CP back to 2514/2517); nothing there came from Excel or CB.
+- Status by origin: 12 Apr active 1,587, 12 Apr graduated 4,729, 12 Apr retired 820, 12 Apr unknown 45, 5 Jul active 33, 5 Jul graduated 464, 5 Jul retired 943, 14 Sep unknown 1,472 (the book only says "ever studied", never "graduated").
 - Study track: unset 6,718, special 1,343, regular 560. Set by the 22 Aug backfill for the CS, SE and CM master's groups.
 
 ## Known gaps
 
 - No per-row link from a student to the Excel file that created it. The import table keeps counts per file only. Since the same student often appeared in several files, the last upsert wins and the trail is lost.
 - Status was set to active by default at import and never re-confirmed for Excel rows. CB's status code is the more reliable signal; the 80 discrepancies found in July were resolved by hand, and the mirror column remains for future checks.
-- 6,644 of 8,621 students have no grades at all. Grade data exists only for 2016 to 2025, so it covers recent students and nothing of the alumni body.
+- 8,116 of 10,093 students have no grades at all (6,644 pre-book, plus all 1,472 book placeholders, which carry no grades by design). Grade data exists only for 2016 to 2025, so it covers recent students and nothing of the alumni body.
 - 468 of 898 course rows are machine-made stubs or clones created so a grade could attach. They carry auto_generated other than none until a real revision replaces them.
 - 46 Excel-created students are unknown to ChulaBooster. They may predate CB's coverage or carry a different identifier.
 - One junk course row: course number "ETL" with revision year 543, a year-zero conversion artefact.
 - The consolidated all-students file listed major names only. Programme resolution picked the latest revision at or before the admission year, which invented programme 0999 for 730 students; dissolved on 22 Aug 2026.
 - Grades carry no section link; grades.section_id is null everywhere.
-- 19 first-cohort M.Eng. students (2535 to 2538) sit under the bachelor programme with graduate-school IDs. Found 14 Sep 2026, correction pending.
+- 19 first-cohort M.Eng. students (2535 to 2538) sat under the bachelor programme with graduate-school IDs. Found 14 Sep 2026; re-filed to CM revision 0037 the same day, as the book import's pre-step.
 
 ## Related documents
 

@@ -39,6 +39,8 @@ Seed list (2026-07-09):
   the page. Links added 2026-07-17.
 - **students/show** → `/data_sources/book30` (shown when the student has
   book30_entries; added 2026-09-14).
+- **data_sources/index** → `/data_sources/provenance` and `/data_sources/book30`
+  (added 2026-09-15; both are whole-database/admin reports with no single-entity anchor).
 
 ## 2. Report ↔ entity page overlap review (recurring)
 
@@ -76,6 +78,8 @@ Status as of 2026-07-09:
 - **2026-09-15** — book30 report vs students/show book lines — no overlap: the
   ledger is cross-cohort counts, the student page shows only that student's
   lines; keep both.
+- **2026-09-15** — provenance report: aggregate admin report, keep regardless
+  (same class as data_coverage).
 
 ## 3. Course lists → shared course filter (recurring)
 
