@@ -69,11 +69,12 @@ the re-file is done first.
 | 7 | `create_missing` | 102 | The cohort has DB students but no candidate for this name by any rule. Mostly CS regular 2532–2548 (59) and CT (22). | Create placeholder. | — |
 | 8 | `create_lost_claim` | 15 | The near-match rule pointed at a DB student that a closer book name also claims. The closer name keeps the link. Some are probably the same woman under maiden and married name; the resulting duplicate is accepted and reversible. | Create placeholder. | The DB student that was taken, and by whom. |
 | 9 | `create_namesake` | 2 | The only same-name DB student entered 13 years away from the book cohort. Treated as a different person. | Create placeholder. | The namesake's ID and year. |
-| 10 | `unparsed` | 4 | Three lines print a first name only (เอนก CP13, ประเสริฐศักดิ์ CP25, จตุพร CS04); one is a bracketed maiden name printed on its own line (วันเพ็ญ ฆนวารี CP19, belongs to the line above). | Nothing by default; hand fix in the parser if wanted. | Raw line. |
+| 10 | `unparsed` | 3 | Three lines print a first name only (เอนก CP13, ประเสริฐศักดิ์ CP25, จตุพร CS04); a bracketed maiden name printed on its own line (วันเพ็ญ ฆนวารี, CP19) is folded into the previous line's alias, so it is no longer a separate row. | Nothing by default; hand fix in the parser if wanted. | Raw line. |
 | 11 | `db_not_in_book` | 224 | A DB student in a book cohort that no book line linked to (CP 65, CS 67, CT 59, CM 18, SE 9, CD 6; 125 graduated, 99 retired). The book is not complete: its foreword says details were withheld to protect personal data. | Nothing. | Status and track. |
 
-Lines 1–10 sum to the 4,010 lines in the student sections. Creates total **1,472**: CE 666, CS 418,
-CP 353, CT 25, SE 9, CD 1. Links total 2,507.
+Lines 1–10 sum to the 4,009 log rows (4,010 printed lines; one bracket-only continuation line is
+folded into the line above it). Creates total **1,472**: CE 666, CS 418, CP 353, CT 25, SE 9, CD 1.
+Links total 2,507.
 
 Cross-cutting annotations, not outcomes: 123 people appear under two different programs (63 CP+CM,
 the bachelor-then-master pattern); the DB already keeps one row per enrollment, so each listing is
@@ -98,8 +99,9 @@ handled on its own and the log notes the other cohorts. Sex is known from the ti
 ## Per-cohort outcomes
 
 Counts per cohort of every outcome above (pre-import dry run, CM re-file simulated). `DB` = students in that
-program and admission year, CS/CT split by study track. `DB only` = outcome 11. Regenerate with
-`bin/rails runner tmp/book30_report/scripts/cohort_outcomes.rb`.
+program and admission year, CS/CT split by study track. `DB only` = outcome 11. Regenerate with a dry
+run: `bin/rails book30:import` writes `tmp/book30_import/<timestamp>/summary.csv` in this same
+per-cohort shape (the actual 2026-09-14 run is `tmp/book30_import/20260914-164537/summary.csv`).
 
 | Cohort | Year | Book | DB | Exact | Variant | Other yr | 2nd list | Dup line | Create: cohort | Create: missing | Create: lost claim | Create: namesake | Unparsed | DB only |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -167,7 +169,7 @@ program and admission year, CS/CT split by study track. `DB only` = outcome 11. 
 | CP16 | 2532 | 48 | 48 | 44 | 4 |  |  |  |  |  |  |  |  |  |
 | CP17 | 2533 | 52 | 51 | 50 | 1 |  |  |  |  | 1 |  |  |  |  |
 | CP18 | 2534 | 59 | 56 | 52 | 4 |  | 2 |  |  |  | 1 |  |  |  |
-| CP19 | 2535 | 56 | 50 | 48 | 1 |  | 5 |  |  |  | 1 |  | 1 | 1 |
+| CP19 | 2535 | 55 | 50 | 48 | 1 |  | 5 |  |  |  | 1 |  |  | 1 |
 | CP20 | 2536 | 51 | 51 | 43 | 8 |  |  |  |  |  |  |  |  |  |
 | CP21 | 2537 | 60 | 55 | 55 |  |  | 2 |  |  |  | 3 |  |  |  |
 | CP22 | 2538 | 65 | 63 | 62 | 1 |  | 2 |  |  |  |  |  |  |  |
@@ -181,7 +183,7 @@ program and admission year, CS/CT split by study track. `DB only` = outcome 11. 
 | CP30 | 2546 | 101 | 100 | 98 | 2 |  |  |  |  | 1 |  |  |  |  |
 | CP31 | 2547 | 98 | 96 | 96 |  |  |  |  |  | 2 |  |  |  |  |
 | CP32 | 2548 | 46 | 107 | 46 |  |  |  |  |  |  |  |  |  | 61 |
-| **CP total** | | **1768** | **1460** | **1339** | **56** | **0** | **16** | **1** | **332** | **11** | **10** | **0** | **3** | **65** |
+| **CP total** | | **1767** | **1460** | **1339** | **56** | **0** | **16** | **1** | **332** | **11** | **10** | **0** | **2** | **65** |
 | CT01 | 2533 | 26 | 28 | 21 | 3 |  |  |  |  | 2 |  |  |  | 6 |
 | CT02 | 2534 | 42 | 44 | 36 | 4 |  | 1 |  |  |  | 1 |  |  | 4 |
 | CT03 | 2535 | 29 | 29 | 27 | 2 |  |  |  |  |  |  |  |  | 2 |
@@ -228,7 +230,7 @@ program and admission year, CS/CT split by study track. `DB only` = outcome 11. 
 | SE03 | 2547 | 22 | 23 | 19 | 2 |  |  |  |  | 1 |  |  |  | 2 |
 | SE04 | 2548 | 27 | 22 | 19 | 1 |  |  |  |  | 7 |  |  |  | 2 |
 | **SE total** | | **95** | **95** | **80** | **6** | **0** | **0** | **0** | **0** | **9** | **0** | **0** | **0** | **9** |
-| **All** | | **4010** | **2731** | **2325** | **178** | **4** | **25** | **2** | **1353** | **102** | **15** | **2** | **4** | **224** |
+| **All** | | **4009** | **2731** | **2325** | **178** | **4** | **25** | **2** | **1353** | **102** | **15** | **2** | **3** | **224** |
 
 ## Files
 

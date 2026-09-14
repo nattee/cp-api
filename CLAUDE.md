@@ -261,6 +261,9 @@ results and the outcome vocabulary: `docs/book30-import-report.md`; admin page: 
   degree level `certificate`, revision `CE2512` (deliberately non-numeric).
 - `students.source` (`imported|chulabooster|manual|book30`) records provenance for every row;
   `/data_sources/provenance` shows the whole picture.
+- **B30 IDs are synthetic** and never resemble a registrar ID; code that pattern-matches
+  `student_id` length or digits (e.g. the study-track backfill) must not assume every row has one
+  of the registrar shapes.
 
 ## Production
 
