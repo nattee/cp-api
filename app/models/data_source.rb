@@ -104,6 +104,32 @@ class DataSource
         %q{bin/rails runner 'pp Scrapers::CasReg.scrape("2110200", 2569, 1)'   # read-only cross-check}
       ],
       docs: ["docs/schedule-scraper.md"]
+    },
+    {
+      key: "book30",
+      name: "30-Year Anniversary Book",
+      icon: "menu_book",
+      badge: "legacy",
+      blurb: "The alumni directory printed in the department's 30th-anniversary book (ทำเนียบศิษย์เก่า, " \
+             "PDF pages 232–303). Parsed from the PDF, matched line by line against students; every line " \
+             "leaves a book30_entries row. The first legacy (paper) source — more will follow.",
+      provides: [
+        "Thai names of alumni from B.E. 2512, including the certificate cohorts (CE) and every cohort before 2530 that no spreadsheet covered",
+        "A cohort code that fixes programme and admission year",
+        "Placeholder students (source = book30, IDs B30-<cohort>-<nnn>) for names no existing student matched"
+      ],
+      not_provides: [
+        "Student IDs, English names, status, grades — placeholders carry none of these",
+        "Anything after the book went to print during the 2548 intake; its foreword says some details were withheld for privacy"
+      ],
+      caution: nil,
+      action: { label: "Open the import report", path: :data_sources_book30_path },
+      commands: [
+        "bin/rails book30:import                # DRY-RUN: classify every line, CSVs in tmp/book30_import/<ts>/",
+        "bin/rails book30:import COMMIT=1       # write entries + placeholders (refuses if entries exist)",
+        "bin/rails book30:rollback COMMIT=1     # delete entries + placeholder students"
+      ],
+      docs: ["docs/book30-import-report.md", "docs/superpowers/specs/2026-09-14-book30-import-design.md"]
     }
   ].freeze
 

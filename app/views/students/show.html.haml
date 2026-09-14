@@ -50,6 +50,15 @@
             %span.help-popover-content Buddhist Era year (B.E.). To convert to CE, subtract 543.
         %dd.col-sm-9= @student.admission_year_be
 
+        - if @book30_entries.present?
+          %dt.col-sm-3 30-Year Book
+          %dd.col-sm-9
+            - @book30_entries.each do |e|
+              %div
+                = "#{e.cohort}: #{e.raw_line}"
+                %span.badge.ms-1{class: "badge-b30-#{e.family}"}= Book30Entry::OUTCOME_LABELS[e.outcome]
+            = link_to "Import report", data_sources_book30_path, class: "small"
+
         - if @full_access
           %dt.col-sm-3 Status
           %dd.col-sm-9

@@ -1,0 +1,123 @@
+- s = @summary
+- outcomes = Book30Entry::OUTCOMES
+- short = { "linked_exact" => "Exact", "linked_variant" => "Variant", "linked_other_year" => "Other year", "second_listing" => "2nd listing", "duplicate_line" => "Dup line", "unparsed" => "Unparsed", "create_book_only_cohort" => "Create: cohort", "create_missing" => "Create: missing", "create_lost_claim" => "Create: lost claim", "create_namesake" => "Create: namesake" }
+- cols = outcomes.size + 5
+
+.card.mb-4
+  .card-body.p-3
+    .d-flex.justify-content-between.align-items-center.mb-3
+      %h5.card-title.mb-0.fw-semibold.d-flex.align-items-center
+        %span.material-symbols.resource-icon.me-2 menu_book
+        30-Year Book Import
+      = link_to "Data Sources", data_sources_path, class: "btn btn-outline-secondary btn-sm"
+
+    - unless s.any?
+      %p.text-body-secondary.mb-0
+        No book entries yet. Run
+        %code bin/rails book30:import
+        for a dry run, then with
+        %code COMMIT=1
+        to write.
+    - else
+      - t = s.totals
+      .row.g-3.mb-3
+        .col-6.col-md-3
+          .small.text-body-secondary Printed lines
+          .fs-3.fw-semibold= number_with_delimiter(t[:lines])
+        .col-6.col-md-3
+          .small.text-body-secondary Linked to existing students
+          .fs-3.fw-semibold.text-primary= number_with_delimiter(t[:links])
+        .col-6.col-md-3
+          .small.text-body-secondary Placeholder students created
+          .fs-3.fw-semibold.text-warning= number_with_delimiter(t[:placeholders])
+        .col-6.col-md-3
+          .small.text-body-secondary DB students not in the book
+          .fs-3.fw-semibold= number_with_delimiter(s.db_not_in_book_total)
+      %p.text-body-secondary.small.mb-0
+        Policy (14 Sep 2026): a cohort the database lacks is believed outright; a near match links to the
+        existing student and the DB spelling stays; odd cases follow a fixed rule and are logged.
+        Every printed line has one row in
+        %code book30_entries
+        with its outcome and note. Placeholders carry
+        = succeed "," do
+          %code B30-<cohort>-<nnn>
+        Thai names only, status unknown, and source
+        = succeed "." do
+          %span.badge.badge-book30 30-year book
+
+- if s.any?
+  .card.mb-4
+    .card-body.p-3
+      %h5.card-title.fw-semibold.mb-3 Outcomes
+      .table-responsive
+        %table.table.table-hover.mb-0
+          %thead
+            %tr
+              %th Outcome
+              %th.text-end Lines
+              %th Example
+          %tbody
+            - outcomes.each do |o|
+              - n = s.outcome_counts[o] || 0
+              - ex = s.examples[o]
+              %tr
+                %td
+                  %span.badge.me-2{class: "badge-b30-#{Book30Entry::OUTCOME_FAMILY[o]}"}= Book30Entry::OUTCOME_FAMILY[o]
+                  = Book30Entry::OUTCOME_LABELS[o]
+                  %div
+                    %code.small= o
+                %td.text-end= number_with_delimiter(n)
+                %td.small.text-body-secondary
+                  - if ex
+                    = "#{ex.cohort}: #{ex.raw_line}"
+                    - if ex.student
+                      →
+                      = link_to ex.student.display_name, ex.student
+                      = "(#{ex.student.student_id})"
+                    - if ex.note.present?
+                      %div= ex.note
+
+  .card
+    .card-body.p-3
+      %h5.card-title.fw-semibold.mb-1 Cohort ledger
+      %p.text-body-secondary.small
+        Book = printed lines. DB = students in that programme and admission year (B.E.), CS and CT split by
+        study track, placeholders excluded. DB only = students no line linked to.
+      .table-responsive
+        %table.table.table-hover.mb-0
+          %thead
+            %tr
+              %th Cohort
+              %th.text-end Year (B.E.)
+              %th.text-end Book
+              %th.text-end DB
+              - outcomes.each do |o|
+                %th.text-end= short[o]
+              %th.text-end DB only
+          %tbody
+            - s.group_rows.each_with_index do |(prefix, rows), gi|
+              - if gi.positive?
+                %tr.table-group-spacer{"aria-hidden" => "true"}
+                  %td{colspan: cols}
+              %tr.table-group-header
+                %td{colspan: cols}
+                  = prefix
+                  %span.text-body-secondary.ms-2= "first intake #{Book30::Directory::EPOCHS[prefix]}"
+              - rows.each do |r|
+                %tr
+                  %td= r.cohort
+                  %td.text-end= r.year
+                  %td.text-end= r.book
+                  %td.text-end{class: ("text-body-secondary" if r.db.zero?)}= r.db
+                  - outcomes.each do |o|
+                    %td.text-end{class: ("text-body-secondary opacity-25" if r.counts[o].zero?)}= r.counts[o].zero? ? "·" : r.counts[o]
+                  %td.text-end{class: ("text-body-secondary opacity-25" if r.db_only.zero?)}= r.db_only.zero? ? "·" : r.db_only
+              - gt = s.group_totals(rows)
+              %tr.fw-semibold
+                %td= "#{prefix} total"
+                %td
+                %td.text-end= gt.book
+                %td.text-end= gt.db
+                - outcomes.each do |o|
+                  %td.text-end= gt.counts[o]
+                %td.text-end= gt.db_only

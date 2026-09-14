@@ -37,6 +37,8 @@ Seed list (2026-07-09):
   pre-filled) and `/schedules/conflicts` (semester_id pre-filled): the
   dept-wide who-teaches-what and double-booking views for the term shown on
   the page. Links added 2026-07-17.
+- **students/show** → `/data_sources/book30` (shown when the student has
+  book30_entries; added 2026-09-14).
 
 ## 2. Report ↔ entity page overlap review (recurring)
 

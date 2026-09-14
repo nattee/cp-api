@@ -4,4 +4,9 @@ class DataSourcesController < ApplicationController
   def index
     @sources = DataSource::SOURCES
   end
+
+  # The 30-year book import report, live from book30_entries.
+  def book30
+    @summary = Book30::Summary.new
+  end
 end

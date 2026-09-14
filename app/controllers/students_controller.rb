@@ -139,6 +139,7 @@ class StudentsController < ApplicationController
 
   def set_student
     @student = Student.find(params[:id])
+    @book30_entries = @student.book30_entries.order(:cohort, :line_no)
     if action_name == "show"
       @full_access = current_user.can_view_student_fully?(@student)
       @grades_visible = current_user.can_view_grades?(@student)

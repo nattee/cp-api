@@ -30,6 +30,7 @@ Rails.application.routes.draw do
   resources :rooms
   resources :scrapes, only: [:index, :create, :show]
   get "data_sources", to: "data_sources#index"
+  get "data_sources/book30", to: "data_sources#book30", as: :data_sources_book30
   get "chulabooster", to: redirect("/data_sources")
   resource :term_context, only: :update
 

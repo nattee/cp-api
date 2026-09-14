@@ -14,5 +14,9 @@
       #{link_to "Data Coverage report", report_path("data_coverage")} —
       per-term counts for grades, schedule, and new students, with gaps flagged.
 
+    %p.text-body-secondary
+      For the legacy book import, see the
+      #{link_to "30-Year Book Import report", data_sources_book30_path}.
+
     - @sources.each_with_index do |src, index|
       = render "source", src: src, last: (index == @sources.size - 1)
