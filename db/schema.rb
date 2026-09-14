@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_14_091000) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -62,6 +62,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_090000) do
     t.string "severity", default: "error", null: false
     t.index ["created_at"], name: "index_api_events_on_created_at"
     t.index ["service", "created_at"], name: "index_api_events_on_service_and_created_at"
+  end
+
+  create_table "book30_entries", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "alias_name"
+    t.string "cohort", null: false
+    t.datetime "created_at", null: false
+    t.string "first_name_th"
+    t.string "last_name_th"
+    t.integer "line_no", null: false
+    t.text "note"
+    t.string "outcome", null: false
+    t.string "raw_line", null: false
+    t.string "sex"
+    t.bigint "student_id"
+    t.datetime "updated_at", null: false
+    t.integer "year_be", null: false
+    t.index ["cohort", "line_no"], name: "index_book30_entries_on_cohort_and_line_no", unique: true
+    t.index ["outcome"], name: "index_book30_entries_on_outcome"
+    t.index ["student_id"], name: "index_book30_entries_on_student_id"
   end
 
   create_table "chat_messages", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -400,6 +419,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_090000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "advisorships", "staffs"
   add_foreign_key "advisorships", "students"
+  add_foreign_key "book30_entries", "students"
   add_foreign_key "course_offerings", "courses"
   add_foreign_key "course_offerings", "semesters"
   add_foreign_key "data_imports", "users"
