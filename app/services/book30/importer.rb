@@ -17,9 +17,15 @@ module Book30
     end
 
     def run
-      if @commit && Book30Entry.exists?
-        @io.puts "Refusing to import: book30_entries already holds #{Book30Entry.count} rows. " \
-                 "Run `bin/rails book30:rollback COMMIT=1` first if you really want to redo it."
+      if Book30Entry.exists?
+        if @commit
+          @io.puts "Refusing to import: book30_entries already holds #{Book30Entry.count} rows. " \
+                   "Run `bin/rails book30:rollback COMMIT=1` first if you really want to redo it."
+        else
+          @io.puts "book30_entries already holds #{Book30Entry.count} rows; this dry run shows what a FRESH " \
+                   "import would do and will report the existing placeholders as uniqueness errors — use " \
+                   "book30:rollback first to re-import."
+        end
         return nil
       end
       FileUtils.mkdir_p(@out_dir)
@@ -37,6 +43,11 @@ module Book30
             next if d.student_record.valid?
             raise "placeholder for #{d.line.cohort} line #{d.line.line_no} is invalid: #{d.student_record.errors.full_messages.join(', ')}"
           end
+          # student_record is unsaved here, so student_id is nil for creates -- that's fine, student is optional.
+          decisions.each do |d|
+            e = build_entry(d)
+            raise "entry for #{d.line.cohort} line #{d.line.line_no} is invalid: #{e.errors.full_messages.join(', ')}" unless e.valid?
+          end
         end
         write_reports(decisions)
         result = summarize(decisions, refiled)
@@ -52,7 +63,10 @@ module Book30
     def refile_cm!
       from = Program.find_by(program_code: CM_REFILE[:from])
       to   = Program.find_by(program_code: CM_REFILE[:to])
-      return 0 unless from && to
+      unless from && to
+        @io.puts "WARNING: programme #{CM_REFILE[:from]} or #{CM_REFILE[:to]} not found; CM re-file skipped"
+        return 0
+      end
       scope = Student.where(program: from, admission_year_be: CM_REFILE[:years]).where("student_id LIKE ?", "#{CM_REFILE[:id_prefix]}%")
       moved = scope.to_a # materialise first: the scope stops matching as rows move
       moved.each do |s|
@@ -129,14 +143,14 @@ module Book30
 
     def write_reports(decisions)
       CSV.open(@out_dir.join("decisions.csv"), "w") do |csv|
-        csv << %w[cohort year line_no raw_line first_name_th last_name_th sex outcome student_id db_name db_year note]
+        csv << %w[cohort year line_no raw_line first_name_th last_name_th alias_name sex outcome student_id db_name db_year note]
         decisions.each do |d|
           l = d.line
           target = d.student_record || d.head&.student_record
           sid, name, year = if target then [ target.student_id, target.full_name_th, target.admission_year_be ]
           elsif d.student then [ d.student.student_id, "#{d.student.first} #{d.student.last}", d.student.year ]
           end
-          csv << [ l.cohort, l.year, l.line_no, l.raw, l.first, l.last, l.sex, d.outcome, sid, name, year, d.note ]
+          csv << [ l.cohort, l.year, l.line_no, l.raw, l.first, l.last, l.alias_name, l.sex, d.outcome, sid, name, year, d.note ]
         end
       end
       CSV.open(@out_dir.join("summary.csv"), "w") do |csv|

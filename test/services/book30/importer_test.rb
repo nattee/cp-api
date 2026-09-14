@@ -33,6 +33,8 @@ class Book30ImporterTest < ActiveSupport::TestCase
       #{line_xml(50, 70, 'นาง มาลี (แซ่ลี้) รักดี')}
       #{line_xml(50, 80, 'รุ่น CM01')}
       #{line_xml(50, 90, 'ผศ. บุญชัย โสวรรณ')}
+      #{line_xml(50, 100, 'รุ่น CS28')}
+      #{line_xml(50, 110, 'นาย มานะ อดทน')}
     </page></document>)
     @dir = Book30::Directory.new(@xml)
     @out = Dir.mktmpdir
@@ -49,10 +51,11 @@ class Book30ImporterTest < ActiveSupport::TestCase
     assert_no_difference [ "Student.count", "Book30Entry.count" ] do
       result = importer(commit: false).run
     end
-    assert_equal 5, result[:lines]
+    assert_equal 6, result[:lines]
     # CE01 is the only cohort with an empty pool (CM01's pool holds the re-filed student);
-    # มานะ (CS23) and มาลี (CT04) have DB students in their cohort but no candidate.
-    assert_equal({ "create_book_only_cohort" => 1, "linked_exact" => 2, "create_missing" => 2 }, result[:outcomes])
+    # มานะ (CS23) and มาลี (CT04) have DB students in their cohort but no candidate; CS28's
+    # มานะ is a second listing of the same name, wired to the placeholder created under CS23.
+    assert_equal({ "create_book_only_cohort" => 1, "linked_exact" => 2, "create_missing" => 2, "second_listing" => 1 }, result[:outcomes])
     assert_equal 1, result[:refiled]
     assert_equal @cp_0018, @misfiled.reload.program, "dry run must roll the CM re-file back"
     assert File.exist?(File.join(@out, "decisions.csv"))
@@ -63,7 +66,7 @@ class Book30ImporterTest < ActiveSupport::TestCase
     importer(commit: true).run
     assert_equal @cm_first, @misfiled.reload.program
     assert_match(/re-filed from 0018 to 0037/, @misfiled.remark)
-    assert_equal 5, Book30Entry.count
+    assert_equal 6, Book30Entry.count
     linked = Book30Entry.find_by!(cohort: "CS23", line_no: 1)
     assert_equal "linked_exact", linked.outcome
     assert_equal @existing, linked.student
@@ -86,6 +89,11 @@ class Book30ImporterTest < ActiveSupport::TestCase
 
     missing = Book30Entry.find_by!(cohort: "CS23", line_no: 2).student
     assert_equal [ "regular", @cs_old, "B30-CS23-002" ], [ missing.study_track, missing.program, missing.student_id ]
+
+    cs28 = Book30Entry.find_by!(cohort: "CS28", line_no: 1)
+    assert_equal "second_listing", cs28.outcome
+    assert_equal missing, cs28.student
+    assert_equal 3, Student.where(source: "book30").count
   end
 
   test "refuses a second commit; rollback removes entries and placeholders only" do
@@ -95,9 +103,22 @@ class Book30ImporterTest < ActiveSupport::TestCase
     assert_match(/Refusing/, io.string)
 
     assert_difference("Student.count", -3) do
-      assert_difference("Book30Entry.count", -5) { Book30::Rollback.new(commit: true, io: StringIO.new).run }
+      assert_difference("Book30Entry.count", -6) { Book30::Rollback.new(commit: true, io: StringIO.new).run }
     end
     assert Student.exists?(@existing.id)
     assert Student.exists?(@misfiled.id)
+  end
+
+  test "rollback refuses when a placeholder has acquired grades" do
+    importer(commit: true).run
+    placeholder = Book30Entry.find_by!(cohort: "CE01", line_no: 1).student
+    Grade.create!(student: placeholder, course: courses(:intro_computing), year_ce: 2020, semester: 1)
+    io = StringIO.new
+    result = nil
+    assert_no_difference [ "Book30Entry.count", "Student.count" ] do
+      result = Book30::Rollback.new(commit: true, io: io).run
+    end
+    assert_equal false, result
+    assert_match(/Refusing/, io.string)
   end
 end
