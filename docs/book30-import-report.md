@@ -47,9 +47,9 @@ Rules apply **per book line**, not per cohort. Every line receives exactly one o
 line, whatever its outcome, gets one row in the import log (cohort, raw line, parsed name, outcome,
 linked or created student, note). Names confirmed anywhere in the book are never created a second time.
 
-## Pre-import DB correction (needs approval before the run)
+## Pre-import DB correction (done 2026-09-14)
 
-The book's CM01–CM04 (2535–2538, 19 names) looked like a book-only cohort, but all 19 people exist in
+The book's CM01–CM04 (2535–2538, 19 names) looked like a book-only cohort, but all 19 people existed in
 the DB with graduate-school IDs `C5187xx`–`C8188xx`, filed under **CP program 0018** (the bachelor
 revision), mostly status `retired`. 18 match the book exactly, 1 differs by a missing ์. They are the
 first four CM cohorts and belong on CM revision **0037** (year 2535). Without this re-file the import
@@ -81,9 +81,9 @@ the bachelor-then-master pattern); the DB already keeps one row per enrollment, 
 handled on its own and the log notes the other cohorts. Sex is known from the title for 1,341 of the
 1,472 creates (นาย → male; นาง, นางสาว → female).
 
-## Placeholder shape (open decisions, recommendations as of 2026-09-14)
+## Placeholder shape (as implemented)
 
-| Field | Recommendation |
+| Field | Implementation |
 |---|---|
 | `student_id` | Synthetic, non-numeric, derived from the book position (cohort code + sequence) so re-runs are idempotent; replaced when a real ID surfaces. |
 | `first_name`, `last_name` (English) | Make nullable; do not transliterate or copy Thai. |
