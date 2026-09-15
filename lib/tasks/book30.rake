@@ -8,11 +8,14 @@ namespace :book30 do
   end
 
   desc "Import the book: one book30_entries row per printed line, new student rows for names " \
-       "with no student. DRY-RUN by default (reports in tmp/book30_import/<ts>/); COMMIT=1 writes. PDF=<path>."
+       "with no student. DRY-RUN by default (reports in tmp/book30_import/<ts>/); COMMIT=1 writes. PDF=<path> or STEXT=<stext xml>."
   task import: :environment do
+    # STEXT=<file> skips mutool: use structured text extracted on another machine
+    # (`mutool draw -q -F stext -o <file> <pdf> 232-303`). Production has no mutool.
+    directory = ENV["STEXT"].present? ? Book30::Directory.from_stext_file(ENV["STEXT"]) : nil
     pdf = ENV.fetch("PDF", Book30::Directory::DEFAULT_PDF)
-    abort "PDF not found: #{pdf} (pass PDF=<path>)" unless File.exist?(pdf)
-    result = Book30::Importer.new(pdf_path: pdf, commit: ENV["COMMIT"] == "1").run
+    abort "PDF not found: #{pdf} (pass PDF=<path> or STEXT=<file>)" if directory.nil? && !File.exist?(pdf)
+    result = Book30::Importer.new(pdf_path: pdf, directory: directory, commit: ENV["COMMIT"] == "1").run
     abort "book30:import did not run (see the message above)" if result.nil?
   end
 

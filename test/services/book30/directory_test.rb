@@ -36,6 +36,15 @@ class Book30DirectoryTest < ActiveSupport::TestCase
     assert_equal [ "เอนก", "" ], [ d.first, d.last ]
   end
 
+  test "from_stext_file reads pre-extracted structured text" do
+    Tempfile.create([ "book30", ".xml" ]) do |f|
+      f.write(xml)
+      f.flush
+      assert_equal %w[CP14 CT01], Book30::Directory.from_stext_file(f.path).cohorts.keys
+    end
+    assert_raises(ArgumentError) { Book30::Directory.from_stext_file("/nonexistent.xml") }
+  end
+
   test "decode maps PUA glyphs and reorders marks" do
     # U+F70A is the PSL private-use variant of the tone mark ่ ; the PDF puts it BEFORE the vowel ุ
     assert_equal "รุ่น", Book30::Directory.decode("ร\uF70A\u0E38น")

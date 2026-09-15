@@ -45,6 +45,13 @@ module Book30
       new(xml)
     end
 
+    # For hosts without mutool: read structured text that was extracted elsewhere with
+    # `mutool draw -q -F stext -o <file> <pdf> 232-303`.
+    def self.from_stext_file(path)
+      raise ArgumentError, "stext file not found: #{path}" unless File.exist?(path.to_s)
+      new(File.read(path.to_s, encoding: "UTF-8"))
+    end
+
     def initialize(stext_xml)
       @xml = stext_xml
     end
