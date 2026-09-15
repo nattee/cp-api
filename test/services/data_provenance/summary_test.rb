@@ -10,7 +10,7 @@ class DataProvenanceSummaryTest < ActiveSupport::TestCase
     assert_equal Grade.count, s.grades_by_source.values.sum
     assert_equal Course.count, s.courses_by_generation.values.sum
     assert_equal ProgramGroup.count, s.counts[:program_groups]
-    assert_equal 1, s.book[:placeholders]
+    assert_equal 1, s.book[:students]
     assert_kind_of Array, s.imports
     assert_kind_of Array, s.scrapes
   end

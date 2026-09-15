@@ -167,7 +167,7 @@ module Book30
           d.outcome = "second_listing"
           d.student = nil
           d.head = head
-          d.notes << "same person, placeholder created under #{head.line.cohort}"
+          d.notes << "same person, student record created under #{head.line.cohort}"
         end
       end
     end

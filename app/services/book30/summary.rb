@@ -20,7 +20,7 @@ module Book30
         links: Book30Entry::LINK_OUTCOMES.sum { |o| oc[o] || 0 },
         creates: Book30Entry::CREATE_OUTCOMES.sum { |o| oc[o] || 0 },
         ignored: Book30Entry::IGNORE_OUTCOMES.sum { |o| oc[o] || 0 },
-        placeholders: Student.where(source: "book30").count
+        book_students: Student.where(source: "book30").count
       }
     end
 
@@ -76,8 +76,8 @@ module Book30
       @ce_group ||= ProgramGroup.find_by(code: "CE")
     end
 
-    def ce_placeholders_count
-      @ce_placeholders_count ||= Student.where(source: "book30").joins(program: :program_group).where(program_groups: { code: "CE" }).count
+    def ce_students_count
+      @ce_students_count ||= Student.where(source: "book30").joins(program: :program_group).where(program_groups: { code: "CE" }).count
     end
   end
 end

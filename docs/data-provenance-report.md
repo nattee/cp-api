@@ -4,13 +4,13 @@ Status: **generated 14 September 2026 from the development database**, which pro
 
 ## In one paragraph
 
-Everything in cp-api came in through six doors. Registrar Excel extracts, loaded on 12 April 2026, created 7,181 of the 10,093 students (71%) and 31,079 grades. ChulaBooster, the registrar system, was first compared read-only and then allowed to add what it alone knew: 1,440 students, 30,201 grades, 345 courses, and a status-code mirror on 8,575 students. CuGetReg scrapes supplied the whole teaching schedule. Seeds supplied programmes, staff and roles. The 30-year anniversary book, matched line by line against the students table, was imported on 14 September 2026: 1,472 placeholder students from cohorts back to B.E. 2512 that no spreadsheet ever covered. A handful of documented backfills corrected what the imports got wrong.
+Everything in cp-api came in through six doors. Registrar Excel extracts, loaded on 12 April 2026, created 7,181 of the 10,093 students (71%) and 31,079 grades. ChulaBooster, the registrar system, was first compared read-only and then allowed to add what it alone knew: 1,440 students, 30,201 grades, 345 courses, and a status-code mirror on 8,575 students. CuGetReg scrapes supplied the whole teaching schedule. Seeds supplied programmes, staff and roles. The 30-year anniversary book, matched line by line against the students table, was imported on 14 September 2026: 1,472 students from cohorts back to B.E. 2512 that no spreadsheet ever covered. A handful of documented backfills corrected what the imports got wrong.
 
 ## Where the rows came from
 
 | Entity | Rows | Excel | ChulaBooster | CuGetReg | Seeds | Book | How to tell |
 |---|---|---|---|---|---|---|---|
-| Students | 10,093 | 7,181 | 1,440 |  |  | 1,472 | Date created: 12 Apr 2026 is Excel, 5 Jul 2026 is CB, 14 Sep 2026 is the book. A remark beginning ChulaBooster sync marks a heuristic programme assignment. cb_status_code present means CB confirms the student exists. source = book30 marks a book placeholder (student_id shaped B30-<cohort>-<nnn>). |
+| Students | 10,093 | 7,181 | 1,440 |  |  | 1,472 | Date created: 12 Apr 2026 is Excel, 5 Jul 2026 is CB, 14 Sep 2026 is the book. A remark beginning ChulaBooster sync marks a heuristic programme assignment. cb_status_code present means CB confirms the student exists. source = book30 marks a student recorded from the book (student_id shaped B30-<cohort>-<nnn>). |
 | Grades | 61,280 | 31,079 | 30,201 |  |  |  | The source column: imported, chulabooster, or manual. |
 | Courses | 898 | 553 | 345 |  |  |  | Date created, plus auto_generated: none for a real row, placeholder for a stub the grade import needed, copied for a clone of a neighbouring revision. |
 | Programme groups | 9 |  | 1 |  | 7 | 1 | Seven seeded groups plus one created for CB's orphan track. The book adds CE, the certificate programme, created by the 2026-09-14 import. |
@@ -39,7 +39,7 @@ Records that exist on paper or in print rather than in a system. Each is matched
 
 | Source | What it is | Coverage | Status | Rows | Report |
 |---|---|---|---|---|---|
-| 30-year anniversary book | ทำเนียบศิษย์เก่า in book ครบรอบ 30 ปี.pdf, PDF pages 232 to 303, one line per alumnus under a cohort header. | CE 2512 to 2520, CS 2514 to 2548, CP 2517 to 2548, CT 2533 to 2548, CM 2535 to 2548, CD 2541 to 2548, SE 2545 to 2548; 118 cohorts | Imported 2026-09-14 (development database; production not yet run) | 4,010 lines, 4,009 log rows: 2,507 link to existing students, 1,472 become placeholders | `docs/book30-import-report.md` |
+| 30-year anniversary book | ทำเนียบศิษย์เก่า in book ครบรอบ 30 ปี.pdf, PDF pages 232 to 303, one line per alumnus under a cohort header. | CE 2512 to 2520, CS 2514 to 2548, CP 2517 to 2548, CT 2533 to 2548, CM 2535 to 2548, CD 2541 to 2548, SE 2545 to 2548; 118 cohorts | Imported 2026-09-14 (development database; production not yet run) | 4,010 lines, 4,009 log rows: 2,507 link to existing students, 1,472 become new student records | `docs/book30-import-report.md` |
 
 ## Timeline
 
@@ -57,7 +57,7 @@ Records that exist on paper or in print rather than in a system. Each is matched
 - **22 Jul 2026.** Advisorships model and importer added. No rows in this database yet.
 - **22 Aug 2026.** Study-track backfill from the department label plus CB fee and study-plan codes; programme 0999 dissolved onto the regular CS lineage. Run identically on development and production.
 - **19 to 22 Aug 2026.** The 30-year book's alumni directory is parsed from the PDF and matched against the students table, report only: 4,010 printed lines, 2,311 confirmed at first pass.
-- **14 Sep 2026.** The book's cohort codes are identified from its own legend (CE is the pre-department certificate), matching rules are settled, and every line is assigned an outcome: 2,507 links, 1,472 placeholders to create. The same pass revealed 19 first-cohort M.Eng. students filed under the bachelor programme; they are re-filed to CM revision 0037 as the importer's pre-step. `bin/rails book30:import COMMIT=1` runs the same day on development: 1,472 students created, programme group CE and revision CE2512 added. Production has not run it yet.
+- **14 Sep 2026.** The book's cohort codes are identified from its own legend (CE is the pre-department certificate), matching rules are settled, and every line is assigned an outcome: 2,507 links, 1,472 student records to create. The same pass revealed 19 first-cohort M.Eng. students filed under the bachelor programme; they are re-filed to CM revision 0037 as the importer's pre-step. `bin/rails book30:import COMMIT=1` runs the same day on development: 1,472 students created, programme group CE and revision CE2512 added. Production has not run it yet.
 
 ## The Excel load of 12 April 2026
 
@@ -126,7 +126,7 @@ Offerings per term: 2565/1 233, 2565/2 236, 2566/1 238, 2566/2 240, 2567/1 253, 
 ## Reading a student row
 
 - Created 12 Apr 2026: from Excel. Created 5 Jul 2026: from CB. Created 14 Sep 2026: from the book (source book30).
-- Student ID shape: 10-digit 7,795, 7-digit 446, C-prefixed 380, B30-prefixed 1,472. Ten digits is the modern registrar ID, seven digits the pre-2540 bachelor ID, a C prefix the graduate-school ID of the 2530s, B30-<cohort>-<nnn> a book placeholder with no real registrar ID.
+- Student ID shape: 10-digit 7,795, 7-digit 446, C-prefixed 380, B30-prefixed 1,472. Ten digits is the modern registrar ID, seven digits the pre-2540 bachelor ID, a C prefix the graduate-school ID of the 2530s, B30-<cohort>-<nnn> a student recorded from the book, with no registrar ID.
 - Admission years 2512 to 2568. Below 2530 is book-only (CE 2512–2520, CS/CP back to 2514/2517); nothing there came from Excel or CB.
 - Status by origin: 12 Apr active 1,587, 12 Apr graduated 4,729, 12 Apr retired 820, 12 Apr unknown 45, 5 Jul active 33, 5 Jul graduated 464, 5 Jul retired 943, 14 Sep unknown 1,472 (the book only says "ever studied", never "graduated").
 - Study track: unset 6,718, special 1,343, regular 560. Set by the 22 Aug backfill for the CS, SE and CM master's groups.
@@ -135,7 +135,7 @@ Offerings per term: 2565/1 233, 2565/2 236, 2566/1 238, 2566/2 240, 2567/1 253, 
 
 - No per-row link from a student to the Excel file that created it. The import table keeps counts per file only. Since the same student often appeared in several files, the last upsert wins and the trail is lost.
 - Status was set to active by default at import and never re-confirmed for Excel rows. CB's status code is the more reliable signal; the 80 discrepancies found in July were resolved by hand, and the mirror column remains for future checks.
-- 8,116 of 10,093 students have no grades at all (6,644 pre-book, plus all 1,472 book placeholders, which carry no grades by design). Grade data exists only for 2016 to 2025, so it covers recent students and nothing of the alumni body.
+- 8,116 of 10,093 students have no grades at all (6,644 pre-book, plus all 1,472 students recorded from the book, which carry no grades by design). Grade data exists only for 2016 to 2025, so it covers recent students and nothing of the alumni body.
 - 468 of 898 course rows are machine-made stubs or clones created so a grade could attach. They carry auto_generated other than none until a real revision replaces them.
 - 46 Excel-created students are unknown to ChulaBooster. They may predate CB's coverage or carry a different identifier.
 - One junk course row: course number "ETL" with revision year 543, a year-zero conversion artefact.

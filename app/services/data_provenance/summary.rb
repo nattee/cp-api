@@ -32,7 +32,7 @@ module DataProvenance
     end
 
     def book
-      @book ||= { lines: Book30Entry.count, placeholders: Student.where(source: "book30").count }
+      @book ||= { lines: Book30Entry.count, students: Student.where(source: "book30").count }
     end
 
     def students_with_grades

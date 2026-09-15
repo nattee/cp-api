@@ -28,8 +28,8 @@
           .small.text-body-secondary Linked to existing students
           .fs-3.fw-semibold.text-primary= number_with_delimiter(t[:links])
         .col-6.col-md-3
-          .small.text-body-secondary Placeholder students created
-          .fs-3.fw-semibold.text-warning= number_with_delimiter(t[:placeholders])
+          .small.text-body-secondary Students recorded from the book
+          .fs-3.fw-semibold.text-warning= number_with_delimiter(t[:book_students])
         .col-6.col-md-3
           .small.text-body-secondary DB students in book cohorts, not in the book
           .fs-3.fw-semibold= number_with_delimiter(s.db_not_in_book_total)
@@ -38,7 +38,7 @@
         existing student and the DB spelling stays; odd cases follow a fixed rule and are logged.
         Every printed line has one row in
         %code book30_entries
-        with its outcome and note. Placeholders carry
+        with its outcome and note. Book-sourced rows carry
         = succeed "," do
           %code B30-<cohort>-<nnn>
         Thai names only, status unknown, and source
@@ -106,15 +106,15 @@
           - else
             CE
           (degree level certificate) with one revision, CE2512, a deliberately non-numeric code.
-          = number_with_delimiter(s.ce_placeholders_count)
-          CE placeholders were created.
+          = number_with_delimiter(s.ce_students_count)
+          CE students were recorded from the book.
 
   .card
     .card-body.p-3
       %h5.card-title.fw-semibold.mb-1 Cohort ledger
       %p.text-body-secondary.small
         Book = printed lines. DB = students in that programme and admission year (B.E.), CS and CT split by
-        study track, placeholders excluded. DB only = students no line linked to.
+        study track, book-sourced students excluded. DB only = students no line linked to.
       .table-responsive
         %table.table.table-hover.mb-0
           %thead

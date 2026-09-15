@@ -251,7 +251,7 @@ pages 232–303) was imported on 2026-09-14. Spec: `docs/superpowers/specs/2026-
 results and the outcome vocabulary: `docs/book30-import-report.md`; admin page: `/data_sources/book30`.
 
 - **One `book30_entries` row per printed line** (`Book30Entry`, outcome ∈ `OUTCOMES`); linked students are
-  never modified; placeholders have `students.source = "book30"`, IDs `B30-<cohort>-<nnn>`, Thai names only,
+  never modified; students recorded from the book have `students.source = "book30"`, IDs `B30-<cohort>-<nnn>`, Thai names only,
   status `unknown`. `Student::LEGACY_SOURCES` rows may lack English names.
 - **Pipeline**: `Book30::Directory` (PDF → lines, needs `mutool`) → `Book30::Classifier` (pure rules) →
   `Book30::Importer` (transactional; dry-run by default, `COMMIT=1`). `bin/rails book30:import`,

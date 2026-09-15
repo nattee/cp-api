@@ -13,7 +13,7 @@ PDF pages 232–303, 4,010 printed lines under `รุ่น <CODE><NN>` headers
 
 1. every printed line gets exactly one **log row** recording what was decided about it;
 2. lines that match an existing student are **linked** to that student without changing it;
-3. lines with no existing student become **placeholder students** (about 1,472);
+3. lines with no existing student become **students recorded from the book** (about 1,472);
 4. the results are readable by admins inside the app, alongside a page describing where all
    other data came from.
 
@@ -25,7 +25,7 @@ PDF pages 232–303, 4,010 printed lines under `รุ่น <CODE><NN>` headers
 | Near match (a few characters, name change, neighbouring year) | Believe the DB: link, never edit DB names or years, log the book's variant. No human review. |
 | Odd cases (double listings, two book names on one DB student, namesakes) | Apply the mechanical rule below, log it so it can be amended later. |
 | CE cohorts | Deserve a programme group: `CE`, degree level `certificate`, first intake 2512. |
-| Placeholder student ID | Synthetic, non-numeric, deterministic from book position: `B30-<COHORT>-<NNN>` (e.g. `B30-CE01-001`). |
+| Student ID for rows recorded from the book | Synthetic, non-numeric, deterministic from book position: `B30-<COHORT>-<NNN>` (e.g. `B30-CE01-001`). |
 | English name columns | Made nullable; never transliterated or copied from Thai. |
 | Programme revision for early cohorts | Latest revision started at or before the admission year; if none, the group's earliest revision (CP01–02 → `0018`, CS01–10 → `1027`). Ties (SE `0772`/`0773`, CD `0458`/`0459`) → the twin with more students admitted that year, else the lower code. Recorded in the remark. |
 | Status | `unknown` (the book says "ever studied"). |
@@ -134,7 +134,7 @@ create_book_only_cohort 1,353, create_missing 102, create_lost_claim 15, create_
 unparsed 4; total 4,010; creates 1,472. The implementation must reproduce these within ±3 per
 outcome (small differences from the alias-line handling are acceptable and must be explained).
 
-## Placeholder construction
+## Constructing a student record from the book
 
 For every `create_*` line:
 
@@ -157,7 +157,7 @@ remark:            "30-year book #{cohort} line #{line_no}: <notes>" truncated t
 and write `tmp/book30_import/<timestamp>/decisions.csv` (one row per line, same columns as the
 log table plus the candidate's name) and `summary.csv` (counts per cohort × outcome), and print the
 outcome totals. With `COMMIT=1`, inside one transaction: the CM re-file, then one `Book30Entry`
-per line, then placeholder students for create outcomes (entry `student_id` set after create).
+per line, then new student rows for create outcomes (entry `student_id` set after create).
 Refuses to commit if `Book30Entry.any?` — say so and point to `book30:rollback`.
 
 `bin/rails book30:rollback [COMMIT=1]` — deletes all `Book30Entry` rows and all students with
@@ -210,7 +210,7 @@ student show page links to the book30 page when the student has a `book30_entrie
   lines and fixture students exercising each outcome (exact, tone-insensitive, variant surname,
   variant first name, other_year within 2, namesake at 13, lost claim, second listing, duplicate
   line, unparsed, book-only cohort, missing) and the claim resolution. `Book30::Importer` dry-run
-  writes nothing; COMMIT creates entries + placeholders with the documented attributes and
+  writes nothing; COMMIT creates entries + book-sourced students with the documented attributes and
   student IDs; refuses when entries exist; rollback removes them.
 - `Book30::Directory` parsing is covered by a fixture stext XML snippet (two lines, one header,
   one bracket-only continuation) rather than the PDF.

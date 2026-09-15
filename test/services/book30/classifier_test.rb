@@ -70,7 +70,7 @@ class Book30ClassifierTest < ActiveSupport::TestCase
     d = classify([ line("CS06", 1, "อุไรลักษณ์", "พนัสบดี"), line("CS19", 3, "อุไรลักษณ์", "พนัสบดี") ], { [ "CS", 2532 ] => [ pool(5, "x", "y", group: "CS", year: 2532) ] })
     assert_equal %w[create_book_only_cohort second_listing], d.map(&:outcome)
     assert_same d[0], d[1].head
-    assert_includes d[1].note, "placeholder created under CS06"
+    assert_includes d[1].note, "student record created under CS06"
   end
 
   test "missing in a covered cohort, duplicate lines, unparsed lines, cross-programme note" do

@@ -7,7 +7,7 @@ bracket-only maiden-name continuation that gets folded into the previous line's 
 logged on its own, so the import log holds 4,009 rows. Outcomes: `linked_exact` 2,325,
 `linked_variant` 178, `linked_other_year` 4, `second_listing` 25, `duplicate_line` 2, `unparsed` 3,
 `create_book_only_cohort` 1,353, `create_missing` 102, `create_lost_claim` 15, `create_namesake` 2.
-1,472 placeholders created: CE 666, CS 418, CT 25, CP 353, SE 9, CD 1. Programme revisions used:
+1,472 students recorded from the book: CE 666, CS 418, CT 25, CP 353, SE 9, CD 1. Programme revisions used:
 1027 ×393, 0038 ×50, 0018 ×344, 0928 ×6, 0779 ×3, CE2512 ×666, 0772 ×9, 0458 ×1. The 19 CM01–CM04
 students were re-filed from program 0018 to 0037 as the importer's pre-step. Students now 10,093
 (imported 7,181 / chulabooster 1,440 / book30 1,472). DB students in book cohorts that no book line
@@ -35,7 +35,7 @@ Some lines carry a maiden name in brackets.
 
 ## Policy (decided 2026-09-14)
 
-1. **Cohort with book data and no DB students → believe the book.** Create a placeholder student
+1. **Cohort with book data and no DB students → believe the book.** Create a student record from the book
    for every name.
 2. **Odd cases (double listings, two book names on one DB student, year disagreements) → apply the
    mechanical rule below and log it**, so the decision can be amended if new information arrives.
@@ -53,7 +53,7 @@ The book's CM01–CM04 (2535–2538, 19 names) looked like a book-only cohort, b
 the DB with graduate-school IDs `C5187xx`–`C8188xx`, filed under **CP program 0018** (the bachelor
 revision), mostly status `retired`. 18 match the book exactly, 1 differs by a missing ์. They are the
 first four CM cohorts and belong on CM revision **0037** (year 2535). Without this re-file the import
-would create 19 duplicate CM placeholders and leave 19 phantom CP students. All counts below assume
+would create 19 duplicate CM students and leave 19 phantom CP students. All counts below assume
 the re-file is done first.
 
 ## Outcomes
@@ -63,12 +63,12 @@ the re-file is done first.
 | 1 | `linked_exact` | 2,325 | The book name equals a DB student's Thai name in the same program and admission year. 11 of these differ only in tone marks. 11 are book-CT-vs-DB-regular or the reverse. | Link. No change to the student. | Track conflict, if any. |
 | 2 | `linked_variant` | 178 | Same cohort, one part of the name matches, the other differs. 107 surname differs with a unique first name (typos, marriages; 5 confirmed by a bracketed maiden name). 63 first name differs with the same surname (typos, first-name changes). 8 whole-name edit distance ≤ 2. | Link. DB name kept. | Which part differs; book spelling; maiden name. |
 | 3 | `linked_other_year` | 4 | Same name in the same program, DB admission year 1–2 years from the book cohort, after double listings are removed. | Link. DB year kept. | Book year vs DB year. |
-| 4 | `second_listing` | 25 | The same name appears under two cohorts of one program. 23: another listing is already linked to a DB student (6 of those people genuinely have two DB rows from re-admission). 2: another listing already produced the placeholder. | Nothing. | Which cohort holds the linked or created row. |
+| 4 | `second_listing` | 25 | The same name appears under two cohorts of one program. 23: another listing is already linked to a DB student (6 of those people genuinely have two DB rows from re-admission). 2: another listing already produced the student record. | Nothing. | Which cohort holds the linked or created row. |
 | 5 | `duplicate_line` | 2 | The identical line is printed twice in one cohort. | Nothing. | — |
-| 6 | `create_book_only_cohort` | 1,353 | The cohort has no DB students at all: CE01–CE09 (666), CP01–CP13, CS01–CS17, plus the lone CS18. | Create placeholder. | Cohort. |
-| 7 | `create_missing` | 102 | The cohort has DB students but no candidate for this name by any rule. Mostly CS regular 2532–2548 (59) and CT (22). | Create placeholder. | — |
-| 8 | `create_lost_claim` | 15 | The near-match rule pointed at a DB student that a closer book name also claims. The closer name keeps the link. Some are probably the same woman under maiden and married name; the resulting duplicate is accepted and reversible. | Create placeholder. | The DB student that was taken, and by whom. |
-| 9 | `create_namesake` | 2 | The only same-name DB student entered 13 years away from the book cohort. Treated as a different person. | Create placeholder. | The namesake's ID and year. |
+| 6 | `create_book_only_cohort` | 1,353 | The cohort has no DB students at all: CE01–CE09 (666), CP01–CP13, CS01–CS17, plus the lone CS18. | Create a student record from the book. | Cohort. |
+| 7 | `create_missing` | 102 | The cohort has DB students but no candidate for this name by any rule. Mostly CS regular 2532–2548 (59) and CT (22). | Create a student record from the book. | — |
+| 8 | `create_lost_claim` | 15 | The near-match rule pointed at a DB student that a closer book name also claims. The closer name keeps the link. Some are probably the same woman under maiden and married name; the resulting duplicate is accepted and reversible. | Create a student record from the book. | The DB student that was taken, and by whom. |
+| 9 | `create_namesake` | 2 | The only same-name DB student entered 13 years away from the book cohort. Treated as a different person. | Create a student record from the book. | The namesake's ID and year. |
 | 10 | `unparsed` | 3 | Three lines print a first name only (เอนก CP13, ประเสริฐศักดิ์ CP25, จตุพร CS04); a bracketed maiden name printed on its own line (วันเพ็ญ ฆนวารี, CP19) is folded into the previous line's alias, so it is no longer a separate row. | Nothing by default; hand fix in the parser if wanted. | Raw line. |
 | 11 | `db_not_in_book` | 224 | A DB student in a book cohort that no book line linked to (CP 65, CS 67, CT 59, CM 18, SE 9, CD 6; 125 graduated, 99 retired). The book is not complete: its foreword says details were withheld to protect personal data. | Nothing. | Status and track. |
 
@@ -81,7 +81,7 @@ the bachelor-then-master pattern); the DB already keeps one row per enrollment, 
 handled on its own and the log notes the other cohorts. Sex is known from the title for 1,341 of the
 1,472 creates (นาย → male; นาง, นางสาว → female).
 
-## Placeholder shape (as implemented)
+## Shape of a student recorded from the book (as implemented)
 
 | Field | Implementation |
 |---|---|

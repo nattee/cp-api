@@ -1,7 +1,7 @@
 require "csv"
 
 module Book30
-  # Turns the book's directory into book30_entries + placeholder students.
+  # Turns the book's directory into book30_entries + students recorded from the book.
   # Dry-run by default: everything runs inside a transaction that is rolled back unless
   # commit: true, so the dry-run sees exactly what the commit would (including the CM
   # re-file). Reports land in out_dir either way.
@@ -23,7 +23,7 @@ module Book30
                    "Run `bin/rails book30:rollback COMMIT=1` first if you really want to redo it."
         else
           @io.puts "book30_entries already holds #{Book30Entry.count} rows; this dry run shows what a FRESH " \
-                   "import would do and will report the existing placeholders as uniqueness errors — use " \
+                   "import would do and will report the existing book-sourced students as uniqueness errors — use " \
                    "book30:rollback first to re-import."
         end
         return nil
@@ -34,14 +34,14 @@ module Book30
         refiled = refile_cm!
         decisions = Classifier.new(lines: @directory.lines, pools: student_pools).run
         creates = decisions.select { |d| Book30Entry::CREATE_OUTCOMES.include?(d.outcome) }
-        creates.each { |d| d.student_record = build_placeholder(d) }
+        creates.each { |d| d.student_record = build_book_student(d) }
         if @commit
           creates.each { |d| d.student_record.save! }
           decisions.each { |d| build_entry(d).save! }
         else
           creates.each do |d|
             next if d.student_record.valid?
-            raise "placeholder for #{d.line.cohort} line #{d.line.line_no} is invalid: #{d.student_record.errors.full_messages.join(', ')}"
+            raise "student record for #{d.line.cohort} line #{d.line.line_no} is invalid: #{d.student_record.errors.full_messages.join(', ')}"
           end
           # student_record is unsaved here, so student_id is nil for creates -- that's fine, student is optional.
           decisions.each do |d|
@@ -88,7 +88,7 @@ module Book30
              end
     end
 
-    def build_placeholder(d)
+    def build_book_student(d)
       l = d.line
       program, program_note = resolve_program(l.group, l.year)
       d.notes << program_note if program_note
@@ -165,7 +165,7 @@ module Book30
     def summarize(decisions, refiled)
       outcomes = decisions.map(&:outcome).tally
       creates  = decisions.count { |d| Book30Entry::CREATE_OUTCOMES.include?(d.outcome) }
-      @io.puts "#{@commit ? 'COMMITTED' : 'DRY-RUN'}: #{decisions.size} lines, #{creates} placeholders, #{refiled} CM students re-filed -> #{@out_dir}"
+      @io.puts "#{@commit ? 'COMMITTED' : 'DRY-RUN'}: #{decisions.size} lines, #{creates} students recorded from the book, #{refiled} CM students re-filed -> #{@out_dir}"
       outcomes.sort_by { |_, n| -n }.each { |o, n| @io.puts "  %-26s %5d" % [ o, n ] }
       { lines: decisions.size, outcomes: outcomes, creates: creates, refiled: refiled, out_dir: @out_dir.to_s }
     end

@@ -54,7 +54,7 @@ class Book30ImporterTest < ActiveSupport::TestCase
     assert_equal 6, result[:lines]
     # CE01 is the only cohort with an empty pool (CM01's pool holds the re-filed student);
     # มานะ (CS23) and มาลี (CT04) have DB students in their cohort but no candidate; CS28's
-    # มานะ is a second listing of the same name, wired to the placeholder created under CS23.
+    # มานะ is a second listing of the same name, wired to the student record created under CS23.
     assert_equal({ "create_book_only_cohort" => 1, "linked_exact" => 2, "create_missing" => 2, "second_listing" => 1 }, result[:outcomes])
     assert_equal 1, result[:refiled]
     assert_equal @cp_0018, @misfiled.reload.program, "dry run must roll the CM re-file back"
@@ -62,7 +62,7 @@ class Book30ImporterTest < ActiveSupport::TestCase
     assert File.exist?(File.join(@out, "summary.csv"))
   end
 
-  test "commit re-files CM, links, and creates placeholders with the documented shape" do
+  test "commit re-files CM, links, and creates book-sourced students with the documented shape" do
     importer(commit: true).run
     assert_equal @cm_first, @misfiled.reload.program
     assert_match(/re-filed from 0018 to 0037/, @misfiled.remark)
@@ -96,7 +96,7 @@ class Book30ImporterTest < ActiveSupport::TestCase
     assert_equal 3, Student.where(source: "book30").count
   end
 
-  test "refuses a second commit; rollback removes entries and placeholders only" do
+  test "refuses a second commit; rollback removes entries and book-sourced students only" do
     importer(commit: true).run
     io = StringIO.new
     assert_nil Book30::Importer.new(directory: @dir, commit: true, out_dir: Pathname(@out), io: io).run
@@ -109,10 +109,10 @@ class Book30ImporterTest < ActiveSupport::TestCase
     assert Student.exists?(@misfiled.id)
   end
 
-  test "rollback refuses when a placeholder has acquired grades" do
+  test "rollback refuses when a book-sourced student has acquired grades" do
     importer(commit: true).run
-    placeholder = Book30Entry.find_by!(cohort: "CE01", line_no: 1).student
-    Grade.create!(student: placeholder, course: courses(:intro_computing), year_ce: 2020, semester: 1)
+    book_student = Book30Entry.find_by!(cohort: "CE01", line_no: 1).student
+    Grade.create!(student: book_student, course: courses(:intro_computing), year_ce: 2020, semester: 1)
     io = StringIO.new
     result = nil
     assert_no_difference [ "Book30Entry.count", "Student.count" ] do

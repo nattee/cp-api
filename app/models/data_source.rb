@@ -116,18 +116,18 @@ class DataSource
       provides: [
         "Thai names of alumni from B.E. 2512, including the certificate cohorts (CE) and every cohort before 2530 that no spreadsheet covered",
         "A cohort code that fixes programme and admission year",
-        "Placeholder students (source = book30, IDs B30-<cohort>-<nnn>) for names no existing student matched"
+        "Students recorded from the book (source = book30, IDs B30-<cohort>-<nnn>) for names no existing student matched"
       ],
       not_provides: [
-        "Student IDs, English names, status, grades — placeholders carry none of these",
+        "Student IDs, English names, status, grades — book-sourced rows carry none of these",
         "Anything after the book went to print during the 2548 intake; its foreword says some details were withheld for privacy"
       ],
       caution: nil,
       action: { label: "Open the import report", path: :data_sources_book30_path },
       commands: [
         "bin/rails book30:import                # DRY-RUN: classify every line, CSVs in tmp/book30_import/<ts>/",
-        "bin/rails book30:import COMMIT=1       # write entries + placeholders (refuses if entries exist)",
-        "bin/rails book30:rollback COMMIT=1     # delete entries + placeholder students"
+        "bin/rails book30:import COMMIT=1       # write entries + book-sourced students (refuses if entries exist)",
+        "bin/rails book30:rollback COMMIT=1     # delete entries + book-sourced students"
       ],
       docs: ["docs/book30-import-report.md", "docs/superpowers/specs/2026-09-14-book30-import-design.md"]
     }
